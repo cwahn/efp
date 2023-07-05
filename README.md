@@ -1,4 +1,4 @@
-# Arduino Eager Functional Programming
+# Embedded Eager Functional Programming
 
 This library is for eager functional programming in Arduino project. 
 
