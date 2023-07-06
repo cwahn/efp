@@ -75,83 +75,7 @@ void for_each(F f, Args &...args)
     return;
 }
 
-// unary fmap
-
-// template <typename T>
-// using element_type_t = typename std::remove_reference<decltype(*std::begin(std::declval<T &>()))>::type;
-
-// template <typename, typename>
-// struct fmap_type_t_;
-
-// template <typename A, size_t N, typename B>
-// struct fmap_type_t_<A[N], B>
-// {
-//     using type = std::array<B, N>;
-// };
-
-// template <typename A, size_t N, typename B>
-// struct fmap_type_t_<std::array<A, N>, B>
-// {
-//     using type = std::array<B, N>;
-// };
-
-// template <typename A, typename B>
-// struct fmap_type_t_<std::vector<A>, B>
-// {
-//     using type = std::vector<B>;
-// };
-
-// template <typename T, typename B>
-// struct fmap_type_t_<T &, B> : fmap_type_t_<T, B>
-// {
-// };
-
-// template <typename T, typename B>
-// struct fmap_type_t_<T &&, B> : fmap_type_t_<T, B>
-// {
-// };
-
-// template <typename T, typename B>
-// using fmap_type_t = typename fmap_type_t_<T, B>::type;
-
-// template <typename F, typename It_A>
-// // A = element_type_t<It_A>;
-// // B = decltype(std::declval<F>()(std::declval<A>()));
-// // R = fmap_type_t<It_A, B>;
-// auto fmap(F f, It_A &iterable)
-//     -> fmap_type_t<It_A, decltype(std::declval<F>()(std::declval<element_type_t<It_A>>()))>
-// {
-//     auto length = std::end(iterable) - std::begin(iterable);
-
-//     fmap_type_t<It_A, decltype(std::declval<F>()(std::declval<element_type_t<It_A>>()))> result;
-
-//     for (int i = 0; i < length; i++)
-//     {
-//         result[i] = f(iterable[i]);
-//     }
-
-//     return result;
-// }
-
-// template <typename F, typename A>
-// auto fmap(F f, std::vector<A> &iterable)
-//     -> std::vector<decltype(std::declval<F>()(std::declval<A>()))>
-// {
-//     auto length = std::end(iterable) - std::begin(iterable);
-
-//     std::vector<decltype(std::declval<F>()(std::declval<A>()))> result(length);
-
-//     for (int i = 0; i < length; i++)
-//     {
-//         result[i] = f(iterable[i]);
-//     }
-
-//     return result;
-// }
-
-// ! Experimental
-
-// Helper function to check if a type is std::array
+// isArray
 
 template <typename T>
 struct isArray : std::false_type
@@ -178,7 +102,7 @@ struct isArray<T &&> : isArray<T>
 {
 };
 
-// Helper function to check if all types are C-style arrays or std::array
+// areAllArrays
 
 template <typename... Args>
 struct areAllArrays;
@@ -254,16 +178,80 @@ constexpr size_t min_length(Args &...args)
     return sizeof...(Args) == 0 ? 0 : min_value(get_length(args)...);
 }
 
+// GetLength
+template <typename T>
+struct ArrayLength
+{
+    static constexpr size_t value = 0;
+};
+
+template <typename T, size_t N>
+struct ArrayLength<T[N]>
+{
+    static constexpr size_t value = N;
+};
+
+template <typename T, size_t N>
+struct ArrayLength<std::array<T, N>>
+{
+    static constexpr size_t value = N;
+};
+
+template <typename T>
+struct ArrayLength<T &> : ArrayLength<T>
+{
+};
+
+template <typename T>
+struct ArrayLength<T &&> : ArrayLength<T>
+{
+};
+
+// MinValue
+
+template <size_t... Args>
+struct MinValue;
+
+template <size_t Arg>
+struct MinValue<Arg>
+{
+    static constexpr size_t value = Arg;
+};
+
+template <size_t Head, size_t... Tail>
+struct MinValue<Head, Tail...>
+{
+    static constexpr size_t tail = MinValue<Tail...>::value;
+    static constexpr size_t value = Head < tail ? Head : tail;
+};
+
+template <typename...>
+struct MinArrayLength;
+
+template <typename Arg>
+struct MinArrayLength<Arg>
+{
+    static constexpr size_t value = ArrayLength<Arg>::value;
+};
+
+template <typename Head, typename... Tail>
+struct MinArrayLength<Head, Tail...>
+{
+    static constexpr size_t head = ArrayLength<Head>::value;
+    static constexpr size_t tail = MinArrayLength<Tail...>::value;
+    static constexpr size_t value = head < tail ? head : tail;
+};
+
 // initilize_result
 
 template <typename R, typename... Args>
 auto initialize_result(Args &...args) -> typename std::conditional<areAllArrays<Args...>::value,
-                                                                   std::array<R, constexpr min_length(args...)>,
+                                                                   std::array<R, MinArrayLength<Args...>::value>,
                                                                    std::vector<R>>::type
 {
     if constexpr (areAllArrays<Args...>::value)
     {
-        return std::array<R, constexpr min_length(args...)>;
+        return std::array<R, MinArrayLength<Args...>::value>();
     }
     else
     {
@@ -298,8 +286,11 @@ struct GetElementType<std::vector<A>>
 template <typename A>
 using ElementType_t = typename GetElementType<A>::type;
 
+template <typename, typename...>
+struct LambdaReturnType;
+
 template <typename F, typename... Args>
-struct LambdaReturnType<F, Args...>
+struct LambdaReturnType
 {
     using type = decltype(std::declval<F>()(std::declval<Args>()...));
 };
@@ -309,19 +300,32 @@ using LambdaReturnType_t = typename LambdaReturnType<F, Args...>::type;
 
 template <typename F, typename... Args>
 auto fmap(F f, Args &...args) -> typename std::conditional<areAllArrays<Args...>::value,
-                                                           std::array<LambdaReturnType_t<F, Args...>, min_length(args...)>,
-                                                           std::vector<LambdaReturnType_t<F, Args...>>>::type
+                                                           std::array<LambdaReturnType_t<F, ElementType_t<Args>...>, MinArrayLength<Args...>::value>,
+                                                           std::vector<LambdaReturnType_t<F, ElementType_t<Args>...>>>::type
 {
-    using R = LambdaReturnType_t<F, Args...>;
+    using R = LambdaReturnType_t<F, ElementType_t<Args>...>;
 
     auto result = initialize_result<R, Args...>(args...);
 
-    for (int i = 0; i < length; i++)
+    if constexpr (areAllArrays<Args...>::value)
     {
-        result[i] = f(args[i]...);
-    }
+        for (int i = 0; i < MinArrayLength<Args...>::value; i++)
+        {
+            result[i] = f(args[i]...);
+        }
 
-    return result;
+        return result;
+    }
+    else
+    {
+
+        for (int i = 0; i < min_length(args...); i++)
+        {
+            result[i] = f(args[i]...);
+        }
+
+        return result;
+    }
 }
 
 template <typename F, typename It>
