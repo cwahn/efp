@@ -8,18 +8,18 @@
 
 TEST_CASE("IsArray")
 {
-    REQUIRE(IsArray<int[3]>::value == true);
-    REQUIRE(IsArray<std::array<int, 3>>::value == true);
-    REQUIRE(IsArray<std::vector<int>>::value == false);
+    CHECK(IsArray<int[3]>::value == true);
+    CHECK(IsArray<std::array<int, 3>>::value == true);
+    CHECK(IsArray<std::vector<int>>::value == false);
 }
 
 TEST_CASE("AreAllArrayss")
 {
-    REQUIRE(AreAllArrays<int[3]>::value == true);
-    REQUIRE(AreAllArrays<std::array<int, 3>>::value == true);
-    REQUIRE(AreAllArrays<int[3], std::array<int, 3>>::value == true);
-    REQUIRE(AreAllArrays<std::vector<int>>::value == false);
-    REQUIRE(AreAllArrays<std::array<int, 3>, std::vector<int>>::value == false);
+    CHECK(AreAllArrays<int[3]>::value == true);
+    CHECK(AreAllArrays<std::array<int, 3>>::value == true);
+    CHECK(AreAllArrays<int[3], std::array<int, 3>>::value == true);
+    CHECK(AreAllArrays<std::vector<int>>::value == false);
+    CHECK(AreAllArrays<std::array<int, 3>, std::vector<int>>::value == false);
 }
 
 TEST_CASE("for_each")
@@ -31,7 +31,7 @@ TEST_CASE("for_each")
     };
 
     for_each(add_1, c_array_3);
-    REQUIRE(res_1 == 6);
+    CHECK(res_1 == 6);
 
     double res_2 = 0.;
     auto add_2 = [&](double x)
@@ -40,7 +40,7 @@ TEST_CASE("for_each")
     };
 
     for_each(add_2, std_array_3);
-    REQUIRE(res_2 == 6.);
+    CHECK(res_2 == 6.);
 
     double res_3 = 0.;
     auto add_3 = [&](double x)
@@ -49,7 +49,7 @@ TEST_CASE("for_each")
     };
 
     for_each(add_3, std_vector_3);
-    REQUIRE(res_3 == 6.);
+    CHECK(res_3 == 6.);
 
     double res_4 = 0.;
     auto add_product = [&](double x1, double x2)
@@ -58,7 +58,7 @@ TEST_CASE("for_each")
     };
 
     for_each(add_product, std_vector_3, c_array_3);
-    REQUIRE(res_4 == 14.);
+    CHECK(res_4 == 14.);
 }
 
 TEST_CASE("fmap")
@@ -70,7 +70,7 @@ TEST_CASE("fmap")
             return x * x;
         };
 
-        REQUIRE(fmap(square, c_array_3) == std::array<int, 3>{1, 4, 9});
+        CHECK(fmap(square, c_array_3) == std::array<int, 3>{1, 4, 9});
     }
 
     SECTION("std::vector")
@@ -80,7 +80,7 @@ TEST_CASE("fmap")
             return x * x;
         };
 
-        REQUIRE(fmap(square, std_vector_3) == std::vector<int>{1, 4, 9});
+        CHECK(fmap(square, std_vector_3) == std::vector<int>{1, 4, 9});
     }
 
     SECTION("binary of std::array, std::vecor")
@@ -91,7 +91,7 @@ TEST_CASE("fmap")
         };
         std::vector<int> ref = {2, 4, 6};
 
-        REQUIRE(fmap(plus, std_array_3, std_vector_3) == std::vector<int>{2, 4, 6});
+        CHECK(fmap(plus, std_array_3, std_vector_3) == std::vector<int>{2, 4, 6});
     }
 }
 
@@ -104,7 +104,7 @@ TEST_CASE("filter")
             return x % 2 == 0;
         };
 
-        REQUIRE(filter(is_even, c_array_3) == std::vector<int>{2});
+        CHECK(filter(is_even, c_array_3) == std::vector<int>{2});
     }
 
     SECTION("odd std::vector")
@@ -114,7 +114,7 @@ TEST_CASE("filter")
             return x % 2 != 0;
         };
 
-        REQUIRE(filter(is_odd, std_vector_3) == std::vector<double>{1, 3});
+        CHECK(filter(is_odd, std_vector_3) == std::vector<double>{1, 3});
     }
 }
 
@@ -126,7 +126,7 @@ TEST_CASE("foldl")
         {
             return lhs + rhs;
         };
-        REQUIRE(foldl(plus, 0, c_array_5) == 15);
+        CHECK(foldl(plus, 0, c_array_5) == 15);
     }
 
     SECTION("times on std::vectors arary")
@@ -135,7 +135,7 @@ TEST_CASE("foldl")
         {
             return lhs * rhs;
         };
-        REQUIRE(foldl(times, 1., std_vector_3) == 6.);
+        CHECK(foldl(times, 1., std_vector_3) == 6.);
     }
 }
 
@@ -147,7 +147,7 @@ TEST_CASE("foldr")
         {
             return lhs + rhs;
         };
-        REQUIRE(foldr(plus, 0, c_array_5) == 15);
+        CHECK(foldr(plus, 0, c_array_5) == 15);
     }
 
     SECTION("times on std::vectors arary")
@@ -156,7 +156,22 @@ TEST_CASE("foldr")
         {
             return lhs * rhs;
         };
-        REQUIRE(foldr(times, 1., std_vector_3) == 6.);
+        CHECK(foldr(times, 1., std_vector_3) == 6.);
+    }
+}
+
+TEST_CASE("arange")
+{
+    SECTION("int")
+    {
+        std::vector<int> ref = {0, 1, 2};
+        CHECK(arange(0, 3, 1) == ref);
+    }
+
+    SECTION("double")
+    {
+        std::vector<double> ref = {0., 1., 2.};
+        CHECK(arange(0., 3., 1.) == ref);
     }
 }
 

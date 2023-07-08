@@ -46,6 +46,12 @@ A square(A x)
 }
 
 template <typename A>
+A sqrt(A x)
+{
+    return sqrt(x);
+}
+
+template <typename A>
 A sin(A x)
 {
     return std::sin(x);
@@ -76,6 +82,12 @@ ElementType_t<A> minimum(A &&xs)
 }
 
 template <typename A>
+ElementType_t<A> max_min(A &&xs)
+{
+    return maximum(xs) - minimum(xs);
+}
+
+template <typename A>
 ElementType_t<A> sum(A &&xs)
 {
     return foldl(plus<ElementType_t<A>>, 0, xs);
@@ -99,5 +111,4 @@ double mean(A &&xs)
         return sum(xs) / double(get_length(xs));
     }
 }
-
 #endif

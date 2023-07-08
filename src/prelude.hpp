@@ -203,7 +203,7 @@ using ReturnIterable_t = typename std::conditional<AreAllArrays<Args...>::value,
 // initilize_result
 
 template <typename R, typename... Args>
-auto initialize_result(Args &...args) -> ReturnIterable_t<R, Args...>
+auto initialize_iterable(Args &...args) -> ReturnIterable_t<R, Args...>
 {
     if constexpr (AreAllArrays<Args...>::value)
     {
@@ -271,11 +271,11 @@ template <typename F, typename... Args>
 using FmapReturnType_t = ReturnIterable_t<FunctionReturnType_t<F, ElementType_t<Args>...>, Args...>;
 
 template <typename F, typename... Args>
-auto fmap(F f, Args &...args) -> FmapReturnType_t<F, Args...>
+auto fmap(F f, Args &&...args) -> FmapReturnType_t<F, Args...>
 {
     using R = FunctionReturnType_t<F, ElementType_t<Args>...>;
 
-    FmapReturnType_t<F, Args...> result = initialize_result<R, Args...>(args...);
+    FmapReturnType_t<F, Args...> result = initialize_iterable<R, Args...>(args...);
 
     if constexpr (AreAllArrays<Args...>::value)
     {
@@ -360,6 +360,20 @@ R foldr(F f, R initial_value, std::vector<A> &iterable)
         iterable.rend(),
         initial_value,
         f);
+}
+
+template <typename A>
+std::vector<A> arange(A start, A end, A step)
+{
+    size_t length = (end - start) / step;
+    std::vector<A> result(length);
+
+    for (int i = 0; i < length; ++i)
+    {
+        result[i] = start + (i * step);
+    }
+
+    return result;
 }
 
 #endif
