@@ -1,6 +1,6 @@
-# Embedded Eager Functional Programming
+# Eager Functional Programming
 
-This library is for eager functional programming in Arduino project. 
+This library is for eager functional programming with C++.  
 
 ## Requirements
 
