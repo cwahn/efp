@@ -239,6 +239,16 @@ struct ElementType<std::vector<A>>
 };
 
 template <typename A>
+struct ElementType<A &> : ElementType<A>
+{
+};
+
+template <typename A>
+struct ElementType<A &&> : ElementType<A>
+{
+};
+
+template <typename A>
 using ElementType_t = typename ElementType<A>::type;
 
 // FunctionReturnType;

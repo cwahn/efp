@@ -1,7 +1,19 @@
-#ifndef MATH_HPP_
-#define MATH_HPP_
+#ifndef NUMERIC_HPP_
+#define NUMERIC_HPP_
 
-#include "pure.hpp"
+#include "prelude.hpp"
+
+template <typename A>
+A max(A lhs, A rhs)
+{
+    return std::max(lhs, rhs);
+}
+
+template <typename A>
+A min(A lhs, A rhs)
+{
+    return std::min(lhs, rhs);
+}
 
 template <typename A>
 A plus(A lhs, A rhs)
@@ -52,52 +64,39 @@ A tan(A x)
 }
 
 template <typename A>
-auto sum(A &xs) -> ElementType_t<A>
+ElementType_t<A> maximum(A &&xs)
+{
+    return foldl(max<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::min(), xs);
+}
+
+template <typename A>
+ElementType_t<A> minimum(A &&xs)
+{
+    return foldl(min<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::max(), xs);
+}
+
+template <typename A>
+ElementType_t<A> sum(A &&xs)
 {
     return foldl(plus<ElementType_t<A>>, 0, xs);
 }
 
 template <typename A>
-auto sum(A &&xs) -> ElementType_t<A>
-{
-    return foldl(plus<ElementType_t<A>>, 0, xs);
-}
-
-template <typename A>
-auto product(A &xs) -> ElementType_t<A>
+ElementType_t<A> product(A &&xs)
 {
     return foldl(times<ElementType_t<A>>, 1, xs);
 }
 
 template <typename A>
-auto product(A &&xs) -> ElementType_t<A>
+double mean(A &&xs)
 {
-    return foldl(times<ElementType_t<A>>, 1, xs);
-}
-
-template <typename A>
-auto mean(A &xs) -> ElementType_t<A>
-{
-    if (IsArray<A>::value)
+    if constexpr (IsArray<A>::value)
     {
-        return sum(xs) / ArrayLength<A>::value;
+        return sum(xs) / double(ArrayLength<A>::value);
     }
     else
     {
-        return sum(xs) / get_length(xs);
-    }
-}
-
-template <typename A>
-auto mean(A &&xs) -> ElementType_t<A>
-{
-    if (IsArray<A>::value)
-    {
-        return sum(xs) / ArrayLength<A>::value;
-    }
-    else
-    {
-        return sum(xs) / get_length(xs);
+        return sum(xs) / double(get_length(xs));
     }
 }
 

@@ -1,16 +1,10 @@
+#ifndef PRELUDE_TEST_HPP_
+#define PRELUDE_TEST_HPP_
+
 #include "catch2/catch_test_macros.hpp"
 
+#include "test_common.hpp"
 #include "prelude.hpp"
-
-int c_array_3[3] = {1, 2, 3};
-int c_array_5[5] = {1, 2, 3, 4, 5};
-
-std::array<double, 3> std_array_3 = {1., 2., 3.};
-std::array<double, 5> std_array_5 = {1., 2., 3., 4., 5.};
-
-std::vector<double> std_vector_0 = {};
-std::vector<double> std_vector_3 = {1., 2., 3.};
-std::vector<double> std_vector_5 = {1., 2., 3., 4., 5.};
 
 TEST_CASE("IsArray")
 {
@@ -165,3 +159,5 @@ TEST_CASE("foldr")
         REQUIRE(foldr(times, 1., std_vector_3) == 6.);
     }
 }
+
+#endif

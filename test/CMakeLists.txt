@@ -1,15 +1,16 @@
-add_executable(prelude_test prelude_test.cpp)
-target_link_libraries(prelude_test
+add_executable(all_test test.cpp)
+
+target_link_libraries(all_test
     PRIVATE
     Catch2::Catch2WithMain
     efp)
 
-catch_discover_tests(prelude_test)
+catch_discover_tests(all_test)
 
 add_custom_command(
-    TARGET prelude_test
+    TARGET all_test
     COMMENT "Run tests"
     POST_BUILD
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> "prelude_test"  --output-on-failure
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> "all_test" --output-on-failure
 )
