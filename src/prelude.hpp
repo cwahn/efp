@@ -362,18 +362,4 @@ R foldr(F f, R initial_value, std::vector<A> &iterable)
         f);
 }
 
-template <typename A>
-std::vector<A> arange(A start, A end, A step)
-{
-    size_t length = (end - start) / step;
-    std::vector<A> result(length);
-
-    for (int i = 0; i < length; ++i)
-    {
-        result[i] = start + (i * step);
-    }
-
-    return result;
-}
-
 #endif

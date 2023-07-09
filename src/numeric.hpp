@@ -69,6 +69,8 @@ A tan(A x)
     return std::tan(x);
 }
 
+// Reducing
+
 template <typename A>
 ElementType_t<A> maximum(A &&xs)
 {
@@ -110,5 +112,21 @@ double mean(A &&xs)
     {
         return sum(xs) / double(get_length(xs));
     }
+}
+
+// Generating
+
+template <typename A>
+std::vector<A> arange(A start, A end, A step)
+{
+    size_t length = (end - start) / step;
+    std::vector<A> result(length);
+
+    for (int i = 0; i < length; ++i)
+    {
+        result[i] = start + (i * step);
+    }
+
+    return result;
 }
 #endif

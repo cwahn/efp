@@ -120,6 +120,7 @@ ReturnIterable_t<double, A> auto_covariance_function(A &&xs)
     {
         constexpr size_t length = ArrayLength<A>::value;
 
+        // ? Maybe can do this as constexpr  
         std::array<int, length> idxs;
         std::iota(std::begin(idxs), std::end(idxs), 1);
 
@@ -143,8 +144,8 @@ ReturnIterable_t<double, A> auto_corelation_function(A &&xs)
 
     auto div_x_var = [&](auto x)
     {
-        retrun x / x_variance
-    }
+        return x / x_variance;
+    };
 
     return fmap(div_x_var, x_auto_covariance_function);
 }
