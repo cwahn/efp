@@ -133,8 +133,8 @@ TEST_CASE("remove_dc")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
-        auto ys_ref = fmap(f_ref, xs);
+        auto ys = map(f, xs);
+        auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
         CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
@@ -148,8 +148,8 @@ TEST_CASE("remove_dc")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
-        auto ys_ref = fmap(f_ref, xs);
+        auto ys = map(f, xs);
+        auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
         CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
@@ -163,8 +163,8 @@ TEST_CASE("remove_dc")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
-        auto ys_ref = fmap(f_ref, xs);
+        auto ys = map(f, xs);
+        auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
         CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
@@ -192,7 +192,7 @@ TEST_CASE("linear_regression")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
+        auto ys = map(f, xs);
 
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression(std_array_xs, ys);
@@ -209,7 +209,7 @@ TEST_CASE("linear_regression")
         std::array<double, n> xs;
         std::iota(std::begin(xs), std::end(xs), 0);
 
-        auto ys = fmap(f, xs);
+        auto ys = map(f, xs);
 
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
@@ -226,7 +226,7 @@ TEST_CASE("linear_regression")
         std::vector<double> xs(n);
         std::iota(std::begin(xs), std::end(xs), 0);
 
-        auto ys = fmap(f, xs);
+        auto ys = map(f, xs);
 
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
@@ -264,7 +264,7 @@ TEST_CASE("detrend")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f1, xs);
+        auto ys = map(f1, xs);
 
         std::vector<double> ys_ref(n);
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
@@ -278,13 +278,13 @@ TEST_CASE("detrend")
     {
         auto xs = arange<std::array<int, n>>(0, n, 1);
 
-        auto ys1 = fmap(f1, xs);
-        auto ys2 = fmap(f2, xs);
+        auto ys1 = map(f1, xs);
+        auto ys2 = map(f2, xs);
 
         double ys_ref[n];
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto ys = fmap(plus<double>, ys1, ys2);
+        auto ys = map(plus<double>, ys1, ys2);
 
         auto detrended = detrend(ys);
 
@@ -299,13 +299,13 @@ TEST_CASE("detrend")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys1 = fmap(f1, xs);
-        auto ys2 = fmap(f2, xs);
+        auto ys1 = map(f1, xs);
+        auto ys2 = map(f2, xs);
 
         std::array<double, n> ys_ref;
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto ys = fmap(plus<double>, ys1, ys2);
+        auto ys = map(plus<double>, ys1, ys2);
 
         auto detrended = detrend(ys);
 

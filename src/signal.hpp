@@ -6,24 +6,24 @@
 // ! temp
 // #include "arduino_debug.hpp"
 
-template <typename A, typename B>
-double sse(A &&as, B &&bs)
+template <typename SeqA, typename SeqB>
+constexpr double sse(const SeqA &as, const SeqB &bs)
 {
-    static auto square_error = [](ElementType_t<A> a, ElementType_t<A> b)
+    const auto square_error = [](ElementType_t<SeqA> a, ElementType_t<SeqB> b)
     {
-        auto error = a - b;
+        const auto error = a - b;
         return error * error;
     };
 
-    return sum(fmap(square_error, as, bs));
+    return sum(map(square_error, as, bs));
 }
 
-template <typename A, typename B>
-double mse(A &&as, B &&bs)
+template <typename SeqA, typename SeqB>
+constexpr double mse(const SeqA &as, const SeqB &bs)
 {
-    if constexpr (AreAllStatic<A, B>::value)
+    if constexpr (AreAllStatic<SeqA, SeqB>::value)
     {
-        return sse(as, bs) / double(MinStaticCapacity<A, B>::value);
+        return sse(as, bs) / double(MinStaticCapacity<SeqA, SeqB>::value);
     }
 
     else
@@ -32,189 +32,194 @@ double mse(A &&as, B &&bs)
     }
 }
 
-template <typename A, typename B>
-double rms(A &&as, B &&bs)
+template <typename SeqA, typename SeqB>
+constexpr double rms(const SeqA &as, const SeqB &bs)
 {
     return sqrt(mse(as, bs));
 }
 
-template <typename A, typename B>
-double nrms_mean(A &&as, B &&bs)
+template <typename SeqA, typename SeqB>
+constexpr double nrms_mean(const SeqA &as, const SeqB &bs)
 {
     return rms(as, bs) / double(mean(bs));
 }
 
-template <typename A, typename B>
-double nrms_max_min(A &&as, B &&bs)
+template <typename SeqA, typename SeqB>
+constexpr double nrms_max_min(const SeqA &as, const SeqB &bs)
 {
     return rms(as, bs) / double(max_min(bs));
 }
 
-template <typename A>
-double variance(A &&xs)
+template <typename SeqA>
+constexpr double variance(const SeqA &as)
 {
-    double x_mean = mean(xs);
+    const double a_mean = mean(as);
 
-    auto minus_x_mean = [&](ElementType_t<A> x)
+    auto minus_a_mean = [&](ElementType_t<SeqA> x)
     {
-        return x - x_mean;
+        return x - a_mean;
     };
 
-    auto deviations = fmap(minus_x_mean, xs);
-    return sum(deviations) / double(length(xs));
+    const auto a_deviations = map(minus_a_mean, as);
+    return sum(a_deviations) / double(length(as));
 }
 
-template <typename A>
-double standard_deviation(A &&xs)
+template <typename SeqA>
+constexpr double standard_deviation(const SeqA &as)
 {
-    return sqrt(variance(xs));
+    return sqrt(variance(as));
 }
 
-template <typename A, typename B>
-double covariance(A &&xs, B &&ys)
+template <typename SeqA, typename SeqB>
+constexpr double covariance(const SeqA &as, const SeqB &bs)
 {
-    double x_mean = mean(xs);
-    double y_mean = mean(ys);
+    const double a_mean = mean(as);
+    const double b_mean = mean(bs);
 
-    auto covar = [&](ElementType_t<A> x, ElementType_t<B> y)
+    const auto covar = [&](ElementType_t<SeqA> a, ElementType_t<SeqB> b)
     {
-        return (x - x_mean) * (y - y_mean);
+        return (a - a_mean) * (b - b_mean);
     };
 
-    return fmap(covar, xs, ys) / double(length(xs));
+    return map(covar, as, bs) / double(length(as));
 }
 
-template <typename A, typename B>
-double correlation(A &&xs, B &&ys)
+template <typename SeqA, typename SeqB>
+constexpr double correlation(const SeqA &as, const SeqB &bs)
 {
-    double x_standard_deviation = standard_deviation(xs);
-    double y_standard_deviation = standard_deviation(ys);
-    double xy_covariance = covariance(xs, ys);
+    const double a_standard_deviation = standard_deviation(as);
+    const double b_standard_deviation = standard_deviation(bs);
+    const double ab_covariance = covariance(as, bs);
 
-    return xy_covariance / (x_standard_deviation * y_standard_deviation);
+    return ab_covariance / (a_standard_deviation * b_standard_deviation);
 }
 
-template <typename A>
-double auto_covariance(A &&xs, uint lag)
+template <typename SeqA>
+constexpr double auto_covariance(const SeqA &as, uint lag)
 {
-    double x_mean = mean(xs);
-    size_t xs_len = length(xs);
-    double sum_length = xs_len - lag;
+    const double a_mean = mean(as);
+    const size_t as_len = length(as);
+    const double sum_length = as_len - lag;
 
     double summation = 0;
+
     for (int i = 0; i < sum_length; ++i)
     {
-        summation += (xs[i] - x_mean) * (xs[i + lag] - x_mean);
+        summation += (as[i] - a_mean) * (as[i + lag] - a_mean);
     }
 
     return summation / double(sum_length);
 }
 
-template <typename A>
-FmapSequance_t<double, A> auto_covariance_function(A &&xs)
+// ! Temporary nonconst expr
+template <typename SeqA>
+FmapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
 {
-    auto auto_covar = [&](int i)
+    const auto auto_covar = [&](int i)
     {
-        return auto_covariance(xs, i);
+        return auto_covariance(as, i);
     };
 
-    if constexpr (IsStatic<A>::value)
+    if constexpr (IsStatic<SeqA>::value)
     {
-        constexpr size_t length = StaticCapacity<A>::value;
+        constexpr size_t result_length = StaticCapacity<SeqA>::value;
 
         // ? Maybe can do this as constexpr
-        StaticArray<int, length> idxs;
+        StaticArray<int, result_length> idxs;
         std::iota(std::begin(idxs), std::end(idxs), 1);
 
-        return fmap(auto_covar, idxs);
+        return map(auto_covar, idxs);
     }
     else
     {
-        size_t length = length(xs);
+        const size_t result_length = length(as);
 
-        auto idxs = arange<std::vector<int>>(0, int(length), 1);
+        const auto idxs = arange<DynamicVector<int>>(0, result_length, 1);
 
-        return fmap(auto_covar, idxs);
+        return map(auto_covar, idxs);
     }
 }
 
-template <typename A>
-FmapSequance_t<double, A> auto_corelation_function(A &&xs)
+template <typename SeqA>
+constexpr FmapSequance_t<double, SeqA> auto_corelation_function(const SeqA &as)
 {
-    auto x_auto_covariance_function = auto_covariance_function(xs);
-    double x_variance = variance(xs);
+    const auto a_auto_covariance_function = auto_covariance_function(as);
+    const double a_variance = variance(as);
 
-    auto div_x_var = [&](ElementType_t<A> x)
+    const auto div_a_var = [&](ElementType_t<SeqA> x)
     {
-        return x / x_variance;
+        return x / a_variance;
     };
 
-    return fmap(div_x_var, x_auto_covariance_function);
+    return map(div_a_var, a_auto_covariance_function);
 }
 
-template <typename A>
-double auto_correlation(A &&xs, uint lag)
+template <typename SeqA>
+constexpr double auto_correlation(const SeqA &as, const uint lag)
 {
-    double x_auto_covariance = auto_covariance(xs, lag);
-    double x_variance = variance(xs);
+    const double a_auto_covariance = auto_covariance(as, lag);
+    const double a_variance = variance(as);
 
-    return x_auto_covariance / x_variance;
+    return a_auto_covariance / a_variance;
 }
 
-template <typename A>
-FmapSequance_t<double, A> remove_dc(A &&xs)
+template <typename SeqA>
+constexpr FmapSequance_t<double, SeqA> remove_dc(const SeqA &as)
 {
-    double x_mean = mean(xs);
-    auto minus_x_mean = [&](ElementType_t<A> x)
+    const double a_mean = mean(as);
+
+    const auto minus_a_mean = [&](ElementType_t<SeqA> x)
     {
-        return double(x) - x_mean;
+        return double(x) - a_mean;
     };
 
-    return fmap(minus_x_mean, xs);
+    return map(minus_a_mean, as);
 }
 
-template <typename A, typename B>
-std::tuple<double, double> linear_regression(A &&xs, B &&ys)
+template <typename SeqA, typename SeqB>
+constexpr std::tuple<double, double> linear_regression(const SeqA &as, const SeqB &bs)
 {
-    double x_mean = mean(xs);
-    double y_mean = mean(ys);
+    const double a_mean = mean(as);
+    const double b_mean = mean(bs);
 
-    auto minus_x_mean = [&](double x)
+    const auto minus_a_mean = [&](double x)
     {
-        return x - x_mean;
+        return x - a_mean;
     };
 
-    auto minus_y_mean = [&](double y)
+    const auto minus_b_mean = [&](double x)
     {
-        return y - y_mean;
+        return x - b_mean;
     };
 
-    auto x_deviations = fmap(minus_x_mean, xs);
-    auto y_deviations = fmap(minus_y_mean, ys);
+    const auto a_deviations = map(minus_a_mean, as);
+    const auto b_deviations = map(minus_b_mean, bs);
 
-    double ss_xy = sum(fmap(times<double>, x_deviations, y_deviations));
-    double ss_xx = sum(fmap(square<double>, x_deviations));
+    const double ss_ab = sum(map(times<double>, a_deviations, b_deviations));
+    const double ss_aa = sum(map(square<double>, a_deviations));
 
-    double beta_1 = ss_xy / ss_xx;
-    double beta_2 = y_mean - (beta_1 * x_mean);
+    const double beta_1 = ss_ab / ss_aa;
+    const double beta_2 = b_mean - (beta_1 * a_mean);
 
     return std::make_tuple(beta_1, beta_2);
 }
 
-template <typename A>
-FmapSequance_t<double, A> detrend(A &&xs)
+template <typename SeqA>
+constexpr FmapSequance_t<double, SeqA> detrend(const SeqA &as)
 {
-    auto is = arange<RemoveReference_t<A>>(0, length(xs), 1);
+    auto is = arange<RemoveReference_t<SeqA>>(0, length(as), 1);
 
-    double beta_1, beta_2;
-    std::tie(beta_1, beta_2) = linear_regression(is, xs);
+    // double beta_1, beta_2;
+    std::tuple<double, double> betas = linear_regression(is, as);
+    const double beta_1 = std::get<0>(betas);
+    const double beta_2 = std::get<1>(betas);
 
-    auto remove_trend = [&](ElementType_t<A> i, ElementType_t<A> x)
+    const auto remove_trend = [&](ElementType_t<SeqA> i, ElementType_t<SeqA> x)
     {
         return x - (beta_1 * i + beta_2);
     };
 
-    return fmap(remove_trend, is, xs);
+    return map(remove_trend, is, as);
 }
 
 #endif

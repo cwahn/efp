@@ -61,7 +61,7 @@ TEST_CASE("for_each")
     CHECK(res_4 == 14.);
 }
 
-TEST_CASE("fmap")
+TEST_CASE("map")
 {
     SECTION("c style array")
     {
@@ -70,7 +70,7 @@ TEST_CASE("fmap")
             return x * x;
         };
 
-        CHECK(fmap(square, c_array_3) == std::array<int, 3>{1, 4, 9});
+        CHECK(map(square, c_array_3) == std::array<int, 3>{1, 4, 9});
     }
 
     SECTION("std::vector")
@@ -80,7 +80,7 @@ TEST_CASE("fmap")
             return x * x;
         };
 
-        CHECK(fmap(square, std_vector_3) == std::vector<int>{1, 4, 9});
+        CHECK(map(square, std_vector_3) == std::vector<int>{1, 4, 9});
     }
 
     SECTION("binary of std::array, std::vecor")
@@ -91,7 +91,7 @@ TEST_CASE("fmap")
         };
         std::vector<int> ref = {2, 4, 6};
 
-        CHECK(fmap(plus, std_array_3, std_vector_3) == std::vector<int>{2, 4, 6});
+        CHECK(map(plus, std_array_3, std_vector_3) == std::vector<int>{2, 4, 6});
     }
 }
 

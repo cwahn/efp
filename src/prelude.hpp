@@ -327,7 +327,7 @@ template <typename F, typename... Seqs>
 using FmapReturnType_t = FmapSequance_t<FunctionReturnType_t<F, ElementType_t<Seqs>...>, Seqs...>;
 
 template <typename F, typename... Seqs>
-constexpr FmapReturnType_t<F, Seqs...> fmap(F f, const Seqs &...seqs)
+constexpr FmapReturnType_t<F, Seqs...> map(F f, const Seqs &...seqs)
 {
     using R = FunctionReturnType_t<F, ElementType_t<Seqs>...>;
 
