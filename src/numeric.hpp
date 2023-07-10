@@ -6,67 +6,67 @@
 // #include "arduino_debug.hpp"
 
 template <typename A>
-A max(A lhs, A rhs)
+constexpr A max(const A lhs, const A rhs)
 {
     return std::max(lhs, rhs);
 }
 
 template <typename A>
-A min(A lhs, A rhs)
+constexpr A min(const A lhs, const A rhs)
 {
     return std::min(lhs, rhs);
 }
 
 template <typename A>
-A plus(A lhs, A rhs)
+constexpr A plus(const A lhs, const A rhs)
 {
     return lhs + rhs;
 }
 
 template <typename A>
-A minus(A lhs, A rhs)
+constexpr A minus(const A lhs, const A rhs)
 {
     return lhs - rhs;
 }
 
 template <typename A>
-A times(A lhs, A rhs)
+constexpr A times(const A lhs, const A rhs)
 {
     return lhs * rhs;
 }
 
 template <typename A>
-A devide(A lhs, A rhs)
+constexpr A devide(const A lhs, const A rhs)
 {
     return lhs / rhs;
 }
 
 template <typename A>
-A square(A x)
+constexpr A square(const A x)
 {
     return x * x;
 }
 
 template <typename A>
-A sqrt(A x)
+constexpr A sqrt(const A x)
 {
     return sqrt(x);
 }
 
 template <typename A>
-A sin(A x)
+constexpr A sin(const A x)
 {
     return std::sin(x);
 }
 
 template <typename A>
-A cos(A x)
+constexpr A cos(const A x)
 {
     return std::cos(x);
 }
 
 template <typename A>
-A tan(A x)
+constexpr A tan(const A x)
 {
     return std::tan(x);
 }
@@ -74,37 +74,37 @@ A tan(A x)
 // Reducing
 
 template <typename A>
-ElementType_t<A> maximum(A &&xs)
+constexpr ElementType_t<A> maximum(const A &xs)
 {
     return foldl(max<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::min(), xs);
 }
 
 template <typename A>
-ElementType_t<A> minimum(A &&xs)
+constexpr ElementType_t<A> minimum(const A &xs)
 {
     return foldl(min<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::max(), xs);
 }
 
 template <typename A>
-ElementType_t<A> max_min(A &&xs)
+constexpr ElementType_t<A> max_min(const A &xs)
 {
     return maximum(xs) - minimum(xs);
 }
 
 template <typename A>
-ElementType_t<A> sum(A &&xs)
+constexpr ElementType_t<A> sum(const A &xs)
 {
     return foldl(plus<ElementType_t<A>>, 0, xs);
 }
 
 template <typename A>
-ElementType_t<A> product(A &&xs)
+constexpr ElementType_t<A> product(const A &xs)
 {
     return foldl(times<ElementType_t<A>>, 1, xs);
 }
 
 template <typename A>
-double mean(A &&xs)
+constexpr double mean(const A &xs)
 {
     if constexpr (IsStatic<A>::value)
     {
@@ -117,9 +117,8 @@ double mean(A &&xs)
 }
 
 // Generating
-// ! Temp no constexpr
 template <typename A>
-size_t arange_length_(A start, A end, A step)
+constexpr size_t arange_length_(const A start, const A end, const A step)
 {
     if (start < end && step > 0)
         return (end - start + step - 1) / step;
@@ -130,7 +129,7 @@ size_t arange_length_(A start, A end, A step)
 }
 
 template <typename A>
-auto arange_iterable(size_t length) -> A // Internal data could be unpredictable
+constexpr A arange_iterable(const size_t length) // Internal data could be unpredictable
 {
     if constexpr (IsStatic_v<A>)
     {
@@ -150,9 +149,9 @@ auto arange_iterable(size_t length) -> A // Internal data could be unpredictable
 }
 
 template <typename A>
-A arange(ElementType_t<A> start, ElementType_t<A> end, ElementType_t<A> step)
+constexpr A arange(const ElementType_t<A> start, const ElementType_t<A> end, const ElementType_t<A> step)
 {
-    size_t result_length = arange_length_(start, end, step);
+    const size_t result_length = arange_length_(start, end, step);
 
     A result = arange_iterable<A>(result_length);
     ElementType_t<A> value = start;
