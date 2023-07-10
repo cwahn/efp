@@ -14,10 +14,6 @@ public:
     StaticArray(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
     StaticArray(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
 
-    // Assigment
-    // StaticArray &operator=(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
-    // StaticArray &operator=(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
-
     template <typename... Args>
     StaticArray(Args &&...args)
         : data_{std::forward<Args>(args)...} {}
@@ -84,21 +80,21 @@ public:
 
     // Constructors
     StaticVector() : size_(0) {}
-    StaticVector(size_t s) : size_(0) {} // Unpredicatable data_
-    StaticVector(const StaticVector &);  // Not emplemented by design for RVO, NRVO enforcement
-    StaticVector(StaticVector &&);       // Not emplemented by design for RVO, NRVO enforcement
+    StaticVector(const size_t s) : size_(0) {} // Unpredicatable data_
+    StaticVector(const StaticVector &);        // Not emplemented by design for RVO, NRVO enforcement
+    StaticVector(StaticVector &&);             // Not emplemented by design for RVO, NRVO enforcement
     template <typename... Args>
-    StaticVector(Args &&...args)
-        : data_{std::forward<Args>(args)...},
+    StaticVector(const Args &...args)
+        : data_{args...},
           size_(sizeof...(args)) {}
 
     // Accessors
-    A &operator[](size_type index)
+    A &operator[](const size_type index)
     {
         return data_[index];
     }
 
-    const A &operator[](size_type index) const
+    const A &operator[](const size_type index) const
     {
         return data_[index];
     }
@@ -109,15 +105,6 @@ public:
         if (size_ < Capacity)
         {
             data_[size_] = value;
-            ++size_;
-        }
-    }
-
-    void push_back(value_type &&value)
-    {
-        if (size_ < Capacity)
-        {
-            data_[size_] = std::move(value);
             ++size_;
         }
     }
@@ -183,11 +170,11 @@ public:
 
     // Default constructor
     DynamicVector() : data_(nullptr), size_(0), capacity_(0) {}
-    DynamicVector(size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
-    DynamicVector(const DynamicVector &);                                                    // Not emplemented by design for RVO, NRVO enforcement
-    DynamicVector(DynamicVector &&);                                                         // Not emplemented by design for RVO, NRVO enforcement
+    DynamicVector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
+    DynamicVector(const DynamicVector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
+    DynamicVector(DynamicVector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
     template <typename... Args>
-    DynamicVector(Args &&...args)
+    DynamicVector(const Args &...args)
         : data_(new A[sizeof...(args) * 2]),
           size_(sizeof...(args)),
           capacity_(sizeof...(args) * 2)
@@ -204,12 +191,12 @@ public:
     }
 
     // Element access
-    A &operator[](size_type index)
+    A &operator[](const size_type index)
     {
         return data_[index];
     }
 
-    const A &operator[](size_type index) const
+    const A &operator[](const size_type index) const
     {
         return data_[index];
     }
@@ -222,15 +209,6 @@ public:
             reserve(capacity_ == 0 ? 1 : capacity_ * 2);
         }
         data_[size_++] = value;
-    }
-
-    void push_back(value_type &&value)
-    {
-        if (size_ == capacity_)
-        {
-            reserve(capacity_ == 0 ? 1 : capacity_ * 2);
-        }
-        data_[size_++] = std::move(value);
     }
 
     void pop_back()
@@ -254,7 +232,7 @@ public:
     }
 
     // Reserve capacity
-    void reserve(size_type new_capacity)
+    void reserve(const size_type new_capacity)
     {
         if (new_capacity > capacity_)
         {
@@ -270,7 +248,7 @@ public:
     }
 
     // Resizing the vector
-    void resize(size_type new_size)
+    void resize(const size_type new_size)
     {
         if (new_size > capacity_)
         {
