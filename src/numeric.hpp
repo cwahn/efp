@@ -112,7 +112,7 @@ double mean(A &&xs)
     }
     else
     {
-        return sum(xs) / double(get_length(xs));
+        return sum(xs) / double(length(xs));
     }
 }
 

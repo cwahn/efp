@@ -61,7 +61,7 @@ double variance(A &&xs)
     };
 
     auto deviations = fmap(minus_x_mean, xs);
-    return sum(deviations) / double(get_length(xs));
+    return sum(deviations) / double(length(xs));
 }
 
 template <typename A>
@@ -81,7 +81,7 @@ double covariance(A &&xs, B &&ys)
         return (x - x_mean) * (y - y_mean);
     };
 
-    return fmap(covar, xs, ys) / double(get_length(xs));
+    return fmap(covar, xs, ys) / double(length(xs));
 }
 
 template <typename A, typename B>
@@ -98,7 +98,7 @@ template <typename A>
 double auto_covariance(A &&xs, uint lag)
 {
     double x_mean = mean(xs);
-    size_t xs_len = get_length(xs);
+    size_t xs_len = length(xs);
     double sum_length = xs_len - lag;
 
     double summation = 0;
@@ -130,7 +130,7 @@ FmapIterable_t<double, A> auto_covariance_function(A &&xs)
     }
     else
     {
-        size_t length = get_length(xs);
+        size_t length = length(xs);
 
         auto idxs = arange<std::vector<int>>(0, int(length), 1);
 
@@ -204,7 +204,7 @@ std::tuple<double, double> linear_regression(A &&xs, B &&ys)
 template <typename A>
 FmapIterable_t<double, A> detrend(A &&xs)
 {
-    auto is = arange<RemoveReference_t<A>>(0, get_length(xs), 1);
+    auto is = arange<RemoveReference_t<A>>(0, length(xs), 1);
 
     double beta_1, beta_2;
     std::tie(beta_1, beta_2) = linear_regression(is, xs);

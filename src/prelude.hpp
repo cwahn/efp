@@ -219,22 +219,22 @@ struct MinStaticCapacity<Head, Tail...>
 template <typename... Args>
 constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Args...>::value;
 
-// get_length
+// length
 
 template <typename A>
-size_t get_length(const A &iterable)
+size_t length(const A &iterable)
 {
     return iterable.size();
 }
 
 template <typename A, size_t N>
-constexpr size_t get_length(const A (&)[N])
+constexpr size_t length(const A (&)[N])
 {
     return N;
 }
 
 template <typename A, size_t N>
-constexpr size_t get_length(A(&&)[N])
+constexpr size_t length(A(&&)[N])
 {
     return N;
 }
@@ -244,16 +244,16 @@ constexpr size_t get_length(A(&&)[N])
 template <typename... Args>
 constexpr size_t min_length(Args &...args)
 {
-    // return min_value(get_length(args)...);
-    return min_value(get_length(args)...);
+    // return min_value(length(args)...);
+    return min_value(length(args)...);
 }
 
 template <typename F, typename... Args>
 void for_each(F f, Args &&...args)
 {
-    size_t length = min_value(get_length(args)...);
+    size_t return_length = min_value(length(args)...);
 
-    for (int i = 0; i < length; ++i)
+    for (int i = 0; i < return_length; ++i)
     {
         f(args[i]...);
     }
@@ -384,7 +384,7 @@ auto filter_iterable(Arg &arg) -> FilterIterable_t<R, Arg> // Internal data coul
     else
     {
         auto result = DynamicVector<R>();
-        result.reserve(get_length(arg) * 2);
+        result.reserve(length(arg) * 2);
         return result;
     }
 }
@@ -394,7 +394,7 @@ auto filter(F f, Arg &arg) -> FilterIterable_t<ElementType_t<Arg>, Arg>
 {
     auto result = filter_iterable<ElementType_t<Arg>, Arg>(arg);
 
-    for (int i = 0; i < get_length(arg); ++i)
+    for (int i = 0; i < length(arg); ++i)
     {
         if (f(arg[i]))
         {
@@ -410,7 +410,7 @@ R foldl(F f, R initial_value, It &iterable)
 {
     R result = initial_value;
 
-    for (int i = 0; i < get_length(iterable); ++i)
+    for (int i = 0; i < length(iterable); ++i)
     {
         result = f(result, iterable[i]);
     }
@@ -460,7 +460,7 @@ R foldr(F f, R initial_value, std::vector<A> &iterable)
 {
     R result = initial_value;
 
-    for (int i = get_length(iterable) - 1; i > -1; --i)
+    for (int i = length(iterable) - 1; i > -1; --i)
     {
         result = f(iterable[i], result);
     }
