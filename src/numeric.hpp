@@ -2,6 +2,8 @@
 #define NUMERIC_HPP_
 
 #include "prelude.hpp"
+// ! temp
+// #include "arduino_debug.hpp"
 
 template <typename A>
 A max(A lhs, A rhs)
@@ -104,9 +106,9 @@ ElementType_t<A> product(A &&xs)
 template <typename A>
 double mean(A &&xs)
 {
-    if constexpr (IsArray<A>::value)
+    if constexpr (IsStatic<A>::value)
     {
-        return sum(xs) / double(ArrayLength<A>::value);
+        return sum(xs) / double(StaticCapacity<A>::value);
     }
     else
     {
@@ -115,16 +117,50 @@ double mean(A &&xs)
 }
 
 // Generating
+// ! Temp no constexpr
+template <typename A>
+size_t arange_length_(A start, A end, A step)
+{
+    if (start < end && step > 0)
+        return (end - start + step - 1) / step;
+    else if (start > end && step < 0)
+        return (start - end - step - 1) / (-step);
+    else
+        return 0;
+}
 
 template <typename A>
-std::vector<A> arange(A start, A end, A step)
+auto arange_iterable(size_t length) -> A // Internal data could be unpredictable
 {
-    size_t length = (end - start) / step;
-    std::vector<A> result(length);
-
-    for (int i = 0; i < length; ++i)
+    if constexpr (IsStatic_v<A>)
     {
-        result[i] = start + (i * step);
+        if constexpr (IsStaticVector_v<A>)
+        {
+            return A(length);
+        }
+        else
+        {
+            return A();
+        }
+    }
+    else
+    {
+        return A(length);
+    }
+}
+
+template <typename A>
+A arange(ElementType_t<A> start, ElementType_t<A> end, ElementType_t<A> step)
+{
+    size_t result_length = arange_length_(start, end, step);
+
+    A result = arange_iterable<A>(result_length);
+    ElementType_t<A> value = start;
+
+    for (int i = 0; i < result_length; ++i)
+    {
+        result[i] = value;
+        value += step;
     }
 
     return result;

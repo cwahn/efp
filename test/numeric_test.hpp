@@ -101,13 +101,13 @@ TEST_CASE("arange")
     SECTION("int")
     {
         std::vector<int> ref = {0, 1, 2};
-        CHECK(arange(0, 3, 1) == ref);
+        CHECK(arange<std::vector<int>>(0, 3, 1) == ref);
     }
 
     SECTION("double")
     {
         std::vector<double> ref = {0., 1., 2.};
-        CHECK(arange(0., 3., 1.) == ref);
+        CHECK(arange<std::vector<double>>(0., 3., 1.) == ref);
     }
 }
 

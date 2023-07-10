@@ -12,6 +12,8 @@
 #include <numeric>
 #include <tuple>
 
+#include "zero_copy.hpp"
+
 // All
 
 template <typename... Args>
@@ -29,6 +31,9 @@ struct All<Head, Tail...>
     static constexpr bool value = Head::value && All<Tail...>::value;
 };
 
+template <typename... Args>
+constexpr bool All_v = All<Args...>::value;
+
 // Any
 
 template <typename... Args>
@@ -43,73 +48,140 @@ struct Any<>
 template <typename Head, typename... Tail>
 struct Any<Head, Tail...>
 {
-    static constexpr bool value = Head::value || All<Tail...>::value;
+    static constexpr bool value = Head::value || Any<Tail...>::value;
 };
-
-// IsArray
-
-template <typename T>
-struct IsArray : std::false_type
-{
-};
-
-template <typename T, std::size_t N>
-struct IsArray<T[N]> : std::true_type
-{
-};
-
-template <typename T, std::size_t N>
-struct IsArray<std::array<T, N>> : std::true_type
-{
-};
-
-template <typename T>
-struct IsArray<T &> : IsArray<T>
-{
-};
-
-template <typename T>
-struct IsArray<T &&> : IsArray<T>
-{
-};
-
-// AreAllArrays
 
 template <typename... Args>
-struct AreAllArrays
-{
-    static constexpr bool value = All<IsArray<Args>...>::value;
-};
+constexpr bool Any_v = Any<Args...>::value;
 
-// ArrayLength
+// RemoveReference
+template <typename A>
+using RemoveReference_t = typename std::remove_reference<A>::type;
+
+// CommonType
+template <typename... Args>
+using CommonType_t = typename std::common_type<Args...>::type;
+
+// ? What if not either Static and Dynamic?
+// IsStatic
 
 template <typename T>
-struct ArrayLength
+struct IsStatic : std::false_type
+{
+};
+
+template <typename T, size_t N>
+struct IsStatic<T[N]> : std::true_type
+{
+};
+
+template <typename T, size_t N>
+struct IsStatic<std::array<T, N>> : std::true_type
+{
+};
+
+template <typename T, size_t N>
+struct IsStatic<StaticArray<T, N>> : std::true_type
+{
+};
+
+template <typename T, size_t N>
+struct IsStatic<StaticVector<T, N>> : std::true_type
+{
+};
+
+template <typename T>
+struct IsStatic<T &> : IsStatic<T>
+{
+};
+
+template <typename T>
+struct IsStatic<T &&> : IsStatic<T>
+{
+};
+
+template <typename T>
+constexpr bool IsStatic_v = IsStatic<T>::value;
+
+// AreAllStatic
+
+template <typename... Args>
+struct AreAllStatic
+{
+    static constexpr bool value = All_v<IsStatic<Args>...>;
+};
+
+template <typename... Args>
+constexpr bool AreAllStatic_v = AreAllStatic<Args...>::value;
+
+// IsStaticVector
+template <typename T>
+struct IsStaticVector : std::false_type
+{
+};
+
+template <typename T, size_t N>
+struct IsStaticVector<StaticVector<T, N>> : std::true_type
+{
+};
+
+template <typename T>
+struct IsStaticVector<T &> : IsStaticVector<T>
+{
+};
+
+template <typename T>
+struct IsStaticVector<T &&> : IsStaticVector<T>
+{
+};
+
+template <typename T>
+constexpr bool IsStaticVector_v = IsStaticVector<T>::value;
+
+// StaticCapacity
+
+template <typename T>
+struct StaticCapacity
 {
     static constexpr size_t value = 0;
 };
 
 template <typename T, size_t N>
-struct ArrayLength<T[N]>
+struct StaticCapacity<T[N]>
 {
     static constexpr size_t value = N;
 };
 
 template <typename T, size_t N>
-struct ArrayLength<std::array<T, N>>
+struct StaticCapacity<std::array<T, N>>
+{
+    static constexpr size_t value = N;
+};
+
+template <typename T, size_t N>
+struct StaticCapacity<StaticArray<T, N>>
+{
+    static constexpr size_t value = N;
+};
+
+template <typename T, size_t N>
+struct StaticCapacity<StaticVector<T, N>>
 {
     static constexpr size_t value = N;
 };
 
 template <typename T>
-struct ArrayLength<T &> : ArrayLength<T>
+struct StaticCapacity<T &> : StaticCapacity<T>
 {
 };
 
 template <typename T>
-struct ArrayLength<T &&> : ArrayLength<T>
+struct StaticCapacity<T &&> : StaticCapacity<T>
 {
 };
+
+template <typename T>
+constexpr size_t StaticCapacity_v = StaticCapacity<T>::value;
 
 // min_value
 
@@ -125,43 +197,46 @@ constexpr Head min_value(const Head &head, const Tail &...tail)
     return head < min_value(tail...) ? head : min_value(tail...);
 }
 
-// MinArrayLength
+// MinStaticCapacity
 
 template <typename... Args>
-struct MinArrayLength;
+struct MinStaticCapacity;
 
 template <typename Arg>
-struct MinArrayLength<Arg>
+struct MinStaticCapacity<Arg>
 {
-    static constexpr size_t value = ArrayLength<Arg>::value;
+    static constexpr size_t value = StaticCapacity_v<Arg>;
 };
 
 template <typename Head, typename... Tail>
-struct MinArrayLength<Head, Tail...>
+struct MinStaticCapacity<Head, Tail...>
 {
-    static constexpr size_t head = ArrayLength<Head>::value;
-    static constexpr size_t tail = min_value(ArrayLength<Tail>::value...);
+    static constexpr size_t head = StaticCapacity_v<Head>;
+    static constexpr size_t tail = min_value(StaticCapacity_v<Tail>...);
     static constexpr size_t value = head < tail ? head : tail;
 };
 
+template <typename... Args>
+constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Args...>::value;
+
 // get_length
 
-template <typename A, size_t N>
-constexpr size_t get_length(A (&)[N])
-{
-    return N;
-}
-
-template <typename A, size_t N>
-constexpr size_t get_length(std::array<A, N> &)
-{
-    return N;
-}
-
 template <typename A>
-size_t get_length(std::vector<A> &vector)
+size_t get_length(const A &iterable)
 {
-    return vector.size();
+    return iterable.size();
+}
+
+template <typename A, size_t N>
+constexpr size_t get_length(const A (&)[N])
+{
+    return N;
+}
+
+template <typename A, size_t N>
+constexpr size_t get_length(A(&&)[N])
+{
+    return N;
 }
 
 // min_length
@@ -169,71 +244,60 @@ size_t get_length(std::vector<A> &vector)
 template <typename... Args>
 constexpr size_t min_length(Args &...args)
 {
+    // return min_value(get_length(args)...);
     return min_value(get_length(args)...);
 }
 
 template <typename F, typename... Args>
 void for_each(F f, Args &&...args)
 {
-    if constexpr (AreAllArrays<Args...>::value)
-    {
-        constexpr size_t length = min_value(ArrayLength<Args>::value...);
-        for (int i = 0; i < length; ++i)
-        {
-            f(args[i]...);
-        }
-    }
-    else
-    {
-        size_t length = min_length(args...);
+    size_t length = min_value(get_length(args)...);
 
-        for (int i = 0; i < length; ++i)
-        {
-            f(args[i]...);
-        }
+    for (int i = 0; i < length; ++i)
+    {
+        f(args[i]...);
     }
 }
 
-// ReturnIterable_t
 template <typename A, typename... Args>
-using ReturnIterable_t = typename std::conditional<AreAllArrays<Args...>::value,
-                                                   std::array<A, MinArrayLength<Args...>::value>,
-                                                   std::vector<A>>::type;
+using FmapIterable_t = typename std::conditional<All_v<IsStatic<Args>...>,
+                                                 typename std::conditional<Any_v<IsStaticVector<Args>...>,
+                                                                           StaticVector<A, MinStaticCapacity_v<Args...>>,
+                                                                           StaticArray<A, MinStaticCapacity_v<Args...>>>::type,
+                                                 DynamicVector<A>>::type;
 
 // initilize_result
 
 template <typename R, typename... Args>
-auto initialize_iterable(Args &...args) -> ReturnIterable_t<R, Args...>
+FmapIterable_t<R, Args...> fmap_iterable(Args &...args) // Internal data could be unpredictable
 {
-    if constexpr (AreAllArrays<Args...>::value)
+    if constexpr (All_v<IsStatic<Args>...>)
     {
-        return std::array<R, MinArrayLength<Args...>::value>();
+        if constexpr (Any_v<IsStaticVector<Args>...>)
+        {
+            return StaticVector<R, MinStaticCapacity_v<Args...>>(min_length(args...));
+        }
+        else
+        {
+            return StaticArray<R, MinStaticCapacity_v<Args...>>();
+        }
     }
     else
     {
-        return std::vector<R>(min_length(args...));
+        return DynamicVector<R>(min_length(args...));
     }
 }
 
 // ElementType
 
-template <typename>
-struct ElementType;
-
-template <typename A, std::size_t N>
-struct ElementType<A[N]>
-{
-    using type = A;
-};
-
-template <typename A, std::size_t N>
-struct ElementType<std::array<A, N>>
-{
-    using type = A;
-};
-
 template <typename A>
-struct ElementType<std::vector<A>>
+struct ElementType
+{
+    using type = typename A::value_type;
+};
+
+template <typename A, size_t N>
+struct ElementType<A[N]>
 {
     using type = A;
 };
@@ -268,20 +332,30 @@ using FunctionReturnType_t = typename FunctionReturnType<F, Args...>::type;
 // FmapReturnType_t
 
 template <typename F, typename... Args>
-using FmapReturnType_t = ReturnIterable_t<FunctionReturnType_t<F, ElementType_t<Args>...>, Args...>;
+using FmapReturnType_t = FmapIterable_t<FunctionReturnType_t<F, ElementType_t<Args>...>, Args...>;
 
 template <typename F, typename... Args>
 auto fmap(F f, Args &&...args) -> FmapReturnType_t<F, Args...>
 {
     using R = FunctionReturnType_t<F, ElementType_t<Args>...>;
 
-    FmapReturnType_t<F, Args...> result = initialize_iterable<R, Args...>(args...);
+    auto result = fmap_iterable<R, Args...>(args...);
 
-    if constexpr (AreAllArrays<Args...>::value)
+    if constexpr (All_v<IsStatic<Args>...>)
     {
-        for (int i = 0; i < MinArrayLength<Args...>::value; ++i)
+        if constexpr (Any_v<IsStaticVector<Args>...>)
         {
-            result[i] = f(args[i]...);
+            for (int i = 0; i < min_length(args...); ++i)
+            {
+                result[i] = f(args[i]...);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < MinStaticCapacity_v<Args...>; ++i)
+            {
+                result[i] = f(args[i]...);
+            }
         }
     }
     else
@@ -295,16 +369,38 @@ auto fmap(F f, Args &&...args) -> FmapReturnType_t<F, Args...>
     return result;
 }
 
-template <typename F, typename It>
-auto filter(F f, It &iterable) -> std::vector<ElementType_t<It>>
-{
-    std::vector<ElementType_t<It>> result;
+template <typename A, typename Arg>
+using FilterIterable_t = typename std::conditional<IsStatic_v<Arg>,
+                                                   StaticVector<A, StaticCapacity_v<Arg>>,
+                                                   DynamicVector<A>>::type;
 
-    std::copy_if(
-        std::begin(iterable),
-        std::end(iterable),
-        std::back_inserter(result),
-        f);
+template <typename R, typename Arg>
+auto filter_iterable(Arg &arg) -> FilterIterable_t<R, Arg> // Internal data could be unpredictable, with size 0;
+{
+    if constexpr (IsStatic_v<Arg>)
+    {
+        return StaticVector<R, StaticCapacity_v<Arg>>();
+    }
+    else
+    {
+        auto result = DynamicVector<R>();
+        result.reserve(get_length(arg) * 2);
+        return result;
+    }
+}
+
+template <typename F, typename Arg>
+auto filter(F f, Arg &arg) -> FilterIterable_t<ElementType_t<Arg>, Arg>
+{
+    auto result = filter_iterable<ElementType_t<Arg>, Arg>(arg);
+
+    for (int i = 0; i < get_length(arg); ++i)
+    {
+        if (f(arg[i]))
+        {
+            result.push_back(arg[i]);
+        }
+    }
 
     return result;
 }
@@ -312,7 +408,14 @@ auto filter(F f, It &iterable) -> std::vector<ElementType_t<It>>
 template <typename F, typename R, typename It>
 R foldl(F f, R initial_value, It &iterable)
 {
-    return std::accumulate(std::begin(iterable), std::end(iterable), initial_value, f);
+    R result = initial_value;
+
+    for (int i = 0; i < get_length(iterable); ++i)
+    {
+        result = f(result, iterable[i]);
+    }
+
+    return result;
 }
 
 template <typename It>
@@ -355,11 +458,14 @@ R foldr(F f, R initial_value, It &iterable)
 template <typename F, typename R, typename A>
 R foldr(F f, R initial_value, std::vector<A> &iterable)
 {
-    return std::accumulate(
-        iterable.rbegin(),
-        iterable.rend(),
-        initial_value,
-        f);
+    R result = initial_value;
+
+    for (int i = get_length(iterable) - 1; i > -1; --i)
+    {
+        result = f(iterable[i], result);
+    }
+
+    return result;
 }
 
 #endif

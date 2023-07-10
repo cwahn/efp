@@ -3,6 +3,8 @@
 
 #include "prelude.hpp"
 #include "numeric.hpp"
+// ! temp
+// #include "arduino_debug.hpp"
 
 template <typename A, typename B>
 double sse(A &&as, B &&bs)
@@ -19,9 +21,9 @@ double sse(A &&as, B &&bs)
 template <typename A, typename B>
 double mse(A &&as, B &&bs)
 {
-    if constexpr (AreAllArrays<A, B>::value)
+    if constexpr (AreAllStatic<A, B>::value)
     {
-        return sse(as, bs) / double(MinArrayLength<A, B>::value);
+        return sse(as, bs) / double(MinStaticCapacity<A, B>::value);
     }
 
     else
@@ -53,7 +55,7 @@ double variance(A &&xs)
 {
     double x_mean = mean(xs);
 
-    auto minus_x_mean = [&](auto x)
+    auto minus_x_mean = [&](ElementType_t<A> x)
     {
         return x - x_mean;
     };
@@ -74,7 +76,7 @@ double covariance(A &&xs, B &&ys)
     double x_mean = mean(xs);
     double y_mean = mean(ys);
 
-    auto covar = [&](auto x, auto y)
+    auto covar = [&](ElementType_t<A> x, ElementType_t<B> y)
     {
         return (x - x_mean) * (y - y_mean);
     };
@@ -109,19 +111,19 @@ double auto_covariance(A &&xs, uint lag)
 }
 
 template <typename A>
-ReturnIterable_t<double, A> auto_covariance_function(A &&xs)
+FmapIterable_t<double, A> auto_covariance_function(A &&xs)
 {
     auto auto_covar = [&](int i)
     {
         return auto_covariance(xs, i);
     };
 
-    if constexpr (IsArray<A>::value)
+    if constexpr (IsStatic<A>::value)
     {
-        constexpr size_t length = ArrayLength<A>::value;
+        constexpr size_t length = StaticCapacity<A>::value;
 
-        // ? Maybe can do this as constexpr  
-        std::array<int, length> idxs;
+        // ? Maybe can do this as constexpr
+        StaticArray<int, length> idxs;
         std::iota(std::begin(idxs), std::end(idxs), 1);
 
         return fmap(auto_covar, idxs);
@@ -130,19 +132,19 @@ ReturnIterable_t<double, A> auto_covariance_function(A &&xs)
     {
         size_t length = get_length(xs);
 
-        std::vector<int> idxs = arange(0, int(length), 1);
+        auto idxs = arange<std::vector<int>>(0, int(length), 1);
 
         return fmap(auto_covar, idxs);
     }
 }
 
 template <typename A>
-ReturnIterable_t<double, A> auto_corelation_function(A &&xs)
+FmapIterable_t<double, A> auto_corelation_function(A &&xs)
 {
     auto x_auto_covariance_function = auto_covariance_function(xs);
     double x_variance = variance(xs);
 
-    auto div_x_var = [&](auto x)
+    auto div_x_var = [&](ElementType_t<A> x)
     {
         return x / x_variance;
     };
@@ -160,7 +162,7 @@ double auto_correlation(A &&xs, uint lag)
 }
 
 template <typename A>
-ReturnIterable_t<double, A> remove_dc(A &&xs)
+FmapIterable_t<double, A> remove_dc(A &&xs)
 {
     double x_mean = mean(xs);
     auto minus_x_mean = [&](ElementType_t<A> x)
@@ -171,8 +173,8 @@ ReturnIterable_t<double, A> remove_dc(A &&xs)
     return fmap(minus_x_mean, xs);
 }
 
-template <typename A>
-std::tuple<double, double> linear_regression(A &&xs, A &&ys)
+template <typename A, typename B>
+std::tuple<double, double> linear_regression(A &&xs, B &&ys)
 {
     double x_mean = mean(xs);
     double y_mean = mean(ys);
@@ -200,39 +202,19 @@ std::tuple<double, double> linear_regression(A &&xs, A &&ys)
 }
 
 template <typename A>
-ReturnIterable_t<double, A> detrend(A &&xs)
+FmapIterable_t<double, A> detrend(A &&xs)
 {
-    if constexpr (IsArray<A>::value)
+    auto is = arange<RemoveReference_t<A>>(0, get_length(xs), 1);
+
+    double beta_1, beta_2;
+    std::tie(beta_1, beta_2) = linear_regression(is, xs);
+
+    auto remove_trend = [&](ElementType_t<A> i, ElementType_t<A> x)
     {
-        std::array<ElementType_t<A>, ArrayLength<A>::value> is;
-        std::iota(std::begin(is), std::end(is), 0);
+        return x - (beta_1 * i + beta_2);
+    };
 
-        double beta_1, beta_2;
-        std::tie(beta_1, beta_2) = linear_regression(is, xs);
-
-        auto remove_trend = [&](ElementType_t<A> i, ElementType_t<A> x)
-        {
-            return x - (beta_1 * i + beta_2);
-        };
-
-        return fmap(remove_trend, is, xs);
-    }
-    else
-    {
-        size_t length = get_length(xs);
-        std::vector<ElementType_t<A>> is(length);
-        std::iota(std::begin(is), std::end(is), 0);
-
-        double beta_1, beta_2;
-        std::tie(beta_1, beta_2) = linear_regression(is, xs);
-
-        auto remove_trend = [&](ElementType_t<A> i, ElementType_t<A> x)
-        {
-            return x - (beta_1 * x + beta_2);
-        };
-
-        return fmap(remove_trend, is, xs);
-    }
+    return fmap(remove_trend, is, xs);
 }
 
 #endif

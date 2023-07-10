@@ -6,20 +6,20 @@
 #include "test_common.hpp"
 #include "prelude.hpp"
 
-TEST_CASE("IsArray")
+TEST_CASE("IsStatic")
 {
-    CHECK(IsArray<int[3]>::value == true);
-    CHECK(IsArray<std::array<int, 3>>::value == true);
-    CHECK(IsArray<std::vector<int>>::value == false);
+    CHECK(IsStatic<int[3]>::value == true);
+    CHECK(IsStatic<std::array<int, 3>>::value == true);
+    CHECK(IsStatic<std::vector<int>>::value == false);
 }
 
 TEST_CASE("AreAllArrayss")
 {
-    CHECK(AreAllArrays<int[3]>::value == true);
-    CHECK(AreAllArrays<std::array<int, 3>>::value == true);
-    CHECK(AreAllArrays<int[3], std::array<int, 3>>::value == true);
-    CHECK(AreAllArrays<std::vector<int>>::value == false);
-    CHECK(AreAllArrays<std::array<int, 3>, std::vector<int>>::value == false);
+    CHECK(AreAllStatic<int[3]>::value == true);
+    CHECK(AreAllStatic<std::array<int, 3>>::value == true);
+    CHECK(AreAllStatic<int[3], std::array<int, 3>>::value == true);
+    CHECK(AreAllStatic<std::vector<int>>::value == false);
+    CHECK(AreAllStatic<std::array<int, 3>, std::vector<int>>::value == false);
 }
 
 TEST_CASE("for_each")

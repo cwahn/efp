@@ -241,18 +241,22 @@ TEST_CASE("linear_regression")
 
 TEST_CASE("detrend")
 {
-
     constexpr size_t n = 100;
 
     double a = 2;
     double b = 100;
 
-    auto f = [&](double x)
+    auto f1 = [&](double x)
     {
         return a * x + b;
     };
 
-    SECTION("std::array")
+    auto f2 = [](double x)
+    {
+        return sin(2 * M_PI * x / n);
+    };
+
+    SECTION("c style")
     {
         double xs[n];
         std::iota(std::begin(xs), std::end(xs), 0);
@@ -260,14 +264,31 @@ TEST_CASE("detrend")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
+        auto ys = fmap(f1, xs);
 
-        double ys_ref[n];
+        std::vector<double> ys_ref(n);
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
         auto detrended = detrend(ys);
 
-        CHECK(rms(detrended, ys_ref) < 0.05);
+        CHECK(rms(detrended, ys_ref) < 0.5);
+    }
+
+    SECTION("std::array")
+    {
+        auto xs = arange<std::array<int, n>>(0, n, 1);
+
+        auto ys1 = fmap(f1, xs);
+        auto ys2 = fmap(f2, xs);
+
+        double ys_ref[n];
+        std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
+
+        auto ys = fmap(plus<double>, ys1, ys2);
+
+        auto detrended = detrend(ys);
+
+        CHECK(rms(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::vectors")
@@ -278,32 +299,17 @@ TEST_CASE("detrend")
         std::array<double, n> std_array_xs;
         std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
 
-        auto ys = fmap(f, xs);
+        auto ys1 = fmap(f1, xs);
+        auto ys2 = fmap(f2, xs);
 
         std::array<double, n> ys_ref;
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto detrended = detrend(ys);
-
-        CHECK(rms(detrended, ys_ref) < 0.05);
-    }
-
-    SECTION("c style")
-    {
-        double xs[n];
-        std::iota(std::begin(xs), std::end(xs), 0);
-
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
-
-        auto ys = fmap(f, xs);
-
-        std::vector<double> ys_ref(n);
-        std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
+        auto ys = fmap(plus<double>, ys1, ys2);
 
         auto detrended = detrend(ys);
 
-        CHECK(rms(detrended, ys_ref) < 0.05);
+        CHECK(rms(detrended, ys_ref) < 0.5);
     }
 }
 

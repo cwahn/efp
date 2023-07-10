@@ -10,7 +10,7 @@ public:
     using size_type = std::size_t;
 
     // Default constructor
-    StaticArray() = default;
+    StaticArray() = default;          // Unpredicatable data_
     StaticArray(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
     StaticArray(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
 
@@ -23,7 +23,8 @@ public:
         : data_{std::forward<Args>(args)...} {}
 
     // Accessors
-    constexpr A &operator[](size_type index)
+    // ! Temp no constexpr
+    A &operator[](size_type index)
     {
         return data_[index];
     }
@@ -33,7 +34,7 @@ public:
         return data_[index];
     }
 
-    constexpr size_type size() const noexcept
+    inline constexpr size_type size() const noexcept
     {
         return N;
     }
@@ -83,14 +84,15 @@ public:
 
     // Constructors
     StaticVector() : size_(0) {}
-    StaticVector(const StaticVector &); // Not emplemented by design for RVO, NRVO enforcement
-    StaticVector(StaticVector &&);      // Not emplemented by design for RVO, NRVO enforcement
+    StaticVector(size_t s) : size_(0) {} // Unpredicatable data_
+    StaticVector(const StaticVector &);  // Not emplemented by design for RVO, NRVO enforcement
+    StaticVector(StaticVector &&);       // Not emplemented by design for RVO, NRVO enforcement
     template <typename... Args>
     StaticVector(Args &&...args)
         : data_{std::forward<Args>(args)...},
           size_(sizeof...(args)) {}
 
-    // Element access
+    // Accessors
     A &operator[](size_type index)
     {
         return data_[index];
@@ -181,8 +183,9 @@ public:
 
     // Default constructor
     DynamicVector() : data_(nullptr), size_(0), capacity_(0) {}
-    DynamicVector(const DynamicVector &); // Not emplemented by design for RVO, NRVO enforcement
-    DynamicVector(DynamicVector &&);      // Not emplemented by design for RVO, NRVO enforcement
+    DynamicVector(size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
+    DynamicVector(const DynamicVector &);                                                    // Not emplemented by design for RVO, NRVO enforcement
+    DynamicVector(DynamicVector &&);                                                         // Not emplemented by design for RVO, NRVO enforcement
     template <typename... Args>
     DynamicVector(Args &&...args)
         : data_(new A[sizeof...(args) * 2]),
