@@ -111,7 +111,7 @@ double auto_covariance(A &&xs, uint lag)
 }
 
 template <typename A>
-FmapIterable_t<double, A> auto_covariance_function(A &&xs)
+FmapSequance_t<double, A> auto_covariance_function(A &&xs)
 {
     auto auto_covar = [&](int i)
     {
@@ -139,7 +139,7 @@ FmapIterable_t<double, A> auto_covariance_function(A &&xs)
 }
 
 template <typename A>
-FmapIterable_t<double, A> auto_corelation_function(A &&xs)
+FmapSequance_t<double, A> auto_corelation_function(A &&xs)
 {
     auto x_auto_covariance_function = auto_covariance_function(xs);
     double x_variance = variance(xs);
@@ -162,7 +162,7 @@ double auto_correlation(A &&xs, uint lag)
 }
 
 template <typename A>
-FmapIterable_t<double, A> remove_dc(A &&xs)
+FmapSequance_t<double, A> remove_dc(A &&xs)
 {
     double x_mean = mean(xs);
     auto minus_x_mean = [&](ElementType_t<A> x)
@@ -202,7 +202,7 @@ std::tuple<double, double> linear_regression(A &&xs, B &&ys)
 }
 
 template <typename A>
-FmapIterable_t<double, A> detrend(A &&xs)
+FmapSequance_t<double, A> detrend(A &&xs)
 {
     auto is = arange<RemoveReference_t<A>>(0, length(xs), 1);
 

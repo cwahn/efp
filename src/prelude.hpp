@@ -6,7 +6,6 @@
 #include <iterator>
 #include <functional>
 #include <algorithm>
-#include <iterator>
 #include <utility>
 #include <type_traits>
 #include <numeric>
@@ -105,83 +104,83 @@ constexpr bool IsStatic_v = IsStatic<T>::value;
 
 // AreAllStatic
 
-template <typename... Args>
+template <typename... Seqs>
 struct AreAllStatic
 {
-    static constexpr bool value = All_v<IsStatic<Args>...>;
+    static constexpr bool value = All_v<IsStatic<Seqs>...>;
 };
 
-template <typename... Args>
-constexpr bool AreAllStatic_v = AreAllStatic<Args...>::value;
+template <typename... Seqs>
+constexpr bool AreAllStatic_v = AreAllStatic<Seqs...>::value;
 
 // IsStaticVector
-template <typename T>
+template <typename A>
 struct IsStaticVector : std::false_type
 {
 };
 
-template <typename T, size_t N>
-struct IsStaticVector<StaticVector<T, N>> : std::true_type
+template <typename A, size_t N>
+struct IsStaticVector<StaticVector<A, N>> : std::true_type
 {
 };
 
-template <typename T>
-struct IsStaticVector<T &> : IsStaticVector<T>
+template <typename A>
+struct IsStaticVector<A &> : IsStaticVector<A>
 {
 };
 
-template <typename T>
-struct IsStaticVector<T &&> : IsStaticVector<T>
+template <typename A>
+struct IsStaticVector<A &&> : IsStaticVector<A>
 {
 };
 
-template <typename T>
-constexpr bool IsStaticVector_v = IsStaticVector<T>::value;
+template <typename A>
+constexpr bool IsStaticVector_v = IsStaticVector<A>::value;
 
 // StaticCapacity
 
-template <typename T>
+template <typename A>
 struct StaticCapacity
 {
     static constexpr size_t value = 0;
 };
 
-template <typename T, size_t N>
-struct StaticCapacity<T[N]>
+template <typename A, size_t N>
+struct StaticCapacity<A[N]>
 {
     static constexpr size_t value = N;
 };
 
-template <typename T, size_t N>
-struct StaticCapacity<std::array<T, N>>
+template <typename A, size_t N>
+struct StaticCapacity<std::array<A, N>>
 {
     static constexpr size_t value = N;
 };
 
-template <typename T, size_t N>
-struct StaticCapacity<StaticArray<T, N>>
+template <typename A, size_t N>
+struct StaticCapacity<StaticArray<A, N>>
 {
     static constexpr size_t value = N;
 };
 
-template <typename T, size_t N>
-struct StaticCapacity<StaticVector<T, N>>
+template <typename A, size_t N>
+struct StaticCapacity<StaticVector<A, N>>
 {
     static constexpr size_t value = N;
 };
 
-template <typename T>
-struct StaticCapacity<T &> : StaticCapacity<T>
+template <typename A>
+struct StaticCapacity<A &> : StaticCapacity<A>
 {
 };
 
-template <typename T>
-struct StaticCapacity<T &&> : StaticCapacity<T>
+template <typename A>
+struct StaticCapacity<A &&> : StaticCapacity<A>
 {
 };
 
-template <typename T>
-constexpr size_t StaticCapacity_v = StaticCapacity<T>::value;
+template <typename A>
+constexpr size_t StaticCapacity_v = StaticCapacity<A>::value;
 
 // min_value
 
@@ -199,13 +198,13 @@ constexpr Head min_value(const Head &head, const Tail &...tail)
 
 // MinStaticCapacity
 
-template <typename... Args>
+template <typename... Seqs>
 struct MinStaticCapacity;
 
-template <typename Arg>
-struct MinStaticCapacity<Arg>
+template <typename Seq>
+struct MinStaticCapacity<Seq>
 {
-    static constexpr size_t value = StaticCapacity_v<Arg>;
+    static constexpr size_t value = StaticCapacity_v<Seq>;
 };
 
 template <typename Head, typename... Tail>
@@ -216,15 +215,15 @@ struct MinStaticCapacity<Head, Tail...>
     static constexpr size_t value = head < tail ? head : tail;
 };
 
-template <typename... Args>
-constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Args...>::value;
+template <typename... Seqs>
+constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Seqs...>::value;
 
 // length
 
 template <typename A>
-size_t length(const A &iterable)
+size_t length(const A &seq)
 {
-    return iterable.size();
+    return seq.size();
 }
 
 template <typename A, size_t N>
@@ -233,58 +232,51 @@ constexpr size_t length(const A (&)[N])
     return N;
 }
 
-template <typename A, size_t N>
-constexpr size_t length(A(&&)[N])
-{
-    return N;
-}
-
 // min_length
 
-template <typename... Args>
-constexpr size_t min_length(Args &...args)
+template <typename... Seqs>
+constexpr size_t min_length(const Seqs &...seqs)
 {
-    // return min_value(length(args)...);
-    return min_value(length(args)...);
+    return min_value(length(seqs)...);
 }
 
-template <typename F, typename... Args>
-void for_each(F f, Args &&...args)
+template <typename F, typename... Seqs>
+constexpr void for_each(F f, const Seqs &...seqs)
 {
-    size_t return_length = min_value(length(args)...);
+    const size_t seq_length = min_value(length(seqs)...);
 
-    for (int i = 0; i < return_length; ++i)
+    for (int i = 0; i < seq_length; ++i)
     {
-        f(args[i]...);
+        f(seqs[i]...);
     }
 }
 
-template <typename A, typename... Args>
-using FmapIterable_t = typename std::conditional<All_v<IsStatic<Args>...>,
-                                                 typename std::conditional<Any_v<IsStaticVector<Args>...>,
-                                                                           StaticVector<A, MinStaticCapacity_v<Args...>>,
-                                                                           StaticArray<A, MinStaticCapacity_v<Args...>>>::type,
+template <typename A, typename... Seqs>
+using FmapSequance_t = typename std::conditional<All_v<IsStatic<Seqs>...>,
+                                                 typename std::conditional<Any_v<IsStaticVector<Seqs>...>,
+                                                                           StaticVector<A, MinStaticCapacity_v<Seqs...>>,
+                                                                           StaticArray<A, MinStaticCapacity_v<Seqs...>>>::type,
                                                  DynamicVector<A>>::type;
 
 // initilize_result
 
-template <typename R, typename... Args>
-FmapIterable_t<R, Args...> fmap_iterable(Args &...args) // Internal data could be unpredictable
+template <typename R, typename... Seqs>
+constexpr FmapSequance_t<R, Seqs...> fmap_sequance(const Seqs &...seqs) // Internal data could be unpredictable
 {
-    if constexpr (All_v<IsStatic<Args>...>)
+    if constexpr (All_v<IsStatic<Seqs>...>)
     {
-        if constexpr (Any_v<IsStaticVector<Args>...>)
+        if constexpr (Any_v<IsStaticVector<Seqs>...>)
         {
-            return StaticVector<R, MinStaticCapacity_v<Args...>>(min_length(args...));
+            return StaticVector<R, MinStaticCapacity_v<Seqs...>>(min_length(seqs...));
         }
         else
         {
-            return StaticArray<R, MinStaticCapacity_v<Args...>>();
+            return StaticArray<R, MinStaticCapacity_v<Seqs...>>();
         }
     }
     else
     {
-        return DynamicVector<R>(min_length(args...));
+        return DynamicVector<R>(min_length(seqs...));
     }
 }
 
@@ -320,149 +312,112 @@ using ElementType_t = typename ElementType<A>::type;
 template <typename, typename...>
 struct FunctionReturnType;
 
-template <typename F, typename... Args>
+template <typename F, typename... Seqs>
 struct FunctionReturnType
 {
-    using type = decltype(std::declval<F>()(std::declval<Args>()...));
+    using type = decltype(std::declval<F>()(std::declval<Seqs>()...));
 };
 
-template <typename F, typename... Args>
-using FunctionReturnType_t = typename FunctionReturnType<F, Args...>::type;
+template <typename F, typename... Seqs>
+using FunctionReturnType_t = typename FunctionReturnType<F, Seqs...>::type;
 
 // FmapReturnType_t
 
-template <typename F, typename... Args>
-using FmapReturnType_t = FmapIterable_t<FunctionReturnType_t<F, ElementType_t<Args>...>, Args...>;
+template <typename F, typename... Seqs>
+using FmapReturnType_t = FmapSequance_t<FunctionReturnType_t<F, ElementType_t<Seqs>...>, Seqs...>;
 
-template <typename F, typename... Args>
-auto fmap(F f, Args &&...args) -> FmapReturnType_t<F, Args...>
+template <typename F, typename... Seqs>
+constexpr FmapReturnType_t<F, Seqs...> fmap(F f, const Seqs &...seqs)
 {
-    using R = FunctionReturnType_t<F, ElementType_t<Args>...>;
+    using R = FunctionReturnType_t<F, ElementType_t<Seqs>...>;
 
-    auto result = fmap_iterable<R, Args...>(args...);
+    auto result = fmap_sequance<R, Seqs...>(seqs...);
 
-    if constexpr (All_v<IsStatic<Args>...>)
+    if constexpr (All_v<IsStatic<Seqs>...>)
     {
-        if constexpr (Any_v<IsStaticVector<Args>...>)
+        if constexpr (Any_v<IsStaticVector<Seqs>...>)
         {
-            for (int i = 0; i < min_length(args...); ++i)
+            for (int i = 0; i < min_length(seqs...); ++i)
             {
-                result[i] = f(args[i]...);
+                result[i] = f(seqs[i]...);
             }
         }
         else
         {
-            for (int i = 0; i < MinStaticCapacity_v<Args...>; ++i)
+            for (int i = 0; i < MinStaticCapacity_v<Seqs...>; ++i)
             {
-                result[i] = f(args[i]...);
+                result[i] = f(seqs[i]...);
             }
         }
     }
     else
     {
-        for (int i = 0; i < min_length(args...); ++i)
+        for (int i = 0; i < min_length(seqs...); ++i)
         {
-            result[i] = f(args[i]...);
+            result[i] = f(seqs[i]...);
         }
     }
 
     return result;
 }
 
-template <typename A, typename Arg>
-using FilterIterable_t = typename std::conditional<IsStatic_v<Arg>,
-                                                   StaticVector<A, StaticCapacity_v<Arg>>,
-                                                   DynamicVector<A>>::type;
+template <typename R, typename Seq>
+using FilterSequence_t = typename std::conditional<IsStatic_v<Seq>,
+                                                   StaticVector<R, StaticCapacity_v<Seq>>,
+                                                   DynamicVector<R>>::type;
 
-template <typename R, typename Arg>
-auto filter_iterable(Arg &arg) -> FilterIterable_t<R, Arg> // Internal data could be unpredictable, with size 0;
+template <typename R, typename Seq>
+constexpr FilterSequence_t<R, Seq> filter_sequence(const Seq &seq) // Internal data could be unpredictable, with size 0;
 {
-    if constexpr (IsStatic_v<Arg>)
+    if constexpr (IsStatic_v<Seq>)
     {
-        return StaticVector<R, StaticCapacity_v<Arg>>();
+        return StaticVector<R, StaticCapacity_v<Seq>>();
     }
     else
     {
         auto result = DynamicVector<R>();
-        result.reserve(length(arg) * 2);
+        result.reserve(length(seq) * 2);
         return result;
     }
 }
 
-template <typename F, typename Arg>
-auto filter(F f, Arg &arg) -> FilterIterable_t<ElementType_t<Arg>, Arg>
+template <typename F, typename Seq>
+constexpr FilterSequence_t<ElementType_t<Seq>, Seq> filter(F f, const Seq &seq)
 {
-    auto result = filter_iterable<ElementType_t<Arg>, Arg>(arg);
+    auto result = filter_sequence<ElementType_t<Seq>, Seq>(seq);
 
-    for (int i = 0; i < length(arg); ++i)
+    for (int i = 0; i < length(seq); ++i)
     {
-        if (f(arg[i]))
+        if (f(seq[i]))
         {
-            result.push_back(arg[i]);
+            result.push_back(seq[i]);
         }
     }
 
     return result;
 }
 
-template <typename F, typename R, typename It>
-R foldl(F f, R initial_value, It &iterable)
+template <typename F, typename R, typename Seq>
+constexpr R foldl(F f, const R initial_value, const Seq &seq)
 {
     R result = initial_value;
 
-    for (int i = 0; i < length(iterable); ++i)
+    for (int i = 0; i < length(seq); ++i)
     {
-        result = f(result, iterable[i]);
+        result = f(result, seq[i]);
     }
 
     return result;
 }
 
-template <typename It>
-using RIters_t = std::tuple<std::reverse_iterator<ElementType_t<It> *>, std::reverse_iterator<ElementType_t<It> *>>;
-
-template <typename It>
-RIters_t<It> make_riters(It &iterable);
-
-template <typename A, size_t N>
-RIters_t<A[N]> make_riters(A (&iterable)[N])
-{
-    auto length = std::end(iterable) - std::begin(iterable);
-
-    auto rbegin = std::reverse_iterator<A *>(iterable + length);
-    auto rend = std::reverse_iterator<A *>(iterable);
-
-    return std::make_tuple(rbegin, rend);
-}
-
-template <typename A, size_t N>
-RIters_t<std::array<A, N>> make_riters(std::array<A, N> &iterable)
-{
-    return std::make_tuple(
-        std::reverse_iterator<A *>(iterable.end()),
-        std::reverse_iterator<A *>(iterable.begin()));
-}
-
-template <typename F, typename R, typename It>
-R foldr(F f, R initial_value, It &iterable)
-{
-    RIters_t<It> riters = make_riters(iterable);
-
-    return std::accumulate(
-        std::get<0>(riters),
-        std::get<1>(riters),
-        initial_value,
-        f);
-}
-
-template <typename F, typename R, typename A>
-R foldr(F f, R initial_value, std::vector<A> &iterable)
+template <typename F, typename R, typename Seq>
+constexpr R foldr(F f, const R initial_value, const Seq &seq)
 {
     R result = initial_value;
 
-    for (int i = length(iterable) - 1; i > -1; --i)
+    for (int i = length(seq) - 1; i > -1; --i)
     {
-        result = f(iterable[i], result);
+        result = f(seq[i], result);
     }
 
     return result;
