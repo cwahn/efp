@@ -149,7 +149,7 @@ constexpr A arange_iterable(const size_t length) // Internal data could be unpre
 }
 
 template <typename A>
-constexpr A arange(const Element_t<A> start, const Element_t<A> end, const Element_t<A> step)
+A arange(const Element_t<A> start, const Element_t<A> end, const Element_t<A> step)
 {
     const size_t result_length = arange_length_(start, end, step);
 

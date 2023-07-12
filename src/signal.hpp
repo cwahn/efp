@@ -21,15 +21,13 @@ constexpr double sse(const SeqA &as, const SeqB &bs)
 template <typename SeqA, typename SeqB>
 constexpr double mse(const SeqA &as, const SeqB &bs)
 {
-    if constexpr (AreAllStaticCapacity<SeqA, SeqB>::value)
+    const auto square_error = [](Element_t<SeqA> a, Element_t<SeqB> b)
     {
-        return sse(as, bs) / double(MinStaticCapacity<SeqA, SeqB>::value);
-    }
+        const auto error = a - b;
+        return error * error;
+    };
 
-    else
-    {
-        return sse(as, bs) / double(min_length(as, bs));
-    }
+    return mean(map(square_error, as, bs));
 }
 
 template <typename SeqA, typename SeqB>
@@ -120,24 +118,7 @@ MapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
         return auto_covariance(as, i);
     };
 
-    if constexpr (IsStaticCapacity<SeqA>::value)
-    {
-        constexpr size_t result_length = StaticCapacity<SeqA>::value;
-
-        // ? Maybe can do this as constexpr
-        StaticArray<int, result_length> idxs;
-        std::iota(std::begin(idxs), std::end(idxs), 1);
-
-        return map(auto_covar, idxs);
-    }
-    else
-    {
-        const size_t result_length = length(as);
-
-        const auto idxs = arange<DynamicVector<int>>(0, result_length, 1);
-
-        return map(auto_covar, idxs);
-    }
+    return map_with_index(auto_covar);
 }
 
 template <typename SeqA>
@@ -205,12 +186,32 @@ constexpr std::tuple<double, double> linear_regression(const SeqA &as, const Seq
 }
 
 template <typename SeqA>
+constexpr std::tuple<double, double> linear_regression_with_index(const SeqA &as)
+{
+    const int n = length(as);
+
+    const double i_mean = (n - 1) / 2.;
+    const double a_mean = mean(as);
+
+    const auto get_ss_ia = [&](int i, double a)
+    {
+        return (i - i_mean) * (a - a_mean);
+    };
+
+    const double ss_ia = sum(map_with_index(get_ss_ia, as));
+    const double ss_ii = n * (n * n - 1) / 12;
+
+    const double beta_1 = ss_ia / ss_ii;
+    const double beta_2 = a_mean - (beta_1 * i_mean);
+
+    return std::make_tuple(beta_1, beta_2);
+}
+
+template <typename SeqA>
 constexpr MapSequance_t<double, SeqA> detrend(const SeqA &as)
 {
-    auto is = arange<RemoveReference_t<SeqA>>(0, length(as), 1);
+    const std::tuple<double, double> betas = linear_regression_with_index(as);
 
-    // double beta_1, beta_2;
-    std::tuple<double, double> betas = linear_regression(is, as);
     const double beta_1 = std::get<0>(betas);
     const double beta_2 = std::get<1>(betas);
 
@@ -219,7 +220,7 @@ constexpr MapSequance_t<double, SeqA> detrend(const SeqA &as)
         return x - (beta_1 * i + beta_2);
     };
 
-    return map(remove_trend, is, as);
+    return map_with_index(remove_trend, as);
 }
 
 #endif

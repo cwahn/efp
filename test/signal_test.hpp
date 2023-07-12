@@ -239,6 +239,69 @@ TEST_CASE("linear_regression")
     }
 }
 
+// TEST_CASE("linear_regression_with_index")
+// {
+
+//     constexpr size_t n = 100;
+
+//     double a = 2;
+//     double b = 100;
+
+//     auto f = [&](double x)
+//     {
+//         return sin(x * 2 * M_PI / n) + a * x + b;
+//     };
+
+//     SECTION("c style")
+//     {
+//         auto xs = map_with_index([](x)
+//                                  { return x }) auto ys = map_with_index(f);
+
+//         double a_hat, b_hat;
+//         std::tie(a_hat, b_hat) = linear_regression(std_array_xs, ys);
+
+//         // CHECK(b_hat == b);
+//         // CHECK(a_hat == a);
+
+//         CHECK(abs_error(a_hat, a) < 0.05);
+//         CHECK(abs_error(b_hat, b) < 0.05);
+//     }
+
+//     SECTION("std::array")
+//     {
+//         std::array<double, n> xs;
+//         std::iota(std::begin(xs), std::end(xs), 0);
+
+//         auto ys = map(f, xs);
+
+//         double a_hat, b_hat;
+//         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+
+//         // CHECK(b_hat == b);
+//         // CHECK(a_hat == a);
+
+//         CHECK(abs_error(a_hat, a) < 0.05);
+//         CHECK(abs_error(b_hat, b) < 0.05);
+//     }
+
+//     SECTION("std::vector")
+//     {
+//         std::vector<double> xs(n);
+//         std::iota(std::begin(xs), std::end(xs), 0);
+
+//         auto ys = map(f, xs);
+
+//         double a_hat, b_hat;
+//         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+
+//         // CHECK(b_hat == b);
+//         // CHECK(a_hat == a);
+
+//         CHECK(abs_error(a_hat, a) < 0.05);
+//         CHECK(abs_error(b_hat, b) < 0.05);
+//     }
+// }
+
 TEST_CASE("detrend")
 {
     constexpr size_t n = 100;

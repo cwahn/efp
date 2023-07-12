@@ -274,7 +274,7 @@ constexpr size_t min_length(const Seqs &...seqs)
 }
 
 template <typename F, typename... Seqs>
-constexpr void for_each(const F &f, const Seqs &...seqs)
+void for_each(const F &f, const Seqs &...seqs)
 {
     // ? Will it be optimized out to a compile time constatnt?
     const size_t seq_length = min_value(length(seqs)...);
@@ -363,7 +363,7 @@ template <typename F, typename... Seqs>
 using MapReturn_t = MapSequance_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
 
 template <typename F, typename... Seqs>
-constexpr MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
+MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
 {
     using R = FunctionReturn_t<F, Element_t<Seqs>...>;
 
@@ -385,7 +385,7 @@ using MapWithIndexReturn_t = MapSequance_t<FunctionReturn_t<F, int, Element_t<Se
 // map_with_index
 
 template <typename F, typename... Seqs>
-constexpr MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
+MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
 {
     using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
 
@@ -421,7 +421,7 @@ constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data 
 }
 
 template <typename F, typename SeqA>
-constexpr FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
+FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
 {
     auto result = filter_sequence<SeqA>(as);
 
@@ -437,7 +437,7 @@ constexpr FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
 }
 
 template <typename F, typename R, typename SeqA>
-constexpr R foldl(const F &f, const R &initial_value, const SeqA &as)
+R foldl(const F &f, const R &initial_value, const SeqA &as)
 {
     R result = initial_value;
 
@@ -450,7 +450,7 @@ constexpr R foldl(const F &f, const R &initial_value, const SeqA &as)
 }
 
 template <typename F, typename R, typename SeqA>
-constexpr R foldr(const F &f, const R &initial_value, const SeqA &as)
+R foldr(const F &f, const R &initial_value, const SeqA &as)
 {
     R result = initial_value;
 
