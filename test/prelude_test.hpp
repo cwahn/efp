@@ -95,6 +95,39 @@ TEST_CASE("map")
     }
 }
 
+TEST_CASE("map_with_index")
+{
+    SECTION("c style array")
+    {
+        auto times = [](int lhs, int rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, c_array_3) == std::array<int, 3>{0, 2, 6});
+    }
+
+    SECTION("std::vector")
+    {
+        auto times = [](int lhs, int rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, std_vector_3) == DynamicVector<int>{0, 2, 6});
+    }
+
+    SECTION("binary of std::array, std::vecor")
+    {
+        auto product = [](int i, int a, int b)
+        {
+            return i * a * b;
+        };
+
+        CHECK(map_with_index(product, std_array_3, std_vector_3) == DynamicVector<int>{0, 4, 18});
+    }
+}
+
 TEST_CASE("filter")
 {
     SECTION("even c style array")

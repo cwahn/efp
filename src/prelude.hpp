@@ -377,10 +377,33 @@ constexpr MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
     return result;
 }
 
+// MapWithIndexReturn_t
+
+template <typename F, typename... Seqs>
+using MapWithIndexReturn_t = MapSequance_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
+
+// map_with_index
+
+template <typename F, typename... Seqs>
+constexpr MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
+{
+    using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+    auto result = fmap_sequance<R, Seqs...>(seqs...);
+
+    for (int i = 0; i < min_length(seqs...); ++i)
+    {
+        result[i] = f(i, seqs[i]...);
+    }
+
+    return result;
+}
+
 template <typename SeqA>
-using FilterReturn_t = typename std::conditional<IsStatic_v<SeqA>,
-                                                 StaticVector<Element_t<SeqA>, StaticCapacity_v<SeqA>>,
-                                                 DynamicVector<Element_t<SeqA>>>::type;
+using FilterReturn_t =
+    typename std::conditional<IsStatic_v<SeqA>,
+                              StaticVector<Element_t<SeqA>, StaticCapacity_v<SeqA>>,
+                              DynamicVector<Element_t<SeqA>>>::type;
 
 template <typename SeqA>
 constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
