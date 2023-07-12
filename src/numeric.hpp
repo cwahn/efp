@@ -74,39 +74,39 @@ constexpr A tan(const A x)
 // Reducing
 
 template <typename A>
-constexpr ElementType_t<A> maximum(const A &xs)
+constexpr Element_t<A> maximum(const A &xs)
 {
-    return foldl(max<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::min(), xs);
+    return foldl(max<Element_t<A>>, std::numeric_limits<Element_t<A>>::min(), xs);
 }
 
 template <typename A>
-constexpr ElementType_t<A> minimum(const A &xs)
+constexpr Element_t<A> minimum(const A &xs)
 {
-    return foldl(min<ElementType_t<A>>, std::numeric_limits<ElementType_t<A>>::max(), xs);
+    return foldl(min<Element_t<A>>, std::numeric_limits<Element_t<A>>::max(), xs);
 }
 
 template <typename A>
-constexpr ElementType_t<A> max_min(const A &xs)
+constexpr Element_t<A> max_min(const A &xs)
 {
     return maximum(xs) - minimum(xs);
 }
 
 template <typename A>
-constexpr ElementType_t<A> sum(const A &xs)
+constexpr Element_t<A> sum(const A &xs)
 {
-    return foldl(plus<ElementType_t<A>>, 0, xs);
+    return foldl(plus<Element_t<A>>, 0, xs);
 }
 
 template <typename A>
-constexpr ElementType_t<A> product(const A &xs)
+constexpr Element_t<A> product(const A &xs)
 {
-    return foldl(times<ElementType_t<A>>, 1, xs);
+    return foldl(times<Element_t<A>>, 1, xs);
 }
 
 template <typename A>
 constexpr double mean(const A &xs)
 {
-    if constexpr (IsStatic<A>::value)
+    if constexpr (IsStaticCapacity<A>::value)
     {
         return sum(xs) / double(StaticCapacity<A>::value);
     }
@@ -149,12 +149,12 @@ constexpr A arange_iterable(const size_t length) // Internal data could be unpre
 }
 
 template <typename A>
-constexpr A arange(const ElementType_t<A> start, const ElementType_t<A> end, const ElementType_t<A> step)
+constexpr A arange(const Element_t<A> start, const Element_t<A> end, const Element_t<A> step)
 {
     const size_t result_length = arange_length_(start, end, step);
 
     A result = arange_iterable<A>(result_length);
-    ElementType_t<A> value = start;
+    Element_t<A> value = start;
 
     for (int i = 0; i < result_length; ++i)
     {

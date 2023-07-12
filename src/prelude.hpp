@@ -59,59 +59,91 @@ using RemoveReference_t = typename std::remove_reference<A>::type;
 
 // CommonType
 template <typename... Args>
-using CommonType_t = typename std::common_type<Args...>::type;
+using Common_t = typename std::common_type<Args...>::type;
 
 // ? What if not either Static and Dynamic?
-// IsStatic
+// IsStaticCapacity
 
 template <typename T>
-struct IsStatic : std::false_type
+struct IsStaticCapacity : std::false_type
 {
 };
 
 template <typename T, size_t N>
-struct IsStatic<T[N]> : std::true_type
+struct IsStaticCapacity<T[N]> : std::true_type
 {
 };
 
 template <typename T, size_t N>
-struct IsStatic<std::array<T, N>> : std::true_type
+struct IsStaticCapacity<std::array<T, N>> : std::true_type
 {
 };
 
 template <typename T, size_t N>
-struct IsStatic<StaticArray<T, N>> : std::true_type
+struct IsStaticCapacity<StaticArray<T, N>> : std::true_type
 {
 };
 
 template <typename T, size_t N>
-struct IsStatic<StaticVector<T, N>> : std::true_type
+struct IsStaticCapacity<StaticVector<T, N>> : std::true_type
 {
 };
 
 template <typename T>
-struct IsStatic<T &> : IsStatic<T>
+struct IsStaticCapacity<T &> : IsStaticCapacity<T>
 {
 };
 
 template <typename T>
-struct IsStatic<T &&> : IsStatic<T>
+struct IsStaticCapacity<T &&> : IsStaticCapacity<T>
 {
 };
 
 template <typename T>
-constexpr bool IsStatic_v = IsStatic<T>::value;
+constexpr bool IsStatic_v = IsStaticCapacity<T>::value;
 
-// AreAllStatic
+// AreAllStaticCapacity
 
 template <typename... Seqs>
-struct AreAllStatic
+struct AreAllStaticCapacity
 {
-    static constexpr bool value = All_v<IsStatic<Seqs>...>;
+    static constexpr bool value = All_v<IsStaticCapacity<Seqs>...>;
+};
+
+// IsDynamicLength
+
+template <typename T>
+struct IsDynamicLength : std::false_type
+{
+};
+
+template <typename A, size_t N>
+struct IsDynamicLength<StaticVector<A, N>> : std::true_type
+{
+};
+
+template <typename A>
+struct IsDynamicLength<DynamicVector<A>> : std::true_type
+{
+};
+
+template <typename A>
+struct IsDynamicLength<std::vector<A>> : std::true_type
+{
+};
+
+template <typename T>
+struct IsDynamicLength<T &> : IsDynamicLength<T>
+{
+};
+
+template <typename T>
+struct IsDynamicLength<T &&> : IsDynamicLength<T>
+{
 };
 
 template <typename... Seqs>
-constexpr bool AreAllStatic_v = AreAllStatic<Seqs...>::value;
+constexpr bool AreAllStatic_v = AreAllStaticCapacity<Seqs...>::value;
 
 // IsStaticVector
 template <typename A>
@@ -220,20 +252,21 @@ constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Seqs...>::value;
 
 // length
 
-template <typename A>
-size_t length(const A &seq)
+template <typename SeqA>
+size_t length(const SeqA &as)
 {
-    return seq.size();
+    return as.size();
 }
 
 template <typename A, size_t N>
-constexpr size_t length(const A (&)[N])
+size_t length(const A (&)[N])
 {
     return N;
 }
 
 // min_length
 
+// * Make it return static value if all static capacity, static length.
 template <typename... Seqs>
 constexpr size_t min_length(const Seqs &...seqs)
 {
@@ -241,8 +274,9 @@ constexpr size_t min_length(const Seqs &...seqs)
 }
 
 template <typename F, typename... Seqs>
-constexpr void for_each(F f, const Seqs &...seqs)
+constexpr void for_each(const F &f, const Seqs &...seqs)
 {
+    // ? Will it be optimized out to a compile time constatnt?
     const size_t seq_length = min_value(length(seqs)...);
 
     for (int i = 0; i < seq_length; ++i)
@@ -252,31 +286,33 @@ constexpr void for_each(F f, const Seqs &...seqs)
 }
 
 template <typename A, typename... Seqs>
-using FmapSequance_t = typename std::conditional<All_v<IsStatic<Seqs>...>,
-                                                 typename std::conditional<Any_v<IsStaticVector<Seqs>...>,
-                                                                           StaticVector<A, MinStaticCapacity_v<Seqs...>>,
-                                                                           StaticArray<A, MinStaticCapacity_v<Seqs...>>>::type,
-                                                 DynamicVector<A>>::type;
+using MapSequance_t =
+    typename std::conditional<All_v<IsStaticCapacity<Seqs>...>,
+                              typename std::conditional<Any_v<IsStaticVector<Seqs>...>,
+                                                        StaticVector<A, MinStaticCapacity_v<Seqs...>>,
+                                                        StaticArray<A, MinStaticCapacity_v<Seqs...>>>::type,
+                              DynamicVector<A>>::type;
 
 // initilize_result
 
+// ! argument seqs may be redundant if all the seqs are static -> Sould be done out side of it
 template <typename R, typename... Seqs>
-constexpr FmapSequance_t<R, Seqs...> fmap_sequance(const Seqs &...seqs) // Internal data could be unpredictable
+constexpr MapSequance_t<R, Seqs...> fmap_sequance(const Seqs &...seqs) // Internal data could be unpredictable
 {
-    if constexpr (All_v<IsStatic<Seqs>...>)
+    if constexpr (All_v<IsStaticCapacity<Seqs>...>)
     {
         if constexpr (Any_v<IsStaticVector<Seqs>...>)
         {
-            return StaticVector<R, MinStaticCapacity_v<Seqs...>>(min_length(seqs...));
+            return MapSequance_t<R, Seqs...>(min_length(seqs...));
         }
         else
         {
-            return StaticArray<R, MinStaticCapacity_v<Seqs...>>();
+            return MapSequance_t<R, Seqs...>();
         }
     }
     else
     {
-        return DynamicVector<R>(min_length(seqs...));
+        return MapSequance_t<R, Seqs...>(min_length(seqs...));
     }
 }
 
@@ -305,7 +341,7 @@ struct ElementType<A &&> : ElementType<A>
 };
 
 template <typename A>
-using ElementType_t = typename ElementType<A>::type;
+using Element_t = typename ElementType<A>::type;
 
 // FunctionReturnType;
 
@@ -319,105 +355,85 @@ struct FunctionReturnType
 };
 
 template <typename F, typename... Seqs>
-using FunctionReturnType_t = typename FunctionReturnType<F, Seqs...>::type;
+using FunctionReturn_t = typename FunctionReturnType<F, Seqs...>::type;
 
-// FmapReturnType_t
-
-template <typename F, typename... Seqs>
-using FmapReturnType_t = FmapSequance_t<FunctionReturnType_t<F, ElementType_t<Seqs>...>, Seqs...>;
+// MapReturn_t
 
 template <typename F, typename... Seqs>
-constexpr FmapReturnType_t<F, Seqs...> map(F f, const Seqs &...seqs)
+using MapReturn_t = MapSequance_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
+
+template <typename F, typename... Seqs>
+constexpr MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
 {
-    using R = FunctionReturnType_t<F, ElementType_t<Seqs>...>;
+    using R = FunctionReturn_t<F, Element_t<Seqs>...>;
 
     auto result = fmap_sequance<R, Seqs...>(seqs...);
 
-    if constexpr (All_v<IsStatic<Seqs>...>)
+    for (int i = 0; i < min_length(seqs...); ++i)
     {
-        if constexpr (Any_v<IsStaticVector<Seqs>...>)
-        {
-            for (int i = 0; i < min_length(seqs...); ++i)
-            {
-                result[i] = f(seqs[i]...);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < MinStaticCapacity_v<Seqs...>; ++i)
-            {
-                result[i] = f(seqs[i]...);
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i < min_length(seqs...); ++i)
-        {
-            result[i] = f(seqs[i]...);
-        }
+        result[i] = f(seqs[i]...);
     }
 
     return result;
 }
 
-template <typename R, typename Seq>
-using FilterSequence_t = typename std::conditional<IsStatic_v<Seq>,
-                                                   StaticVector<R, StaticCapacity_v<Seq>>,
-                                                   DynamicVector<R>>::type;
+template <typename SeqA>
+using FilterReturn_t = typename std::conditional<IsStatic_v<SeqA>,
+                                                 StaticVector<Element_t<SeqA>, StaticCapacity_v<SeqA>>,
+                                                 DynamicVector<Element_t<SeqA>>>::type;
 
-template <typename R, typename Seq>
-constexpr FilterSequence_t<R, Seq> filter_sequence(const Seq &seq) // Internal data could be unpredictable, with size 0;
+template <typename SeqA>
+constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
 {
-    if constexpr (IsStatic_v<Seq>)
+    if constexpr (IsStatic_v<SeqA>)
     {
-        return StaticVector<R, StaticCapacity_v<Seq>>();
+        return FilterReturn_t<SeqA>();
     }
     else
     {
-        auto result = DynamicVector<R>();
-        result.reserve(length(seq) * 2);
+        auto result = FilterReturn_t<SeqA>();
+        result.reserve(length(as) * 2);
         return result;
     }
 }
 
-template <typename F, typename Seq>
-constexpr FilterSequence_t<ElementType_t<Seq>, Seq> filter(F f, const Seq &seq)
+template <typename F, typename SeqA>
+constexpr FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
 {
-    auto result = filter_sequence<ElementType_t<Seq>, Seq>(seq);
+    auto result = filter_sequence<SeqA>(as);
 
-    for (int i = 0; i < length(seq); ++i)
+    for (int i = 0; i < length(as); ++i)
     {
-        if (f(seq[i]))
+        if (f(as[i]))
         {
-            result.push_back(seq[i]);
+            result.push_back(as[i]);
         }
     }
 
     return result;
 }
 
-template <typename F, typename R, typename Seq>
-constexpr R foldl(F f, const R initial_value, const Seq &seq)
+template <typename F, typename R, typename SeqA>
+constexpr R foldl(const F &f, const R &initial_value, const SeqA &as)
 {
     R result = initial_value;
 
-    for (int i = 0; i < length(seq); ++i)
+    for (int i = 0; i < length(as); ++i)
     {
-        result = f(result, seq[i]);
+        result = f(result, as[i]);
     }
 
     return result;
 }
 
-template <typename F, typename R, typename Seq>
-constexpr R foldr(F f, const R initial_value, const Seq &seq)
+template <typename F, typename R, typename SeqA>
+constexpr R foldr(const F &f, const R &initial_value, const SeqA &as)
 {
     R result = initial_value;
 
-    for (int i = length(seq) - 1; i > -1; --i)
+    for (int i = length(as) - 1; i > -1; --i)
     {
-        result = f(seq[i], result);
+        result = f(as[i], result);
     }
 
     return result;

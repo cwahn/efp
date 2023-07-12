@@ -9,7 +9,7 @@
 template <typename SeqA, typename SeqB>
 constexpr double sse(const SeqA &as, const SeqB &bs)
 {
-    const auto square_error = [](ElementType_t<SeqA> a, ElementType_t<SeqB> b)
+    const auto square_error = [](Element_t<SeqA> a, Element_t<SeqB> b)
     {
         const auto error = a - b;
         return error * error;
@@ -21,7 +21,7 @@ constexpr double sse(const SeqA &as, const SeqB &bs)
 template <typename SeqA, typename SeqB>
 constexpr double mse(const SeqA &as, const SeqB &bs)
 {
-    if constexpr (AreAllStatic<SeqA, SeqB>::value)
+    if constexpr (AreAllStaticCapacity<SeqA, SeqB>::value)
     {
         return sse(as, bs) / double(MinStaticCapacity<SeqA, SeqB>::value);
     }
@@ -55,7 +55,7 @@ constexpr double variance(const SeqA &as)
 {
     const double a_mean = mean(as);
 
-    auto minus_a_mean = [&](ElementType_t<SeqA> x)
+    auto minus_a_mean = [&](Element_t<SeqA> x)
     {
         return x - a_mean;
     };
@@ -76,7 +76,7 @@ constexpr double covariance(const SeqA &as, const SeqB &bs)
     const double a_mean = mean(as);
     const double b_mean = mean(bs);
 
-    const auto covar = [&](ElementType_t<SeqA> a, ElementType_t<SeqB> b)
+    const auto covar = [&](Element_t<SeqA> a, Element_t<SeqB> b)
     {
         return (a - a_mean) * (b - b_mean);
     };
@@ -113,14 +113,14 @@ constexpr double auto_covariance(const SeqA &as, uint lag)
 
 // ! Temporary nonconst expr
 template <typename SeqA>
-FmapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
+MapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
 {
     const auto auto_covar = [&](int i)
     {
         return auto_covariance(as, i);
     };
 
-    if constexpr (IsStatic<SeqA>::value)
+    if constexpr (IsStaticCapacity<SeqA>::value)
     {
         constexpr size_t result_length = StaticCapacity<SeqA>::value;
 
@@ -141,12 +141,12 @@ FmapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
 }
 
 template <typename SeqA>
-constexpr FmapSequance_t<double, SeqA> auto_corelation_function(const SeqA &as)
+constexpr MapSequance_t<double, SeqA> auto_corelation_function(const SeqA &as)
 {
     const auto a_auto_covariance_function = auto_covariance_function(as);
     const double a_variance = variance(as);
 
-    const auto div_a_var = [&](ElementType_t<SeqA> x)
+    const auto div_a_var = [&](Element_t<SeqA> x)
     {
         return x / a_variance;
     };
@@ -164,11 +164,11 @@ constexpr double auto_correlation(const SeqA &as, const uint lag)
 }
 
 template <typename SeqA>
-constexpr FmapSequance_t<double, SeqA> remove_dc(const SeqA &as)
+constexpr MapSequance_t<double, SeqA> remove_dc(const SeqA &as)
 {
     const double a_mean = mean(as);
 
-    const auto minus_a_mean = [&](ElementType_t<SeqA> x)
+    const auto minus_a_mean = [&](Element_t<SeqA> x)
     {
         return double(x) - a_mean;
     };
@@ -205,7 +205,7 @@ constexpr std::tuple<double, double> linear_regression(const SeqA &as, const Seq
 }
 
 template <typename SeqA>
-constexpr FmapSequance_t<double, SeqA> detrend(const SeqA &as)
+constexpr MapSequance_t<double, SeqA> detrend(const SeqA &as)
 {
     auto is = arange<RemoveReference_t<SeqA>>(0, length(as), 1);
 
@@ -214,7 +214,7 @@ constexpr FmapSequance_t<double, SeqA> detrend(const SeqA &as)
     const double beta_1 = std::get<0>(betas);
     const double beta_2 = std::get<1>(betas);
 
-    const auto remove_trend = [&](ElementType_t<SeqA> i, ElementType_t<SeqA> x)
+    const auto remove_trend = [&](Element_t<SeqA> i, Element_t<SeqA> x)
     {
         return x - (beta_1 * i + beta_2);
     };

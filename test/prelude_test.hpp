@@ -6,20 +6,20 @@
 #include "test_common.hpp"
 #include "prelude.hpp"
 
-TEST_CASE("IsStatic")
+TEST_CASE("IsStaticCapacity")
 {
-    CHECK(IsStatic<int[3]>::value == true);
-    CHECK(IsStatic<std::array<int, 3>>::value == true);
-    CHECK(IsStatic<std::vector<int>>::value == false);
+    CHECK(IsStaticCapacity<int[3]>::value == true);
+    CHECK(IsStaticCapacity<std::array<int, 3>>::value == true);
+    CHECK(IsStaticCapacity<std::vector<int>>::value == false);
 }
 
-TEST_CASE("AreAllArrayss")
+TEST_CASE("AreAllStaticCapacity")
 {
-    CHECK(AreAllStatic<int[3]>::value == true);
-    CHECK(AreAllStatic<std::array<int, 3>>::value == true);
-    CHECK(AreAllStatic<int[3], std::array<int, 3>>::value == true);
-    CHECK(AreAllStatic<std::vector<int>>::value == false);
-    CHECK(AreAllStatic<std::array<int, 3>, std::vector<int>>::value == false);
+    CHECK(AreAllStaticCapacity<int[3]>::value == true);
+    CHECK(AreAllStaticCapacity<std::array<int, 3>>::value == true);
+    CHECK(AreAllStaticCapacity<int[3], std::array<int, 3>>::value == true);
+    CHECK(AreAllStaticCapacity<std::vector<int>>::value == false);
+    CHECK(AreAllStaticCapacity<std::array<int, 3>, std::vector<int>>::value == false);
 }
 
 TEST_CASE("for_each")

@@ -21,7 +21,7 @@ void sprintln(A &&h, Args &&...t)
 template <typename A>
 void sprintln_seq(A &&seq)
 {
-    auto sprintln_element = [](ElementType_t<A> x)
+    auto sprintln_element = [](Element_t<A> x)
     {
         Serial.print(x);
         Serial.print(" ");
