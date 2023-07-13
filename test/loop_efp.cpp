@@ -23,8 +23,33 @@ int main(int argc, char const *argv[])
     //     xs[i] = std::rand();
     // }
 
+    auto isquare = [&](double x)
+    {
+        return x = square(x);
+    };
+
+    auto isqrt = [&](double x)
+    {
+        return x = sqrt(x);
+    };
+
+    auto ys = map(square<double>, xs);
+    for_each(isqrt, xs);
+
+    for_each(isquare, xs);
+    for_each(isqrt, xs);
+
+    for_each(isquare, xs);
+    for_each(isqrt, xs);
+
+    for_each(isquare, xs);
+    for_each(isqrt, xs);
+
+    for_each(isquare, xs);
+    for_each(isqrt, xs);
+
     // 5
-     auto ys = map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, xs))))))))));
+    //  auto ys = map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, xs))))))))));
     // 1
     // auto ys = map(sqrt<double>, map(square<double>, xs));
 

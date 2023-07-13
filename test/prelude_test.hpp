@@ -6,6 +6,24 @@
 #include "test_common.hpp"
 #include "prelude.hpp"
 
+// ! WIP
+
+// TEST_CASE("compose")
+// {
+//     auto add_1 = [](int x)
+//     {
+//         return x + 1;
+//     };
+
+//     auto times_2 = [](int x)
+//     {
+//         return x * 2;
+//     };
+
+//     auto composed = compose(add_1, times_2);
+//     CHECK(composed(2) == 5);
+// }
+
 TEST_CASE("IsStaticCapacity")
 {
     CHECK(IsStaticCapacity<int[3]>::value == true);

@@ -13,6 +13,32 @@
 
 #include "zero_copy.hpp"
 
+template <typename A>
+A id(const A &a)
+{
+    return a;
+}
+
+// ! WIP
+
+// template <typename F>
+// auto compose(const F &f)
+//     -> decltype(std::forward<F>(f))
+// {
+//     return std::forward<F>(f);
+// }
+
+// template <typename F, typename... Fs>
+// auto compose(const F &f, const Fs &...fs)
+//     -> decltype([&](const auto &...args)
+//                 { return f(fs(std::forward<decltype(args)>(args)...)); })
+// {
+//     return [&](const auto &...args)
+//     {
+//         return f(fs(std::forward<decltype(args)>(args)...));
+//     };
+// }
+
 // All
 
 template <typename... Args>
@@ -626,9 +652,9 @@ auto from_function(const N &length, const F &f)
         !IsIntegralConstant<N>::value,
         DynamicVector<FunctionReturn_t<F, int>>>::type
 {
-    DynamicVector<FunctionReturn_t<F, int>> result;
+    DynamicVector<FunctionReturn_t<F, int>> result(length);
 
-    result.reserve(length * 2);
+    // result.reserve(length * 2);
 
     for (int i = 0; i < length; ++i)
     {

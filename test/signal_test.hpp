@@ -184,6 +184,22 @@ TEST_CASE("linear_regression")
         return sin(x * 2 * M_PI / n) + a * x + b;
     };
 
+    SECTION("StaticArray")
+    {
+        auto xs = from_function<StaticSizeT<n>{}, id<int>>;
+
+        auto ys = map(f, xs);
+
+        double a_hat, b_hat;
+        std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+
+        // CHECK(b_hat == b);
+        // CHECK(a_hat == a);
+
+        CHECK(abs_error(a_hat, a) < 0.05);
+        CHECK(abs_error(b_hat, b) < 0.05);
+    }
+
     SECTION("c style")
     {
         double xs[n];
@@ -339,8 +355,8 @@ TEST_CASE("detrend")
 
     SECTION("std::array")
     {
-        std::array<int, n> xs;
-        std::iota(std::begin(xs), std::end(xs), 0);
+        // auto xs = from_function(StaticSizeT<n>{}, id<int>);
+        auto xs = from_function(n, id<int>);
 
         auto ys1 = map(f1, xs);
         auto ys2 = map(f2, xs);
