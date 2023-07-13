@@ -106,62 +106,7 @@ constexpr Element_t<A> product(const A &xs)
 template <typename A>
 constexpr double mean(const A &xs)
 {
-    if constexpr (IsStaticCapacity<A>::value)
-    {
-        return sum(xs) / double(StaticCapacity<A>::value);
-    }
-    else
-    {
-        return sum(xs) / double(length(xs));
-    }
+    return sum(xs) / double(length(xs));
 }
 
-// Generating
-template <typename A>
-constexpr size_t arange_length_(const A start, const A end, const A step)
-{
-    if (start < end && step > 0)
-        return (end - start + step - 1) / step;
-    else if (start > end && step < 0)
-        return (start - end - step - 1) / (-step);
-    else
-        return 0;
-}
-
-template <typename A>
-constexpr A arange_iterable(const size_t length) // Internal data could be unpredictable
-{
-    if constexpr (IsStatic_v<A>)
-    {
-        if constexpr (IsStaticVector_v<A>)
-        {
-            return A(length);
-        }
-        else
-        {
-            return A();
-        }
-    }
-    else
-    {
-        return A(length);
-    }
-}
-
-template <typename A>
-A arange(const Element_t<A> start, const Element_t<A> end, const Element_t<A> step)
-{
-    const size_t result_length = arange_length_(start, end, step);
-
-    A result = arange_iterable<A>(result_length);
-    Element_t<A> value = start;
-
-    for (int i = 0; i < result_length; ++i)
-    {
-        result[i] = value;
-        value += step;
-    }
-
-    return result;
-}
 #endif

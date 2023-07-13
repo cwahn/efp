@@ -339,7 +339,8 @@ TEST_CASE("detrend")
 
     SECTION("std::array")
     {
-        auto xs = arange<std::array<int, n>>(0, n, 1);
+        std::array<int, n> xs;
+        std::iota(std::begin(xs), std::end(xs), 0);
 
         auto ys1 = map(f1, xs);
         auto ys2 = map(f2, xs);
