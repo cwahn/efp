@@ -261,9 +261,6 @@ struct MinStaticCapacity<Head, Tail...>
     static constexpr size_t value = head < tail ? head : tail;
 };
 
-template <typename... Seqs>
-constexpr size_t MinStaticCapacity_v = MinStaticCapacity<Seqs...>::value;
-
 // length
 
 template <typename SeqA>
@@ -327,11 +324,13 @@ constexpr auto min_length(const Head &head, const Tail &...tail)
     return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
 }
 
+// for_each
+
 template <typename F, typename... Seqs>
 void for_each(const F &f, const Seqs &...seqs)
 {
     // ? Will it be optimized out to a compile time constatnt?
-    const size_t seq_length = min_value(length(seqs)...);
+    const size_t seq_length = min_length(seqs...);
 
     for (int i = 0; i < seq_length; ++i)
     {
@@ -339,38 +338,18 @@ void for_each(const F &f, const Seqs &...seqs)
     }
 }
 
+// MapSequence_t
+
 template <typename A, typename... Seqs>
-using MapSequance_t =
+using MapSequence_t =
     typename std::conditional<
         All<IsStaticCapacity<Seqs>...>::value,
         typename std::conditional<
             All<IsStaticLength<Seqs>...>::value,
-            StaticArray<A, MinStaticCapacity_v<Seqs...>>,
-            StaticVector<A, MinStaticCapacity_v<Seqs...>>>::type,
+            StaticArray<A, MinStaticCapacity<Seqs...>::value>,
+            StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
         DynamicVector<A>>::type;
 
-// initilize_result
-
-// ! argument seqs may be redundant if all the seqs are static -> Sould be done out side of it
-template <typename R, typename... Seqs>
-MapSequance_t<R, Seqs...> map_sequance(const Seqs &...seqs) // Internal data could be unpredictable
-{
-    if constexpr (All<IsStaticCapacity<Seqs>...>::value)
-    {
-        if constexpr (All<IsStaticLength<Seqs>...>::value)
-        {
-            return MapSequance_t<R, Seqs...>();
-        }
-        else
-        {
-            return MapSequance_t<R, Seqs...>(min_length(seqs...));
-        }
-    }
-    else
-    {
-        return MapSequance_t<R, Seqs...>(min_length(seqs...));
-    }
-}
 
 // ElementType
 
@@ -416,16 +395,76 @@ using FunctionReturn_t = typename FunctionReturnType<F, Seqs...>::type;
 // MapReturn_t
 
 template <typename F, typename... Seqs>
-using MapReturn_t = MapSequance_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
+using MapReturn_t = MapSequence_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
+
+// map
+
+// template <typename F, typename... Seqs>
+// MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
+// {
+//     using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+//     auto result = map_sequance<R, Seqs...>(seqs...);
+
+//     for (int i = 0; i < min_length(seqs...); ++i)
+//     {
+//         result[i] = f(seqs[i]...);
+//     }
+
+//     return result;
+// }
 
 template <typename F, typename... Seqs>
-MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
+auto map(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
+        StaticArray<FunctionReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
 {
     using R = FunctionReturn_t<F, Element_t<Seqs>...>;
 
-    auto result = map_sequance<R, Seqs...>(seqs...);
+    StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
 
-    for (int i = 0; i < min_length(seqs...); ++i)
+    for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
+    {
+        result[i] = f(seqs[i]...);
+    }
+
+    return result;
+}
+
+template <typename F, typename... Seqs>
+auto map(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
+        StaticVector<FunctionReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+{
+    using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+    const size_t result_length = min_length(seqs...);
+
+    StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+
+    for (int i = 0; i < result_length; ++i)
+    {
+        result[i] = f(seqs[i]...);
+    }
+
+    return result;
+}
+
+template <typename F, typename... Seqs>
+auto map(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        !All<IsStaticCapacity<Seqs>...>::value,
+        DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>>>::type
+{
+    using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+    const size_t result_length = min_length(seqs...);
+
+    DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>> result(result_length);
+
+    for (int i = 0; i < result_length; ++i)
     {
         result[i] = f(seqs[i]...);
     }
@@ -436,18 +475,76 @@ MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
 // MapWithIndexReturn_t
 
 template <typename F, typename... Seqs>
-using MapWithIndexReturn_t = MapSequance_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
+using MapWithIndexReturn_t = MapSequence_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
 
 // map_with_index
 
+// template <typename F, typename... Seqs>
+// MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
+// {
+//     using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+//     auto result = map_sequance<R, Seqs...>(seqs...);
+
+//     for (int i = 0; i < min_length(seqs...); ++i)
+//     {
+//         result[i] = f(i, seqs[i]...);
+//     }
+
+//     return result;
+// }
+
 template <typename F, typename... Seqs>
-MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
+auto map_with_index(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
+        StaticArray<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
 {
     using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
 
-    auto result = map_sequance<R, Seqs...>(seqs...);
+    StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
 
-    for (int i = 0; i < min_length(seqs...); ++i)
+    for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
+    {
+        result[i] = f(i, seqs[i]...);
+    }
+
+    return result;
+}
+
+template <typename F, typename... Seqs>
+auto map_with_index(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
+        StaticVector<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+{
+    using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+    const size_t result_length = min_length(seqs...);
+
+    StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+
+    for (int i = 0; i < result_length; ++i)
+    {
+        result[i] = f(i, seqs[i]...);
+    }
+
+    return result;
+}
+
+template <typename F, typename... Seqs>
+auto map_with_index(const F &f, const Seqs &...seqs)
+    -> typename std::enable_if<
+        !All<IsStaticCapacity<Seqs>...>::value,
+        DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>>>::type
+{
+    using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+    const size_t result_length = min_length(seqs...);
+
+    DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
+
+    for (int i = 0; i < result_length; ++i)
     {
         result[i] = f(i, seqs[i]...);
     }
@@ -464,29 +561,70 @@ using FilterReturn_t =
         StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
         DynamicVector<Element_t<SeqA>>>::type;
 
-template <typename SeqA>
-constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
-{
-    if constexpr (IsStaticCapacity<SeqA>::value)
-    {
-        return FilterReturn_t<SeqA>();
-    }
-    else
-    {
-        auto result = FilterReturn_t<SeqA>();
-        result.reserve(length(as) * 2);
-        return result;
-    }
-}
+// template <typename SeqA>
+// constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
+// {
+//     if constexpr (IsStaticCapacity<SeqA>::value)
+//     {
+//         return FilterReturn_t<SeqA>();
+//     }
+//     else
+//     {
+//         auto result = FilterReturn_t<SeqA>();
+//         result.reserve(length(as) * 2);
+//         return result;
+//     }
+// }
 
 // filter
 
+// template <typename F, typename SeqA>
+// FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
+// {
+//     auto result = filter_sequence<SeqA>(as);
+
+//     for (int i = 0; i < length(as); ++i)
+//     {
+//         if (f(as[i]))
+//         {
+//             result.push_back(as[i]);
+//         }
+//     }
+
+//     return result;
+// }
+
 template <typename F, typename SeqA>
-FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
+auto filter(const F &f, const SeqA &as)
+    -> typename std::enable_if<
+        IsStaticCapacity<SeqA>::value,
+        StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>::type
 {
-    auto result = filter_sequence<SeqA>(as);
+    StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
 
     for (int i = 0; i < length(as); ++i)
+    {
+        if (f(as[i]))
+        {
+            result.push_back(as[i]);
+        }
+    }
+
+    return result;
+}
+
+template <typename F, typename SeqA>
+auto filter(const F &f, const SeqA &as)
+    -> typename std::enable_if<
+        !IsStaticCapacity<SeqA>::value,
+        DynamicVector<Element_t<SeqA>>>::type
+{
+    const size_t sequance_length = length(as);
+
+    DynamicVector<Element_t<SeqA>> result;
+    result.reserve(sequance_length * 2);
+
+    for (int i = 0; i < sequance_length; ++i)
     {
         if (f(as[i]))
         {
@@ -534,6 +672,8 @@ using FromFunctionReturn_t = typename std::conditional<
     IsIntegralConstant<N>::value,
     StaticArray<FunctionReturn_t<F, int>, N::value>,
     DynamicVector<FunctionReturn_t<F, int>>>::type;
+
+// from_function
 
 template <typename N, typename F>
 auto from_function(const N &length, const F &f)

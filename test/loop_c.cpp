@@ -6,7 +6,7 @@
 #include "prelude.hpp"
 #include "numeric.hpp"
 
-constexpr size_t n = 10;
+constexpr size_t n = 10000;
 
 int main(int argc, char const *argv[])
 {
@@ -16,12 +16,12 @@ int main(int argc, char const *argv[])
     // std::vector<int> xs(n);
     std::array<int, n> xs;
 
-    // std::iota(std::begin(xs), std::end(xs), 0);
+    std::iota(std::begin(xs), std::end(xs), 0);
 
-    for (int i = 0; i < n; ++i)
-    {
-        xs[i] = std::rand();
-    }
+    // for (int i = 0; i < n; ++i)
+    // {
+    //     xs[i] = std::rand();
+    // }
 
     // DynamicVector<int> ys(n);
     StaticArray<int, n> ys;

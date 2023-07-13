@@ -16,12 +16,12 @@ int main(int argc, char const *argv[])
     // std::vector<int> xs(n);
     std::array<int, n> xs;
 
-    // std::iota(std::begin(xs), std::end(xs), 0);
+    std::iota(std::begin(xs), std::end(xs), 0);
 
-    for (int i = 0; i < n; ++i)
-    {
-        xs[i] = std::rand();
-    }
+    // for (int i = 0; i < n; ++i)
+    // {
+    //     xs[i] = std::rand();
+    // }
 
     // 5
      auto ys = map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, xs))))))))));

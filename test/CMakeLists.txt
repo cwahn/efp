@@ -1,12 +1,12 @@
-# add_executable(loop_c loop_c.cpp)
-# target_link_libraries(loop_c
-#     PRIVATE
-#     efp)
+add_executable(loop_c loop_c.cpp)
+target_link_libraries(loop_c
+    PRIVATE
+    efp)
 
-# add_executable(loop_efp loop_efp.cpp)
-# target_link_libraries(loop_efp
-#     PRIVATE
-#     efp)
+add_executable(loop_efp loop_efp.cpp)
+target_link_libraries(loop_efp
+    PRIVATE
+    efp)
 
 add_executable(all_test test.cpp)
 

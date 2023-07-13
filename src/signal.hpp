@@ -111,7 +111,7 @@ constexpr double auto_covariance(const SeqA &as, uint lag)
 
 // ! Temporary nonconst expr
 template <typename SeqA>
-MapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
+MapSequence_t<double, SeqA> auto_covariance_function(const SeqA &as)
 {
     const auto auto_covar = [&](int i)
     {
@@ -122,7 +122,7 @@ MapSequance_t<double, SeqA> auto_covariance_function(const SeqA &as)
 }
 
 template <typename SeqA>
-constexpr MapSequance_t<double, SeqA> auto_corelation_function(const SeqA &as)
+constexpr MapSequence_t<double, SeqA> auto_corelation_function(const SeqA &as)
 {
     const auto a_auto_covariance_function = auto_covariance_function(as);
     const double a_variance = variance(as);
@@ -145,7 +145,7 @@ constexpr double auto_correlation(const SeqA &as, const uint lag)
 }
 
 template <typename SeqA>
-constexpr MapSequance_t<double, SeqA> remove_dc(const SeqA &as)
+constexpr MapSequence_t<double, SeqA> remove_dc(const SeqA &as)
 {
     const double a_mean = mean(as);
 
@@ -208,7 +208,7 @@ constexpr std::tuple<double, double> linear_regression_with_index(const SeqA &as
 }
 
 template <typename SeqA>
-constexpr MapSequance_t<double, SeqA> detrend(const SeqA &as)
+constexpr MapSequence_t<double, SeqA> detrend(const SeqA &as)
 {
     const std::tuple<double, double> betas = linear_regression_with_index(as);
 
