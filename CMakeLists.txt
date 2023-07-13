@@ -19,6 +19,6 @@ include(Catch)
 enable_testing()
 
 add_library(efp INTERFACE)
-target_include_directories(efp INTERFACE "./src")
+target_include_directories(efp INTERFACE "./include")
 
 add_subdirectory("./test")

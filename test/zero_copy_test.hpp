@@ -1,7 +1,9 @@
 #ifndef ZERO_COPY_TEST_HPP_
 #define ZERO_COPY_TEST_HPP_
 
-#include "zero_copy.hpp"
+#include "efp.hpp"
+
+using namespace efp;
 
 TEST_CASE("initialization")
 {

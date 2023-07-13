@@ -3,8 +3,10 @@
 
 #include "catch2/catch_test_macros.hpp"
 
+#include "efp.hpp"
 #include "test_common.hpp"
-#include "prelude.hpp"
+
+using namespace efp;
 
 // ! WIP
 

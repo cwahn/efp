@@ -3,8 +3,9 @@
 #include <vector>
 #include <array>
 
-#include "prelude.hpp"
-#include "numeric.hpp"
+#include "efp.hpp"
+
+using namespace efp;
 
 constexpr size_t n = 10000;
 

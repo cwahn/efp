@@ -3,8 +3,10 @@
 
 #include "catch2/catch_test_macros.hpp"
 
+#include "efp.hpp"
 #include "test_common.hpp"
-#include "signal.hpp"
+
+using namespace efp;
 
 double abs_error(double x_hat, double x)
 {
