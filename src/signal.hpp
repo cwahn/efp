@@ -111,7 +111,7 @@ constexpr double auto_covariance(const SeqA &as, uint lag)
 
 // ! Temporary nonconst expr
 template <typename SeqA>
-MapSequence_t<double, SeqA> auto_covariance_function(const SeqA &as)
+constexpr MapSequence_t<double, SeqA> auto_covariance_function(const SeqA &as)
 {
     const auto auto_covar = [&](int i)
     {

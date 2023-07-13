@@ -73,40 +73,40 @@ constexpr A tan(const A x)
 
 // Reducing
 
-template <typename A>
-constexpr Element_t<A> maximum(const A &xs)
+template <typename SeqA>
+constexpr Element_t<SeqA> maximum(const SeqA &as)
 {
-    return foldl(max<Element_t<A>>, std::numeric_limits<Element_t<A>>::min(), xs);
+    return foldl(max<Element_t<SeqA>>, std::numeric_limits<Element_t<SeqA>>::min(), as);
 }
 
-template <typename A>
-constexpr Element_t<A> minimum(const A &xs)
+template <typename SeqA>
+constexpr Element_t<SeqA> minimum(const SeqA &as)
 {
-    return foldl(min<Element_t<A>>, std::numeric_limits<Element_t<A>>::max(), xs);
+    return foldl(min<Element_t<SeqA>>, std::numeric_limits<Element_t<SeqA>>::max(), as);
 }
 
-template <typename A>
-constexpr Element_t<A> max_min(const A &xs)
+template <typename SeqA>
+constexpr Element_t<SeqA> max_min(const SeqA &as)
 {
-    return maximum(xs) - minimum(xs);
+    return maximum(as) - minimum(as);
 }
 
-template <typename A>
-constexpr Element_t<A> sum(const A &xs)
+template <typename SeqA>
+constexpr Element_t<SeqA> sum(const SeqA &as)
 {
-    return foldl(plus<Element_t<A>>, 0, xs);
+    return foldl(plus<Element_t<SeqA>>, 0, as);
 }
 
-template <typename A>
-constexpr Element_t<A> product(const A &xs)
+template <typename SeqA>
+constexpr Element_t<SeqA> product(const SeqA &as)
 {
-    return foldl(times<Element_t<A>>, 1, xs);
+    return foldl(times<Element_t<SeqA>>, 1, as);
 }
 
-template <typename A>
-constexpr double mean(const A &xs)
+template <typename SeqA>
+constexpr double mean(const SeqA &as)
 {
-    return sum(xs) / double(length(xs));
+    return sum(as) / double(length(as));
 }
 
 #endif

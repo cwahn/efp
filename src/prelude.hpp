@@ -48,14 +48,15 @@ struct Any<Head, Tail...>
 };
 
 // RemoveReference
+
 template <typename A>
 using RemoveReference_t = typename std::remove_reference<A>::type;
 
 // CommonType
+
 template <typename... Args>
 using Common_t = typename std::common_type<Args...>::type;
 
-// ? What if not either Static and Dynamic?
 // IsStaticCapacity
 
 template <typename SeqA>
@@ -176,6 +177,7 @@ struct IsStaticLength<T &&> : IsStaticLength<T>
 };
 
 // StaticLength
+
 template <typename SeqA>
 struct StaticLength;
 
@@ -220,6 +222,7 @@ struct IsIntegralConstant<std::integral_constant<T, Value>> : std::true_type
 };
 
 // StaticSizeT
+
 template <size_t N>
 using StaticSizeT = std::integral_constant<size_t, N>;
 
@@ -231,7 +234,7 @@ constexpr A min_value(const A &value)
     return value;
 }
 
-// ! Not suitable for type other than min_value
+// ! Not suitable for hetero geneneous arguments
 template <typename Head, typename... Tail>
 constexpr auto min_value(const Head &head, const Tail &...tail)
     -> typename std::conditional<
@@ -292,17 +295,6 @@ auto length(const A (&)[N])
 
 // min_length
 
-// * Make it return static value if all static capacity, static length.
-// template <typename... Seqs>
-// constexpr auto min_length(const Seqs &...seqs)
-//     -> typename std::conditional<
-//         All<IsIntegralConstant<Seqs>...>::value,
-//         decltype(),
-//         size_t>::type
-// {
-//     return min_value(length(seqs)...);
-// }
-
 template <typename SeqA>
 constexpr auto min_length(const SeqA &as)
     -> typename std::conditional<
@@ -313,7 +305,6 @@ constexpr auto min_length(const SeqA &as)
     return length(as);
 }
 
-// ! Not suitable for type other than min_value
 template <typename Head, typename... Tail>
 constexpr auto min_length(const Head &head, const Tail &...tail)
     -> typename std::conditional<
@@ -349,7 +340,6 @@ using MapSequence_t =
             StaticArray<A, MinStaticCapacity<Seqs...>::value>,
             StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
         DynamicVector<A>>::type;
-
 
 // ElementType
 
@@ -398,21 +388,6 @@ template <typename F, typename... Seqs>
 using MapReturn_t = MapSequence_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
 
 // map
-
-// template <typename F, typename... Seqs>
-// MapReturn_t<F, Seqs...> map(const F &f, const Seqs &...seqs)
-// {
-//     using R = FunctionReturn_t<F, Element_t<Seqs>...>;
-
-//     auto result = map_sequance<R, Seqs...>(seqs...);
-
-//     for (int i = 0; i < min_length(seqs...); ++i)
-//     {
-//         result[i] = f(seqs[i]...);
-//     }
-
-//     return result;
-// }
 
 template <typename F, typename... Seqs>
 auto map(const F &f, const Seqs &...seqs)
@@ -478,21 +453,6 @@ template <typename F, typename... Seqs>
 using MapWithIndexReturn_t = MapSequence_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
 
 // map_with_index
-
-// template <typename F, typename... Seqs>
-// MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
-// {
-//     using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
-
-//     auto result = map_sequance<R, Seqs...>(seqs...);
-
-//     for (int i = 0; i < min_length(seqs...); ++i)
-//     {
-//         result[i] = f(i, seqs[i]...);
-//     }
-
-//     return result;
-// }
 
 template <typename F, typename... Seqs>
 auto map_with_index(const F &f, const Seqs &...seqs)
@@ -561,38 +521,7 @@ using FilterReturn_t =
         StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
         DynamicVector<Element_t<SeqA>>>::type;
 
-// template <typename SeqA>
-// constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
-// {
-//     if constexpr (IsStaticCapacity<SeqA>::value)
-//     {
-//         return FilterReturn_t<SeqA>();
-//     }
-//     else
-//     {
-//         auto result = FilterReturn_t<SeqA>();
-//         result.reserve(length(as) * 2);
-//         return result;
-//     }
-// }
-
 // filter
-
-// template <typename F, typename SeqA>
-// FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
-// {
-//     auto result = filter_sequence<SeqA>(as);
-
-//     for (int i = 0; i < length(as); ++i)
-//     {
-//         if (f(as[i]))
-//         {
-//             result.push_back(as[i]);
-//         }
-//     }
-
-//     return result;
-// }
 
 template <typename F, typename SeqA>
 auto filter(const F &f, const SeqA &as)
