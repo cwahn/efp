@@ -193,4 +193,27 @@ TEST_CASE("foldr")
     }
 }
 
+TEST_CASE("from_function")
+{
+    SECTION("StaticArray")
+    {
+        auto plus_one = [](int i)
+        {
+            return i + 1;
+        };
+
+        CHECK(from_function(StaticSizeT<3>{}, plus_one) == StaticArray<int, 3>{1, 2, 3});
+    }
+
+    SECTION("DynamicArray")
+    {
+        auto plus_one = [](int i)
+        {
+            return i + 1;
+        };
+
+        CHECK(from_function(3, plus_one) == DynamicVector<int>{1, 2, 3});
+    }
+}
+
 #endif

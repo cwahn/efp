@@ -219,6 +219,10 @@ struct IsIntegralConstant<std::integral_constant<T, Value>> : std::true_type
 {
 };
 
+// StaticSizeT
+template <size_t N>
+using StaticSizeT = std::integral_constant<size_t, N>;
+
 // min_value
 
 template <typename A>
@@ -292,10 +296,35 @@ auto length(const A (&)[N])
 // min_length
 
 // * Make it return static value if all static capacity, static length.
-template <typename... Seqs>
-constexpr size_t min_length(const Seqs &...seqs)
+// template <typename... Seqs>
+// constexpr auto min_length(const Seqs &...seqs)
+//     -> typename std::conditional<
+//         All<IsIntegralConstant<Seqs>...>::value,
+//         decltype(),
+//         size_t>::type
+// {
+//     return min_value(length(seqs)...);
+// }
+
+template <typename SeqA>
+constexpr auto min_length(const SeqA &as)
+    -> typename std::conditional<
+        IsStaticLength<SeqA>::value,
+        decltype(length(as)),
+        size_t>::type
 {
-    return min_value(length(seqs)...);
+    return length(as);
+}
+
+// ! Not suitable for type other than min_value
+template <typename Head, typename... Tail>
+constexpr auto min_length(const Head &head, const Tail &...tail)
+    -> typename std::conditional<
+        All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+        decltype(length(head)),
+        size_t>::type
+{
+    return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
 }
 
 template <typename F, typename... Seqs>
@@ -426,18 +455,7 @@ MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
     return result;
 }
 
-// template <size_t N, typename F>
-// StaticArray<FunctionReturn_t<F, int>, N> array_from_function(const size_t &length, const F &f)
-// {
-//     StaticArray<FunctionReturn_t<F, int>, N> result;
-
-//     for (int i = 0; i < StaticCapacity<SeqA>; ++i)
-//     {
-//         result[i] = f(i);
-//     }
-
-//     return result;
-// }
+// FilterReturn_t
 
 template <typename SeqA>
 using FilterReturn_t =
@@ -461,6 +479,8 @@ constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data 
     }
 }
 
+// filter
+
 template <typename F, typename SeqA>
 FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
 {
@@ -477,6 +497,8 @@ FilterReturn_t<SeqA> filter(const F &f, const SeqA &as)
     return result;
 }
 
+// foldl
+
 template <typename F, typename R, typename SeqA>
 R foldl(const F &f, const R &initial_value, const SeqA &as)
 {
@@ -489,6 +511,8 @@ R foldl(const F &f, const R &initial_value, const SeqA &as)
 
     return result;
 }
+
+// foldr
 
 template <typename F, typename R, typename SeqA>
 R foldr(const F &f, const R &initial_value, const SeqA &as)
@@ -503,4 +527,45 @@ R foldr(const F &f, const R &initial_value, const SeqA &as)
     return result;
 }
 
+// FromFunctionReturn_t
+
+template <typename N, typename F>
+using FromFunctionReturn_t = typename std::conditional<
+    IsIntegralConstant<N>::value,
+    StaticArray<FunctionReturn_t<F, int>, N::value>,
+    DynamicVector<FunctionReturn_t<F, int>>>::type;
+
+template <typename N, typename F>
+auto from_function(const N &length, const F &f)
+    -> typename std::enable_if<
+        IsIntegralConstant<N>::value,
+        StaticArray<FunctionReturn_t<F, int>, N::value>>::type
+{
+    StaticArray<FunctionReturn_t<F, int>, N::value> result;
+
+    for (int i = 0; i < N::value; ++i)
+    {
+        result[i] = f(i);
+    }
+
+    return result;
+}
+
+template <typename N, typename F>
+auto from_function(const N &length, const F &f)
+    -> typename std::enable_if<
+        !IsIntegralConstant<N>::value,
+        DynamicVector<FunctionReturn_t<F, int>>>::type
+{
+    DynamicVector<FunctionReturn_t<F, int>> result;
+
+    result.reserve(length * 2);
+
+    for (int i = 0; i < length; ++i)
+    {
+        result[i] = f(i);
+    }
+
+    return result;
+}
 #endif
