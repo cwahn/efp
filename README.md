@@ -1,15 +1,20 @@
 # Eager Functional Programming
 
-This library is for eager functional programming with C++. 
+"**Practical eager functional programming for C++**" 
 
-The major purpose of this library is to remove loop iterations, preserving the performance of bear C. Therefore, it is also suitable for embedded project.
+The major purpose of this library is to remove loops and utilize the power of functional programming while preserving the performance of bare C in C++. Therefore, it is also suitable for general applications including embedded projects.
 
 ## Features
 ### Zero-Copy Sequence Types
-Zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types; StaticArray, StaticVector, DynamicVector.
+Zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types; StaticArray, StaticVector, DynamicVector. Copy-elision of these types is guaranteed regardless of compiler and C++ standard.
 
-### Higher Order Functions
-Efp supports major HOFs including `for_each`, `map`, `map_with_index`, `from_function`, `filter`, `foldl`, `foldr`, etc.
+### Higher-Order Functions
+EFP supports major higher-order functions including `for_each`, `map`, `map_with_index`, `from_function`, `filter`, `foldl`, `foldr`, etc.
+
+### APIs
+EFP accepts C-style array, `std::array`, `std::vector`, `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` as sequence argument. 
+
+Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` based on types of argument sequences.
 
 ## Examples
 ```cpp
