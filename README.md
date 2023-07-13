@@ -12,7 +12,7 @@ Zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types; Stat
 Efp supports major HOFs including `for_each`, `map`, `map_with_index`, `from_function`, `filter`, `foldl`, `foldr`, etc.
 
 ## Examples
-```
+```cpp
 #include <iostream>
 
 #include "prelude.hpp"
