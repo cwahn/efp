@@ -186,7 +186,7 @@ TEST_CASE("linear_regression")
 
     SECTION("StaticArray")
     {
-        auto xs = from_function<StaticSizeT<n>{}, id<int>>;
+        auto xs = from_function(StaticSizeT<n>{}, id<int>);
 
         auto ys = map(f, xs);
 

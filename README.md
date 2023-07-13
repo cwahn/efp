@@ -13,26 +13,35 @@ Efp supports major HOFs including `for_each`, `map`, `map_with_index`, `from_fun
 
 ## Examples
 ```
-    #include "prelude.hpp"
-    #include "signal.hpp"
-    
-    constexpr size_t n = 100;
+#include <iostream>
 
-    double a = 2;
-    double b = 100;
+#include "prelude.hpp"
+#include "numeric.hpp"
 
-    auto xs = from_function<StaticSizeT<n>{}, id<int>>;
+constexpr size_t n = 10;
 
-    auto f = [&](double x)
+int main()
+{
+    auto as = from_function(StaticSizeT<n>{}, id<int>);
+
+    auto bs = map(square<int>, as);
+
+    auto is_even = [](int x)
     {
-        return sin(x * 2 * M_PI / n) + a * x + b;
+        return x % 2 == 0;
     };
 
-    auto ys = map(f, xs);
+    auto cs = filter(is_even, bs);
 
-    double a_hat, b_hat;
-    std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+    auto stdout = [&] (int x)
+    {
+        std::cout << x << " ";
+    };
 
+    for_each(stdout, cs); // 0 4 16 36 64 
+
+    return 0;
+}
 ```
 
 ## Requirements
