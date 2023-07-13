@@ -207,6 +207,18 @@ struct StaticLength<SeqA &&> : StaticLength<SeqA>
 {
 };
 
+// IsIntegralConstant
+
+template <typename T>
+struct IsIntegralConstant : std::false_type
+{
+};
+
+template <typename T, T Value>
+struct IsIntegralConstant<std::integral_constant<T, Value>> : std::true_type
+{
+};
+
 // min_value
 
 template <typename A>
@@ -215,8 +227,13 @@ constexpr A min_value(const A &value)
     return value;
 }
 
+// ! Not suitable for type other than min_value
 template <typename Head, typename... Tail>
-constexpr Head min_value(const Head &head, const Tail &...tail)
+constexpr auto min_value(const Head &head, const Tail &...tail)
+    -> typename std::conditional<
+        All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+        Head,
+        size_t>::type
 {
     return head < min_value(tail...) ? head : min_value(tail...);
 }
@@ -252,9 +269,24 @@ size_t length(const SeqA &as)
 }
 
 template <typename A, size_t N>
-size_t length(const A (&)[N])
+auto length(const StaticArray<A, N> &)
+    -> std::integral_constant<size_t, N>
 {
-    return N;
+    return std::integral_constant<size_t, N>{};
+}
+
+template <typename A, size_t N>
+auto length(const std::array<A, N> &)
+    -> std::integral_constant<size_t, N>
+{
+    return std::integral_constant<size_t, N>{};
+}
+
+template <typename A, size_t N>
+auto length(const A (&)[N])
+    -> std::integral_constant<size_t, N>
+{
+    return std::integral_constant<size_t, N>{};
 }
 
 // min_length
@@ -280,11 +312,13 @@ void for_each(const F &f, const Seqs &...seqs)
 
 template <typename A, typename... Seqs>
 using MapSequance_t =
-    typename std::conditional<All<IsStaticCapacity<Seqs>...>::value,
-                              typename std::conditional<All<IsStaticLength<Seqs>...>::value,
-                                                        StaticArray<A, MinStaticCapacity_v<Seqs...>>,
-                                                        StaticVector<A, MinStaticCapacity_v<Seqs...>>>::type,
-                              DynamicVector<A>>::type;
+    typename std::conditional<
+        All<IsStaticCapacity<Seqs>...>::value,
+        typename std::conditional<
+            All<IsStaticLength<Seqs>...>::value,
+            StaticArray<A, MinStaticCapacity_v<Seqs...>>,
+            StaticVector<A, MinStaticCapacity_v<Seqs...>>>::type,
+        DynamicVector<A>>::type;
 
 // initilize_result
 
@@ -407,9 +441,10 @@ MapWithIndexReturn_t<F, Seqs...> map_with_index(const F &f, const Seqs &...seqs)
 
 template <typename SeqA>
 using FilterReturn_t =
-    typename std::conditional<IsStaticCapacity<SeqA>::value,
-                              StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
-                              DynamicVector<Element_t<SeqA>>>::type;
+    typename std::conditional<
+        IsStaticCapacity<SeqA>::value,
+        StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
+        DynamicVector<Element_t<SeqA>>>::type;
 
 template <typename SeqA>
 constexpr FilterReturn_t<SeqA> filter_sequence(const SeqA &as) // Internal data could be unpredictable, with size 0;
