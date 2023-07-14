@@ -22,23 +22,61 @@ namespace efp
     }
 
     // ! WIP
+    // Composed
 
-    // template <typename F>
-    // auto compose(const F &f)
-    //     -> decltype(std::forward<F>(f))
-    // {
-    //     return std::forward<F>(f);
-    // }
+    // template <typename... Fs>
+    // struct Composed;
+
+    template <typename F, typename G>
+    struct Composed
+    {
+        const F &f;
+        const G &g;
+
+        Composed(const F &f, const G &g) : f(f), g(g) {}
+
+        template <typename Arg>
+
+        auto operator()(Arg &&arg) const -> decltype(f(g(std::forward<Arg>(arg))))
+        {
+            return f(g(std::forward<Arg>(arg)));
+        }
+    };
 
     // template <typename F, typename... Fs>
-    // auto compose(const F &f, const Fs &...fs)
-    //     -> decltype([&](const auto &...args)
-    //                 { return f(fs(std::forward<decltype(args)>(args)...)); })
+    // struct Composed<F, Fs...>
     // {
-    //     return [&](const auto &...args)
+    //     const F &f;
+    //     const Composed<Fs...> fs;
+
+    //     Composed(const F &f, const Fs &...fs) : f(f), fs(compose(fs...)) {}
+
+    //     template <typename Arg>
+
+    //     inline auto operator()(Arg &&arg) -> decltype(f(fs(std::forward<Arg>(arg))))
     //     {
-    //         return f(fs(std::forward<decltype(args)>(args)...));
-    //     };
+    //         return f(fs(std::forward<Arg>(arg)));
+    //     }
+    // };
+
+    // template <typename F, typename G>
+    // inline auto operator*(F f, G g) -> Composed<F, G>
+    // {
+    //     return compose(f, g);
+    // }
+
+    // compose
+
+    template <typename F, typename G>
+    auto compose(const F &f, const G &g) -> Composed<F, G>
+    {
+        return Composed<F, G>(f, g);
+    }
+
+    // template <typename F, typename... Fs>
+    // auto compose(const F &f, const Fs &...fs) -> Composed<F, Fs...>
+    // {
+    //     return Composed<F, Fs...>(f, fs...);
     // }
 
     // All

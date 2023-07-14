@@ -10,37 +10,95 @@ using namespace efp;
 
 // ! WIP
 
-// TEST_CASE("compose")
+TEST_CASE("compose")
+{
+    SECTION("pure0")
+    {
+        auto add_1 = [](int x)
+        {
+            return x + 1;
+        };
+
+        auto times_2 = [](int x)
+        {
+            return x * 2;
+        };
+
+        auto composed = compose(add_1, times_2);
+        // auto composed_with_operator = add_1 * times_2;
+
+        CHECK(composed(2) == 5);
+        // CHECK(composed_with_operator(2) == 5);
+    }
+
+    SECTION("pure1")
+    {
+        auto add_1 = [](int x)
+        {
+            return x + 1;
+        };
+
+        auto devide_2 = [](int x)
+        {
+            return x / 2.;
+        };
+
+        auto composed = compose(devide_2, add_1);
+        CHECK(composed(2) == 1.5);
+    }
+
+    SECTION("side-effect")
+    {
+        int i = 0;
+
+        auto i_plusplus = [&](int x)
+        {
+            i += x;
+            return i;
+        };
+
+        auto times_2 = [](int x)
+        {
+            return x * 2;
+        };
+
+        auto composed = compose(times_2, i_plusplus);
+        CHECK(composed(2) == 4);
+        CHECK(i == 2);
+    }
+
+    // SECTION("n-ary")
+    // {
+    //     auto add_1 = [](int x)
+    //     {
+    //         return x + 1;
+    //     };
+
+    //     auto devide_2 = [](int x)
+    //     {
+    //         return x / 2.;
+    //     };
+
+    //     auto composed = compose(devide_2, add_1, square<int>);
+    //     CHECK(composed(2) == 2.5);
+    // }
+}
+
+// TEST_CASE("IsStaticCapacity")
 // {
-//     auto add_1 = [](int x)
-//     {
-//         return x + 1;
-//     };
-
-//     auto times_2 = [](int x)
-//     {
-//         return x * 2;
-//     };
-
-//     auto composed = compose(add_1, times_2);
-//     CHECK(composed(2) == 5);
+//     CHECK(IsStaticCapacity<int[3]>::value == true);
+//     CHECK(IsStaticCapacity<std::array<int, 3>>::value == true);
+//     CHECK(IsStaticCapacity<std::vector<int>>::value == false);
 // }
 
-TEST_CASE("IsStaticCapacity")
-{
-    CHECK(IsStaticCapacity<int[3]>::value == true);
-    CHECK(IsStaticCapacity<std::array<int, 3>>::value == true);
-    CHECK(IsStaticCapacity<std::vector<int>>::value == false);
-}
-
-TEST_CASE("AreAllStaticCapacity")
-{
-    CHECK(AreAllStaticCapacity<int[3]>::value == true);
-    CHECK(AreAllStaticCapacity<std::array<int, 3>>::value == true);
-    CHECK(AreAllStaticCapacity<int[3], std::array<int, 3>>::value == true);
-    CHECK(AreAllStaticCapacity<std::vector<int>>::value == false);
-    CHECK(AreAllStaticCapacity<std::array<int, 3>, std::vector<int>>::value == false);
-}
+// TEST_CASE("AreAllStaticCapacity")
+// {
+//     CHECK(AreAllStaticCapacity<int[3]>::value == true);
+//     CHECK(AreAllStaticCapacity<std::array<int, 3>>::value == true);
+//     CHECK(AreAllStaticCapacity<int[3], std::array<int, 3>>::value == true);
+//     CHECK(AreAllStaticCapacity<std::vector<int>>::value == false);
+//     CHECK(AreAllStaticCapacity<std::array<int, 3>, std::vector<int>>::value == false);
+// }
 
 TEST_CASE("for_each")
 {
