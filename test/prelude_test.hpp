@@ -173,39 +173,6 @@ TEST_CASE("map")
     }
 }
 
-TEST_CASE("map_with_index")
-{
-    SECTION("c style array")
-    {
-        auto times = [](int lhs, int rhs)
-        {
-            return lhs * rhs;
-        };
-
-        CHECK(map_with_index(times, c_array_3) == std::array<int, 3>{0, 2, 6});
-    }
-
-    SECTION("std::vector")
-    {
-        auto times = [](int lhs, int rhs)
-        {
-            return lhs * rhs;
-        };
-
-        CHECK(map_with_index(times, std_vector_3) == DynamicVector<int>{0, 2, 6});
-    }
-
-    SECTION("binary of std::array, std::vecor")
-    {
-        auto product = [](int i, int a, int b)
-        {
-            return i * a * b;
-        };
-
-        CHECK(map_with_index(product, std_array_3, std_vector_3) == DynamicVector<int>{0, 4, 18});
-    }
-}
-
 TEST_CASE("filter")
 {
     SECTION("even c style array")
@@ -291,6 +258,54 @@ TEST_CASE("from_function")
         };
 
         CHECK(from_function(3, plus_one) == DynamicVector<int>{1, 2, 3});
+    }
+}
+
+TEST_CASE("cartesian_for_each")
+{
+    std::vector<int> res;
+    auto as = std::array<int, 2>{1, 2};
+    auto bs = std::array<int, 2>{1, 3};
+
+    auto push_res = [&](int x0, int x1)
+    {
+        res.push_back(x0 * x1);
+    };
+
+    cartesian_for_each(push_res, as, bs);
+    CHECK(res == std::vector<int>{1, 3, 2, 6});
+}
+
+TEST_CASE("map_with_index")
+{
+    SECTION("c style array")
+    {
+        auto times = [](int lhs, int rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, c_array_3) == std::array<int, 3>{0, 2, 6});
+    }
+
+    SECTION("std::vector")
+    {
+        auto times = [](int lhs, int rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, std_vector_3) == DynamicVector<int>{0, 2, 6});
+    }
+
+    SECTION("binary of std::array, std::vecor")
+    {
+        auto product = [](int i, int a, int b)
+        {
+            return i * a * b;
+        };
+
+        CHECK(map_with_index(product, std_array_3, std_vector_3) == DynamicVector<int>{0, 4, 18});
     }
 }
 

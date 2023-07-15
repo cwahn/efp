@@ -395,18 +395,6 @@ namespace efp
         }
     }
 
-    // MapSequence_t
-
-    template <typename A, typename... Seqs>
-    using MapSequence_t =
-        typename std::conditional<
-            All<IsStaticCapacity<Seqs>...>::value,
-            typename std::conditional<
-                All<IsStaticLength<Seqs>...>::value,
-                StaticArray<A, MinStaticCapacity<Seqs...>::value>,
-                StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
-            DynamicVector<A>>::type;
-
     // ElementType
 
     template <typename A>
@@ -433,6 +421,18 @@ namespace efp
 
     template <typename A>
     using Element_t = typename ElementType<A>::type;
+
+    // MapSequence_t
+
+    template <typename A, typename... Seqs>
+    using MapSequence_t =
+        typename std::conditional<
+            All<IsStaticCapacity<Seqs>...>::value,
+            typename std::conditional<
+                All<IsStaticLength<Seqs>...>::value,
+                StaticArray<A, MinStaticCapacity<Seqs...>::value>,
+                StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
+            DynamicVector<A>>::type;
 
     // FunctionReturnType;
 
@@ -517,66 +517,6 @@ namespace efp
 
     template <typename F, typename... Seqs>
     using MapWithIndexReturn_t = MapSequence_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
-
-    // map_with_index
-
-    template <typename F, typename... Seqs>
-    auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
-            All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
-            StaticArray<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
-    {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
-
-        StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
-
-        for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
-        {
-            result[i] = f(i, seqs[i]...);
-        }
-
-        return result;
-    }
-
-    template <typename F, typename... Seqs>
-    auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
-            All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
-            StaticVector<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
-    {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
-
-        const size_t result_length = min_length(seqs...);
-
-        StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
-
-        for (int i = 0; i < result_length; ++i)
-        {
-            result[i] = f(i, seqs[i]...);
-        }
-
-        return result;
-    }
-
-    template <typename F, typename... Seqs>
-    auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
-            !All<IsStaticCapacity<Seqs>...>::value,
-            DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>>>::type
-    {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
-
-        const size_t result_length = min_length(seqs...);
-
-        DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
-
-        for (int i = 0; i < result_length; ++i)
-        {
-            result[i] = f(i, seqs[i]...);
-        }
-
-        return result;
-    }
 
     // FilterReturn_t
 
@@ -699,6 +639,93 @@ namespace efp
         for (int i = 0; i < length; ++i)
         {
             result[i] = f(i);
+        }
+
+        return result;
+    }
+
+    // cartesian_for_each
+
+    template <typename F, typename SeqA>
+    void cartesian_for_each(const F &f, const SeqA &as)
+    {
+        for_each(f, as);
+    }
+
+    template <typename F, typename SeqA, typename... Seqs>
+    void cartesian_for_each(const F &f, const SeqA &as, const Seqs &...seqs)
+    {
+        // ? Will it be optimized out to a compile time constatnt?
+        const size_t as_length = length(as);
+        Element_t<SeqA> a;
+
+        for (int i = 0; i < as_length; ++i)
+        {
+            a = as[i];
+            const auto inner = [&](Element_t<Seqs>... xs)
+            {
+                f(a, xs...);
+            };
+
+            cartesian_for_each<decltype(inner), Seqs...>(inner, seqs...);
+        }
+    }
+    
+        // map_with_index
+
+    template <typename F, typename... Seqs>
+    auto map_with_index(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
+            StaticArray<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+    {
+        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+        StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
+
+        for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
+        {
+            result[i] = f(i, seqs[i]...);
+        }
+
+        return result;
+    }
+
+    template <typename F, typename... Seqs>
+    auto map_with_index(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
+            StaticVector<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+    {
+        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+        const size_t result_length = min_length(seqs...);
+
+        StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+
+        for (int i = 0; i < result_length; ++i)
+        {
+            result[i] = f(i, seqs[i]...);
+        }
+
+        return result;
+    }
+
+    template <typename F, typename... Seqs>
+    auto map_with_index(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            !All<IsStaticCapacity<Seqs>...>::value,
+            DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>>>::type
+    {
+        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+
+        const size_t result_length = min_length(seqs...);
+
+        DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
+
+        for (int i = 0; i < result_length; ++i)
+        {
+            result[i] = f(i, seqs[i]...);
         }
 
         return result;
