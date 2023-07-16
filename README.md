@@ -67,6 +67,10 @@ WIP
 
 ## Tests
 EFP is tested with Catch2 with g++ and clang.
+```
+===============================================================================
+All tests passed (96 assertions in 25 test cases)
+```
 
 ## Requirements
 

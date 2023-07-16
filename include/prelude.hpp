@@ -415,8 +415,6 @@ namespace efp
         return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
     }
 
-    // length_product
-
     // for_each
 
     template <typename F, typename... Seqs>
@@ -575,9 +573,10 @@ namespace efp
 
         for (int i = 0; i < length(as); ++i)
         {
-            if (f(as[i]))
+            const auto a = as[i];
+            if (f(a))
             {
-                result.push_back(as[i]);
+                result.push_back(a);
             }
         }
 
@@ -597,9 +596,10 @@ namespace efp
 
         for (int i = 0; i < sequance_length; ++i)
         {
-            if (f(as[i]))
+            const auto a = as[i];
+            if (f(a))
             {
-                result.push_back(as[i]);
+                result.push_back(a);
             }
         }
 
@@ -712,7 +712,7 @@ namespace efp
         for (int i = 0; i < as_length; ++i)
         {
             a = as[i];
-            const auto inner = [&](Element_t<Seqs>... xs)
+            const auto inner = [=](Element_t<Seqs>... xs)
             {
                 f(a, xs...);
             };
