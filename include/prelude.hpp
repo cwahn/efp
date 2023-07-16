@@ -292,23 +292,40 @@ namespace efp
     template <size_t N>
     using StaticSizeT = std::integral_constant<size_t, N>;
 
-    // min_value
+    // min_size_t
 
     template <typename A>
-    constexpr A min_value(const A &value)
+    constexpr A min_size_t(const A &value)
     {
         return value;
     }
 
-    // ! Not suitable for hetero geneneous arguments
     template <typename Head, typename... Tail>
-    constexpr auto min_value(const Head &head, const Tail &...tail)
+    constexpr auto min_size_t(const Head &head, const Tail &...tail)
         -> typename std::conditional<
             All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
             Head,
             size_t>::type
     {
-        return head < min_value(tail...) ? head : min_value(tail...);
+        return head < min_size_t(tail...) ? head : min_size_t(tail...);
+    }
+
+    // size_t_product
+
+    template <typename A>
+    constexpr A size_t_product(const A &value)
+    {
+        return value;
+    }
+
+    template <typename Head, typename... Tail>
+    constexpr auto size_t_product(const Head &head, const Tail &...tail)
+        -> typename std::conditional<
+            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+            Head,
+            size_t>::type
+    {
+        return head * size_t_product(tail...);
     }
 
     // MinStaticCapacity
@@ -326,8 +343,25 @@ namespace efp
     struct MinStaticCapacity<Head, Tail...>
     {
         static constexpr size_t head = StaticCapacity<Head>::value;
-        static constexpr size_t tail = min_value(StaticCapacity<Tail>::value...);
+        static constexpr size_t tail = min_size_t(StaticCapacity<Tail>::value...);
         static constexpr size_t value = head < tail ? head : tail;
+    };
+
+    // StaticCapacityProduct
+
+    template <typename... Seqs>
+    struct StaticCapacityProduct;
+
+    template <typename SeqA>
+    struct StaticCapacityProduct<SeqA>
+    {
+        static constexpr size_t value = StaticCapacity<SeqA>::value;
+    };
+
+    template <typename Head, typename... Tail>
+    struct StaticCapacityProduct<Head, Tail...>
+    {
+        static constexpr size_t value = StaticCapacity<Head>::value * StaticCapacityProduct<Tail...>::value;
     };
 
     // length
@@ -380,6 +414,8 @@ namespace efp
     {
         return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
     }
+
+    // length_product
 
     // for_each
 
@@ -741,6 +777,75 @@ namespace efp
         {
             result[i] = f(i, seqs[i]...);
         }
+
+        return result;
+    }
+
+    // cartesian_map
+    // ! Maybe need to bechmark and optimize
+    template <typename F, typename... Seqs>
+    auto cartesian_map(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
+            StaticArray<FunctionReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+    {
+        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+        StaticArray<R, StaticCapacityProduct<Seqs...>::value> result;
+        size_t i = 0;
+
+        const auto inner = [&](Element_t<Seqs>... xs)
+        {
+            result[i++] = f(xs...);
+        };
+
+        cartesian_for_each(inner, seqs...);
+
+        return result;
+    }
+
+    template <typename F, typename... Seqs>
+    auto cartesian_map(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
+            StaticVector<FunctionReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+    {
+        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+        const size_t result_length = size_t_product(length(seqs)...);
+
+        StaticVector<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
+        size_t i = 0;
+
+        const auto inner = [&](Element_t<Seqs>... xs)
+        {
+            result[i++] = f(xs...);
+        };
+
+        cartesian_for_each(inner, seqs...);
+
+        return result;
+    }
+
+    template <typename F, typename... Seqs>
+    auto cartesian_map(const F &f, const Seqs &...seqs)
+        -> typename std::enable_if<
+            !All<IsStaticCapacity<Seqs>...>::value,
+            DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>>>::type
+    {
+        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+
+        const size_t result_length = size_t_product(length(seqs)...);
+
+        DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>> result(result_length);
+        size_t i = 0;
+
+        const auto inner = [&](Element_t<Seqs>... xs)
+        {
+            result[i++] = f(xs...);
+        };
+
+        cartesian_for_each(inner, seqs...);
 
         return result;
     }

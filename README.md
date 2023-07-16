@@ -8,7 +8,7 @@ It is a general-purpose library. The usage of no-STL, resource-tight embedded ap
 
 ## Features
 ### Higher-Order Functions
-EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, etc.
+EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` etc.
 
 ### Zero-Copy Sequence Types
 Copying sequence is often an expensive operation yet does not necessary. Move semantic, introduced in C++ 11 somewhat eases the problem. However, the move helps little about stack sequence types like `std::array`, since moving such types is essentially a series of element-wise moves which is often no better than an element-wise copy.
