@@ -9,7 +9,7 @@ The major purpose of this library is to remove loops and utilize the power of fu
 Zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types; StaticArray, StaticVector, DynamicVector. Copy-elision of these types is guaranteed regardless of compiler and C++ standards.
 
 ### Higher-Order Functions
-EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `cartesian_for_each`, `map_with_index`, etc.
+EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, etc.
 
 ### APIs
 EFP accepts C-style array, `std::array`, `std::vector`, `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` as sequence argument. 

@@ -261,6 +261,19 @@ TEST_CASE("from_function")
     }
 }
 
+TEST_CASE("for_each_with_index")
+{
+    StaticArray<int, 3> res;
+
+    auto product = [&](int i, int x0, int x1)
+    {
+        res[i] = x0 * x1;
+    };
+
+    for_each_with_index(product, c_array_3, std_vector_5);
+    CHECK(res == std::array<int, 3>{1, 4, 9});
+}
+
 TEST_CASE("cartesian_for_each")
 {
     std::vector<int> res;

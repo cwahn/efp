@@ -644,6 +644,20 @@ namespace efp
         return result;
     }
 
+    // for_each_with_index
+
+    template <typename F, typename... Seqs>
+    void for_each_with_index(const F &f, const Seqs &...seqs)
+    {
+        // ? Will it be optimized out to a compile time constatnt?
+        const size_t seq_length = min_length(seqs...);
+
+        for (int i = 0; i < seq_length; ++i)
+        {
+            f(i, seqs[i]...);
+        }
+    }
+
     // cartesian_for_each
 
     template <typename F, typename SeqA>
@@ -670,8 +684,8 @@ namespace efp
             cartesian_for_each<decltype(inner), Seqs...>(inner, seqs...);
         }
     }
-    
-        // map_with_index
+
+    // map_with_index
 
     template <typename F, typename... Seqs>
     auto map_with_index(const F &f, const Seqs &...seqs)
