@@ -6,15 +6,24 @@ The major purpose of this library is to remove loops and utilize the power of fu
 
 ## Features
 ### Zero-Copy Sequence Types
-Zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types; StaticArray, StaticVector, DynamicVector. Copy-elision of these types is guaranteed regardless of compiler and C++ standards.
+Copying sequence is often an expensive operation yet does not necessary. C++ 11 move semantic has been introduced and eases the problem. However, the move does not help much stack sequence types like `std::array` since moving such type works as element-wise moves which are often no better than element-wise copy.
+
+There is a better option, copy-elision (Return Value Optimization and Named Return Value Optimization). It makes returning heavy data free. Unfortunately, copy-elision is not guaranteed but, at the compiler's discretion. (Since, C++ 17 some of them are guaranteed.)
+
+EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) optimization sequence types as solutions to the issue; StaticArray, StaticVector, DynamicVector. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. These types are also used as the default output types of mixed-type, n-ary operations.
 
 ### Higher-Order Functions
 EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, etc.
 
-### APIs
-EFP accepts C-style array, `std::array`, `std::vector`, `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` as sequence argument. 
+### Type Agnostic APIs
+EFP accepts C-style array, `std::array`, `std::vector`, `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
 
-Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` based on types of argument sequences.
+Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector` based on types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
+- Static capacity && static length: StaticArray (zero-copy analog of `std::array`)
+- Static capacity && dynamic length: StaticVector (zero-copy, fixed capacity, no-allocation, on-stack variant of `std::vector`)
+- Dynamic capacity: DynamicVector (zero-copy analog of `std::vector`)
+
+
 
 ## Examples
 ```cpp
