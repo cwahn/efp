@@ -403,10 +403,12 @@ TEST_CASE("Argument_t")
 
 double return_t_function0(int x0, float &&x1)
 {
+    return 0.;
 }
 
 double *return_t_function1(const int x0, float &x1)
 {
+    return nullptr;
 }
 
 TEST_CASE("Return_t")
@@ -451,10 +453,12 @@ TEST_CASE("Return_t")
 
 double fpt_function0(int x0, float &&x1)
 {
+    return 0.;
 }
 
 double *fpt_function1(const int x0, float &x1)
 {
+    return nullptr;
 }
 
 TEST_CASE("FunctionPointer_t")
