@@ -351,6 +351,104 @@ TEST_CASE("IsCallOperator")
     CHECK(IsCallOperator<decltype(lambda)>::value == true);
 }
 
+void argument_t_function0(int x0, float &&x1)
+{
+}
+
+void argument_t_function1(const int x0, float &x1)
+{
+}
+
+TEST_CASE("Argument_t")
+{
+    auto argument_t_lambda0 = [](int x0, float &&x1) {};
+    auto argument_t_lambda1 = [](const int x0, float &x1) {};
+
+    CHECK(std::is_same<
+              std::tuple<int, float>,
+              Argument_t<decltype(&argument_t_function0)>>::value == false);
+
+    // Can catch l-value reference r-value reference
+    CHECK(std::is_same<
+              std::tuple<int, float &&>,
+              Argument_t<decltype(&argument_t_function0)>>::value == true);
+
+    // Can't catch const qualifier
+    CHECK(std::is_same<
+              std::tuple<const int, float &>,
+              Argument_t<decltype(&argument_t_function1)>>::value == false);
+
+    CHECK(std::is_same<
+              std::tuple<int, float &>,
+              Argument_t<decltype(&argument_t_function1)>>::value == true);
+
+    CHECK(std::is_same<
+              std::tuple<int, float>,
+              Argument_t<decltype(argument_t_lambda0)>>::value == false);
+
+    // Can catch l-value reference r-value reference
+    CHECK(std::is_same<
+              std::tuple<int, float &&>,
+              Argument_t<decltype(argument_t_lambda0)>>::value == true);
+
+    // Can't catch const qualifier
+    CHECK(std::is_same<
+              std::tuple<const int, float &>,
+              Argument_t<decltype(argument_t_lambda1)>>::value == false);
+
+    CHECK(std::is_same<
+              std::tuple<int, float &>,
+              Argument_t<decltype(argument_t_lambda1)>>::value == true);
+}
+
+double return_t_function0(int x0, float &&x1)
+{
+}
+
+double *return_t_function1(const int x0, float &x1)
+{
+}
+
+TEST_CASE("Return_t")
+{
+    auto return_t_lambda0 = [](int x0, float x1)
+    { return x1 + x0; };
+    auto return_t_lambda1 = [](const int x0, float &x1)
+    { return x0 + x1; };
+
+    CHECK(std::is_same<
+              double,
+              Return_t<decltype(&return_t_function0)>>::value == true);
+
+    CHECK(std::is_same<
+              double &,
+              Return_t<decltype(&return_t_function0)>>::value == false);
+
+    CHECK(std::is_same<
+              double *,
+              Return_t<decltype(&return_t_function1)>>::value == true);
+
+    CHECK(std::is_same<
+              double,
+              Return_t<decltype(&return_t_function1)>>::value == false);
+
+    CHECK(std::is_same<
+              float,
+              Return_t<decltype(return_t_lambda0)>>::value == true);
+
+    CHECK(std::is_same<
+              int &,
+              Return_t<decltype(return_t_lambda0)>>::value == false);
+
+    CHECK(std::is_same<
+              float,
+              Return_t<decltype(return_t_lambda1)>>::value == true);
+
+    CHECK(std::is_same<
+              float *,
+              Return_t<decltype(return_t_lambda1)>>::value == false);
+}
+
 static void (*inner_function)(void *) = nullptr;
 
 static void outer_function()

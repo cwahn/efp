@@ -468,24 +468,24 @@ namespace efp
                 StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
             DynamicVector<A>>::type;
 
-    // FunctionReturnType;
+    // CallReturnType;
 
     template <typename, typename...>
-    struct FunctionReturnType;
+    struct CallReturnType;
 
-    template <typename F, typename... Seqs>
-    struct FunctionReturnType
+    template <typename F, typename... Args>
+    struct CallReturnType
     {
-        using type = decltype(std::declval<F>()(std::declval<Seqs>()...));
+        using type = decltype(std::declval<F>()(std::declval<Args>()...));
     };
 
-    template <typename F, typename... Seqs>
-    using FunctionReturn_t = typename FunctionReturnType<F, Seqs...>::type;
+    template <typename F, typename... Args>
+    using CallReturn_t = typename CallReturnType<F, Args...>::type;
 
     // MapReturn_t
 
     template <typename F, typename... Seqs>
-    using MapReturn_t = MapSequence_t<FunctionReturn_t<F, Element_t<Seqs>...>, Seqs...>;
+    using MapReturn_t = MapSequence_t<CallReturn_t<F, Element_t<Seqs>...>, Seqs...>;
 
     // map
 
@@ -493,9 +493,9 @@ namespace efp
     auto map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
-            StaticArray<FunctionReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
 
@@ -511,9 +511,9 @@ namespace efp
     auto map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
-            StaticVector<FunctionReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = min_length(seqs...);
 
@@ -531,13 +531,13 @@ namespace efp
     auto map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             !All<IsStaticCapacity<Seqs>...>::value,
-            DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = min_length(seqs...);
 
-        DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<CallReturn_t<F, Element_t<Seqs>...>> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -550,7 +550,7 @@ namespace efp
     // MapWithIndexReturn_t
 
     template <typename F, typename... Seqs>
-    using MapWithIndexReturn_t = MapSequence_t<FunctionReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
+    using MapWithIndexReturn_t = MapSequence_t<CallReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
 
     // FilterReturn_t
 
@@ -641,8 +641,8 @@ namespace efp
     template <typename N, typename F>
     using FromFunctionReturn_t = typename std::conditional<
         IsIntegralConstant<N>::value,
-        StaticArray<FunctionReturn_t<F, int>, N::value>,
-        DynamicVector<FunctionReturn_t<F, int>>>::type;
+        StaticArray<CallReturn_t<F, int>, N::value>,
+        DynamicVector<CallReturn_t<F, int>>>::type;
 
     // from_function
 
@@ -650,9 +650,9 @@ namespace efp
     auto from_function(const N &length, const F &f)
         -> typename std::enable_if<
             IsIntegralConstant<N>::value,
-            StaticArray<FunctionReturn_t<F, int>, N::value>>::type
+            StaticArray<CallReturn_t<F, int>, N::value>>::type
     {
-        StaticArray<FunctionReturn_t<F, int>, N::value> result;
+        StaticArray<CallReturn_t<F, int>, N::value> result;
 
         for (int i = 0; i < N::value; ++i)
         {
@@ -666,9 +666,9 @@ namespace efp
     auto from_function(const N &length, const F &f)
         -> typename std::enable_if<
             !IsIntegralConstant<N>::value,
-            DynamicVector<FunctionReturn_t<F, int>>>::type
+            DynamicVector<CallReturn_t<F, int>>>::type
     {
-        DynamicVector<FunctionReturn_t<F, int>> result(length);
+        DynamicVector<CallReturn_t<F, int>> result(length);
 
         // result.reserve(length * 2);
 
@@ -727,9 +727,9 @@ namespace efp
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
-            StaticArray<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
         StaticArray<R, MinStaticCapacity<Seqs...>::value> result;
 
@@ -745,9 +745,9 @@ namespace efp
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
-            StaticVector<FunctionReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
         const size_t result_length = min_length(seqs...);
 
@@ -765,13 +765,13 @@ namespace efp
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             !All<IsStaticCapacity<Seqs>...>::value,
-            DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, int, Element_t<Seqs>...>>>::type
     {
-        using R = FunctionReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
         const size_t result_length = min_length(seqs...);
 
-        DynamicVector<FunctionReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<CallReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -787,9 +787,9 @@ namespace efp
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && All<IsStaticLength<Seqs>...>::value,
-            StaticArray<FunctionReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         StaticArray<R, StaticCapacityProduct<Seqs...>::value> result;
         size_t i = 0;
@@ -808,9 +808,9 @@ namespace efp
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             All<IsStaticCapacity<Seqs>...>::value && !All<IsStaticLength<Seqs>...>::value,
-            StaticVector<FunctionReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = size_t_product(length(seqs)...);
 
@@ -831,13 +831,13 @@ namespace efp
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> typename std::enable_if<
             !All<IsStaticCapacity<Seqs>...>::value,
-            DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>::type
     {
-        using R = FunctionReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = size_t_product(length(seqs)...);
 
-        DynamicVector<FunctionReturn_t<F, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<CallReturn_t<F, Element_t<Seqs>...>> result(result_length);
         size_t i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
@@ -927,11 +927,66 @@ namespace efp
         static const bool value = sizeof(test<A>(0)) == sizeof(one);
     };
 
-    template <typename F, bool IsCallOperatorType = false>
-    struct Arguement{};
+    // ArgumentHelper
+
+    template <typename, bool>
+    struct ArgumentHelper
+    {
+    };
 
     template <typename F>
-    struct Arguement{};
+    struct ArgumentHelper<F, true> : ArgumentHelper<decltype(&F::operator()), false>
+    {
+        // using type = typename
+    };
+
+    template <typename R, typename... Args>
+    struct ArgumentHelper<R (*)(Args...), false>
+    {
+        using type = std::tuple<Args...>;
+    };
+
+    template <typename R, typename A, typename... Args>
+    struct ArgumentHelper<R (A::*)(Args...), false>
+    {
+        using type = std::tuple<Args...>;
+    };
+
+    template <typename R, typename A, typename... Args>
+    struct ArgumentHelper<R (A::*)(Args...) const, false>
+    {
+        using type = std::tuple<Args...>;
+    };
+
+    // Arguement_t
+
+    template <typename F>
+    using Argument_t = typename ArgumentHelper<F, IsCallOperator<F>::value>::type;
+
+    // ReturnTypeHelper
+
+    template <typename, typename>
+    struct ReturnTypeHelper
+    {
+    };
+
+    template <typename F, typename... Args>
+    struct ReturnTypeHelper<F, std::tuple<Args...>>
+    {
+        using type = CallReturn_t<F, Args...>;
+    };
+
+    // ReturnType
+
+    template <typename F>
+    struct ReturnType : ReturnTypeHelper<F, Argument_t<F>>
+    {
+    };
+
+    // Return_t
+
+    template <typename F>
+    using Return_t = typename ReturnType<F>::type;
 
 }
 #endif
