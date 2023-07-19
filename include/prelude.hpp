@@ -976,17 +976,28 @@ namespace efp
         using type = CallReturn_t<F, Args...>;
     };
 
-    // ReturnType
-
-    template <typename F>
-    struct ReturnType : ReturnTypeHelper<F, Argument_t<F>>
-    {
-    };
-
     // Return_t
 
     template <typename F>
-    using Return_t = typename ReturnType<F>::type;
+    using Return_t = typename ReturnTypeHelper<F, Argument_t<F>>::type;
+
+    template <typename, typename...>
+    struct FunctionPointerTypeHelper
+    {
+    };
+
+    // FunctionPointerTypeHelper
+
+    template <typename F, typename... Args>
+    struct FunctionPointerTypeHelper<F, std::tuple<Args...>>
+    {
+        using type = Return_t<F> (*)(Args...);
+    };
+
+    // FunctionPointer_t
+
+    template <typename F>
+    using FunctionPointer_t = typename FunctionPointerTypeHelper<F, Argument_t<F>>::type;
 
 }
 #endif

@@ -449,6 +449,54 @@ TEST_CASE("Return_t")
               Return_t<decltype(return_t_lambda1)>>::value == false);
 }
 
+double fpt_function0(int x0, float &&x1)
+{
+}
+
+double *fpt_function1(const int x0, float &x1)
+{
+}
+
+TEST_CASE("FunctionPointer_t")
+{
+    auto fpt_lambda0 = [](int x0, float x1)
+    { return x1 + x0; };
+    auto fpt_lambda1 = [](const int x0, float &x1)
+    { return x0 + x1; };
+
+    CHECK(std::is_same<
+              double (*)(int, float &&),
+              FunctionPointer_t<decltype(&fpt_function0)>>::value == true);
+
+    CHECK(std::is_same<
+              double (*)(int, float),
+              FunctionPointer_t<decltype(&fpt_function0)>>::value == false);
+
+    CHECK(std::is_same<
+              double *(*)(int, float &),
+              FunctionPointer_t<decltype(&fpt_function1)>>::value == true);
+
+    CHECK(std::is_same<
+              double *(*)(int, float),
+              FunctionPointer_t<decltype(&fpt_function1)>>::value == false);
+
+    CHECK(std::is_same<
+              float (*)(int, float),
+              FunctionPointer_t<decltype(fpt_lambda0)>>::value == true);
+
+    CHECK(std::is_same<
+              double (*)(int, float),
+              FunctionPointer_t<decltype(fpt_lambda0)>>::value == false);
+
+    CHECK(std::is_same<
+              float (*)(int, float &),
+              FunctionPointer_t<decltype(fpt_lambda1)>>::value == true);
+
+    CHECK(std::is_same<
+              float (*)(int, float),
+              FunctionPointer_t<decltype(fpt_lambda1)>>::value == false);
+}
+
 static void (*inner_function)(void *) = nullptr;
 
 static void outer_function()
