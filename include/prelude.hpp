@@ -850,5 +850,88 @@ namespace efp
         return result;
     }
 
+    // ! temp
+    struct Lambda
+    {
+        template <typename Tret = void, typename Tfp = Tret (*)(void *), typename T>
+        static Tfp ptr(T &t)
+        {
+            fn<T>(&t);                            // Save callable to static void pointer in fn function.
+            return (Tfp)lambda_ptr_exec<Tret, T>; // Return pointer of static member function
+        }
+
+        template <typename Tret, typename T>
+        static Tret lambda_ptr_exec(void *data)
+        {                                       // This member function takes any type of one argument
+            return (Tret)(*(T *)fn<T>())(data); // Calling the function without argument will return stored void pointer
+            // Change the poiner type of T which is the type of original callable.
+            // Dereference the pointer to get original callable
+            // Done!
+        }
+
+        template <typename T>
+        static void *fn(void *new_fn = nullptr)
+        {
+            static void *fn;
+            if (new_fn != nullptr)
+                fn = new_fn;
+            return fn;
+        }
+    };
+
+    // struct Callable
+    // {
+    //     // How to get argument types and return types of lambda
+    //     template <typename F, typename Fptr>
+    //     static void to_ptr(F &f, Fptr &fptr)
+    //     {
+    //         // fn<F>(&f);
+    //         inner_ptr = (void *)&f;                     // Save callable to static void pointer in fn function.
+    //         fptr = (Fptr)call_inner_ptr<Tret, F>; // Return pointer of static member function
+    //     }
+
+    //     template <typename Tret, typename T>
+    //     static Tret call_inner_ptr(Arg)
+    //     {                                       // This member function takes any type of one argument
+    //         return (Tret)(*(T *)fn<T>())(data); // Calling the function without argument will return stored void pointer
+    //         // Change the poiner type of T which is the type of original callable.
+    //         // Dereference the pointer to get original callable
+    //         // Done!
+    //     }
+
+    //     // template <typename T>
+    //     // static void *fn(void *new_fn = nullptr)
+    //     // {
+    //     //     static void *fn;
+    //     //     if (new_fn != nullptr)
+    //     //         fn = new_fn;
+    //     //     return fn;
+    //     // }
+
+    //     static void* inner_ptr;
+    // };
+
+    template <typename A>
+    class IsCallOperator
+    {
+        typedef char one;
+        typedef long two;
+
+        template <typename B>
+        static one test(decltype(&B::operator()));
+
+        template <typename B>
+        static two test(...);
+
+    public:
+        static const bool value = sizeof(test<A>(0)) == sizeof(one);
+    };
+
+    template <typename F, bool IsCallOperatorType = false>
+    struct Arguement{};
+
+    template <typename F>
+    struct Arguement{};
+
 }
 #endif

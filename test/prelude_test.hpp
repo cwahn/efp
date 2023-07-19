@@ -331,4 +331,71 @@ TEST_CASE("cartesian_map")
     CHECK(res == StaticArray<int, 4>{1, 3, 2, 6});
 }
 
+// ! temp
+
+TEST_CASE("IsCallOperator")
+{
+    struct No
+    {
+    };
+
+    struct Yes
+    {
+        void operator()(int x){};
+    };
+
+    auto lambda = [](int x) {};
+
+    CHECK(IsCallOperator<No>::value == false);
+    CHECK(IsCallOperator<Yes>::value == true);
+    CHECK(IsCallOperator<decltype(lambda)>::value == true);
+}
+
+static void (*inner_function)(void *) = nullptr;
+
+static void outer_function()
+{
+    if (inner_function != nullptr)
+    {
+        inner_function(nullptr);
+    }
+}
+
+static void (*inner_function2)(void *) = nullptr;
+
+static void outer_function2()
+{
+    if (inner_function2 != nullptr)
+    {
+        inner_function2(nullptr);
+    }
+}
+
+TEST_CASE("to_function_pointer")
+{
+    int a = 100;
+    auto b = [&](void *)
+    { return ++a; };
+
+    void (*f1)(void *) = Lambda::ptr(b);
+    f1(nullptr);
+    CHECK(a == 101);
+
+    outer_function();
+    CHECK(a == 101);
+
+    inner_function = Lambda::ptr(b);
+
+    outer_function();
+    CHECK(a == 102);
+
+    outer_function();
+    CHECK(a == 103);
+
+    auto lambda1 = [](int x1, float x2) -> double
+    {
+        return 1.;
+    };
+}
+
 #endif
