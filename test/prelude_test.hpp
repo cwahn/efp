@@ -501,51 +501,108 @@ TEST_CASE("FunctionPointer_t")
               FunctionPointer_t<decltype(fpt_lambda1)>>::value == false);
 }
 
-static void (*inner_function)(void *) = nullptr;
+static void (*inner_function0)(void *) = nullptr;
 
-static void outer_function()
+static void outer_function0()
 {
-    if (inner_function != nullptr)
+    if (inner_function0 != nullptr)
     {
-        inner_function(nullptr);
+        inner_function0(nullptr);
     }
 }
 
-static void (*inner_function2)(void *) = nullptr;
-
-static void outer_function2()
-{
-    if (inner_function2 != nullptr)
-    {
-        inner_function2(nullptr);
-    }
-}
-
-TEST_CASE("to_function_pointer")
+TEST_CASE("LambdaSource")
 {
     int a = 100;
     auto b = [&](void *)
     { return ++a; };
 
-    void (*f1)(void *) = Lambda::ptr(b);
+    void (*f1)(void *) = LambdaSource::ptr(b);
     f1(nullptr);
     CHECK(a == 101);
 
-    outer_function();
+    outer_function0();
     CHECK(a == 101);
 
-    inner_function = Lambda::ptr(b);
+    inner_function0 = LambdaSource::ptr(b);
 
-    outer_function();
+    outer_function0();
     CHECK(a == 102);
 
-    outer_function();
+    outer_function0();
     CHECK(a == 103);
 
     auto lambda1 = [](int x1, float x2) -> double
     {
         return 1.;
     };
+}
+
+static void (*inner_function1)(void *) = nullptr;
+
+static void outer_function1()
+{
+    if (inner_function1 != nullptr)
+    {
+        inner_function1(nullptr);
+    }
+}
+
+static double (*inner_function2)(int, float);
+
+static void register_callback(double (*fptr)(int, float))
+{
+    inner_function2 = fptr;
+}
+
+TEST_CASE("to_function_pointer")
+{
+    SECTION("no_argument")
+    {
+        int a = 100;
+        auto b = [&](void *)
+        { ++a; };
+
+        void (*f1)(void *) = to_function_pointer(b);
+        f1(nullptr);
+        CHECK(a == 101);
+
+        outer_function1();
+        CHECK(a == 101);
+
+        inner_function1 = to_function_pointer(b);
+
+        outer_function1();
+        CHECK(a == 102);
+
+        outer_function1();
+        CHECK(a == 103);
+    }
+
+    SECTION("general")
+    {
+        double a = 0.;
+
+        static auto b = [&](int x0, float x1)
+        {
+            a += x0 + x1;
+            return a * 2;
+        };
+
+        // ! Currently accessing before callback registration is segment violation.
+        // todo Need to set default value
+
+        // inner_function2(1, 2.);
+        // CHECK(a == 0.);
+
+        register_callback(to_function_pointer(b));
+
+        CHECK(inner_function2(1, 2.) == 6.);
+        CHECK(a == 3.);
+
+        CHECK(inner_function2(1, 2.) == 12.);
+        CHECK(a == 6.);
+    }
 }
 
 #endif

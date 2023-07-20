@@ -851,7 +851,7 @@ namespace efp
     }
 
     // ! temp
-    struct Lambda
+    struct LambdaSource
     {
         template <typename Tret = void, typename Tfp = Tret (*)(void *), typename T>
         static Tfp ptr(T &t)
@@ -878,38 +878,6 @@ namespace efp
             return fn;
         }
     };
-
-    // struct Callable
-    // {
-    //     // How to get argument types and return types of lambda
-    //     template <typename F, typename Fptr>
-    //     static void to_ptr(F &f, Fptr &fptr)
-    //     {
-    //         // fn<F>(&f);
-    //         inner_ptr = (void *)&f;                     // Save callable to static void pointer in fn function.
-    //         fptr = (Fptr)call_inner_ptr<Tret, F>; // Return pointer of static member function
-    //     }
-
-    //     template <typename Tret, typename T>
-    //     static Tret call_inner_ptr(Arg)
-    //     {                                       // This member function takes any type of one argument
-    //         return (Tret)(*(T *)fn<T>())(data); // Calling the function without argument will return stored void pointer
-    //         // Change the poiner type of T which is the type of original callable.
-    //         // Dereference the pointer to get original callable
-    //         // Done!
-    //     }
-
-    //     // template <typename T>
-    //     // static void *fn(void *new_fn = nullptr)
-    //     // {
-    //     //     static void *fn;
-    //     //     if (new_fn != nullptr)
-    //     //         fn = new_fn;
-    //     //     return fn;
-    //     // }
-
-    //     static void* inner_ptr;
-    // };
 
     template <typename A>
     class IsCallOperator
@@ -998,6 +966,41 @@ namespace efp
 
     template <typename F>
     using FunctionPointer_t = typename FunctionPointerTypeHelper<F, Argument_t<F>>::type;
+
+    // LambdaPointer
+
+    template <typename F>
+    struct LambdaPointer
+    {
+        template <typename Tpl>
+        struct Helper
+        {
+        };
+
+        template <typename... Args>
+        struct Helper<std::tuple<Args...>>
+        {
+            static Return_t<F> call(Args... args)
+            {
+                return (Return_t<F>)(*(F *)inner_ptr)(args...);
+            }
+        };
+
+        static void *inner_ptr;
+    };
+
+    template <typename F>
+    void *LambdaPointer<F>::inner_ptr = nullptr;
+
+    // to_function_pointer
+    // Take caution on the lifetime of the argument. (Maybe make it satatic)
+
+    template <typename F>
+    static FunctionPointer_t<F> to_function_pointer(F &f)
+    {
+        LambdaPointer<F>::inner_ptr = (void *)&f;
+        return (FunctionPointer_t<F>)LambdaPointer<F>::template Helper<Argument_t<F>>::call;
+    }
 
 }
 #endif
