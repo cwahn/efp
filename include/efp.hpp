@@ -4,5 +4,6 @@
 #include "prelude.hpp"
 #include "numeric.hpp"
 #include "signal.hpp"
+#include "c_utility.hpp"
 
 #endif
