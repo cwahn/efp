@@ -15,7 +15,7 @@ Copying sequence is often an expensive operation yet does not necessary. Move se
 
 There is a better option, copy-elision (Return Value Optimization and Named Return Value Optimization). It makes returning heavy data free. Unfortunately, copy-elision is not guaranteed but at the compiler's discretion. (Since, C++ 17 some of them are guaranteed.)
 
-EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence types as solutions to the issue; `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector`. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. These types are also used as the default output types of mixed-type, n-ary operations.
+EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence types as solutions to the issue; `efp::StaticArray`, `efp::StaticVector`, `efp::DynamicVector`. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. To be exact, these types could be copy-assigned but not copy-constructed. These types are also used as the default output types of mixed-type, n-ary operations.
 
 ### Type Agnostic APIs
 EFP accepts C-style array, `std::array`, `std::vector`, `efp::StaticArray`, `efp::StaticVector`, and `efp::DynamicVector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  

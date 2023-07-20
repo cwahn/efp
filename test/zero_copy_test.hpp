@@ -113,4 +113,34 @@ TEST_CASE("copy elision")
     }
 }
 
+TEST_CASE("assignment")
+{
+    SECTION("StaticArray")
+    {
+        StaticArray<double, 3> a{1., 2., 3.};
+        StaticArray<double, 3> b;
+
+        b = a;
+        CHECK(a == b);
+    }
+
+    SECTION("StaticVector")
+    {
+        StaticVector<double, 3> a{1., 2., 3.};
+        StaticVector<double, 3> b;
+
+        b = a;
+        CHECK(a == b);
+    }
+
+    SECTION("DynamicVector")
+    {
+        DynamicVector<double> a{1., 2., 3.};
+        DynamicVector<double> b;
+
+        b = a;
+        CHECK(a == b);
+    }
+}
+
 #endif

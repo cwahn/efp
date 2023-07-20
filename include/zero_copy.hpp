@@ -18,6 +18,20 @@ public:
     StaticArray(Args &&...args)
         : data_{std::forward<Args>(args)...} {}
 
+    // Assignment
+
+    StaticArray &operator=(const StaticArray &other)
+    {
+        if (this != &other)
+        {
+            for (std::size_t i = 0; i < N; ++i)
+            {
+                data_[i] = other.data_[i];
+            }
+        }
+        return *this;
+    }
+
     // Accessors
     // ! Temp no constexpr
     A &operator[](size_type index)
@@ -65,12 +79,6 @@ private:
     A data_[N];
 };
 
-template <typename A, typename B>
-bool operator==(A &&a, B &&b)
-{
-    return std::equal(a.begin(), a.end(), b.begin());
-}
-
 template <typename A, std::size_t Capacity>
 class StaticVector
 {
@@ -87,6 +95,21 @@ public:
     StaticVector(const Args &...args)
         : data_{args...},
           size_(sizeof...(args)) {}
+
+    // Assignment
+
+    StaticVector &operator=(const StaticVector &other)
+    {
+        if (this != &other)
+        {
+            size_ = other.size_;
+            for (std::size_t i = 0; i < size_; ++i)
+            {
+                data_[i] = other.data_[i];
+            }
+        }
+        return *this;
+    }
 
     // Accessors
     A &operator[](const size_type index)
@@ -190,6 +213,27 @@ public:
         delete[] data_;
     }
 
+    // Assignment
+
+    DynamicVector &operator=(const DynamicVector &other)
+    {
+        if (this != &other)
+        {
+            size_ = other.size();
+            if (capacity_ < size_)
+            {
+                capacity_ = other.capacity();
+                reserve(capacity_);
+            }
+
+            for (std::size_t i = 0; i < size_; ++i)
+            {
+                data_[i] = other.data_[i];
+            }
+        }
+        return *this;
+    }
+
     // Element access
     A &operator[](const size_type index)
     {
@@ -288,5 +332,11 @@ private:
     size_type size_;
     size_type capacity_;
 };
+
+template <typename A, typename B>
+bool operator==(A &&a, B &&b)
+{
+    return std::equal(a.begin(), a.end(), b.begin());
+}
 
 #endif

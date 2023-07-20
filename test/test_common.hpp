@@ -4,6 +4,18 @@
 #include <array>
 #include <vector>
 
+StaticArray<double, 0> static_array_0 {};
+StaticArray<double, 3> static_array_3 {1., 2., 3.};
+StaticArray<double, 5> static_array_5 {1., 2., 3., 4., 5.};
+
+StaticVector<double, 0> static_vector_0 {};
+StaticVector<double, 3> static_vector_3 {1., 2., 3.};
+StaticVector<double, 5> static_vector_5 {1., 2., 3., 4., 5.};
+
+DynamicVector<double> dynamic_vector_0 {};
+DynamicVector<double> dynamic_vector_3 {1., 2., 3.};
+DynamicVector<double> dynamic_vector_5 {1., 2., 3., 4., 5.};
+
 int c_array_3[3] = {1, 2, 3};
 int c_array_5[5] = {1, 2, 3, 4, 5};
 
