@@ -537,7 +537,7 @@ namespace efp
 
         const size_t result_length = min_length(seqs...);
 
-        DynamicVector<CallReturn_t<F, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<R> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -771,7 +771,7 @@ namespace efp
 
         const size_t result_length = min_length(seqs...);
 
-        DynamicVector<CallReturn_t<F, int, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<R> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -837,7 +837,7 @@ namespace efp
 
         const size_t result_length = size_t_product(length(seqs)...);
 
-        DynamicVector<CallReturn_t<F, Element_t<Seqs>...>> result(result_length);
+        DynamicVector<R> result(result_length);
         size_t i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
