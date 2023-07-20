@@ -1,9 +1,9 @@
 #ifndef NUMERIC_HPP_
 #define NUMERIC_HPP_
 
+#include <cmath>
+
 #include "prelude.hpp"
-// ! temp
-// #include "arduino_debug.hpp"
 
 namespace efp
 {
