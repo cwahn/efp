@@ -850,34 +850,7 @@ namespace efp
         return result;
     }
 
-    // ! temp
-    struct LambdaSource
-    {
-        template <typename Tret = void, typename Tfp = Tret (*)(void *), typename T>
-        static Tfp ptr(T &t)
-        {
-            fn<T>(&t);                            // Save callable to static void pointer in fn function.
-            return (Tfp)lambda_ptr_exec<Tret, T>; // Return pointer of static member function
-        }
-
-        template <typename Tret, typename T>
-        static Tret lambda_ptr_exec(void *data)
-        {                                       // This member function takes any type of one argument
-            return (Tret)(*(T *)fn<T>())(data); // Calling the function without argument will return stored void pointer
-            // Change the poiner type of T which is the type of original callable.
-            // Dereference the pointer to get original callable
-            // Done!
-        }
-
-        template <typename T>
-        static void *fn(void *new_fn = nullptr)
-        {
-            static void *fn;
-            if (new_fn != nullptr)
-                fn = new_fn;
-            return fn;
-        }
-    };
+    // IsCallOperator
 
     template <typename A>
     class IsCallOperator
@@ -993,9 +966,9 @@ namespace efp
     void *LambdaPointer<F>::inner_ptr = nullptr;
 
     // to_function_pointer
-    // Take caution on the lifetime of the argument. (Maybe make it satatic)
 
     template <typename F>
+    // ! Take caution on the lifetime of the argument.
     static FunctionPointer_t<F> to_function_pointer(F &f)
     {
         LambdaPointer<F>::inner_ptr = (void *)&f;

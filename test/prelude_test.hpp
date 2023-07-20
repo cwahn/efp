@@ -501,43 +501,6 @@ TEST_CASE("FunctionPointer_t")
               FunctionPointer_t<decltype(fpt_lambda1)>>::value == false);
 }
 
-static void (*inner_function0)(void *) = nullptr;
-
-static void outer_function0()
-{
-    if (inner_function0 != nullptr)
-    {
-        inner_function0(nullptr);
-    }
-}
-
-TEST_CASE("LambdaSource")
-{
-    int a = 100;
-    auto b = [&](void *)
-    { return ++a; };
-
-    void (*f1)(void *) = LambdaSource::ptr(b);
-    f1(nullptr);
-    CHECK(a == 101);
-
-    outer_function0();
-    CHECK(a == 101);
-
-    inner_function0 = LambdaSource::ptr(b);
-
-    outer_function0();
-    CHECK(a == 102);
-
-    outer_function0();
-    CHECK(a == 103);
-
-    auto lambda1 = [](int x1, float x2) -> double
-    {
-        return 1.;
-    };
-}
-
 static void (*inner_function1)(void *) = nullptr;
 
 static void outer_function1()
