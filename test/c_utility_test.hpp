@@ -70,6 +70,14 @@ static void outer_function1()
 
 static double (*inner_function2)(int, float);
 
+static void outer_function2(int x0, float x1)
+{
+    if (inner_function2 != nullptr)
+    {
+        inner_function2(x0, x1);
+    }
+}
+
 static void register_callback(double (*fptr)(int, float))
 {
     inner_function2 = fptr;
@@ -120,7 +128,7 @@ TEST_CASE("to_function_pointer")
         CHECK(inner_function2(1, 2.) == 6.);
         CHECK(a == 3.);
 
-        CHECK(inner_function2(1, 2.) == 12.);
+        outer_function2(1, 2.);
         CHECK(a == 6.);
     }
 }

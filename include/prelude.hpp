@@ -670,8 +670,6 @@ namespace efp
     {
         DynamicVector<CallReturn_t<F, int>> result(length);
 
-        // result.reserve(length * 2);
-
         for (int i = 0; i < length; ++i)
         {
             result[i] = f(i);
