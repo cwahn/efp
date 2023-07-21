@@ -17,13 +17,9 @@ TEST_CASE("initialization")
     SECTION("StaticVector")
     {
         StaticVector<int, 4> a{1, 2, 3};
-        StaticVector<int, 5> b{1, 2, 3};
 
-        CHECK(a == b);
         CHECK(a.size() == 3);
-        CHECK(b.size() == 3);
         CHECK(a.capacity() == 4);
-        CHECK(b.capacity() == 5);
     }
 
     SECTION("DynamicVector")

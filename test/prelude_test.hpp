@@ -148,7 +148,7 @@ TEST_CASE("map")
             return x * x;
         };
 
-        CHECK(map(square, c_array_3) == std::array<int, 3>{1, 4, 9});
+        CHECK(map(square, c_array_3) == StaticArray<int, 3>{1, 4, 9});
     }
 
     SECTION("std::vector")
@@ -158,7 +158,7 @@ TEST_CASE("map")
             return x * x;
         };
 
-        CHECK(map(square, std_vector_3) == std::vector<int>{1, 4, 9});
+        CHECK(map(square, std_vector_3) == DynamicVector<int>{1, 4, 9});
     }
 
     SECTION("binary of std::array, std::vecor")
@@ -169,7 +169,7 @@ TEST_CASE("map")
         };
         std::vector<int> ref = {2, 4, 6};
 
-        CHECK(map(plus, std_array_3, std_vector_3) == std::vector<int>{2, 4, 6});
+        CHECK(map(plus, std_array_3, std_vector_3) == DynamicVector<int>{2, 4, 6});
     }
 }
 
@@ -182,7 +182,7 @@ TEST_CASE("filter")
             return x % 2 == 0;
         };
 
-        CHECK(filter(is_even, c_array_3) == std::vector<int>{2});
+        CHECK(filter(is_even, c_array_3) == StaticVector<int, 3>{2});
     }
 
     SECTION("odd std::vector")
@@ -192,7 +192,7 @@ TEST_CASE("filter")
             return x % 2 != 0;
         };
 
-        CHECK(filter(is_odd, std_vector_3) == std::vector<double>{1, 3});
+        CHECK(filter(is_odd, std_vector_3) == DynamicVector<double>{1, 3});
     }
 }
 
@@ -271,7 +271,7 @@ TEST_CASE("for_each_with_index")
     };
 
     for_each_with_index(product, c_array_3, std_vector_5);
-    CHECK(res == std::array<int, 3>{1, 4, 9});
+    CHECK(res == StaticArray<int, 3>{1, 4, 9});
 }
 
 TEST_CASE("cartesian_for_each")
@@ -298,7 +298,7 @@ TEST_CASE("map_with_index")
             return lhs * rhs;
         };
 
-        CHECK(map_with_index(times, c_array_3) == std::array<int, 3>{0, 2, 6});
+        CHECK(map_with_index(times, c_array_3) == StaticArray<int, 3>{0, 2, 6});
     }
 
     SECTION("std::vector")

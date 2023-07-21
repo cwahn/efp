@@ -79,6 +79,12 @@ private:
     A data_[N];
 };
 
+template <typename A, std::size_t N>
+bool operator==(const StaticArray<A, N> &lhs, const StaticArray<A, N> &rhs)
+{
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
 template <typename A, std::size_t Capacity>
 class StaticVector
 {
@@ -183,6 +189,14 @@ private:
     size_type size_;
 };
 
+template <typename A, std::size_t N>
+bool operator==(const StaticVector<A, N> &lhs, const StaticVector<A, N> &rhs)
+{
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+// DynamicVector
+
 template <typename A>
 class DynamicVector
 {
@@ -219,17 +233,17 @@ public:
     {
         if (this != &other)
         {
-            size_ = other.size();
-            if (capacity_ < size_)
+            const std::size_t other_size = other.size();
+            if (capacity_ < other_size)
             {
-                capacity_ = other.capacity();
-                reserve(capacity_);
+                reserve(other.capacity());
             }
 
-            for (std::size_t i = 0; i < size_; ++i)
+            for (std::size_t i = 0; i < other_size; ++i)
             {
                 data_[i] = other.data_[i];
             }
+            size_ = other_size;
         }
         return *this;
     }
@@ -333,10 +347,10 @@ private:
     size_type capacity_;
 };
 
-template <typename A, typename B>
-bool operator==(A &&a, B &&b)
+template <typename A>
+bool operator==(const DynamicVector<A> &lhs, const DynamicVector<A> &rhs)
 {
-    return std::equal(a.begin(), a.end(), b.begin());
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 #endif
