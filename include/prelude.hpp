@@ -12,6 +12,7 @@
 #include <tuple>
 
 #include "zero_copy.hpp"
+#include "sfinae.hpp"
 
 namespace efp
 {
@@ -26,6 +27,8 @@ namespace efp
 
     // template <typename... Fs>
     // struct Composed;
+
+    // Composed
 
     template <typename F, typename G>
     struct Composed
@@ -78,291 +81,6 @@ namespace efp
     // {
     //     return Composed<F, Fs...>(f, fs...);
     // }
-
-    // All
-
-    template <typename... Args>
-    struct All;
-
-    template <>
-    struct All<>
-    {
-        static constexpr bool value = true;
-    };
-
-    template <typename Head, typename... Tail>
-    struct All<Head, Tail...>
-    {
-        static constexpr bool value = Head::value && All<Tail...>::value;
-    };
-
-    // Any
-
-    template <typename... Args>
-    struct Any;
-
-    template <>
-    struct Any<>
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename Head, typename... Tail>
-    struct Any<Head, Tail...>
-    {
-        static constexpr bool value = Head::value || Any<Tail...>::value;
-    };
-
-    // RemoveReference
-
-    template <typename A>
-    using RemoveReference_t = typename std::remove_reference<A>::type;
-
-    // CommonType
-
-    template <typename... Args>
-    using Common_t = typename std::common_type<Args...>::type;
-
-    // IsStaticCapacity
-
-    template <typename SeqA>
-    struct IsStaticCapacity : std::false_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<StaticArray<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<StaticVector<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<std::array<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<A[N]> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct IsStaticCapacity<T &> : IsStaticCapacity<T>
-    {
-    };
-
-    template <typename T>
-    struct IsStaticCapacity<T &&> : IsStaticCapacity<T>
-    {
-    };
-
-    // AreAllStaticCapacity
-
-    template <typename... Seqs>
-    struct AreAllStaticCapacity
-    {
-        static constexpr bool value = All<IsStaticCapacity<Seqs>...>::value;
-    };
-
-    // StaticCapacity
-
-    template <typename A>
-    struct StaticCapacity
-    {
-        static constexpr size_t value = 0;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<A[N]>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<std::array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<StaticArray<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<StaticVector<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A>
-    struct StaticCapacity<A &> : StaticCapacity<A>
-    {
-    };
-
-    template <typename A>
-    struct StaticCapacity<A &&> : StaticCapacity<A>
-    {
-    };
-
-    // IsStaticLength
-
-    template <typename T>
-    struct IsStaticLength : std::false_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticLength<StaticArray<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticLength<std::array<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticLength<A[N]> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct IsStaticLength<T &> : IsStaticLength<T>
-    {
-    };
-
-    template <typename T>
-    struct IsStaticLength<T &&> : IsStaticLength<T>
-    {
-    };
-
-    // StaticLength
-
-    template <typename SeqA>
-    struct StaticLength;
-
-    template <typename A, size_t N>
-    struct StaticLength<StaticArray<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticLength<std::array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticLength<A[N]>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename SeqA>
-    struct StaticLength<SeqA &> : StaticLength<SeqA>
-    {
-    };
-
-    template <typename SeqA>
-    struct StaticLength<SeqA &&> : StaticLength<SeqA>
-    {
-    };
-
-    // IsIntegralConstant
-
-    template <typename T>
-    struct IsIntegralConstant : std::false_type
-    {
-    };
-
-    template <typename T, T Value>
-    struct IsIntegralConstant<std::integral_constant<T, Value>> : std::true_type
-    {
-    };
-
-    // StaticSizeT
-
-    template <size_t N>
-    using StaticSizeT = std::integral_constant<size_t, N>;
-
-    // min_size_t
-
-    template <typename A>
-    constexpr A min_size_t(const A &value)
-    {
-        return value;
-    }
-
-    template <typename Head, typename... Tail>
-    constexpr auto min_size_t(const Head &head, const Tail &...tail)
-        -> typename std::conditional<
-            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
-            Head,
-            size_t>::type
-    {
-        return head < min_size_t(tail...) ? head : min_size_t(tail...);
-    }
-
-    // size_t_product
-
-    template <typename A>
-    constexpr A size_t_product(const A &value)
-    {
-        return value;
-    }
-
-    template <typename Head, typename... Tail>
-    constexpr auto size_t_product(const Head &head, const Tail &...tail)
-        -> typename std::conditional<
-            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
-            Head,
-            size_t>::type
-    {
-        return head * size_t_product(tail...);
-    }
-
-    // MinStaticCapacity
-
-    template <typename... Seqs>
-    struct MinStaticCapacity;
-
-    template <typename Seq>
-    struct MinStaticCapacity<Seq>
-    {
-        static constexpr size_t value = StaticCapacity<Seq>::value;
-    };
-
-    template <typename Head, typename... Tail>
-    struct MinStaticCapacity<Head, Tail...>
-    {
-        static constexpr size_t head = StaticCapacity<Head>::value;
-        static constexpr size_t tail = min_size_t(StaticCapacity<Tail>::value...);
-        static constexpr size_t value = head < tail ? head : tail;
-    };
-
-    // StaticCapacityProduct
-
-    template <typename... Seqs>
-    struct StaticCapacityProduct;
-
-    template <typename SeqA>
-    struct StaticCapacityProduct<SeqA>
-    {
-        static constexpr size_t value = StaticCapacity<SeqA>::value;
-    };
-
-    template <typename Head, typename... Tail>
-    struct StaticCapacityProduct<Head, Tail...>
-    {
-        static constexpr size_t value = StaticCapacity<Head>::value * StaticCapacityProduct<Tail...>::value;
-    };
 
     // length
 
@@ -429,33 +147,6 @@ namespace efp
         }
     }
 
-    // ElementType
-
-    template <typename A>
-    struct ElementType
-    {
-        using type = typename A::value_type;
-    };
-
-    template <typename A, size_t N>
-    struct ElementType<A[N]>
-    {
-        using type = A;
-    };
-
-    template <typename A>
-    struct ElementType<A &> : ElementType<A>
-    {
-    };
-
-    template <typename A>
-    struct ElementType<A &&> : ElementType<A>
-    {
-    };
-
-    template <typename A>
-    using Element_t = typename ElementType<A>::type;
-
     // MapSequence_t
 
     template <typename A, typename... Seqs>
@@ -467,20 +158,6 @@ namespace efp
                 StaticArray<A, MinStaticCapacity<Seqs...>::value>,
                 StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
             DynamicVector<A>>::type;
-
-    // CallReturnType;
-
-    template <typename, typename...>
-    struct CallReturnType;
-
-    template <typename F, typename... Args>
-    struct CallReturnType
-    {
-        using type = decltype(std::declval<F>()(std::declval<Args>()...));
-    };
-
-    template <typename F, typename... Args>
-    using CallReturn_t = typename CallReturnType<F, Args...>::type;
 
     // MapReturn_t
 
@@ -847,78 +524,6 @@ namespace efp
 
         return result;
     }
-
-    // IsCallOperator
-
-    template <typename A>
-    class IsCallOperator
-    {
-        typedef char one;
-        typedef long two;
-
-        template <typename B>
-        static one test(decltype(&B::operator()));
-
-        template <typename B>
-        static two test(...);
-
-    public:
-        static const bool value = sizeof(test<A>(0)) == sizeof(one);
-    };
-
-    // ArgumentHelper
-
-    template <typename, bool>
-    struct ArgumentHelper
-    {
-    };
-
-    template <typename F>
-    struct ArgumentHelper<F, true> : ArgumentHelper<decltype(&F::operator()), false>
-    {
-        // using type = typename
-    };
-
-    template <typename R, typename... Args>
-    struct ArgumentHelper<R (*)(Args...), false>
-    {
-        using type = std::tuple<Args...>;
-    };
-
-    template <typename R, typename A, typename... Args>
-    struct ArgumentHelper<R (A::*)(Args...), false>
-    {
-        using type = std::tuple<Args...>;
-    };
-
-    template <typename R, typename A, typename... Args>
-    struct ArgumentHelper<R (A::*)(Args...) const, false>
-    {
-        using type = std::tuple<Args...>;
-    };
-
-    // Arguement_t
-
-    template <typename F>
-    using Argument_t = typename ArgumentHelper<F, IsCallOperator<F>::value>::type;
-
-    // ReturnTypeHelper
-
-    template <typename, typename>
-    struct ReturnTypeHelper
-    {
-    };
-
-    template <typename F, typename... Args>
-    struct ReturnTypeHelper<F, std::tuple<Args...>>
-    {
-        using type = CallReturn_t<F, Args...>;
-    };
-
-    // Return_t
-
-    template <typename F>
-    using Return_t = typename ReturnTypeHelper<F, Argument_t<F>>::type;
 
 }
 #endif

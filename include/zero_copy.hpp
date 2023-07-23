@@ -1,356 +1,622 @@
 #ifndef ZERO_COPY_HPP_
 #define ZERO_COPY_HPP_
 
-template <typename A, std::size_t N>
-class StaticArray
+#include "sfinae.hpp"
+
+namespace efp
 {
-public:
-    // Type aliases to match std::array
-    using value_type = A;
-    using size_type = std::size_t;
 
-    // Default constructor
-    StaticArray() = default;          // Unpredicatable data_
-    StaticArray(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
-    StaticArray(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
-
-    template <typename... Args>
-    StaticArray(Args &&...args)
-        : data_{std::forward<Args>(args)...} {}
-
-    // Assignment
-
-    StaticArray &operator=(const StaticArray &other)
+    template <typename A, std::size_t N>
+    class StaticArray
     {
-        if (this != &other)
+    public:
+        // Type aliases to match std::array
+        using value_type = A;
+        using size_type = std::size_t;
+
+        // Default constructor
+        StaticArray() = default;          // Unpredicatable data_
+        StaticArray(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
+        StaticArray(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
+
+        template <typename... Args>
+        StaticArray(Args &&...args)
+            : data_{std::forward<Args>(args)...} {}
+
+        // Assignment
+
+        StaticArray &operator=(const StaticArray &other)
         {
-            for (std::size_t i = 0; i < N; ++i)
+            if (this != &other)
             {
-                data_[i] = other.data_[i];
+                for (std::size_t i = 0; i < N; ++i)
+                {
+                    data_[i] = other.data_[i];
+                }
+            }
+            return *this;
+        }
+
+        // Accessors
+        // ! Temp no constexpr
+        A &operator[](size_type index)
+        {
+            return data_[index];
+        }
+
+        constexpr const A &operator[](size_type index) const
+        {
+            return data_[index];
+        }
+
+        inline constexpr size_type size() const noexcept
+        {
+            return N;
+        }
+
+        // Iterators
+        A *begin() noexcept
+        {
+            return data_;
+        }
+
+        const A *begin() const noexcept
+        {
+            return data_;
+        }
+
+        A *end() noexcept
+        {
+            return data_ + N;
+        }
+
+        const A *end() const noexcept
+        {
+            return data_ + N;
+        }
+
+        bool empty() const noexcept
+        {
+            return N == 0;
+        }
+
+    private:
+        A data_[N];
+    };
+
+    template <typename A, std::size_t N>
+    bool operator==(const StaticArray<A, N> &lhs, const StaticArray<A, N> &rhs)
+    {
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    template <typename A, std::size_t Capacity>
+    class StaticVector
+    {
+    public:
+        using value_type = A;
+        using size_type = std::size_t;
+
+        // Constructors
+        StaticVector() : size_(0) {}
+        StaticVector(const size_t s) : size_(0) {} // Unpredicatable data_
+        StaticVector(const StaticVector &);        // Not emplemented by design for RVO, NRVO enforcement
+        StaticVector(StaticVector &&);             // Not emplemented by design for RVO, NRVO enforcement
+        template <typename... Args>
+        StaticVector(const Args &...args)
+            : data_{args...},
+              size_(sizeof...(args)) {}
+
+        // Assignment
+
+        StaticVector &operator=(const StaticVector &other)
+        {
+            if (this != &other)
+            {
+                size_ = other.size_;
+                for (std::size_t i = 0; i < size_; ++i)
+                {
+                    data_[i] = other.data_[i];
+                }
+            }
+            return *this;
+        }
+
+        // Accessors
+        A &operator[](const size_type index)
+        {
+            return data_[index];
+        }
+
+        const A &operator[](const size_type index) const
+        {
+            return data_[index];
+        }
+
+        // Modifiers
+        void push_back(const value_type &value)
+        {
+            if (size_ < Capacity)
+            {
+                data_[size_] = value;
+                ++size_;
             }
         }
-        return *this;
-    }
 
-    // Accessors
-    // ! Temp no constexpr
-    A &operator[](size_type index)
-    {
-        return data_[index];
-    }
-
-    constexpr const A &operator[](size_type index) const
-    {
-        return data_[index];
-    }
-
-    inline constexpr size_type size() const noexcept
-    {
-        return N;
-    }
-
-    // Iterators
-    A *begin() noexcept
-    {
-        return data_;
-    }
-
-    const A *begin() const noexcept
-    {
-        return data_;
-    }
-
-    A *end() noexcept
-    {
-        return data_ + N;
-    }
-
-    const A *end() const noexcept
-    {
-        return data_ + N;
-    }
-
-    bool empty() const noexcept
-    {
-        return N == 0;
-    }
-
-private:
-    A data_[N];
-};
-
-template <typename A, std::size_t N>
-bool operator==(const StaticArray<A, N> &lhs, const StaticArray<A, N> &rhs)
-{
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-}
-
-template <typename A, std::size_t Capacity>
-class StaticVector
-{
-public:
-    using value_type = A;
-    using size_type = std::size_t;
-
-    // Constructors
-    StaticVector() : size_(0) {}
-    StaticVector(const size_t s) : size_(0) {} // Unpredicatable data_
-    StaticVector(const StaticVector &);        // Not emplemented by design for RVO, NRVO enforcement
-    StaticVector(StaticVector &&);             // Not emplemented by design for RVO, NRVO enforcement
-    template <typename... Args>
-    StaticVector(const Args &...args)
-        : data_{args...},
-          size_(sizeof...(args)) {}
-
-    // Assignment
-
-    StaticVector &operator=(const StaticVector &other)
-    {
-        if (this != &other)
+        void pop_back()
         {
-            size_ = other.size_;
-            for (std::size_t i = 0; i < size_; ++i)
+            if (size_ > 0)
             {
-                data_[i] = other.data_[i];
+                --size_;
             }
         }
-        return *this;
-    }
 
-    // Accessors
-    A &operator[](const size_type index)
-    {
-        return data_[index];
-    }
-
-    const A &operator[](const size_type index) const
-    {
-        return data_[index];
-    }
-
-    // Modifiers
-    void push_back(const value_type &value)
-    {
-        if (size_ < Capacity)
+        // Capacity
+        constexpr size_type capacity() const noexcept
         {
-            data_[size_] = value;
-            ++size_;
+            return Capacity;
         }
-    }
 
-    void pop_back()
-    {
-        if (size_ > 0)
+        // size
+        size_type size() const noexcept
         {
-            --size_;
+            return size_;
         }
-    }
 
-    // Capacity
-    constexpr size_type capacity() const noexcept
-    {
-        return Capacity;
-    }
-
-    // size
-    size_type size() const noexcept
-    {
-        return size_;
-    }
-
-    // Iterators
-    A *begin() noexcept
-    {
-        return data_;
-    }
-
-    const A *begin() const noexcept
-    {
-        return data_;
-    }
-
-    A *end() noexcept
-    {
-        return data_ + size_;
-    }
-
-    const A *end() const noexcept
-    {
-        return data_ + size_;
-    }
-
-    bool empty() const noexcept
-    {
-        return size_ == 0;
-    }
-
-private:
-    A data_[Capacity];
-    size_type size_;
-};
-
-template <typename A, std::size_t N>
-bool operator==(const StaticVector<A, N> &lhs, const StaticVector<A, N> &rhs)
-{
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-}
-
-// DynamicVector
-
-template <typename A>
-class DynamicVector
-{
-public:
-    // Type aliases
-    using value_type = A;
-    using size_type = std::size_t;
-
-    // Default constructor
-    DynamicVector() : data_(nullptr), size_(0), capacity_(0) {}
-    DynamicVector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
-    DynamicVector(const DynamicVector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
-    DynamicVector(DynamicVector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
-    template <typename... Args>
-    DynamicVector(const Args &...args)
-        : data_(new A[sizeof...(args) * 2]),
-          size_(sizeof...(args)),
-          capacity_(sizeof...(args) * 2)
-    {
-        int i = 0;
-        for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
-            data_[i++] = arg;
-    }
-
-    // Destructor
-    ~DynamicVector()
-    {
-        delete[] data_;
-    }
-
-    // Assignment
-
-    DynamicVector &operator=(const DynamicVector &other)
-    {
-        if (this != &other)
+        // Iterators
+        A *begin() noexcept
         {
-            const std::size_t other_size = other.size();
-            if (capacity_ < other_size)
-            {
-                reserve(other.capacity());
-            }
-
-            for (std::size_t i = 0; i < other_size; ++i)
-            {
-                data_[i] = other.data_[i];
-            }
-            size_ = other_size;
+            return data_;
         }
-        return *this;
-    }
 
-    // Element access
-    A &operator[](const size_type index)
-    {
-        return data_[index];
-    }
-
-    const A &operator[](const size_type index) const
-    {
-        return data_[index];
-    }
-
-    // Modifiers
-    void push_back(const A &value)
-    {
-        if (size_ == capacity_)
+        const A *begin() const noexcept
         {
-            reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+            return data_;
         }
-        data_[size_++] = value;
-    }
 
-    void pop_back()
-    {
-        if (size_ > 0)
+        A *end() noexcept
         {
-            --size_;
+            return data_ + size_;
         }
-    }
 
-    // Capacity
-    size_type capacity() const noexcept
-    {
-        return capacity_;
-    }
-
-    // size
-    size_type size() const noexcept
-    {
-        return size_;
-    }
-
-    // Reserve capacity
-    void reserve(const size_type new_capacity)
-    {
-        if (new_capacity > capacity_)
+        const A *end() const noexcept
         {
-            A *new_data = new A[new_capacity];
-            for (size_type i = 0; i < size_; ++i)
-            {
-                new_data[i] = data_[i];
-            }
+            return data_ + size_;
+        }
+
+        bool empty() const noexcept
+        {
+            return size_ == 0;
+        }
+
+    private:
+        A data_[Capacity];
+        size_type size_;
+    };
+
+    template <typename A, std::size_t N>
+    bool operator==(const StaticVector<A, N> &lhs, const StaticVector<A, N> &rhs)
+    {
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    // DynamicVector
+
+    template <typename A>
+    class DynamicVector
+    {
+    public:
+        // Type aliases
+        using value_type = A;
+        using size_type = std::size_t;
+
+        // Default constructor
+        DynamicVector() : data_(nullptr), size_(0), capacity_(0) {}
+        DynamicVector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
+        DynamicVector(const DynamicVector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
+        DynamicVector(DynamicVector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
+        template <typename... Args>
+        DynamicVector(const Args &...args)
+            : data_(new A[sizeof...(args) * 2]),
+              size_(sizeof...(args)),
+              capacity_(sizeof...(args) * 2)
+        {
+            int i = 0;
+            for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
+                data_[i++] = arg;
+        }
+
+        // Destructor
+        ~DynamicVector()
+        {
             delete[] data_;
-            data_ = new_data;
-            capacity_ = new_capacity;
         }
-    }
 
-    // Resizing the vector
-    void resize(const size_type new_size)
-    {
-        if (new_size > capacity_)
+        // Assignment
+
+        DynamicVector &operator=(const DynamicVector &other)
         {
-            reserve(new_size);
+            if (this != &other)
+            {
+                const std::size_t other_size = other.size();
+                if (capacity_ < other_size)
+                {
+                    reserve(other.capacity());
+                }
+
+                for (std::size_t i = 0; i < other_size; ++i)
+                {
+                    data_[i] = other.data_[i];
+                }
+                size_ = other_size;
+            }
+            return *this;
         }
-        size_ = new_size;
-    }
 
-    // Iterators
-    A *begin() noexcept
+        // Element access
+        A &operator[](const size_type index)
+        {
+            return data_[index];
+        }
+
+        const A &operator[](const size_type index) const
+        {
+            return data_[index];
+        }
+
+        // Modifiers
+        void push_back(const A &value)
+        {
+            if (size_ == capacity_)
+            {
+                reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+            }
+            data_[size_++] = value;
+        }
+
+        void pop_back()
+        {
+            if (size_ > 0)
+            {
+                --size_;
+            }
+        }
+
+        // Capacity
+        size_type capacity() const noexcept
+        {
+            return capacity_;
+        }
+
+        // size
+        size_type size() const noexcept
+        {
+            return size_;
+        }
+
+        // Reserve capacity
+        void reserve(const size_type new_capacity)
+        {
+            if (new_capacity > capacity_)
+            {
+                A *new_data = new A[new_capacity];
+                for (size_type i = 0; i < size_; ++i)
+                {
+                    new_data[i] = data_[i];
+                }
+                delete[] data_;
+                data_ = new_data;
+                capacity_ = new_capacity;
+            }
+        }
+
+        // Resizing the vector
+        void resize(const size_type new_size)
+        {
+            if (new_size > capacity_)
+            {
+                reserve(new_size);
+            }
+            size_ = new_size;
+        }
+
+        // Iterators
+        A *begin() noexcept
+        {
+            return data_;
+        }
+
+        const A *begin() const noexcept
+        {
+            return data_;
+        }
+
+        A *end() noexcept
+        {
+            return data_ + size_;
+        }
+
+        const A *end() const noexcept
+        {
+            return data_ + size_;
+        }
+
+        bool empty() const noexcept
+        {
+            return size_ == 0;
+        }
+
+    private:
+        A *data_;
+        size_type size_;
+        size_type capacity_;
+    };
+
+    template <typename A>
+    bool operator==(const DynamicVector<A> &lhs, const DynamicVector<A> &rhs)
     {
-        return data_;
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    const A *begin() const noexcept
+    // IsStaticCapacity
+
+    template <typename SeqA>
+    struct IsStaticCapacity : std::false_type
     {
-        return data_;
-    }
+    };
 
-    A *end() noexcept
+    template <typename A, size_t N>
+    struct IsStaticCapacity<StaticArray<A, N>> : std::true_type
     {
-        return data_ + size_;
-    }
+    };
 
-    const A *end() const noexcept
+    template <typename A, size_t N>
+    struct IsStaticCapacity<StaticVector<A, N>> : std::true_type
     {
-        return data_ + size_;
-    }
+    };
 
-    bool empty() const noexcept
+    template <typename A, size_t N>
+    struct IsStaticCapacity<std::array<A, N>> : std::true_type
     {
-        return size_ == 0;
+    };
+
+    template <typename A, size_t N>
+    struct IsStaticCapacity<A[N]> : std::true_type
+    {
+    };
+
+    template <typename T>
+    struct IsStaticCapacity<T &> : IsStaticCapacity<T>
+    {
+    };
+
+    template <typename T>
+    struct IsStaticCapacity<T &&> : IsStaticCapacity<T>
+    {
+    };
+
+    // AreAllStaticCapacity
+
+    template <typename... Seqs>
+    struct AreAllStaticCapacity
+    {
+        static constexpr bool value = All<IsStaticCapacity<Seqs>...>::value;
+    };
+
+    // StaticCapacity
+
+    template <typename A>
+    struct StaticCapacity
+    {
+        static constexpr size_t value = 0;
+    };
+
+    template <typename A, size_t N>
+    struct StaticCapacity<A[N]>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A, size_t N>
+    struct StaticCapacity<std::array<A, N>>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A, size_t N>
+    struct StaticCapacity<StaticArray<A, N>>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A, size_t N>
+    struct StaticCapacity<StaticVector<A, N>>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A>
+    struct StaticCapacity<A &> : StaticCapacity<A>
+    {
+    };
+
+    template <typename A>
+    struct StaticCapacity<A &&> : StaticCapacity<A>
+    {
+    };
+
+    // IsStaticLength
+
+    template <typename T>
+    struct IsStaticLength : std::false_type
+    {
+    };
+
+    template <typename A, size_t N>
+    struct IsStaticLength<StaticArray<A, N>> : std::true_type
+    {
+    };
+
+    template <typename A, size_t N>
+    struct IsStaticLength<std::array<A, N>> : std::true_type
+    {
+    };
+
+    template <typename A, size_t N>
+    struct IsStaticLength<A[N]> : std::true_type
+    {
+    };
+
+    template <typename T>
+    struct IsStaticLength<T &> : IsStaticLength<T>
+    {
+    };
+
+    template <typename T>
+    struct IsStaticLength<T &&> : IsStaticLength<T>
+    {
+    };
+
+    // StaticLength
+
+    template <typename SeqA>
+    struct StaticLength;
+
+    template <typename A, size_t N>
+    struct StaticLength<StaticArray<A, N>>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A, size_t N>
+    struct StaticLength<std::array<A, N>>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename A, size_t N>
+    struct StaticLength<A[N]>
+    {
+        static constexpr size_t value = N;
+    };
+
+    template <typename SeqA>
+    struct StaticLength<SeqA &> : StaticLength<SeqA>
+    {
+    };
+
+    template <typename SeqA>
+    struct StaticLength<SeqA &&> : StaticLength<SeqA>
+    {
+    };
+
+        // StaticSizeT
+
+    template <size_t N>
+    using StaticSizeT = std::integral_constant<size_t, N>;
+
+    // min_size_t
+
+    template <typename A>
+    constexpr A min_size_t(const A &value)
+    {
+        return value;
     }
 
-private:
-    A *data_;
-    size_type size_;
-    size_type capacity_;
+    template <typename Head, typename... Tail>
+    constexpr auto min_size_t(const Head &head, const Tail &...tail)
+        -> typename std::conditional<
+            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+            Head,
+            size_t>::type
+    {
+        return head < min_size_t(tail...) ? head : min_size_t(tail...);
+    }
+
+    // size_t_product
+
+    template <typename A>
+    constexpr A size_t_product(const A &value)
+    {
+        return value;
+    }
+
+    template <typename Head, typename... Tail>
+    constexpr auto size_t_product(const Head &head, const Tail &...tail)
+        -> typename std::conditional<
+            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+            Head,
+            size_t>::type
+    {
+        return head * size_t_product(tail...);
+    }
+
+
+    // MinStaticCapacity
+
+    template <typename... Seqs>
+    struct MinStaticCapacity;
+
+    template <typename Seq>
+    struct MinStaticCapacity<Seq>
+    {
+        static constexpr size_t value = StaticCapacity<Seq>::value;
+    };
+
+    template <typename Head, typename... Tail>
+    struct MinStaticCapacity<Head, Tail...>
+    {
+        static constexpr size_t head = StaticCapacity<Head>::value;
+        static constexpr size_t tail = min_size_t(StaticCapacity<Tail>::value...);
+        static constexpr size_t value = head < tail ? head : tail;
+    };
+
+    // StaticCapacityProduct
+
+    template <typename... Seqs>
+    struct StaticCapacityProduct;
+
+    template <typename SeqA>
+    struct StaticCapacityProduct<SeqA>
+    {
+        static constexpr size_t value = StaticCapacity<SeqA>::value;
+    };
+
+    template <typename Head, typename... Tail>
+    struct StaticCapacityProduct<Head, Tail...>
+    {
+        static constexpr size_t value = StaticCapacity<Head>::value * StaticCapacityProduct<Tail...>::value;
+    };
+
+    // ElementType
+
+    template <typename A>
+    struct ElementType
+    {
+        using type = typename A::value_type;
+    };
+
+    template <typename A, size_t N>
+    struct ElementType<A[N]>
+    {
+        using type = A;
+    };
+
+    template <typename A>
+    struct ElementType<A &> : ElementType<A>
+    {
+    };
+
+    template <typename A>
+    struct ElementType<A &&> : ElementType<A>
+    {
+    };
+
+    // Element_t
+
+    template <typename A>
+    using Element_t = typename ElementType<A>::type;
+
 };
-
-template <typename A>
-bool operator==(const DynamicVector<A> &lhs, const DynamicVector<A> &rhs)
-{
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-}
 
 #endif

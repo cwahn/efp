@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 
+using namespace efp;
+
 StaticArray<double, 0> static_array_0 {};
 StaticArray<double, 3> static_array_3 {1., 2., 3.};
 StaticArray<double, 5> static_array_5 {1., 2., 3., 4., 5.};
