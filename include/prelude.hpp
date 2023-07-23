@@ -7,7 +7,6 @@
 #include <functional>
 #include <algorithm>
 #include <utility>
-#include <type_traits>
 #include <numeric>
 #include <tuple>
 
@@ -115,21 +114,21 @@ namespace efp
 
     template <typename SeqA>
     constexpr auto min_length(const SeqA &as)
-        -> typename std::conditional<
+        -> Conditional_t<
             IsStaticLength<SeqA>::value,
             decltype(length(as)),
-            size_t>::type
+            size_t>
     {
         return length(as);
     }
 
     template <typename Head, typename... Tail>
     constexpr auto min_length(const Head &head, const Tail &...tail)
-        -> typename std::conditional<
+        -> Conditional_t<
             // All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
             all_v(IsIntegralConstant<Head>::value, IsIntegralConstant<Tail>::value...),
             decltype(length(head)),
-            size_t>::type
+            size_t>
     {
         return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
     }
@@ -152,13 +151,13 @@ namespace efp
 
     template <typename A, typename... Seqs>
     using MapSequence_t =
-        typename std::conditional<
+        Conditional_t<
             all_v(IsStaticCapacity<Seqs>::value...),
-            typename std::conditional<
+            Conditional_t<
                 all_v(IsStaticLength<Seqs>::value...),
                 StaticArray<A, MinStaticCapacity<Seqs...>::value>,
-                StaticVector<A, MinStaticCapacity<Seqs...>::value>>::type,
-            DynamicVector<A>>::type;
+                StaticVector<A, MinStaticCapacity<Seqs...>::value>>,
+            DynamicVector<A>>;
 
     // MapReturn_t
 
@@ -169,9 +168,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
@@ -187,9 +186,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
@@ -207,9 +206,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             !all_v(IsStaticCapacity<Seqs>::value...),
-            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
@@ -234,18 +233,18 @@ namespace efp
 
     template <typename SeqA>
     using FilterReturn_t =
-        typename std::conditional<
+        Conditional_t<
             IsStaticCapacity<SeqA>::value,
             StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
-            DynamicVector<Element_t<SeqA>>>::type;
+            DynamicVector<Element_t<SeqA>>>;
 
     // filter
 
     template <typename F, typename SeqA>
     auto filter(const F &f, const SeqA &as)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             IsStaticCapacity<SeqA>::value,
-            StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>::type
+            StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
     {
         StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
 
@@ -263,9 +262,9 @@ namespace efp
 
     template <typename F, typename SeqA>
     auto filter(const F &f, const SeqA &as)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             !IsStaticCapacity<SeqA>::value,
-            DynamicVector<Element_t<SeqA>>>::type
+            DynamicVector<Element_t<SeqA>>>
     {
         const size_t sequance_length = length(as);
 
@@ -317,18 +316,18 @@ namespace efp
     // FromFunctionReturn_t
 
     template <typename N, typename F>
-    using FromFunctionReturn_t = typename std::conditional<
+    using FromFunctionReturn_t = Conditional_t<
         IsIntegralConstant<N>::value,
         StaticArray<CallReturn_t<F, int>, N::value>,
-        DynamicVector<CallReturn_t<F, int>>>::type;
+        DynamicVector<CallReturn_t<F, int>>>;
 
     // from_function
 
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             IsIntegralConstant<N>::value,
-            StaticArray<CallReturn_t<F, int>, N::value>>::type
+            StaticArray<CallReturn_t<F, int>, N::value>>
     {
         StaticArray<CallReturn_t<F, int>, N::value> result;
 
@@ -342,9 +341,9 @@ namespace efp
 
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             !IsIntegralConstant<N>::value,
-            DynamicVector<CallReturn_t<F, int>>>::type
+            DynamicVector<CallReturn_t<F, int>>>
     {
         DynamicVector<CallReturn_t<F, int>> result(length);
 
@@ -401,9 +400,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            StaticArray<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
@@ -419,9 +418,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
@@ -439,9 +438,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             !all_v(IsStaticCapacity<Seqs>::value...),
-            DynamicVector<CallReturn_t<F, int, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, int, Element_t<Seqs>...>>>
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
@@ -461,9 +460,9 @@ namespace efp
     // ! Maybe need to bechmark and optimize
     template <typename F, typename... Seqs>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+            StaticArray<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
@@ -482,9 +481,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>::type
+            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
@@ -505,9 +504,9 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> typename std::enable_if<
+        -> EnableIf_t<
             !all_v(IsStaticCapacity<Seqs>::value...),
-            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>::type
+            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 

@@ -5,18 +5,26 @@
 
 #include "prelude.hpp"
 
+namespace
+{
+    extern "C"
+    {
+#include "math.h"
+    }
+}
+
 namespace efp
 {
     template <typename A>
     constexpr A max(const A lhs, const A rhs)
     {
-        return std::max(lhs, rhs);
+        return max_v(lhs, rhs);
     }
 
     template <typename A>
     constexpr A min(const A lhs, const A rhs)
     {
-        return std::min(lhs, rhs);
+        return min_v(lhs, rhs);
     }
 
     template <typename A>
@@ -78,13 +86,13 @@ namespace efp
     template <typename SeqA>
     constexpr Element_t<SeqA> maximum(const SeqA &as)
     {
-        return foldl(max<Element_t<SeqA>>, std::numeric_limits<Element_t<SeqA>>::min(), as);
+        return foldl(max<Element_t<SeqA>>, NumericLimits<Element_t<SeqA>>::min(), as);
     }
 
     template <typename SeqA>
     constexpr Element_t<SeqA> minimum(const SeqA &as)
     {
-        return foldl(min<Element_t<SeqA>>, std::numeric_limits<Element_t<SeqA>>::max(), as);
+        return foldl(min<Element_t<SeqA>>, NumericLimits<Element_t<SeqA>>::max(), as);
     }
 
     template <typename SeqA>

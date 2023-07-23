@@ -257,33 +257,33 @@ namespace efp
         static const bool value = sizeof(test<A>(0)) == sizeof(one);
     };
 
-    // ArgumentHelper
+    // ArgumentType
 
     template <typename, bool>
-    struct ArgumentHelper
+    struct ArgumentType
     {
     };
 
     template <typename F>
-    struct ArgumentHelper<F, true> : ArgumentHelper<decltype(&F::operator()), false>
+    struct ArgumentType<F, true> : ArgumentType<decltype(&F::operator()), false>
     {
         // using type = typename
     };
 
     template <typename R, typename... Args>
-    struct ArgumentHelper<R (*)(Args...), false>
+    struct ArgumentType<R (*)(Args...), false>
     {
         using type = std::tuple<Args...>;
     };
 
     template <typename R, typename A, typename... Args>
-    struct ArgumentHelper<R (A::*)(Args...), false>
+    struct ArgumentType<R (A::*)(Args...), false>
     {
         using type = std::tuple<Args...>;
     };
 
     template <typename R, typename A, typename... Args>
-    struct ArgumentHelper<R (A::*)(Args...) const, false>
+    struct ArgumentType<R (A::*)(Args...) const, false>
     {
         using type = std::tuple<Args...>;
     };
@@ -291,17 +291,17 @@ namespace efp
     // Arguement_t
 
     template <typename F>
-    using Argument_t = typename ArgumentHelper<F, IsCallOperator<F>::value>::type;
+    using Argument_t = typename ArgumentType<F, IsCallOperator<F>::value>::type;
 
-    // ReturnTypeHelper
+    // ReturnType
 
     template <typename, typename>
-    struct ReturnTypeHelper
+    struct ReturnType
     {
     };
 
     template <typename F, typename... Args>
-    struct ReturnTypeHelper<F, std::tuple<Args...>>
+    struct ReturnType<F, std::tuple<Args...>>
     {
         using type = CallReturn_t<F, Args...>;
     };
@@ -309,7 +309,7 @@ namespace efp
     // Return_t
 
     template <typename F>
-    using Return_t = typename ReturnTypeHelper<F, Argument_t<F>>::type;
+    using Return_t = typename ReturnType<F, Argument_t<F>>::type;
 
 }
 
