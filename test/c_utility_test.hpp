@@ -58,13 +58,13 @@ TEST_CASE("FunctionPointer_t")
               FunctionPointer_t<decltype(fpt_lambda1)>>::value == false);
 }
 
-static void (*inner_function1)(void *) = nullptr;
+static void (*inner_function1)() = nullptr;
 
 static void outer_function1()
 {
     if (inner_function1 != nullptr)
     {
-        inner_function1(nullptr);
+        inner_function1();
     }
 }
 
@@ -88,11 +88,11 @@ TEST_CASE("to_function_pointer")
     SECTION("no_argument")
     {
         int a = 100;
-        auto b = [&](void *)
+        auto b = [&]()
         { ++a; };
 
-        void (*f1)(void *) = to_function_pointer(b);
-        f1(nullptr);
+        void (*f1)() = to_function_pointer(b);
+        f1();
         CHECK(a == 101);
 
         outer_function1();

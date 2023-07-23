@@ -3,6 +3,66 @@
 
 namespace efp
 {
+    template <template <class, class> class F, typename A, typename... Bs>
+    struct Foldl
+    {
+    };
+
+    template <template <class, class> class F, typename A, typename B>
+    struct Foldl<F, A, B> : F<A, B>::type
+    {
+    };
+
+    template <template <class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+    struct Foldl<F, A, B0, B1, Bs...> : Foldl<F, typename F<A, B0>::type, B1, Bs...>
+    {
+    };
+
+    template <template <class, class> class F, typename A, typename... Bs>
+    using Foldl_t = typename Foldl<F, A, Bs...>::type;
+
+    // * Maybe just recursive constexpr template function could be enough
+
+    // foldl_v
+
+    template <typename F, typename A>
+    constexpr A foldl_v(F f, A a)
+    {
+        return a;
+    }
+
+    template <typename F, typename A, typename B>
+    constexpr A foldl_v(F f, A a, B b)
+    {
+        return f(a, b);
+    }
+
+    template <typename F, typename A, typename B, typename... Bs>
+    constexpr A foldl_v(F f, A a, B b, Bs... bs)
+    {
+        return foldl_v(f, f(a, b), bs...);
+    }
+
+    // all_v
+
+    template <typename... Args>
+    constexpr bool all_v(Args... args)
+    {
+        return foldl_v([](bool a, bool b)
+                       { return a && b; },
+                       true, args...);
+    }
+
+    // any_v
+
+    template <typename... Args>
+    constexpr bool any_v(Args... args)
+    {
+        return foldl_v([](bool a, bool b)
+                       { return a || b; },
+                       false, args...);
+    }
+
     // All
 
     template <typename... Args>

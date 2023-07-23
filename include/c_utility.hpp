@@ -5,23 +5,23 @@
 
 namespace efp
 {
-    // FunctionPointerTypeHelper
+    // FunctionPointerType
 
     template <typename, typename...>
-    struct FunctionPointerTypeHelper
+    struct FunctionPointerType
     {
     };
 
     template <typename F, typename... Args>
-    struct FunctionPointerTypeHelper<F, std::tuple<Args...>>
+    struct FunctionPointerType<F, std::tuple<Args...>>
     {
-        using type = Return_t<F> (*)(Args...);
+        using type = Return_t<F>(*)(Args...);
     };
 
     // FunctionPointer_t
 
     template <typename F>
-    using FunctionPointer_t = typename FunctionPointerTypeHelper<F, Argument_t<F>>::type;
+    using FunctionPointer_t = typename FunctionPointerType<F, Argument_t<F>>::type;
 
     // LambdaPointer
 
