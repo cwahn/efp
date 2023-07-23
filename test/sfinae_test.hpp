@@ -26,4 +26,22 @@ TEST_CASE("any_v")
     CHECK(any_v(false, true) == true);
 }
 
+TEST_CASE("maximum_v")
+{
+    CHECK(maximum_v(0) == 0);
+    CHECK(maximum_v(0, 1) == 1);
+    CHECK(maximum_v(-1, 1) == 1);
+    CHECK(maximum_v(1., 2., 3) == 3.);
+    CHECK(maximum_v(-1., 2, 3.) == 3.);
+}
+
+TEST_CASE("minimum_v")
+{
+    CHECK(minimum_v(0) == 0);
+    CHECK(minimum_v(1, 0) == 0);
+    CHECK(minimum_v(1u, -1) == 1);
+    CHECK(minimum_v(1, 2., 3) == 1);
+    CHECK(minimum_v(1, 2, -3.) == -3);
+}
+
 #endif
