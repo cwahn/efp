@@ -203,40 +203,6 @@ namespace efp
         return foldl_v(min_v<A>, a, as...);
     }
 
-    // All
-
-    template <typename... Args>
-    struct All;
-
-    template <>
-    struct All<>
-    {
-        static constexpr bool value = true;
-    };
-
-    template <typename Head, typename... Tail>
-    struct All<Head, Tail...>
-    {
-        static constexpr bool value = Head::value && All<Tail...>::value;
-    };
-
-    // Any
-
-    template <typename... Args>
-    struct Any;
-
-    template <>
-    struct Any<>
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename Head, typename... Tail>
-    struct Any<Head, Tail...>
-    {
-        static constexpr bool value = Head::value || Any<Tail...>::value;
-    };
-
     // RemoveReference
 
     template <typename A>

@@ -400,7 +400,7 @@ namespace efp
     template <typename... Seqs>
     struct AreAllStaticCapacity
     {
-        static constexpr bool value = All<IsStaticCapacity<Seqs>...>::value;
+        static constexpr bool value = all_v(IsStaticCapacity<Seqs>::value...);
     };
 
     // StaticCapacity
@@ -510,7 +510,7 @@ namespace efp
     {
     };
 
-        // StaticSizeT
+    // StaticSizeT
 
     template <size_t N>
     using StaticSizeT = std::integral_constant<size_t, N>;
@@ -526,7 +526,7 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto min_size_t(const Head &head, const Tail &...tail)
         -> typename std::conditional<
-            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+            all_v(IsIntegralConstant<Head>::value, IsIntegralConstant<Tail>::value...),
             Head,
             size_t>::type
     {
@@ -544,13 +544,12 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto size_t_product(const Head &head, const Tail &...tail)
         -> typename std::conditional<
-            All<IsIntegralConstant<Head>, IsIntegralConstant<Tail>...>::value,
+            all_v(IsIntegralConstant<Head>::value, IsIntegralConstant<Tail>::value...),
             Head,
             size_t>::type
     {
         return head * size_t_product(tail...);
     }
-
 
     // MinStaticCapacity
 
