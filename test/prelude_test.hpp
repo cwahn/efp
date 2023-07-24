@@ -100,6 +100,27 @@ TEST_CASE("compose")
 //     CHECK(AreAllStaticCapacity<std::array<int, 3>, std::vector<int>>::value == false);
 // }
 
+TEST_CASE("append")
+{
+    SECTION("StaticArray")
+    {
+        StaticArray<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(std_array_3, static_array_3) == res);
+    }
+
+    SECTION("StaticVector")
+    {
+        StaticVector<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(static_vector_3, static_array_3) == res);
+    }
+
+    SECTION("StaticArray")
+    {
+        DynamicVector<double> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(std_array_3, dynamic_vector_3) == res);
+    }
+}
+
 TEST_CASE("for_each")
 {
     int res_1 = 0;

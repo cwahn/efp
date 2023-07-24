@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <numeric>
 
 #include "efp.hpp"
 

@@ -5,14 +5,6 @@
 
 #include "prelude.hpp"
 
-namespace
-{
-    extern "C"
-    {
-#include "math.h"
-    }
-}
-
 namespace efp
 {
     template <typename A>

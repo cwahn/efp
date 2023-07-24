@@ -3,11 +3,6 @@
 
 #include <array>
 #include <vector>
-#include <iterator>
-#include <functional>
-#include <algorithm>
-#include <utility>
-#include <numeric>
 #include <tuple>
 
 #include "zero_copy.hpp"
@@ -15,6 +10,10 @@
 
 namespace efp
 {
+    struct Unit
+    {
+    };
+
     template <typename A>
     A id(const A &a)
     {
@@ -110,6 +109,72 @@ namespace efp
         return std::integral_constant<size_t, N>{};
     }
 
+    // execute_pack
+
+    template <typename... Args>
+    void execute_pack(Args... args)
+    {
+    }
+
+    // AppendSequence_t
+
+    template <typename A, typename... Seqs>
+    using AppendSequence_t =
+        Conditional_t<
+            all_v(IsStaticCapacity<Seqs>::value...),
+            Conditional_t<
+                all_v(IsStaticLength<Seqs>::value...),
+                StaticArray<A, sum_v(StaticCapacity<Seqs>::value...)>,
+                StaticVector<A, sum_v(StaticCapacity<Seqs>::value...)>>,
+            DynamicVector<A>>;
+
+    // AppendReturn_t
+    template <typename Head, typename... Tail>
+    using AppendReturn_t = AppendSequence_t<Element_t<Head>, Head, Tail...>;
+
+    // append
+
+    template <typename A, typename B>
+    Unit append_(A &result, size_t &idx, const B &seq)
+    {
+        for (auto elem : seq)
+        {
+            result[idx] = elem;
+            idx++;
+        }
+        return Unit{};
+    }
+
+    template <typename Head, typename... Tail>
+    auto append(const Head &head, const Tail &...tail)
+        -> EnableIf_t<
+            all_v(IsStaticCapacity<Head>::value, IsStaticCapacity<Tail>::value...) && all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
+            AppendReturn_t<Head, Tail...>>
+    {
+        AppendReturn_t<Head, Tail...> result;
+        size_t idx{0};
+
+        execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
+
+        return result;
+    }
+
+    template <typename Head, typename... Tail>
+    auto append(const Head &head, const Tail &...tail)
+        -> EnableIf_t<
+            !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
+            AppendReturn_t<Head, Tail...>>
+    {
+        const size_t result_length = sum_v((size_t)length(head), (size_t)length(tail)...);
+
+        AppendReturn_t<Head, Tail...> result(result_length);
+        size_t idx{0};
+
+        execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
+
+        return result;
+    }
+
     // min_length
 
     template <typename SeqA>
@@ -184,37 +249,55 @@ namespace efp
         return result;
     }
 
+    // template <typename F, typename... Seqs>
+    // auto map(const F &f, const Seqs &...seqs)
+    //     -> EnableIf_t<
+    //         all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
+    //         StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+    // {
+    //     using R = CallReturn_t<F, Element_t<Seqs>...>;
+
+    //     const size_t result_length = min_length(seqs...);
+
+    //     StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+
+    //     for (int i = 0; i < result_length; ++i)
+    //     {
+    //         result[i] = f(seqs[i]...);
+    //     }
+
+    //     return result;
+    // }
+
+    // template <typename F, typename... Seqs>
+    // auto map(const F &f, const Seqs &...seqs)
+    //     -> EnableIf_t<
+    //         !all_v(IsStaticCapacity<Seqs>::value...),
+    //         DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>
+    // {
+    //     using R = CallReturn_t<F, Element_t<Seqs>...>;
+
+    //     const size_t result_length = min_length(seqs...);
+
+    //     DynamicVector<R> result(result_length);
+
+    //     for (int i = 0; i < result_length; ++i)
+    //     {
+    //         result[i] = f(seqs[i]...);
+    //     }
+
+    //     return result;
+    // }
+
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
-            all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+            !all_v(IsStaticLength<Seqs>::value...),
+            MapReturn_t<F, Seqs...>>
     {
-        using R = CallReturn_t<F, Element_t<Seqs>...>;
-
         const size_t result_length = min_length(seqs...);
 
-        StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
-
-        for (int i = 0; i < result_length; ++i)
-        {
-            result[i] = f(seqs[i]...);
-        }
-
-        return result;
-    }
-
-    template <typename F, typename... Seqs>
-    auto map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
-            !all_v(IsStaticCapacity<Seqs>::value...),
-            DynamicVector<CallReturn_t<F, Element_t<Seqs>...>>>
-    {
-        using R = CallReturn_t<F, Element_t<Seqs>...>;
-
-        const size_t result_length = min_length(seqs...);
-
-        DynamicVector<R> result(result_length);
+        MapReturn_t<F, Seqs...> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {

@@ -125,6 +125,23 @@ namespace efp
         return lhs < rhs ? lhs : rhs;
     }
 
+    // plus_v
+
+    template <typename A, typename B>
+    constexpr auto plus_v(const A lhs, const B rhs)
+        -> decltype(lhs + rhs)
+    {
+        return lhs + rhs;
+    }
+
+    // times_v
+
+    template <typename A>
+    constexpr A times_v(const A lhs, const A rhs)
+    {
+        return lhs * rhs;
+    }
+
     // Foldl
 
     template <template <class, class> class F, typename A, typename... Bs>
@@ -203,6 +220,22 @@ namespace efp
         return foldl_v(min_v<A>, a, as...);
     }
 
+    // sum_v
+
+    template <typename A, typename... As>
+    constexpr A sum_v(A a, As... as)
+    {
+        return foldl_v(plus_v<A, A>, a, as...);
+    }
+
+    // product_v
+
+    template <typename A, typename... As>
+    constexpr A product_v(A a, As... as)
+    {
+        return foldl_v(times_v<A>, a, as...);
+    }
+
     // RemoveReference
 
     template <typename A>
@@ -215,13 +248,13 @@ namespace efp
 
     // IsIntegralConstant
 
-    template <typename T>
+    template <typename A>
     struct IsIntegralConstant : std::false_type
     {
     };
 
-    template <typename T, T Value>
-    struct IsIntegralConstant<std::integral_constant<T, Value>> : std::true_type
+    template <typename A, A Value>
+    struct IsIntegralConstant<std::integral_constant<A, Value>> : std::true_type
     {
     };
 
