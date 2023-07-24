@@ -212,6 +212,20 @@ namespace efp
         }
     }
 
+    // for_eachi
+
+    template <typename F, typename... Seqs>
+    void for_eachi(const F &f, Seqs &...seqs)
+    {
+        // ? Will it be optimized out to a compile time constatnt?
+        const size_t seq_length = min_length(seqs...);
+
+        for (int i = 0; i < seq_length; ++i)
+        {
+            f(seqs[i]...);
+        }
+    }
+
     // MapSequence_t
 
     template <typename A, typename... Seqs>
@@ -452,6 +466,20 @@ namespace efp
         }
     }
 
+    // for_each_with_indexi
+
+    template <typename F, typename... Seqs>
+    void for_each_with_indexi(const F &f, Seqs &...seqs)
+    {
+        // ? Will it be optimized out to a compile time constatnt?
+        const size_t seq_length = min_length(seqs...);
+
+        for (int i = 0; i < seq_length; ++i)
+        {
+            f(i, seqs[i]...);
+        }
+    }
+
     // cartesian_for_each
 
     template <typename F, typename SeqA>
@@ -476,6 +504,33 @@ namespace efp
             };
 
             cartesian_for_each<decltype(inner), Seqs...>(inner, seqs...);
+        }
+    }
+
+    // cartesian_for_eachi
+
+    template <typename F, typename SeqA>
+    void cartesian_for_eachi(const F &f, SeqA &as)
+    {
+        for_eachi(f, as);
+    }
+
+    template <typename F, typename SeqA, typename... Seqs>
+    void cartesian_for_eachi(const F &f, SeqA &as, Seqs &...seqs)
+    {
+        // ? Will it be optimized out to a compile time constatnt?
+        const size_t as_length = length(as);
+        Element_t<SeqA> a;
+
+        for (int i = 0; i < as_length; ++i)
+        {
+            a = as[i];
+            const auto inner = [=](Element_t<Seqs>... xs)
+            {
+                f(a, xs...);
+            };
+
+            cartesian_for_eachi<decltype(inner), Seqs...>(inner, seqs...);
         }
     }
 

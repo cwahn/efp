@@ -160,6 +160,32 @@ TEST_CASE("for_each")
     CHECK(res_4 == 14.);
 }
 
+TEST_CASE("for_eachi")
+{
+    int res_1[3];
+    auto set_42 = [](int &x)
+    {
+        x = 42;
+    };
+
+    for_eachi(set_42, res_1);
+
+    const auto is_42 = [](int x)
+    { return x == 42; };
+
+    CHECK(foldl(and_v, true, map(is_42, res_1)) == true);
+
+    std::array<int, 3> res_2;
+
+    for_eachi(set_42, res_2);
+    CHECK(res_2 == std::array<int, 3>{42, 42, 42});
+
+    DynamicVector<int> res_3{0, 0, 0};
+
+    for_eachi(set_42, res_3);
+    CHECK(res_3 == DynamicVector<int>{42, 42, 42});
+}
+
 TEST_CASE("map")
 {
     SECTION("c style array")
