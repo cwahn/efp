@@ -97,7 +97,7 @@ namespace efp
     }
 
     template <typename SeqA>
-    double auto_covariance(const SeqA &as, uint lag)
+    double auto_covariance(const SeqA &as, const unsigned int lag)
     {
         const double a_mean = mean(as);
         const size_t as_len = length(as);
@@ -140,7 +140,7 @@ namespace efp
     }
 
     template <typename SeqA>
-    double auto_correlation(const SeqA &as, const uint lag)
+    double auto_correlation(const SeqA &as, const unsigned int lag)
     {
         const double a_auto_covariance = auto_covariance(as, lag);
         const double a_variance = variance(as);
