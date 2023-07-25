@@ -2,6 +2,7 @@
 #define NUMERTIC_LIMIT_HPP
 
 #include <float.h>
+#include <climits>
 
 namespace efp
 {
