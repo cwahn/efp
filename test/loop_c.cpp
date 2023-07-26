@@ -25,8 +25,8 @@ int main(int argc, char const *argv[])
     //     xs[i] = std::rand();
     // }
 
-    // DynamicVector<int> ys(n);
-    StaticArray<int, n> ys;
+    // Vector<int> ys(n);
+    Array<int, n> ys{};
 
     for (int i = 0; i < n; ++i)
     {

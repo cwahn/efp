@@ -7,47 +7,47 @@ using namespace efp;
 
 TEST_CASE("initialization")
 {
-    SECTION("StaticArray")
+    SECTION("Array")
     {
-        StaticArray<int, 3> a{1, 2, 3};
-        CHECK(a == StaticArray<int, 3>{1, 2, 3});
+        Array<int, 3> a{1, 2, 3};
+        CHECK(a == Array<int, 3>{1, 2, 3});
         CHECK(a.size() == 3);
     }
 
     SECTION("StaticVector")
     {
-        StaticVector<int, 4> a{1, 2, 3};
+        StaticVector<int, 4> a = {1, 2, 3};
 
         CHECK(a.size() == 3);
         CHECK(a.capacity() == 4);
     }
 
-    SECTION("DynamicVector")
+    SECTION("Vector")
     {
-        DynamicVector<int> a{0, 0, 0};
+        Vector<int> a = {0, 0, 0};
         for (int i = 0; i < a.size(); ++i)
         {
             a[i] = i + 1;
         }
 
-        DynamicVector<int> b{1, 2, 3};
+        Vector<int> b = {1, 2, 3};
 
         CHECK(a == b);
         CHECK(a.size() == 3);
         CHECK(b.size() == 3);
-        CHECK(a.capacity() == 6);
-        CHECK(b.capacity() == 6);
+        CHECK(a.capacity() == 3);
+        CHECK(b.capacity() == 3);
     }
 }
 
-StaticArray<int, 3> static_array_rvo()
+Array<int, 3> static_array_rvo()
 {
-    return StaticArray<int, 3>{1, 2, 3};
+    return Array<int, 3>{1, 2, 3};
 };
 
-StaticArray<int, 3> static_array_nrvo()
+Array<int, 3> static_array_nrvo()
 {
-    StaticArray<int, 3> result{0, 0, 0};
+    Array<int, 3> result{0, 0, 0};
 
     result[0] = 1;
     result[1] = 2;
@@ -72,14 +72,14 @@ StaticVector<int, 3> static_vector_nrvo()
     return result;
 };
 
-DynamicVector<int> dynamic_vector_rvo()
+Vector<int> dynamic_vector_rvo()
 {
-    return DynamicVector<int>{1, 2, 3};
+    return Vector<int>{1, 2, 3};
 };
 
-DynamicVector<int> dynamic_vector_nrvo()
+Vector<int> dynamic_vector_nrvo()
 {
-    DynamicVector<int> result{0, 0, 0};
+    Vector<int> result{0, 0, 0};
 
     result[0] = 1;
     result[1] = 2;
@@ -90,10 +90,10 @@ DynamicVector<int> dynamic_vector_nrvo()
 
 TEST_CASE("copy elision")
 {
-    SECTION("StaticArray")
+    SECTION("Array")
     {
-        CHECK(StaticArray<int, 3>{1, 2, 3} == static_array_rvo());
-        CHECK(StaticArray<int, 3>{1, 2, 3} == static_array_nrvo());
+        CHECK(Array<int, 3>{1, 2, 3} == static_array_rvo());
+        CHECK(Array<int, 3>{1, 2, 3} == static_array_nrvo());
     }
 
     SECTION("StaticVector")
@@ -102,19 +102,19 @@ TEST_CASE("copy elision")
         CHECK(StaticVector<int, 3>{1, 2, 3} == static_vector_nrvo());
     }
 
-    SECTION("DynamicVector")
+    SECTION("Vector")
     {
-        CHECK(DynamicVector<int>{1, 2, 3} == dynamic_vector_rvo());
-        CHECK(DynamicVector<int>{1, 2, 3} == dynamic_vector_nrvo());
+        CHECK(Vector<int>{1, 2, 3} == dynamic_vector_rvo());
+        CHECK(Vector<int>{1, 2, 3} == dynamic_vector_nrvo());
     }
 }
 
 TEST_CASE("assignment")
 {
-    SECTION("StaticArray")
+    SECTION("Array")
     {
-        StaticArray<double, 3> a{1., 2., 3.};
-        StaticArray<double, 3> b;
+        Array<double, 3> a{1., 2., 3.};
+        Array<double, 3> b;
 
         b = a;
         CHECK(a == b);
@@ -129,10 +129,10 @@ TEST_CASE("assignment")
         CHECK(a == b);
     }
 
-    SECTION("DynamicVector")
+    SECTION("Vector")
     {
-        DynamicVector<double> a{1., 2., 3.};
-        DynamicVector<double> b;
+        Vector<double> a{1., 2., 3.};
+        Vector<double> b;
 
         b = a;
         CHECK(a == b);

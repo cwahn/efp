@@ -102,9 +102,9 @@ TEST_CASE("compose")
 
 TEST_CASE("append")
 {
-    SECTION("StaticArray")
+    SECTION("Array")
     {
-        StaticArray<double, 6> res{1., 2., 3., 1., 2., 3.};
+        Array<double, 6> res{1., 2., 3., 1., 2., 3.};
         CHECK(append(std_array_3, static_array_3) == res);
     }
 
@@ -114,9 +114,9 @@ TEST_CASE("append")
         CHECK(append(static_vector_3, static_array_3) == res);
     }
 
-    SECTION("StaticArray")
+    SECTION("Array")
     {
-        DynamicVector<double> res{1., 2., 3., 1., 2., 3.};
+        Vector<double> res{1., 2., 3., 1., 2., 3.};
         CHECK(append(std_array_3, dynamic_vector_3) == res);
     }
 }
@@ -180,10 +180,10 @@ TEST_CASE("for_eachi")
     for_eachi(set_42, res_2);
     CHECK(res_2 == std::array<int, 3>{42, 42, 42});
 
-    DynamicVector<int> res_3{0, 0, 0};
+    Vector<int> res_3{0, 0, 0};
 
     for_eachi(set_42, res_3);
-    CHECK(res_3 == DynamicVector<int>{42, 42, 42});
+    CHECK(res_3 == Vector<int>{42, 42, 42});
 }
 
 TEST_CASE("map")
@@ -195,28 +195,27 @@ TEST_CASE("map")
             return x * x;
         };
 
-        CHECK(map(square, c_array_3) == StaticArray<int, 3>{1, 4, 9});
+        CHECK(map(square, c_array_3) == Array<int, 3>{1, 4, 9});
     }
 
     SECTION("std::vector")
     {
-        auto square = [](int x)
+        auto square = [](double x)
         {
             return x * x;
         };
 
-        CHECK(map(square, std_vector_3) == DynamicVector<int>{1, 4, 9});
+        CHECK(map(square, std_vector_3) == Vector<double>{1., 4., 9.});
     }
 
     SECTION("binary of std::array, std::vecor")
     {
-        auto plus = [](int lhs, int rhs)
+        auto plus = [](double lhs, double rhs)
         {
             return lhs + rhs;
         };
-        std::vector<int> ref = {2, 4, 6};
 
-        CHECK(map(plus, std_array_3, std_vector_3) == DynamicVector<int>{2, 4, 6});
+        CHECK(map(plus, std_array_3, std_vector_3) == Vector<double>{2., 4., 6.});
     }
 }
 
@@ -234,12 +233,12 @@ TEST_CASE("filter")
 
     SECTION("odd std::vector")
     {
-        auto is_odd = [](int x)
+        auto is_odd = [](double x)
         {
-            return x % 2 != 0;
+            return (int)x % 2 != 0;
         };
 
-        CHECK(filter(is_odd, std_vector_3) == DynamicVector<double>{1, 3});
+        CHECK(filter(is_odd, std_vector_3) == Vector<double>{1., 3.});
     }
 }
 
@@ -287,14 +286,14 @@ TEST_CASE("foldr")
 
 TEST_CASE("from_function")
 {
-    SECTION("StaticArray")
+    SECTION("Array")
     {
         auto plus_one = [](int i)
         {
             return i + 1;
         };
 
-        CHECK(from_function(StaticSizeT<3>{}, plus_one) == StaticArray<int, 3>{1, 2, 3});
+        CHECK(from_function(StaticSizeT<3>{}, plus_one) == Array<int, 3>{1, 2, 3});
     }
 
     SECTION("DynamicArray")
@@ -304,13 +303,13 @@ TEST_CASE("from_function")
             return i + 1;
         };
 
-        CHECK(from_function(3, plus_one) == DynamicVector<int>{1, 2, 3});
+        CHECK(from_function(3, plus_one) == Vector<int>{1, 2, 3});
     }
 }
 
 TEST_CASE("for_each_with_index")
 {
-    StaticArray<int, 3> res;
+    Array<int, 3> res;
 
     auto product = [&](int i, int x0, int x1)
     {
@@ -318,7 +317,7 @@ TEST_CASE("for_each_with_index")
     };
 
     for_each_with_index(product, c_array_3, std_vector_5);
-    CHECK(res == StaticArray<int, 3>{1, 4, 9});
+    CHECK(res == Array<int, 3>{1, 4, 9});
 }
 
 TEST_CASE("cartesian_for_each")
@@ -345,27 +344,27 @@ TEST_CASE("map_with_index")
             return lhs * rhs;
         };
 
-        CHECK(map_with_index(times, c_array_3) == StaticArray<int, 3>{0, 2, 6});
+        CHECK(map_with_index(times, c_array_3) == Array<int, 3>{0, 2, 6});
     }
 
     SECTION("std::vector")
     {
-        auto times = [](int lhs, int rhs)
+        auto times = [](double lhs, double rhs)
         {
             return lhs * rhs;
         };
 
-        CHECK(map_with_index(times, std_vector_3) == DynamicVector<int>{0, 2, 6});
+        CHECK(map_with_index(times, std_vector_3) == Vector<double>{0., 2., 6.});
     }
 
     SECTION("binary of std::array, std::vecor")
     {
-        auto product = [](int i, int a, int b)
+        auto product = [](int i, double a, double b)
         {
             return i * a * b;
         };
 
-        CHECK(map_with_index(product, std_array_3, std_vector_3) == DynamicVector<int>{0, 4, 18});
+        CHECK(map_with_index(product, std_array_3, std_vector_3) == Vector<double>{0., 4., 18.});
     }
 }
 
@@ -375,7 +374,7 @@ TEST_CASE("cartesian_map")
     auto bs = std::array<int, 2>{1, 3};
 
     auto res = cartesian_map(times<int>, as, bs);
-    CHECK(res == StaticArray<int, 4>{1, 3, 2, 6});
+    CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
 // ! temp

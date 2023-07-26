@@ -186,7 +186,7 @@ TEST_CASE("linear_regression")
         return sin(x * 2 * M_PI / n) + a * x + b;
     };
 
-    SECTION("StaticArray")
+    SECTION("Array")
     {
         auto xs = from_function(StaticSizeT<n>{}, id<int>);
 

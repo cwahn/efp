@@ -1,94 +1,130 @@
 #ifndef ZERO_COPY_HPP_
 #define ZERO_COPY_HPP_
 
+#include <array>
+
 #include "sfinae.hpp"
 
 namespace efp
 {
 
     template <typename A, std::size_t N>
-    class StaticArray
+    class ArrayProxy : public std::array<A, N>
     {
     public:
-        // Type aliases to match std::array
-        using value_type = A;
-        using size_type = std::size_t;
+        using std::array<A, N>::array;
+        ArrayProxy(const ArrayProxy &) = delete;
+        ArrayProxy(ArrayProxy &&) = delete;
 
-        // Default constructor
-        StaticArray() = default;          // Unpredicatable data_
-        StaticArray(const StaticArray &); // Not emplemented by design for RVO, NRVO enforcement
-        StaticArray(StaticArray &&);      // Not emplemented by design for RVO, NRVO enforcement
+        // Assignment operators
+        ArrayProxy &operator=(const ArrayProxy &) = default;
+        ArrayProxy &operator=(ArrayProxy &&) = default;
 
+        // Variadic constructor for the derived class
         template <typename... Args>
-        StaticArray(Args &&...args)
-            : data_{std::forward<Args>(args)...} {}
-
-        // Assignment
-
-        StaticArray &operator=(const StaticArray &other)
-        {
-            if (this != &other)
-            {
-                for (std::size_t i = 0; i < N; ++i)
-                {
-                    data_[i] = other.data_[i];
-                }
-            }
-            return *this;
-        }
-
-        // Accessors
-        // ! Temp no constexpr
-        A &operator[](size_type index)
-        {
-            return data_[index];
-        }
-
-        constexpr const A &operator[](size_type index) const
-        {
-            return data_[index];
-        }
-
-        inline constexpr size_type size() const noexcept
-        {
-            return N;
-        }
-
-        // Iterators
-        A *begin() noexcept
-        {
-            return data_;
-        }
-
-        const A *begin() const noexcept
-        {
-            return data_;
-        }
-
-        A *end() noexcept
-        {
-            return data_ + N;
-        }
-
-        const A *end() const noexcept
-        {
-            return data_ + N;
-        }
-
-        bool empty() const noexcept
-        {
-            return N == 0;
-        }
-
-    private:
-        A data_[N];
+        ArrayProxy(Args &&...args) : std::array<A, N>{{std::forward<Args>(args)...}} {}
     };
 
     template <typename A, std::size_t N>
-    bool operator==(const StaticArray<A, N> &lhs, const StaticArray<A, N> &rhs)
+    class Array : public ArrayProxy<A, N>
     {
-        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    }
+    public:
+        using ArrayProxy<A, N>::ArrayProxy;
+        Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
+        Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
+
+        // Assignment operators
+        Array &operator=(const Array &) = default;
+        Array &operator=(Array &&) = default;
+
+        // Variadic constructor for the derived class
+        template <typename... Args>
+        Array(Args &&...args) : ArrayProxy<A, N>{std::forward<Args>(args)...} {}
+    };
+
+    // template <typename A, std::size_t N>
+    // class Array : std::array<A, N>
+    // {
+    // public:
+    //     // Type aliases to match std::array
+    //     using value_type = A;
+    //     using size_type = std::size_t;
+
+    //     // Default constructor
+    //     Array() = default;          // Unpredicatable data_
+    //     Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
+    //     Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
+
+    //     template <typename... Args>
+    //     Array(Args &&...args)
+    //         : data_{std::forward<Args>(args)...} {}
+
+    //     // Assignment
+
+    //     Array &operator=(const Array &other)
+    //     {
+    //         if (this != &other)
+    //         {
+    //             for (std::size_t i = 0; i < N; ++i)
+    //             {
+    //                 data_[i] = other.data_[i];
+    //             }
+    //         }
+    //         return *this;
+    //     }
+
+    //     // Accessors
+    //     // ! Temp no constexpr
+    //     A &operator[](size_type index)
+    //     {
+    //         return data_[index];
+    //     }
+
+    //     constexpr const A &operator[](size_type index) const
+    //     {
+    //         return data_[index];
+    //     }
+
+    //     inline constexpr size_type size() const noexcept
+    //     {
+    //         return N;
+    //     }
+
+    //     // Iterators
+    //     A *begin() noexcept
+    //     {
+    //         return data_;
+    //     }
+
+    //     const A *begin() const noexcept
+    //     {
+    //         return data_;
+    //     }
+
+    //     A *end() noexcept
+    //     {
+    //         return data_ + N;
+    //     }
+
+    //     const A *end() const noexcept
+    //     {
+    //         return data_ + N;
+    //     }
+
+    //     bool empty() const noexcept
+    //     {
+    //         return N == 0;
+    //     }
+
+    // private:
+    //     A data_[N];
+    // };
+
+    // template <typename A, std::size_t N>
+    // bool operator==(const Array<A, N> &lhs, const Array<A, N> &rhs)
+    // {
+    //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    // }
 
     template <typename A, std::size_t Capacity>
     class StaticVector
@@ -200,163 +236,189 @@ namespace efp
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    // DynamicVector
+    // Vector
 
     template <typename A>
-    class DynamicVector
+    class VectorProxy : public std::vector<A>
     {
     public:
-        // Type aliases
-        using value_type = A;
-        using size_type = std::size_t;
+        using std::vector<A>::vector;
+        VectorProxy(const VectorProxy &) = delete;
+        VectorProxy(VectorProxy &&) = delete;
 
-        // Default constructor
-        DynamicVector() : data_(nullptr), size_(0), capacity_(0) {}
-        DynamicVector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
-        DynamicVector(const DynamicVector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
-        DynamicVector(DynamicVector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
-        template <typename... Args>
-        DynamicVector(const Args &...args)
-            : data_(new A[sizeof...(args) * 2]),
-              size_(sizeof...(args)),
-              capacity_(sizeof...(args) * 2)
-        {
-            int i = 0;
-            for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
-                data_[i++] = arg;
-        }
-
-        // Destructor
-        ~DynamicVector()
-        {
-            delete[] data_;
-        }
-
-        // Assignment
-
-        DynamicVector &operator=(const DynamicVector &other)
-        {
-            if (this != &other)
-            {
-                const std::size_t other_size = other.size();
-                if (capacity_ < other_size)
-                {
-                    reserve(other.capacity());
-                }
-
-                for (std::size_t i = 0; i < other_size; ++i)
-                {
-                    data_[i] = other.data_[i];
-                }
-                size_ = other_size;
-            }
-            return *this;
-        }
-
-        // Element access
-        A &operator[](const size_type index)
-        {
-            return data_[index];
-        }
-
-        const A &operator[](const size_type index) const
-        {
-            return data_[index];
-        }
-
-        // Modifiers
-        void push_back(const A &value)
-        {
-            if (size_ == capacity_)
-            {
-                reserve(capacity_ == 0 ? 1 : capacity_ * 2);
-            }
-            data_[size_++] = value;
-        }
-
-        void pop_back()
-        {
-            if (size_ > 0)
-            {
-                --size_;
-            }
-        }
-
-        // Capacity
-        size_type capacity() const noexcept
-        {
-            return capacity_;
-        }
-
-        // size
-        size_type size() const noexcept
-        {
-            return size_;
-        }
-
-        // Reserve capacity
-        void reserve(const size_type new_capacity)
-        {
-            if (new_capacity > capacity_)
-            {
-                A *new_data = new A[new_capacity];
-                for (size_type i = 0; i < size_; ++i)
-                {
-                    new_data[i] = data_[i];
-                }
-                delete[] data_;
-                data_ = new_data;
-                capacity_ = new_capacity;
-            }
-        }
-
-        // Resizing the vector
-        void resize(const size_type new_size)
-        {
-            if (new_size > capacity_)
-            {
-                reserve(new_size);
-            }
-            size_ = new_size;
-        }
-
-        // Iterators
-        A *begin() noexcept
-        {
-            return data_;
-        }
-
-        const A *begin() const noexcept
-        {
-            return data_;
-        }
-
-        A *end() noexcept
-        {
-            return data_ + size_;
-        }
-
-        const A *end() const noexcept
-        {
-            return data_ + size_;
-        }
-
-        bool empty() const noexcept
-        {
-            return size_ == 0;
-        }
-
-    private:
-        A *data_;
-        size_type size_;
-        size_type capacity_;
+        // Assignment operators
+        VectorProxy &operator=(const VectorProxy &) = default;
+        VectorProxy &operator=(VectorProxy &&) = default;
     };
 
     template <typename A>
-    bool operator==(const DynamicVector<A> &lhs, const DynamicVector<A> &rhs)
+    class Vector : public VectorProxy<A>
     {
-        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    }
+    public:
+        using VectorProxy<A>::VectorProxy;
+        Vector(const Vector &); // Not emplemented by design for RVO, NRVO enforcement
+        Vector(Vector &&);      // Not emplemented by design for RVO, NRVO enforcement
+
+        // Assignment operators
+        Vector &operator=(const Vector &) = default;
+        Vector &operator=(Vector &&) = default;
+    };
+
+    // template <typename A>
+    // class Vector
+    // {
+    // public:
+    //     // Type aliases
+    //     using value_type = A;
+    //     using size_type = std::size_t;
+
+    //     // Default constructor
+    //     Vector() : data_(nullptr), size_(0), capacity_(0) {}
+    //     Vector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
+    //     Vector(const Vector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
+    //     Vector(Vector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
+    //     template <typename... Args>
+    //     Vector(const Args &...args)
+    //         : data_(new A[sizeof...(args) * 2]),
+    //           size_(sizeof...(args)),
+    //           capacity_(sizeof...(args) * 2)
+    //     {
+    //         int i = 0;
+    //         for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
+    //             data_[i++] = arg;
+    //     }
+
+    //     // Destructor
+    //     ~Vector()
+    //     {
+    //         delete[] data_;
+    //     }
+
+    //     // Assignment
+
+    //     Vector &operator=(const Vector &other)
+    //     {
+    //         if (this != &other)
+    //         {
+    //             const std::size_t other_size = other.size();
+    //             if (capacity_ < other_size)
+    //             {
+    //                 reserve(other.capacity());
+    //             }
+
+    //             for (std::size_t i = 0; i < other_size; ++i)
+    //             {
+    //                 data_[i] = other.data_[i];
+    //             }
+    //             size_ = other_size;
+    //         }
+    //         return *this;
+    //     }
+
+    //     // Element access
+    //     A &operator[](const size_type index)
+    //     {
+    //         return data_[index];
+    //     }
+
+    //     const A &operator[](const size_type index) const
+    //     {
+    //         return data_[index];
+    //     }
+
+    //     // Modifiers
+    //     void push_back(const A &value)
+    //     {
+    //         if (size_ == capacity_)
+    //         {
+    //             reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+    //         }
+    //         data_[size_++] = value;
+    //     }
+
+    //     void pop_back()
+    //     {
+    //         if (size_ > 0)
+    //         {
+    //             --size_;
+    //         }
+    //     }
+
+    //     // Capacity
+    //     size_type capacity() const noexcept
+    //     {
+    //         return capacity_;
+    //     }
+
+    //     // size
+    //     size_type size() const noexcept
+    //     {
+    //         return size_;
+    //     }
+
+    //     // Reserve capacity
+    //     void reserve(const size_type new_capacity)
+    //     {
+    //         if (new_capacity > capacity_)
+    //         {
+    //             A *new_data = new A[new_capacity];
+    //             for (size_type i = 0; i < size_; ++i)
+    //             {
+    //                 new_data[i] = data_[i];
+    //             }
+    //             delete[] data_;
+    //             data_ = new_data;
+    //             capacity_ = new_capacity;
+    //         }
+    //     }
+
+    //     // Resizing the vector
+    //     void resize(const size_type new_size)
+    //     {
+    //         if (new_size > capacity_)
+    //         {
+    //             reserve(new_size);
+    //         }
+    //         size_ = new_size;
+    //     }
+
+    //     // Iterators
+    //     A *begin() noexcept
+    //     {
+    //         return data_;
+    //     }
+
+    //     const A *begin() const noexcept
+    //     {
+    //         return data_;
+    //     }
+
+    //     A *end() noexcept
+    //     {
+    //         return data_ + size_;
+    //     }
+
+    //     const A *end() const noexcept
+    //     {
+    //         return data_ + size_;
+    //     }
+
+    //     bool empty() const noexcept
+    //     {
+    //         return size_ == 0;
+    //     }
+
+    // private:
+    //     A *data_;
+    //     size_type size_;
+    //     size_type capacity_;
+    // };
+
+    // template <typename A>
+    // bool operator==(const Vector<A> &lhs, const Vector<A> &rhs)
+    // {
+    //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    // }
 
     // IsStaticCapacity
 
@@ -366,7 +428,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct IsStaticCapacity<StaticArray<A, N>> : std::true_type
+    struct IsStaticCapacity<Array<A, N>> : std::true_type
     {
     };
 
@@ -424,7 +486,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct StaticCapacity<StaticArray<A, N>>
+    struct StaticCapacity<Array<A, N>>
     {
         static constexpr size_t value = N;
     };
@@ -453,7 +515,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct IsStaticLength<StaticArray<A, N>> : std::true_type
+    struct IsStaticLength<Array<A, N>> : std::true_type
     {
     };
 
@@ -483,7 +545,7 @@ namespace efp
     struct StaticLength;
 
     template <typename A, size_t N>
-    struct StaticLength<StaticArray<A, N>>
+    struct StaticLength<Array<A, N>>
     {
         static constexpr size_t value = N;
     };
