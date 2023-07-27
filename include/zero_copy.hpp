@@ -7,7 +7,6 @@
 
 namespace efp
 {
-
     template <typename A, std::size_t N>
     class ArrayProxy : public std::array<A, N>
     {
