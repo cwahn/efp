@@ -1,9 +1,85 @@
-#ifndef SM_HPP_
-#define SM_HPP_
+#ifndef VCQ_HPP_
+#define VCQ_HPP_
 
 #include <stdlib.h>
 #include <cstdint>
 #include <array>
+
+#include "zero_copy.hpp"
+
+namespace efp
+{
+    template <typename A, size_t N>
+    class Vcq
+    {
+    public:
+        Vcq()
+            : len(0)
+        {
+            p_read = buffer.data();
+            p_write = buffer.data();
+            p_middle = buffer.data() + N;
+        }
+        ~Vcq(){}
+
+        void push_back(const A &value)
+        {
+            p_write[0] = value;
+            p_write[N] = value;
+
+            p_write++;
+            p_write -= N * (p_write == p_middle);
+
+            if (len < N)
+            {
+                len++;
+            }
+            else
+            {
+                p_read++;
+                p_read -= N * (p_read == p_middle);
+            }
+        }
+        // ! Undefined if empty
+
+        A pop_front()
+        {
+            A value = *(p_read);
+            len--;
+
+            p_read++;
+            p_read -= N * (p_read == p_middle);
+
+            return value;
+        }
+
+        size_t size()
+        {
+            return len;
+        }
+
+        bool is_empty()
+        {
+            return len == 0;
+        }
+        A *begin()
+        {
+            return p_read;
+        }
+        A *end()
+        {
+            return p_write > p_read ? p_write : p_write + N;
+        }
+
+    private:
+        Array<A, N * 2> buffer;
+        A *p_read;
+        A *p_write;
+        A *p_middle;
+        size_t len;
+    };
+
+}
 
 // template <typename A, size_t N>
 // class Vcb
@@ -65,7 +141,6 @@
 //     std::array<A, N * 2> buffer;
 //     A *start;
 // };
-
 
 // template <typename A, size_t I_N, size_t O_N>
 // class FixedSizeBuffer

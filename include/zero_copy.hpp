@@ -32,7 +32,7 @@ namespace efp
         Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
         Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
 
-        // Assignment operators
+        // Assignment operator   
         Array &operator=(const Array &) = default;
         Array &operator=(Array &&) = default;
 

@@ -6,5 +6,6 @@
 #include "numeric.hpp"
 #include "signal.hpp"
 #include "c_utility.hpp"
+#include "vcq.hpp"
 
 #endif
