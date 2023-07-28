@@ -452,6 +452,17 @@ namespace efp
         return result;
     }
 
+    // for_index
+
+    template <typename F>
+    void for_index(const F &f, const int i)
+    {
+        for (int i_ = 0; i_ < i; ++i_)
+        {
+            f(i_);
+        }
+    }
+
     // for_each_with_index
 
     template <typename F, typename... Seqs>
