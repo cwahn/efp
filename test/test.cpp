@@ -3,5 +3,5 @@
 #include "prelude_test.hpp"
 #include "numeric_test.hpp"
 #include "signal_test.hpp"
-#include "vcq_test.hpp"
+#include "cyclic_test.hpp"
 #include "c_utility_test.hpp"

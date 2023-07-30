@@ -1,9 +1,26 @@
-#ifndef VCQ_TEST_HPP_
-#define VCQ_TEST_HPP_
+#ifndef CYCLIC_TEST_HPP_
+#define CYCLIC_TEST_HPP_
 
 #include "efp.hpp"
 
 using namespace efp;
+
+TEST_CASE("Vcb")
+{
+    SECTION("0")
+    {
+        Vcb<int, 3> vcb;
+        CHECK(vcb.size() == 3);
+        CHECK(vcb.is_empty() == false);
+        vcb.push_back(1);
+        vcb.push_back(2);
+        vcb.push_back(3);
+        vcb.push_back(4);
+        CHECK(vcb.data()[0] == 2);
+        CHECK(vcb.data()[1] == 3);
+        CHECK(vcb.data()[2] == 4);
+    }
+}
 
 TEST_CASE("Vcq")
 {
