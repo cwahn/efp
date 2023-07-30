@@ -416,6 +416,27 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
+// TEST_CASE("elem_index")
+// {
+//     SECTION("c array")
+//     {
+//         CHECK(elem_index(2., c_array_3).value() == 1);
+//         CHECK(elem_index(9., c_array_3) == std::nullopt);
+//     }
+
+//     SECTION("Array")
+//     {
+//         CHECK(elem_index(2., array_3).value() == 1);
+//         CHECK(elem_index(9., array_3) == std::nullopt);
+//     }
+
+//     SECTION("ArrayView")
+//     {
+//         CHECK(elem_index(2., array_view_3).value() == 1);
+//         CHECK(elem_index(9., array_view_3) == std::nullopt);
+//     }
+// }
+
 // ! temp
 
 TEST_CASE("IsCallOperator")

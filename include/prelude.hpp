@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <tuple>
+#include <optional>
 
 #include "zero_copy.hpp"
 #include "sfinae.hpp"
@@ -673,6 +674,21 @@ namespace efp
 
         return result;
     }
+
+    // // todo No std
+    // template <typename SeqA>
+    // std::optional<size_t> elem_index(const Element_t<SeqA> a, const SeqA &as)
+    // {
+    //     for (size_t i = 0; i < length(as); ++i)
+    //     {
+    //         if (as[i] == a)
+    //         {
+    //             return i;
+    //         }
+    //     }
+
+    //     return std::nullopt;
+    // }
 
 }
 #endif
