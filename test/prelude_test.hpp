@@ -437,6 +437,29 @@ TEST_CASE("cartesian_map")
 //     }
 // }
 
+// ! temp 
+
+TEST_CASE("elem_index")
+{
+    SECTION("c array")
+    {
+        CHECK(elem_index(2., c_array_3) == 1);
+        CHECK(elem_index(9., c_array_3) == -1);
+    }
+
+    SECTION("Array")
+    {
+        CHECK(elem_index(2., array_3) == 1);
+        CHECK(elem_index(9., array_3) == -1);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(elem_index(2., array_view_3) == 1);
+        CHECK(elem_index(9., array_view_3) == -1);
+    }
+}
+
 // ! temp
 
 TEST_CASE("IsCallOperator")

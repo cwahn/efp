@@ -690,5 +690,19 @@ namespace efp
     //     return std::nullopt;
     // }
 
+    // ! temp -1 on fail
+    template <typename SeqA>
+    int elem_index(const Element_t<SeqA> a, const SeqA &as)
+    {
+        for (size_t i = 0; i < length(as); ++i)
+        {
+            if (as[i] == a)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 }
 #endif
