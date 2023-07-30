@@ -89,11 +89,7 @@ namespace efp
     template <typename SeqA, typename SeqB>
     double correlation(const SeqA &as, const SeqB &bs)
     {
-        const double a_standard_deviation = standard_deviation(as);
-        const double b_standard_deviation = standard_deviation(bs);
-        const double ab_covariance = covariance(as, bs);
-
-        return ab_covariance / (a_standard_deviation * b_standard_deviation);
+        return covariance(as, bs) / (standard_deviation(as) * standard_deviation(bs));
     }
 
     template <typename SeqA>
@@ -105,47 +101,43 @@ namespace efp
 
         double summation = 0;
 
-        for (int i = 0; i < sum_length; ++i)
-        {
-            summation += (as[i] - a_mean) * (as[i + lag] - a_mean);
-        }
+        for_index(
+            [&](int i)
+            {
+                summation += (as[i] - a_mean) * (as[i + lag] - a_mean);
+            },
+            sum_length);
 
         return summation / double(sum_length);
     }
 
-    // ! Temporary nonconst expr
     template <typename SeqA>
     MapSequence_t<double, SeqA> auto_covariance_function(const SeqA &as)
     {
-        const auto auto_covar = [&](int i)
+        const auto auto_covar = [&](int i, Element_t<SeqA> _)
         {
             return auto_covariance(as, i);
         };
 
-        return map_with_index(auto_covar);
+        return map_with_index(auto_covar, as);
     }
 
     template <typename SeqA>
     MapSequence_t<double, SeqA> auto_corelation_function(const SeqA &as)
     {
-        const auto a_auto_covariance_function = auto_covariance_function(as);
         const double a_variance = variance(as);
-
         const auto div_a_var = [&](Element_t<SeqA> x)
         {
             return x / a_variance;
         };
 
-        return map(div_a_var, a_auto_covariance_function);
+        return map(div_a_var, auto_covariance_function(as));
     }
 
     template <typename SeqA>
     double auto_correlation(const SeqA &as, const unsigned int lag)
     {
-        const double a_auto_covariance = auto_covariance(as, lag);
-        const double a_variance = variance(as);
-
-        return a_auto_covariance / a_variance;
+        return auto_covariance(as, lag) / variance(as);
     }
 
     template <typename SeqA>
