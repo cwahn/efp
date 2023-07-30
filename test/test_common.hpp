@@ -7,26 +7,35 @@
 
 using namespace efp;
 
-Array<double, 0> static_array_0{};
-Array<double, 3> static_array_3{1., 2., 3.};
-Array<double, 5> static_array_5{1., 2., 3., 4., 5.};
+const double c_array_3[3] = {1., 2., 3.};
+const double c_array_5[5] = {1., 2., 3., 4., 5.};
 
-StaticVector<double, 0> static_vector_0{};
-StaticVector<double, 3> static_vector_3{1., 2., 3.};
-StaticVector<double, 5> static_vector_5{1., 2., 3., 4., 5.};
+const std::array<double, 0> std_array_0{};
+const std::array<double, 3> std_array_3{1., 2., 3.};
+const std::array<double, 5> std_array_5{1., 2., 3., 4., 5.};
 
-Vector<double> dynamic_vector_0{};
-Vector<double> dynamic_vector_3{1., 2., 3.};
-Vector<double> dynamic_vector_5{1., 2., 3., 4., 5.};
+const std::vector<double> std_vector_0{};
+const std::vector<double> std_vector_3{1., 2., 3.};
+const std::vector<double> std_vector_5{1., 2., 3., 4., 5.};
 
-int c_array_3[3] = {1, 2, 3};
-int c_array_5[5] = {1, 2, 3, 4, 5};
+const Array<double, 0> array_0{};
+const Array<double, 3> array_3{1., 2., 3.};
+const Array<double, 5> array_5{1., 2., 3., 4., 5.};
 
-std::array<double, 3> std_array_3{1., 2., 3.};
-std::array<double, 5> std_array_5{1., 2., 3., 4., 5.};
+const ArrayVector<double, 0> array_vector_0{};
+const ArrayVector<double, 3> array_vector_3{1., 2., 3.};
+const ArrayVector<double, 5> array_vector_5{1., 2., 3., 4., 5.};
 
-std::vector<double> std_vector_0{};
-std::vector<double> std_vector_3{1., 2., 3.};
-std::vector<double> std_vector_5{1., 2., 3., 4., 5.};
+const Vector<double> vector_0{};
+const Vector<double> vector_3{1., 2., 3.};
+const Vector<double> vector_5{1., 2., 3., 4., 5.};
+
+const ArrayView<const double, std_array_0.size()> array_view_0{std_array_0.data()};
+const ArrayView<const double, 3> array_view_3{&c_array_3[0]};
+const ArrayView<const double, array_5.size()> array_view_5{array_5.data()};
+
+const VectorView<const double> vector_view_0{std_array_0.data(), 0};
+const VectorView<const double> vector_view_3{&c_array_3[0], 3};
+const VectorView<const double> vector_view_5{array_5.data(), array_5.size()};
 
 #endif

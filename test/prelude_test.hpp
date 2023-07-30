@@ -105,19 +105,19 @@ TEST_CASE("append")
     SECTION("Array")
     {
         Array<double, 6> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(std_array_3, static_array_3) == res);
+        CHECK(append(std_array_3, array_3) == res);
     }
 
-    SECTION("StaticVector")
+    SECTION("ArrayVector")
     {
-        StaticVector<double, 6> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(static_vector_3, static_array_3) == res);
+        ArrayVector<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(array_vector_3, array_3) == res);
     }
 
     SECTION("Array")
     {
         Vector<double> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(std_array_3, dynamic_vector_3) == res);
+        CHECK(append(std_array_3, vector_3) == res);
     }
 }
 
@@ -158,6 +158,16 @@ TEST_CASE("for_each")
 
     for_each(add_product, std_vector_3, c_array_3);
     CHECK(res_4 == 14.);
+
+    double res_5 = 0.;
+
+    auto add_product_2 = [&](double x1, double x2)
+    {
+        res_5 += x1 * x2;
+    };
+
+    for_each(add_product_2, vector_view_3, vector_view_5);
+    CHECK(res_5 == 14.);
 }
 
 TEST_CASE("for_eachi")
@@ -184,6 +194,18 @@ TEST_CASE("for_eachi")
 
     for_eachi(set_42, res_3);
     CHECK(res_3 == Vector<int>{42, 42, 42});
+
+    SECTION("ArrayView")
+    {
+        int c_arr[3] = {0, 1, 2};
+        ArrayView<int, 3> arr_view{&c_arr[0]};
+
+        for_eachi([](int &x)
+                  { x = 2 * x; },
+                  arr_view);
+
+        CHECK((c_arr[0] == 0 && c_arr[1] == 2 && c_arr[2] == 4));
+    }
 }
 
 TEST_CASE("map")
@@ -223,12 +245,12 @@ TEST_CASE("filter")
 {
     SECTION("even c style array")
     {
-        auto is_even = [](int x)
+        auto is_even = [](double x)
         {
-            return x % 2 == 0;
+            return (int)x % 2 == 0;
         };
 
-        CHECK(filter(is_even, c_array_3) == StaticVector<int, 3>{2});
+        CHECK(filter(is_even, c_array_3) == ArrayVector<double, 3>{2.});
     }
 
     SECTION("odd std::vector")

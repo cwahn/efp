@@ -8,37 +8,37 @@
 namespace efp
 {
     template <typename A, std::size_t N>
-    class ArrayProxy : public std::array<A, N>
+    class ArrayProxy_ : public std::array<A, N>
     {
     public:
         using std::array<A, N>::array;
-        ArrayProxy(const ArrayProxy &) = delete;
-        ArrayProxy(ArrayProxy &&) = delete;
+        ArrayProxy_(const ArrayProxy_ &) = delete;
+        ArrayProxy_(ArrayProxy_ &&) = delete;
 
         // Assignment operators
-        ArrayProxy &operator=(const ArrayProxy &) = default;
-        ArrayProxy &operator=(ArrayProxy &&) = default;
+        ArrayProxy_ &operator=(const ArrayProxy_ &) = default;
+        ArrayProxy_ &operator=(ArrayProxy_ &&) = default;
 
         // Variadic constructor for the derived class
         template <typename... Args>
-        ArrayProxy(Args &&...args) : std::array<A, N>{{std::forward<Args>(args)...}} {}
+        ArrayProxy_(Args &&...args) : std::array<A, N>{{std::forward<Args>(args)...}} {}
     };
 
     template <typename A, std::size_t N>
-    class Array : public ArrayProxy<A, N>
+    class Array : public ArrayProxy_<A, N>
     {
     public:
-        using ArrayProxy<A, N>::ArrayProxy;
+        using ArrayProxy_<A, N>::ArrayProxy_;
         Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
         Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
 
-        // Assignment operator   
+        // Assignment operator
         Array &operator=(const Array &) = default;
         Array &operator=(Array &&) = default;
 
         // Variadic constructor for the derived class
         template <typename... Args>
-        Array(Args &&...args) : ArrayProxy<A, N>{std::forward<Args>(args)...} {}
+        Array(Args &&...args) : ArrayProxy_<A, N>{std::forward<Args>(args)...} {}
     };
 
     // template <typename A, std::size_t N>
@@ -126,25 +126,25 @@ namespace efp
     // }
 
     template <typename A, std::size_t Capacity>
-    class StaticVector
+    class ArrayVector
     {
     public:
         using value_type = A;
         using size_type = std::size_t;
 
         // Constructors
-        StaticVector() : size_(0) {}
-        StaticVector(const size_t s) : size_(0) {} // Unpredicatable data_
-        StaticVector(const StaticVector &);        // Not emplemented by design for RVO, NRVO enforcement
-        StaticVector(StaticVector &&);             // Not emplemented by design for RVO, NRVO enforcement
+        ArrayVector() : size_(0) {}
+        ArrayVector(const size_t s) : size_(0) {} // Unpredicatable data_
+        ArrayVector(const ArrayVector &);         // Not emplemented by design for RVO, NRVO enforcement
+        ArrayVector(ArrayVector &&);              // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Args>
-        StaticVector(const Args &...args)
+        ArrayVector(const Args &...args)
             : data_{args...},
               size_(sizeof...(args)) {}
 
         // Assignment
 
-        StaticVector &operator=(const StaticVector &other)
+        ArrayVector &operator=(const ArrayVector &other)
         {
             if (this != &other)
             {
@@ -230,7 +230,7 @@ namespace efp
     };
 
     template <typename A, std::size_t N>
-    bool operator==(const StaticVector<A, N> &lhs, const StaticVector<A, N> &rhs)
+    bool operator==(const ArrayVector<A, N> &lhs, const ArrayVector<A, N> &rhs)
     {
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
@@ -238,23 +238,23 @@ namespace efp
     // Vector
 
     template <typename A>
-    class VectorProxy : public std::vector<A>
+    class VectorProxy_ : public std::vector<A>
     {
     public:
         using std::vector<A>::vector;
-        VectorProxy(const VectorProxy &) = delete;
-        VectorProxy(VectorProxy &&) = delete;
+        VectorProxy_(const VectorProxy_ &) = delete;
+        VectorProxy_(VectorProxy_ &&) = delete;
 
         // Assignment operators
-        VectorProxy &operator=(const VectorProxy &) = default;
-        VectorProxy &operator=(VectorProxy &&) = default;
+        VectorProxy_ &operator=(const VectorProxy_ &) = default;
+        VectorProxy_ &operator=(VectorProxy_ &&) = default;
     };
 
     template <typename A>
-    class Vector : public VectorProxy<A>
+    class Vector : public VectorProxy_<A>
     {
     public:
-        using VectorProxy<A>::VectorProxy;
+        using VectorProxy_<A>::VectorProxy_;
         Vector(const Vector &); // Not emplemented by design for RVO, NRVO enforcement
         Vector(Vector &&);      // Not emplemented by design for RVO, NRVO enforcement
 
@@ -419,6 +419,139 @@ namespace efp
     //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     // }
 
+    // ArrayView
+
+    template <typename A, size_t N>
+    class ArrayView
+    {
+    public:
+        using value_type = A;
+        using size_type = std::size_t;
+
+        ArrayView(A *const p_data)
+            : data_(p_data)
+        {
+        }
+        ~ArrayView()
+        {
+        }
+
+        A &operator[](size_type index)
+        {
+            return data_[index];
+        }
+
+        constexpr const A &operator[](size_type index) const
+        {
+            return data_[index];
+        }
+
+        inline constexpr size_type size() const noexcept
+        {
+            return N;
+        }
+
+        // Iterators
+        A *begin() noexcept
+        {
+            return data_;
+        }
+
+        const A *begin() const noexcept
+        {
+            return data_;
+        }
+
+        A *end() noexcept
+        {
+            return data_ + N;
+        }
+
+        const A *end() const noexcept
+        {
+            return data_ + N;
+        }
+
+        bool empty() const noexcept
+        {
+            return N == 0;
+        }
+
+    private:
+        A *const data_;
+    };
+
+    // VectorView
+
+    template <typename A>
+    class VectorView
+    {
+    public:
+        using value_type = A;
+        using size_type = std::size_t;
+
+        VectorView(A *const p_data, const size_t size)
+            : data_(p_data), size_(size)
+        {
+        }
+        ~VectorView()
+        {
+        }
+
+        A &operator[](const size_type index)
+        {
+            return data_[index];
+        }
+
+        const A &operator[](const size_type index) const
+        {
+            return data_[index];
+        }
+
+        // Capacity
+        // ? Do I need this?
+        size_type capacity() const noexcept
+        {
+            return size_;
+        }
+
+        // size
+        size_type size() const noexcept
+        {
+            return size_;
+        }
+
+        // Iterators
+        A *begin() noexcept
+        {
+            return data_;
+        }
+
+        const A *begin() const noexcept
+        {
+            return data_;
+        }
+
+        A *end() noexcept
+        {
+            return data_ + size_;
+        }
+
+        const A *end() const noexcept
+        {
+            return data_ + size_;
+        }
+
+        bool empty() const noexcept
+        {
+            return size_ == 0;
+        }
+
+    private:
+        A *const data_;
+        const size_type size_;
+    };
+
     // IsStaticCapacity
 
     template <typename SeqA>
@@ -432,7 +565,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct IsStaticCapacity<StaticVector<A, N>> : std::true_type
+    struct IsStaticCapacity<ArrayVector<A, N>> : std::true_type
     {
     };
 
@@ -491,7 +624,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct StaticCapacity<StaticVector<A, N>>
+    struct StaticCapacity<ArrayVector<A, N>>
     {
         static constexpr size_t value = N;
     };

@@ -125,7 +125,7 @@ namespace efp
             Conditional_t<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, sum_v(StaticCapacity<Seqs>::value...)>,
-                StaticVector<A, sum_v(StaticCapacity<Seqs>::value...)>>,
+                ArrayVector<A, sum_v(StaticCapacity<Seqs>::value...)>>,
             Vector<A>>;
 
     // AppendReturn_t
@@ -235,7 +235,7 @@ namespace efp
             Conditional_t<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, MinStaticCapacity<Seqs...>::value>,
-                StaticVector<A, MinStaticCapacity<Seqs...>::value>>,
+                ArrayVector<A, MinStaticCapacity<Seqs...>::value>>,
             Vector<A>>;
 
     // MapReturn_t
@@ -267,13 +267,13 @@ namespace efp
     // auto map(const F &f, const Seqs &...seqs)
     //     -> EnableIf_t<
     //         all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-    //         StaticVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+    //         ArrayVector<CallReturn_t<F, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     // {
     //     using R = CallReturn_t<F, Element_t<Seqs>...>;
 
     //     const size_t result_length = min_length(seqs...);
 
-    //     StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+    //     ArrayVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
 
     //     for (int i = 0; i < result_length; ++i)
     //     {
@@ -332,7 +332,7 @@ namespace efp
     using FilterReturn_t =
         Conditional_t<
             IsStaticCapacity<SeqA>::value,
-            StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
+            ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
             Vector<Element_t<SeqA>>>;
 
     // filter
@@ -341,9 +341,9 @@ namespace efp
     auto filter(const F &f, const SeqA &as)
         -> EnableIf_t<
             IsStaticCapacity<SeqA>::value,
-            StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
+            ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
     {
-        StaticVector<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
+        ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
 
         for (int i = 0; i < length(as); ++i)
         {
@@ -569,13 +569,13 @@ namespace efp
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+            ArrayVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
         const size_t result_length = min_length(seqs...);
 
-        StaticVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+        ArrayVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -632,13 +632,13 @@ namespace efp
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            StaticVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
+            ArrayVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = size_t_product(length(seqs)...);
 
-        StaticVector<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
+        ArrayVector<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
         size_t i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)

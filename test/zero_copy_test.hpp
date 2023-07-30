@@ -14,9 +14,9 @@ TEST_CASE("initialization")
         CHECK(a.size() == 3);
     }
 
-    SECTION("StaticVector")
+    SECTION("ArrayVector")
     {
-        StaticVector<int, 4> a = {1, 2, 3};
+        ArrayVector<int, 4> a = {1, 2, 3};
 
         CHECK(a.size() == 3);
         CHECK(a.capacity() == 4);
@@ -40,12 +40,12 @@ TEST_CASE("initialization")
     }
 }
 
-Array<int, 3> static_array_rvo()
+Array<int, 3> array_rvo()
 {
     return Array<int, 3>{1, 2, 3};
 };
 
-Array<int, 3> static_array_nrvo()
+Array<int, 3> array_nrvo()
 {
     Array<int, 3> result{0, 0, 0};
 
@@ -56,14 +56,14 @@ Array<int, 3> static_array_nrvo()
     return result;
 };
 
-StaticVector<int, 3> static_vector_rvo()
+ArrayVector<int, 3> array_vector_rvo()
 {
-    return StaticVector<int, 3>{1, 2, 3};
+    return ArrayVector<int, 3>{1, 2, 3};
 };
 
-StaticVector<int, 3> static_vector_nrvo()
+ArrayVector<int, 3> array_vector_nrvo()
 {
-    StaticVector<int, 3> result{0, 0, 0};
+    ArrayVector<int, 3> result{0, 0, 0};
 
     result[0] = 1;
     result[1] = 2;
@@ -72,12 +72,12 @@ StaticVector<int, 3> static_vector_nrvo()
     return result;
 };
 
-Vector<int> dynamic_vector_rvo()
+Vector<int> vector_rvo()
 {
     return Vector<int>{1, 2, 3};
 };
 
-Vector<int> dynamic_vector_nrvo()
+Vector<int> vector_nrvo()
 {
     Vector<int> result{0, 0, 0};
 
@@ -92,20 +92,20 @@ TEST_CASE("copy elision")
 {
     SECTION("Array")
     {
-        CHECK(Array<int, 3>{1, 2, 3} == static_array_rvo());
-        CHECK(Array<int, 3>{1, 2, 3} == static_array_nrvo());
+        CHECK(Array<int, 3>{1, 2, 3} == array_rvo());
+        CHECK(Array<int, 3>{1, 2, 3} == array_nrvo());
     }
 
-    SECTION("StaticVector")
+    SECTION("ArrayVector")
     {
-        CHECK(StaticVector<int, 3>{1, 2, 3} == static_vector_rvo());
-        CHECK(StaticVector<int, 3>{1, 2, 3} == static_vector_nrvo());
+        CHECK(ArrayVector<int, 3>{1, 2, 3} == array_vector_rvo());
+        CHECK(ArrayVector<int, 3>{1, 2, 3} == array_vector_nrvo());
     }
 
     SECTION("Vector")
     {
-        CHECK(Vector<int>{1, 2, 3} == dynamic_vector_rvo());
-        CHECK(Vector<int>{1, 2, 3} == dynamic_vector_nrvo());
+        CHECK(Vector<int>{1, 2, 3} == vector_rvo());
+        CHECK(Vector<int>{1, 2, 3} == vector_nrvo());
     }
 }
 
@@ -120,10 +120,10 @@ TEST_CASE("assignment")
         CHECK(a == b);
     }
 
-    SECTION("StaticVector")
+    SECTION("ArrayVector")
     {
-        StaticVector<double, 3> a{1., 2., 3.};
-        StaticVector<double, 3> b;
+        ArrayVector<double, 3> a{1., 2., 3.};
+        ArrayVector<double, 3> b;
 
         b = a;
         CHECK(a == b);
