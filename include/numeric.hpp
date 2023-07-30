@@ -110,6 +110,12 @@ namespace efp
     {
         return sum(as) / double(length(as));
     }
+
+    template <typename SeqA>
+    constexpr double rms(const SeqA &as)
+    {
+        return sqrt(mean(map(square<Element_t<SeqA>>, as)));
+    }
 }
 
 #endif

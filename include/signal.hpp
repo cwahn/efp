@@ -34,22 +34,22 @@ namespace efp
     }
 
     template <typename SeqA, typename SeqB>
-    double rms(const SeqA &as, const SeqB &bs)
+    double rmse(const SeqA &as, const SeqB &bs)
     {
         auto mse_value = mse(as, bs);
         return sqrt(mse_value);
     }
 
     template <typename SeqA, typename SeqB>
-    double nrms_mean(const SeqA &as, const SeqB &bs)
+    double nrmse_mean(const SeqA &as, const SeqB &bs)
     {
-        return rms(as, bs) / double(mean(bs));
+        return rmse(as, bs) / double(mean(bs));
     }
 
     template <typename SeqA, typename SeqB>
-    double nrms_max_min(const SeqA &as, const SeqB &bs)
+    double nrmse_max_min(const SeqA &as, const SeqB &bs)
     {
-        return rms(as, bs) / double(max_min(bs));
+        return rmse(as, bs) / double(max_min(bs));
     }
 
     template <typename SeqA>
@@ -83,7 +83,7 @@ namespace efp
             return (a - a_mean) * (b - b_mean);
         };
 
-        return map(covar, as, bs) / double(length(as));
+        return sum(map(covar, as, bs)) / double(length(as));
     }
 
     template <typename SeqA, typename SeqB>

@@ -61,27 +61,27 @@ TEST_CASE("mse")
     }
 }
 
-TEST_CASE("rms")
+TEST_CASE("rmse")
 {
     SECTION("c style")
     {
         int zeros[3] = {0, 0, 0};
-        CHECK(rms(c_array_3, c_array_3) == 0);
-        CHECK(rms(c_array_3, zeros) == sqrt(14 / 3.));
+        CHECK(rmse(c_array_3, c_array_3) == 0);
+        CHECK(rmse(c_array_3, zeros) == sqrt(14 / 3.));
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(rms(std_array_3, std_array_3) == 0.);
-        CHECK(rms(std_array_3, zeros) == sqrt(14. / 3.));
+        CHECK(rmse(std_array_3, std_array_3) == 0.);
+        CHECK(rmse(std_array_3, zeros) == sqrt(14. / 3.));
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> zeros = {0., 0., 0.};
-        CHECK(rms(std_vector_3, std_vector_3) == 0.);
-        CHECK(rms(std_vector_3, zeros) == sqrt(14. / 3.));
+        CHECK(rmse(std_vector_3, std_vector_3) == 0.);
+        CHECK(rmse(std_vector_3, zeros) == sqrt(14. / 3.));
     }
 }
 
@@ -90,22 +90,22 @@ TEST_CASE("nrms")
     SECTION("c style")
     {
         int twos[3] = {2, 2, 2};
-        CHECK(nrms_mean(c_array_3, c_array_3) == 0);
-        CHECK(nrms_mean(c_array_3, twos) == sqrt(2 / 3.) / 2.);
+        CHECK(nrmse_mean(c_array_3, c_array_3) == 0);
+        CHECK(nrmse_mean(c_array_3, twos) == sqrt(2 / 3.) / 2.);
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> twos = {2., 2., 2.};
-        CHECK(nrms_mean(std_array_3, std_array_3) == 0.);
-        CHECK(nrms_mean(std_array_3, twos) == sqrt(2. / 3.) / 2.);
+        CHECK(nrmse_mean(std_array_3, std_array_3) == 0.);
+        CHECK(nrmse_mean(std_array_3, twos) == sqrt(2. / 3.) / 2.);
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> twos = {2., 2., 2.};
-        CHECK(nrms_mean(std_vector_3, std_vector_3) == 0.);
-        CHECK(nrms_mean(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
+        CHECK(nrmse_mean(std_vector_3, std_vector_3) == 0.);
+        CHECK(nrmse_mean(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
     }
 }
 
@@ -139,7 +139,7 @@ TEST_CASE("remove_dc")
         auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
-        CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
     }
 
     SECTION("std::array")
@@ -154,7 +154,7 @@ TEST_CASE("remove_dc")
         auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
-        CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
     }
 
     SECTION("std::vector")
@@ -169,7 +169,7 @@ TEST_CASE("remove_dc")
         auto ys_ref = map(f_ref, xs);
         auto dc_removed = remove_dc(ys);
 
-        CHECK(nrms_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
     }
 }
 
@@ -352,7 +352,7 @@ TEST_CASE("detrend")
 
         auto detrended = detrend(ys);
 
-        CHECK(rms(detrended, ys_ref) < 0.5);
+        CHECK(rmse(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::array")
@@ -370,7 +370,7 @@ TEST_CASE("detrend")
 
         auto detrended = detrend(ys);
 
-        CHECK(rms(detrended, ys_ref) < 0.5);
+        CHECK(rmse(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::vectors")
@@ -391,7 +391,7 @@ TEST_CASE("detrend")
 
         auto detrended = detrend(ys);
 
-        CHECK(rms(detrended, ys_ref) < 0.5);
+        CHECK(rmse(detrended, ys_ref) < 0.5);
     }
 }
 

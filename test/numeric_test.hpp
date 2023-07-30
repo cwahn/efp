@@ -98,4 +98,22 @@ TEST_CASE("mean")
     }
 }
 
+TEST_CASE("rms")
+{
+    SECTION("c style ")
+    {
+        CHECK(rms(c_array_5) == 3.3166247903554);
+    }
+
+    SECTION("std::array ")
+    {
+        CHECK(rms(std_array_5) == 3.3166247903554);
+    }
+
+    SECTION("std::vectors")
+    {
+        CHECK(rms(std_vector_5) == 3.3166247903554);
+    }
+}
+
 #endif
