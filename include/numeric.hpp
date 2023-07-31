@@ -8,67 +8,67 @@
 namespace efp
 {
     template <typename A, typename B>
-    constexpr A max(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A max(const A &lhs, const B &rhs)
     {
         return max_v(lhs, rhs);
     }
 
     template <typename A, typename B>
-    constexpr A min(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A min(const A &lhs, const B &rhs)
     {
         return min_v(lhs, rhs);
     }
 
     template <typename A, typename B>
-    constexpr A plus(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A plus(const A &lhs, const B &rhs)
     {
         return lhs + rhs;
     }
 
     template <typename A, typename B>
-    constexpr A minus(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A minus(const A &lhs, const B &rhs)
     {
         return lhs - rhs;
     }
 
     template <typename A, typename B>
-    constexpr A times(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A times(const A &lhs, const B &rhs)
     {
         return lhs * rhs;
     }
 
     template <typename A, typename B>
-    constexpr A devide(ConstParam_t<A> lhs, ConstParam_t<B> rhs)
+    constexpr A devide(const A &lhs, const B &rhs)
     {
         return lhs / rhs;
     }
 
     template <typename A>
-    constexpr A square(ConstParam_t<A> a)
+    constexpr A square(const A &a)
     {
         return a * a;
     }
 
     template <typename A>
-    constexpr A sqrt(ConstParam_t<A> a)
+    constexpr A sqrt(const A &a)
     {
         return std::sqrt(a);
     }
 
     template <typename A>
-    constexpr A sin(ConstParam_t<A> a)
+    constexpr A sin(const A &a)
     {
         return std::sin(a);
     }
 
     template <typename A>
-    constexpr A cos(ConstParam_t<A> a)
+    constexpr A cos(const A &a)
     {
         return std::cos(a);
     }
 
     template <typename A>
-    constexpr A tan(ConstParam_t<A> a)
+    constexpr A tan(const A &a)
     {
         return std::tan(a);
     }

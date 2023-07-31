@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < n; ++i)
     {
-        ys[i] = square<double>(xs[i]);
+        ys[i] = square(xs[i]);
     }
     for (int i = 0; i < n; ++i)
     {
