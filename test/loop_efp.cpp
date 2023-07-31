@@ -27,12 +27,12 @@ int main(int argc, char const *argv[])
 
     auto isquare = [&](double x)
     {
-        return x = square(x);
+        return x = square<double>(x);
     };
 
     auto isqrt = [&](double x)
     {
-        return x = sqrt(x);
+        return x = sqrt<double>(x);
     };
 
     auto ys = map(square<double>, xs);
