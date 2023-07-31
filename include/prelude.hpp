@@ -136,7 +136,7 @@ namespace efp
     // append
 
     template <typename A, typename B>
-    Unit append_(A &result, size_t &idx, const B &seq)
+    Unit append_(A &result, int &idx, const B &seq)
     {
         for (auto elem : seq)
         {
@@ -153,7 +153,7 @@ namespace efp
             AppendReturn_t<Head, Tail...>>
     {
         AppendReturn_t<Head, Tail...> result;
-        size_t idx{0};
+        int idx{0};
 
         execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
 
@@ -166,10 +166,10 @@ namespace efp
             !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
             AppendReturn_t<Head, Tail...>>
     {
-        const size_t result_length = sum_v((size_t)length(head), (size_t)length(tail)...);
+        const size_t result_length = sum_v((int)length(head), (int)length(tail)...);
 
         AppendReturn_t<Head, Tail...> result(result_length);
-        size_t idx{0};
+        int idx{0};
 
         execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
 
@@ -205,7 +205,7 @@ namespace efp
     void for_each(const F &f, const Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t seq_length = min_length(seqs...);
+        const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
         {
@@ -219,7 +219,7 @@ namespace efp
     void for_eachi(const F &f, Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t seq_length = min_length(seqs...);
+        const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
         {
@@ -270,7 +270,7 @@ namespace efp
             !all_v(IsStaticLength<Seqs>::value...),
             MapReturn_t<F, Seqs...>>
     {
-        const size_t result_length = min_length(seqs...);
+        const int result_length = min_length(seqs...);
 
         MapReturn_t<F, Seqs...> result(result_length);
 
@@ -468,7 +468,7 @@ namespace efp
     void for_each_with_index(const F &f, const Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t seq_length = min_length(seqs...);
+        const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
         {
@@ -482,7 +482,7 @@ namespace efp
     void for_each_with_indexi(const F &f, Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t seq_length = min_length(seqs...);
+        const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
         {
@@ -502,7 +502,7 @@ namespace efp
     void cartesian_for_each(const F &f, const SeqA &as, const Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t as_length = length(as);
+        const int as_length = length(as);
         Element_t<SeqA> a;
 
         for (int i = 0; i < as_length; ++i)
@@ -529,7 +529,7 @@ namespace efp
     void cartesian_for_eachi(const F &f, SeqA &as, Seqs &...seqs)
     {
         // ? Will it be optimized out to a compile time constatnt?
-        const size_t as_length = length(as);
+        const int as_length = length(as);
         Element_t<SeqA> a;
 
         for (int i = 0; i < as_length; ++i)
@@ -572,7 +572,7 @@ namespace efp
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
-        const size_t result_length = min_length(seqs...);
+        const int result_length = min_length(seqs...);
 
         ArrayVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
 
@@ -592,7 +592,7 @@ namespace efp
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
-        const size_t result_length = min_length(seqs...);
+        const int result_length = min_length(seqs...);
 
         Vector<R> result(result_length);
 
@@ -615,7 +615,7 @@ namespace efp
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         Array<R, StaticCapacityProduct<Seqs...>::value> result;
-        size_t i = 0;
+        int i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
         {
@@ -638,7 +638,7 @@ namespace efp
         const size_t result_length = size_t_product(length(seqs)...);
 
         ArrayVector<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
-        size_t i = 0;
+        int i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
         {
@@ -661,7 +661,7 @@ namespace efp
         const size_t result_length = size_t_product(length(seqs)...);
 
         Vector<R> result(result_length);
-        size_t i = 0;
+        int i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
         {
@@ -694,7 +694,9 @@ namespace efp
     template <typename SeqA>
     int elem_index(const Element_t<SeqA> a, const SeqA &as)
     {
-        for (size_t i = 0; i < length(as); ++i)
+        const int length_a = length(as);
+
+        for (int i = 0; i < length_a; ++i)
         {
             if (as[i] == a)
             {

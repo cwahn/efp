@@ -45,12 +45,7 @@ namespace efp
     template <typename R, typename SeqA, typename SeqB>
     R rmse(const SeqA &as, const SeqB &bs)
     {
-<<<<<<< HEAD
         return sqrt(mse<R>(as, bs));
-=======
-        auto mse_value = mse<R>(as, bs);
-        return sqrt<R>(mse_value);
->>>>>>> 9e4c10f2d54cdcf0ea90c763f678fc41532f1363
     }
 
     template <typename R, typename SeqA, typename SeqB>
@@ -184,13 +179,8 @@ namespace efp
         const auto a_deviations = map(minus_a_mean, as);
         const auto b_deviations = map(minus_b_mean, bs);
 
-<<<<<<< HEAD
         const auto ss_ab = sum(map(times<R, R>, a_deviations, b_deviations));
         const auto ss_aa = sum(map(square<R>, a_deviations));
-=======
-        const R ss_ab = sum(map(times<R, R>, a_deviations, b_deviations));
-        const R ss_aa = sum(map(square<R>, a_deviations));
->>>>>>> 9e4c10f2d54cdcf0ea90c763f678fc41532f1363
 
         const auto beta_1 = ss_ab / ss_aa;
         const auto beta_2 = b_mean - (beta_1 * a_mean);
