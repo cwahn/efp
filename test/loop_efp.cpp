@@ -55,7 +55,7 @@ int main(int argc, char const *argv[])
     // 1
     // auto ys = map(sqrt<double>, map(square<double>, xs));
 
-    double result = mean(ys);
+    double result = mean<double>(ys);
 
     std::cout << "Result: " << result << std::endl;
 

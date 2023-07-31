@@ -675,6 +675,8 @@ namespace efp
         return result;
     }
 
+    // elem_index
+
     // // todo No std
     // template <typename SeqA>
     // std::optional<size_t> elem_index(const Element_t<SeqA> a, const SeqA &as)
@@ -704,5 +706,16 @@ namespace efp
 
         return -1;
     }
+
+    // take
+
+    // template <typename SeqA>
+    // VectorView<Element_t<SeqA>> take(int n, SeqA &as)
+    // {
+    //     const auto length_as = length(as);
+    //     const auto length = n < length_as ? n : length_as;
+
+    //     return VectorView<Element_t<SeqA>>(&(as[0]), length);
+    // }
 }
 #endif

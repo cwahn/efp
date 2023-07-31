@@ -18,22 +18,22 @@ TEST_CASE("sse")
     SECTION("c style")
     {
         int zeros[3] = {0, 0, 0};
-        CHECK(sse(c_array_3, c_array_3) == 0);
-        CHECK(sse(c_array_3, zeros) == 14);
+        CHECK(sse<double>(c_array_3, c_array_3) == 0);
+        CHECK(sse<double>(c_array_3, zeros) == 14);
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(sse(std_array_3, std_array_3) == 0.);
-        CHECK(sse(std_array_3, zeros) == 14.);
+        CHECK(sse<double>(std_array_3, std_array_3) == 0.);
+        CHECK(sse<double>(std_array_3, zeros) == 14.);
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> zeros = {0., 0., 0.};
-        CHECK(sse(std_vector_3, std_vector_3) == 0.);
-        CHECK(sse(std_vector_3, zeros) == 14.);
+        CHECK(sse<double>(std_vector_3, std_vector_3) == 0.);
+        CHECK(sse<double>(std_vector_3, zeros) == 14.);
     }
 }
 
@@ -42,22 +42,22 @@ TEST_CASE("mse")
     SECTION("c style")
     {
         int zeros[3] = {0, 0, 0};
-        CHECK(mse(c_array_3, c_array_3) == 0);
-        CHECK(mse(c_array_3, zeros) == 14 / 3.);
+        CHECK(mse<double>(c_array_3, c_array_3) == 0);
+        CHECK(mse<double>(c_array_3, zeros) == 14 / 3.);
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(mse(std_array_3, std_array_3) == 0.);
-        CHECK(mse(std_array_3, zeros) == 14. / 3.);
+        CHECK(mse<double>(std_array_3, std_array_3) == 0.);
+        CHECK(mse<double>(std_array_3, zeros) == 14. / 3.);
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> zeros = {0., 0., 0.};
-        CHECK(mse(std_vector_3, std_vector_3) == 0.);
-        CHECK(mse(std_vector_3, zeros) == 14. / 3.);
+        CHECK(mse<double>(std_vector_3, std_vector_3) == 0.);
+        CHECK(mse<double>(std_vector_3, zeros) == 14. / 3.);
     }
 }
 
@@ -66,22 +66,22 @@ TEST_CASE("rmse")
     SECTION("c style")
     {
         int zeros[3] = {0, 0, 0};
-        CHECK(rmse(c_array_3, c_array_3) == 0);
-        CHECK(rmse(c_array_3, zeros) == sqrt(14 / 3.));
+        CHECK(rmse<double>(c_array_3, c_array_3) == 0);
+        CHECK(rmse<double>(c_array_3, zeros) == sqrt(14 / 3.));
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(rmse(std_array_3, std_array_3) == 0.);
-        CHECK(rmse(std_array_3, zeros) == sqrt(14. / 3.));
+        CHECK(rmse<double>(std_array_3, std_array_3) == 0.);
+        CHECK(rmse<double>(std_array_3, zeros) == sqrt(14. / 3.));
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> zeros = {0., 0., 0.};
-        CHECK(rmse(std_vector_3, std_vector_3) == 0.);
-        CHECK(rmse(std_vector_3, zeros) == sqrt(14. / 3.));
+        CHECK(rmse<double>(std_vector_3, std_vector_3) == 0.);
+        CHECK(rmse<double>(std_vector_3, zeros) == sqrt(14. / 3.));
     }
 }
 
@@ -90,22 +90,22 @@ TEST_CASE("nrms")
     SECTION("c style")
     {
         int twos[3] = {2, 2, 2};
-        CHECK(nrmse_mean(c_array_3, c_array_3) == 0);
-        CHECK(nrmse_mean(c_array_3, twos) == sqrt(2 / 3.) / 2.);
+        CHECK(nrmse_mean<double>(c_array_3, c_array_3) == 0);
+        CHECK(nrmse_mean<double>(c_array_3, twos) == sqrt(2 / 3.) / 2.);
     }
 
     SECTION("std::array")
     {
         std::array<double, 3> twos = {2., 2., 2.};
-        CHECK(nrmse_mean(std_array_3, std_array_3) == 0.);
-        CHECK(nrmse_mean(std_array_3, twos) == sqrt(2. / 3.) / 2.);
+        CHECK(nrmse_mean<double>(std_array_3, std_array_3) == 0.);
+        CHECK(nrmse_mean<double>(std_array_3, twos) == sqrt(2. / 3.) / 2.);
     }
 
     SECTION("std::vectors")
     {
         std::vector<double> twos = {2., 2., 2.};
-        CHECK(nrmse_mean(std_vector_3, std_vector_3) == 0.);
-        CHECK(nrmse_mean(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
+        CHECK(nrmse_mean<double>(std_vector_3, std_vector_3) == 0.);
+        CHECK(nrmse_mean<double>(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
     }
 }
 
@@ -137,9 +137,9 @@ TEST_CASE("remove_dc")
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
-        auto dc_removed = remove_dc(ys);
+        auto dc_removed = remove_dc<double>(ys);
 
-        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min<double>(dc_removed, ys_ref) < 0.05);
     }
 
     SECTION("std::array")
@@ -152,9 +152,9 @@ TEST_CASE("remove_dc")
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
-        auto dc_removed = remove_dc(ys);
+        auto dc_removed = remove_dc<double>(ys);
 
-        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min<double>(dc_removed, ys_ref) < 0.05);
     }
 
     SECTION("std::vector")
@@ -167,9 +167,9 @@ TEST_CASE("remove_dc")
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
-        auto dc_removed = remove_dc(ys);
+        auto dc_removed = remove_dc<double>(ys);
 
-        CHECK(nrmse_max_min(dc_removed, ys_ref) < 0.05);
+        CHECK(nrmse_max_min<double>(dc_removed, ys_ref) < 0.05);
     }
 }
 
@@ -193,7 +193,7 @@ TEST_CASE("linear_regression")
         auto ys = map(f, xs);
 
         double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
         // CHECK(b_hat == b);
         // CHECK(a_hat == a);
@@ -213,7 +213,7 @@ TEST_CASE("linear_regression")
         auto ys = map(f, xs);
 
         double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression(std_array_xs, ys);
+        std::tie(a_hat, b_hat) = linear_regression<double>(std_array_xs, ys);
 
         // CHECK(b_hat == b);
         // CHECK(a_hat == a);
@@ -230,7 +230,7 @@ TEST_CASE("linear_regression")
         auto ys = map(f, xs);
 
         double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
         // CHECK(b_hat == b);
         // CHECK(a_hat == a);
@@ -247,7 +247,7 @@ TEST_CASE("linear_regression")
         auto ys = map(f, xs);
 
         double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
         // CHECK(b_hat == b);
         // CHECK(a_hat == a);
@@ -276,7 +276,7 @@ TEST_CASE("linear_regression")
 //                                  { return x }) auto ys = map_with_index(f);
 
 //         double a_hat, b_hat;
-//         std::tie(a_hat, b_hat) = linear_regression(std_array_xs, ys);
+//         std::tie(a_hat, b_hat) = linear_regression<double>(std_array_xs, ys);
 
 //         // CHECK(b_hat == b);
 //         // CHECK(a_hat == a);
@@ -293,7 +293,7 @@ TEST_CASE("linear_regression")
 //         auto ys = map(f, xs);
 
 //         double a_hat, b_hat;
-//         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+//         std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
 //         // CHECK(b_hat == b);
 //         // CHECK(a_hat == a);
@@ -310,7 +310,7 @@ TEST_CASE("linear_regression")
 //         auto ys = map(f, xs);
 
 //         double a_hat, b_hat;
-//         std::tie(a_hat, b_hat) = linear_regression(xs, ys);
+//         std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
 //         // CHECK(b_hat == b);
 //         // CHECK(a_hat == a);
@@ -350,9 +350,9 @@ TEST_CASE("detrend")
         std::vector<double> ys_ref(n);
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto detrended = detrend(ys);
+        auto detrended = detrend<double>(ys);
 
-        CHECK(rmse(detrended, ys_ref) < 0.5);
+        CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::array")
@@ -368,9 +368,9 @@ TEST_CASE("detrend")
 
         auto ys = map(plus<double>, ys1, ys2);
 
-        auto detrended = detrend(ys);
+        auto detrended = detrend<double>(ys);
 
-        CHECK(rmse(detrended, ys_ref) < 0.5);
+        CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::vectors")
@@ -389,9 +389,9 @@ TEST_CASE("detrend")
 
         auto ys = map(plus<double>, ys1, ys2);
 
-        auto detrended = detrend(ys);
+        auto detrended = detrend<double>(ys);
 
-        CHECK(rmse(detrended, ys_ref) < 0.5);
+        CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }
 }
 

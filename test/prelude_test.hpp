@@ -437,7 +437,7 @@ TEST_CASE("cartesian_map")
 //     }
 // }
 
-// ! temp 
+// ! temp
 
 TEST_CASE("elem_index")
 {
@@ -459,6 +459,23 @@ TEST_CASE("elem_index")
         CHECK(elem_index(9., array_view_3) == -1);
     }
 }
+
+// TEST_CASE("take")
+// {
+//     SECTION("c array")
+//     {
+//         CHECK(take(0, c_array_3).size() == 0);
+//         CHECK(take(2, c_array_3)[1] == 2.);
+//         CHECK(take(5, c_array_3).size() == 3);
+//     }
+
+//     SECTION("Array")
+//     {
+//         CHECK(take(0, array_3).size() == 0);
+//         CHECK(take(2, array_3)[1] == 2.);
+//         CHECK(take(5, array_3).size() == 3);
+//     }
+// }
 
 // ! temp
 

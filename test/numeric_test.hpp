@@ -84,17 +84,17 @@ TEST_CASE("mean")
 {
     SECTION("c style ")
     {
-        CHECK(mean(c_array_5) == 3.);
+        CHECK(mean<double>(c_array_5) == 3.);
     }
 
     SECTION("std::array ")
     {
-        CHECK(mean(std_array_5) == 3.);
+        CHECK(mean<double>(std_array_5) == 3.);
     }
 
     SECTION("std::vectors")
     {
-        CHECK(mean(std_vector_5) == 3.);
+        CHECK(mean<double>(std_vector_5) == 3.);
     }
 }
 
@@ -102,17 +102,17 @@ TEST_CASE("rms")
 {
     SECTION("c style ")
     {
-        CHECK(rms(c_array_5) == 3.3166247903554);
+        CHECK(rms<double>(c_array_5) == 3.3166247903554);
     }
 
     SECTION("std::array ")
     {
-        CHECK(rms(std_array_5) == 3.3166247903554);
+        CHECK(rms<double>(std_array_5) == 3.3166247903554);
     }
 
     SECTION("std::vectors")
     {
-        CHECK(rms(std_vector_5) == 3.3166247903554);
+        CHECK(rms<double>(std_vector_5) == 3.3166247903554);
     }
 }
 
