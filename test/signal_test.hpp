@@ -402,7 +402,7 @@ TEST_CASE("detrend")
         double ys_ref[n];
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto ys = map(plus<double>, ys1, ys2);
+        auto ys = map(plus<double, double>, ys1, ys2);
 
         auto detrended = detrend<double>(ys);
 
@@ -423,7 +423,7 @@ TEST_CASE("detrend")
         std::array<double, n> ys_ref;
         std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
 
-        auto ys = map(plus<double>, ys1, ys2);
+        auto ys = map(plus<double, double>, ys1, ys2);
 
         auto detrended = detrend<double>(ys);
 

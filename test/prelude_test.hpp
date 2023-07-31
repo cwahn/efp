@@ -412,7 +412,7 @@ TEST_CASE("cartesian_map")
     auto as = std::array<int, 2>{1, 2};
     auto bs = std::array<int, 2>{1, 3};
 
-    auto res = cartesian_map(times<int>, as, bs);
+    auto res = cartesian_map(times<int, int>, as, bs);
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 

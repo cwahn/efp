@@ -47,6 +47,19 @@ namespace efp
     template <bool cond, typename T, typename F>
     using Conditional_t = typename ConditionalType<cond, T, F>::type;
 
+    // size_of_ptr_v
+    constexpr auto size_of_ptr_v = sizeof(void *);
+
+    // ConstParam_t
+    // Pass by value if the size of type is leq to machine pointer size.
+
+    template <typename A>
+    using ConstParam_t = Conditional_t<
+        sizeof(A) <= size_of_ptr_v,
+        A,
+        // const A &>;
+        const typename std::remove_const<typename std::remove_reference<A>::type>::type&>;
+
     // eq_v
 
     template <typename A, typename B>
