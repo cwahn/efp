@@ -63,14 +63,14 @@ namespace efp
     template <typename R, typename SeqA>
     R variance(const SeqA &as)
     {
-        const auto a_mean = mean<R>(as);
+        const auto mean_as = mean<R>(as);
 
-        auto minus_a_mean = [&](const Element_t<SeqA> &x)
+        auto minus_mean_as = [&](const Element_t<SeqA> &x)
         {
-            return x - a_mean;
+            return x - mean_as;
         };
 
-        const auto a_deviations = map(minus_a_mean, as);
+        const auto a_deviations = map(minus_mean_as, as);
         return sum(a_deviations) / (R)length(as);
     }
 
@@ -83,12 +83,12 @@ namespace efp
     template <typename R, typename SeqA, typename SeqB>
     R covariance(const SeqA &as, const SeqB &bs)
     {
-        const auto a_mean = mean<R>(as);
-        const auto b_mean = mean<R>(bs);
+        const auto mean_as = mean<R>(as);
+        const auto mean_bs = mean<R>(bs);
 
         const auto covar = [&](const Element_t<SeqA> &a, const Element_t<SeqB> &b)
         {
-            return (a - a_mean) * (b - b_mean);
+            return (a - mean_as) * (b - mean_bs);
         };
 
         return sum(map(covar, as, bs)) / (R)length(as);
@@ -101,9 +101,9 @@ namespace efp
     }
 
     template <typename R, typename SeqA>
-    R auto_covariance(const SeqA &as, const int &lag)
+    R autocovariance(const SeqA &as, const int &lag)
     {
-        const auto a_mean = mean<R>(as);
+        const auto mean_as = mean<R>(as);
         const int sum_length = length(as) - lag;
 
         R summation = 0;
@@ -111,7 +111,7 @@ namespace efp
         for_index(
             [&](const int &i)
             {
-                summation += (as[i] - a_mean) * (as[i + lag] - a_mean);
+                summation += (as[i] - mean_as) * (as[i + lag] - mean_as);
             },
             sum_length);
 
@@ -119,71 +119,71 @@ namespace efp
     }
 
     template <typename R, typename SeqA>
-    MapSequence_t<R, SeqA> auto_covariance_function(const SeqA &as)
+    MapSequence_t<R, SeqA> autocovariance_function(const SeqA &as)
     {
         const auto auto_covar = [&](const int &i, const Element_t<SeqA> &_)
         {
-            return auto_covariance<R>(as, i);
+            return autocovariance<R>(as, i);
         };
 
         return map_with_index(auto_covar, as);
     }
 
     template <typename R, typename SeqA>
-    MapSequence_t<R, SeqA> auto_corelation_function(const SeqA &as)
+    MapSequence_t<R, SeqA> autocorrelation_function(const SeqA &as)
     {
-        const auto a_variance = variance<R>(as);
-        const auto div_a_var = [&](const Element_t<SeqA> &x)
+        const auto variance_as = variance<R>(as);
+        const auto div_var_as = [&](const Element_t<SeqA> &x)
         {
-            return x / a_variance;
+            return x / variance_as;
         };
 
-        return map(div_a_var, as);
+        return map(div_var_as, as);
     }
 
     template <typename R, typename SeqA>
-    R auto_correlation(const SeqA &as, const int &lag)
+    R autocorrelation(const SeqA &as, const int &lag)
     {
-        return auto_covariance<R>(as, lag) / variance<R>(as);
+        return autocovariance<R>(as, lag) / variance<R>(as);
     }
 
     template <typename R, typename SeqA>
     MapSequence_t<R, SeqA> remove_dc(const SeqA &as)
     {
-        const auto a_mean = mean<R>(as);
+        const auto mean_as = mean<R>(as);
 
-        const auto minus_a_mean = [&](const Element_t<SeqA> &x)
+        const auto minus_mean_as = [&](const Element_t<SeqA> &x)
         {
-            return (R)x - a_mean;
+            return (R)x - mean_as;
         };
 
-        return map(minus_a_mean, as);
+        return map(minus_mean_as, as);
     }
 
     template <typename R, typename SeqA, typename SeqB>
     std::tuple<R, R> linear_regression(const SeqA &as, const SeqB &bs)
     {
-        const auto a_mean = mean<R>(as);
-        const auto b_mean = mean<R>(bs);
+        const auto mean_as = mean<R>(as);
+        const auto mean_bs = mean<R>(bs);
 
-        const auto minus_a_mean = [&](const Element_t<SeqA> &x)
+        const auto minus_mean_as = [&](const Element_t<SeqA> &x)
         {
-            return (R)x - a_mean;
+            return (R)x - mean_as;
         };
 
-        const auto minus_b_mean = [&](const Element_t<SeqB> &x)
+        const auto minus_mean_bs = [&](const Element_t<SeqB> &x)
         {
-            return (R)x - b_mean;
+            return (R)x - mean_bs;
         };
 
-        const auto a_deviations = map(minus_a_mean, as);
-        const auto b_deviations = map(minus_b_mean, bs);
+        const auto a_deviations = map(minus_mean_as, as);
+        const auto b_deviations = map(minus_mean_bs, bs);
 
         const auto ss_ab = sum(map(times<R, R>, a_deviations, b_deviations));
         const auto ss_aa = sum(map(square<R>, a_deviations));
 
         const auto beta_1 = ss_ab / ss_aa;
-        const auto beta_2 = b_mean - (beta_1 * a_mean);
+        const auto beta_2 = mean_bs - (beta_1 * mean_as);
 
         return std::make_tuple(beta_1, beta_2);
     }
@@ -193,19 +193,19 @@ namespace efp
     {
         const int n = length(as);
 
-        const auto i_mean = (n - 1) / 2.;
-        const auto a_mean = mean<R>(as);
+        const auto mean_is = (n - 1) / 2.;
+        const auto mean_as = mean<R>(as);
 
         const auto get_ss_ia = [&](const int &i, const Element_t<SeqA> &a)
         {
-            return (i - i_mean) * ((R)a - a_mean);
+            return (i - mean_is) * ((R)a - mean_as);
         };
 
         const auto ss_ia = sum(map_with_index(get_ss_ia, as));
         const auto ss_ii = n * (n * n - 1) / 12.;
 
         const auto beta_1 = ss_ia / ss_ii;
-        const auto beta_2 = a_mean - (beta_1 * i_mean);
+        const auto beta_2 = mean_as - (beta_1 * mean_is);
 
         return std::make_tuple(beta_1, beta_2);
     }
@@ -218,12 +218,12 @@ namespace efp
         const auto beta_1 = std::get<0>(betas);
         const auto beta_2 = std::get<1>(betas);
 
-        const auto remove_trend = [&](const Element_t<SeqA> &i, const Element_t<SeqA> &x)
+        const auto detrend_elem = [&](const Element_t<SeqA> &i, const Element_t<SeqA> &x)
         {
             return (R)x - (beta_1 * (R)i + beta_2);
         };
 
-        return map_with_index(remove_trend, as);
+        return map_with_index(detrend_elem, as);
     }
 }
 
