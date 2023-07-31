@@ -50,7 +50,7 @@ namespace efp
     // eq_v
 
     template <typename A, typename B>
-    constexpr bool eq_v(const A lhs, const B rhs)
+    constexpr bool eq_v(const A &lhs, const B &rhs)
     {
         return lhs == rhs;
     }
@@ -58,7 +58,7 @@ namespace efp
     //  neq_v
 
     template <typename A, typename B>
-    constexpr bool neq_v(const A lhs, const B rhs)
+    constexpr bool neq_v(const A &lhs, const B &rhs)
     {
         return lhs != rhs;
     }
@@ -66,7 +66,7 @@ namespace efp
     //  gt_v
 
     template <typename A, typename B>
-    constexpr bool gt_v(const A lhs, const B rhs)
+    constexpr bool gt_v(const A &lhs, const B &rhs)
     {
         return lhs > rhs;
     }
@@ -74,7 +74,7 @@ namespace efp
     //  lt_v
 
     template <typename A, typename B>
-    constexpr bool lt_v(const A lhs, const B rhs)
+    constexpr bool lt_v(const A &lhs, const B &rhs)
     {
         return lhs < rhs;
     }
@@ -82,7 +82,7 @@ namespace efp
     //  geq_v
 
     template <typename A, typename B>
-    constexpr bool geq_v(const A lhs, const B rhs)
+    constexpr bool geq_v(const A &lhs, const B &rhs)
     {
         return lhs >= rhs;
     }
@@ -90,7 +90,7 @@ namespace efp
     //  leq_v
 
     template <typename A, typename B>
-    constexpr bool leq_v(const A lhs, const B rhs)
+    constexpr bool leq_v(const A &lhs, const B &rhs)
     {
         return lhs <= rhs;
     }
@@ -112,7 +112,7 @@ namespace efp
     // max_v
 
     template <typename A>
-    constexpr A max_v(const A lhs, const A rhs)
+    constexpr A max_v(const A &lhs, const A &rhs)
     {
         return lhs > rhs ? lhs : rhs;
     }
@@ -120,7 +120,7 @@ namespace efp
     // min_v
 
     template <typename A>
-    constexpr A min_v(const A lhs, const A rhs)
+    constexpr A min_v(const A &lhs, const A &rhs)
     {
         return lhs < rhs ? lhs : rhs;
     }
@@ -128,7 +128,7 @@ namespace efp
     // plus_v
 
     template <typename A, typename B>
-    constexpr auto plus_v(const A lhs, const B rhs)
+    constexpr auto plus_v(const A &lhs, const B &rhs)
         -> decltype(lhs + rhs)
     {
         return lhs + rhs;
@@ -137,7 +137,7 @@ namespace efp
     // times_v
 
     template <typename A>
-    constexpr A times_v(const A lhs, const A rhs)
+    constexpr A times_v(const A &lhs, const A &rhs)
     {
         return lhs * rhs;
     }
