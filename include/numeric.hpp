@@ -104,18 +104,6 @@ namespace efp
     {
         return foldl(times<Element_t<SeqA>>, 1, as);
     }
-
-    template <typename R, typename SeqA>
-    constexpr R mean(const SeqA &as)
-    {
-        return sum(as) / (R)length(as);
-    }
-
-    template <typename R, typename SeqA>
-    constexpr R rms(const SeqA &as)
-    {
-        return sqrt(mean<R>(map(square<Element_t<SeqA>>, as)));
-    }
 }
 
 #endif

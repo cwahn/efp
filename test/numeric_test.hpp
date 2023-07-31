@@ -80,40 +80,4 @@ TEST_CASE("product")
     }
 }
 
-TEST_CASE("mean")
-{
-    SECTION("c style ")
-    {
-        CHECK(mean<double>(c_array_5) == 3.);
-    }
-
-    SECTION("std::array ")
-    {
-        CHECK(mean<double>(std_array_5) == 3.);
-    }
-
-    SECTION("std::vectors")
-    {
-        CHECK(mean<double>(std_vector_5) == 3.);
-    }
-}
-
-TEST_CASE("rms")
-{
-    SECTION("c style ")
-    {
-        CHECK(rms<double>(c_array_5) == 3.3166247903554);
-    }
-
-    SECTION("std::array ")
-    {
-        CHECK(rms<double>(std_array_5) == 3.3166247903554);
-    }
-
-    SECTION("std::vectors")
-    {
-        CHECK(rms<double>(std_vector_5) == 3.3166247903554);
-    }
-}
-
 #endif

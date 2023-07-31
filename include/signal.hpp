@@ -8,6 +8,17 @@
 
 namespace efp
 {
+    template <typename R, typename SeqA>
+    constexpr R mean(const SeqA &as)
+    {
+        return sum(as) / (R)length(as);
+    }
+
+    template <typename R, typename SeqA>
+    constexpr R rms(const SeqA &as)
+    {
+        return sqrt(mean<R>(map(square<Element_t<SeqA>>, as)));
+    }
 
     template <typename R, typename SeqA, typename SeqB>
     R sse(const SeqA &as, const SeqB &bs)
@@ -55,7 +66,7 @@ namespace efp
     template <typename R, typename SeqA>
     R variance(const SeqA &as)
     {
-        const double a_mean = mean<R>(as);
+        const R a_mean = mean<R>(as);
 
         auto minus_a_mean = [&](Element_t<SeqA> x)
         {
