@@ -78,13 +78,13 @@ namespace efp
     template <typename SeqA>
     constexpr Element_t<SeqA> maximum(const SeqA &as)
     {
-        return foldl(max<Element_t<SeqA>, Element_t<SeqA>>, NumericLimits<Element_t<SeqA>>::min(), as);
+        return foldl(max, NumericLimits<Element_t<SeqA>>::min(), as);
     }
 
     template <typename SeqA>
     constexpr Element_t<SeqA> minimum(const SeqA &as)
     {
-        return foldl(min<Element_t<SeqA>, Element_t<SeqA>>, NumericLimits<Element_t<SeqA>>::max(), as);
+        return foldl(min, NumericLimits<Element_t<SeqA>>::max(), as);
     }
 
     template <typename SeqA>
@@ -96,13 +96,13 @@ namespace efp
     template <typename SeqA>
     constexpr Element_t<SeqA> sum(const SeqA &as)
     {
-        return foldl(plus<Element_t<SeqA>, Element_t<SeqA>>, 0, as);
+        return foldl(plus, 0, as);
     }
 
     template <typename SeqA>
     constexpr Element_t<SeqA> product(const SeqA &as)
     {
-        return foldl(times<Element_t<SeqA>, Element_t<SeqA>>, 1, as);
+        return foldl(times, 1, as);
     }
 }
 

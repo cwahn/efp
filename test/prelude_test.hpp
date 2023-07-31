@@ -268,19 +268,11 @@ TEST_CASE("foldl")
 {
     SECTION("plus on c style arary")
     {
-        auto plus = [](int lhs, int rhs)
-        {
-            return lhs + rhs;
-        };
         CHECK(foldl(plus, 0, c_array_5) == 15);
     }
 
     SECTION("times on std::vectors arary")
     {
-        auto times = [](double lhs, double rhs)
-        {
-            return lhs * rhs;
-        };
         CHECK(foldl(times, 1., std_vector_3) == 6.);
     }
 }

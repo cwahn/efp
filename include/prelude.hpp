@@ -383,7 +383,7 @@ namespace efp
 
     // foldl
 
-    template <typename F, typename R, typename SeqA>
+    template <typename R, typename SeqA, typename F = R (*)(const R&, const Element_t<SeqA>&)>
     R foldl(const F &f, const R &initial_value, const SeqA &as)
     {
         R result = initial_value;
