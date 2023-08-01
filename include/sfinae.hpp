@@ -7,6 +7,18 @@
 
 namespace efp
 {
+    // True False type
+
+    struct TrueType
+    {
+        static constexpr bool value = true;
+    };
+
+    struct FalseType
+    {
+        static constexpr bool value = false;
+    };
+
     // EnableIfType
 
     template <bool cond, typename A = void>
@@ -432,6 +444,22 @@ namespace efp
 
     template <typename F>
     using Return_t = typename ReturnType<F, Argument_t<F>>::type;
+
+    // IsInvocable
+
+    template <typename F, typename... Args>
+    struct IsInvocable
+    {
+    private:
+        template <typename A>
+        static auto check(int) -> decltype(std::declval<A>()(std::declval<Args>()...), TrueType());
+
+        template <typename>
+        static auto check(...) -> FalseType;
+
+    public:
+        static constexpr bool value = decltype(check<F>(0))::value;
+    };
 
     // RemoveReferenceType
 

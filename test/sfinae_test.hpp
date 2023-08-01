@@ -207,4 +207,16 @@ TEST_CASE("Return_t")
               Return_t<decltype(return_t_lambda2)>>::value == true);
 }
 
+int is_invocable_add(int a, int b)
+{
+    return a + b;
+}
+
+TEST_CASE("IsInvocable")
+{
+    CHECK(IsInvocable<decltype(&is_invocable_add), int, int>::value == true);
+    CHECK(IsInvocable<decltype(&is_invocable_add), double, double>::value == true);
+    CHECK(IsInvocable<decltype(&is_invocable_add), double, Unit>::value == false);
+}
+
 #endif

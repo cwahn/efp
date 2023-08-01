@@ -86,11 +86,17 @@ namespace efp
         // * Need type level find (Type -> bool) -> Types -> int
         // * Need type level indexing
 
-        // Argument_t implementation 
+        // Argument_t implementation will auto matically remove the const qualifier if there is.
+
+        // template <typename F>
+        // struct IsRelaventBranch_v
+        // {
+        //     any_v()
+        // };
 
         // template <typename... Fs>
         // auto match(const Fs &...fs)
-        //     -> Common_t<Return_t<Fs>...>
+        //     -> EnableIf_t<true, Common_t<Return_t<Fs>...>>
         // {
         //     pack_index(matched_index<As...><Fs...>(index_), fs...)(??? a)
         // }
