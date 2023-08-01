@@ -7,5 +7,6 @@
 #include "signal.hpp"
 #include "c_utility.hpp"
 #include "cyclic.hpp"
+#include "enum_type.hpp"
 
 #endif

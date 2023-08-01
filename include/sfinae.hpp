@@ -253,13 +253,17 @@ namespace efp
 
     // RemoveReference
 
-    template <typename A>
-    using RemoveReference_t = typename std::remove_reference<A>::type;
+    // ! Deprecated
+
+    // template <typename A>
+    // using RemoveReference_t = typename std::remove_reference<A>::type;
 
     // CommonType
 
-    template <typename... Args>
-    using Common_t = typename std::common_type<Args...>::type;
+    // ! Deprecated
+
+    // template <typename... Args>
+    // using Common_t = typename std::common_type<Args...>::type;
 
     // IsIntegralConstant
 
@@ -270,6 +274,75 @@ namespace efp
 
     template <typename A, A Value>
     struct IsIntegralConstant<std::integral_constant<A, Value>> : std::true_type
+    {
+    };
+
+    // IsSame
+
+    template <typename A, typename B>
+    struct IsSame
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename A>
+    struct IsSame<A, A>
+    {
+        static constexpr bool value = true;
+    };
+
+    // PackAtType
+
+    template <uint8_t n, typename... Args>
+    struct PackAtType
+    {
+        static_assert(n < 0, "Index out of range");
+    };
+
+    template <uint8_t n, typename Head, typename... Tail>
+    struct PackAtType<n, Head, Tail...>
+        : PackAtType<n - 1, Tail...>
+    {
+    };
+
+    template <typename Head, typename... Tail>
+    struct PackAtType<0, Head, Tail...>
+    {
+        using type = Head;
+    };
+
+    // PackAt_t
+
+    template <uint8_t n, typename... Args>
+    using PackAt_t = typename PackAtType<n, Args...>::type;
+
+    // FindHelperValue
+    template <uint8_t n>
+    struct FindHelperValue
+    {
+        static constexpr uint8_t value = n;
+    };
+
+    // FindHelper
+
+    template <size_t n, template <class> class P, typename... Args>
+    struct FindHelper
+    {
+    };
+
+    template <size_t n, template <class> class P, typename Head, typename... Tail>
+    struct FindHelper<n, P, Head, Tail...>
+        : Conditional_t<
+              P<Head>::value,
+              FindHelperValue<n>,
+              FindHelper<n + 1, P, Tail...>>
+    {
+    };
+
+    // Find
+
+    template <template <class> class P, typename... Args>
+    struct Find : FindHelper<0, P, Args...>
     {
     };
 
@@ -337,6 +410,7 @@ namespace efp
     };
 
     // Arguement_t
+    // l-value and r-value reference will preserved at the result, but const will be removed.
 
     template <typename F>
     using Argument_t = typename ArgumentType<F, IsCallOperator<F>::value>::type;
@@ -359,71 +433,35 @@ namespace efp
     template <typename F>
     using Return_t = typename ReturnType<F, Argument_t<F>>::type;
 
-    // IsSame
+    // RemoveReferenceType
 
-    template <typename A, typename B>
-    struct IsSame
+    template <typename A>
+    struct RemoveReferenceType
     {
-        static constexpr bool value = false;
+        using type = A;
     };
 
     template <typename A>
-    struct IsSame<A, A>
+    struct RemoveReferenceType<A &>
     {
-        static constexpr bool value = true;
+        using type = A;
     };
 
-    // PackAtType
-
-    template <uint8_t n, typename Head, typename... Tail>
-    struct PackAtType
-        : PackAtType<n - 1, Tail...>
+    template <typename A>
+    struct RemoveReferenceType<A &&>
     {
+        using type = A;
     };
 
+    // RemoveReference_t
+
+    template <typename A>
+    using RemoveReference_t = typename RemoveReferenceType<A>::type;
+
+    // Common_t
     template <typename Head, typename... Tail>
-    struct PackAtType<0, Head, Tail...>
-    {
-        using type = Head;
-    };
-
-    // PackAt_t
-
-    template <uint8_t n, typename... Args>
-    using PackAt_t = typename PackAtType<n, Args...>::type;
-
-    // FindHelperValue
-    template <uint8_t n>
-    struct FindHelperValue
-    {
-        static constexpr uint8_t value = n;
-    };
-
-    // FindHelper
-
-    template <size_t n, template <class> class P, typename... Args>
-    struct FindHelper
-    {
-    };
-
-    template <size_t n, template <class> class P, typename Head, typename... Tail>
-    struct FindHelper<n, P, Head, Tail...>
-        : Conditional_t<
-              P<Head>::value,
-              FindHelperValue<n>,
-              FindHelper<n + 1, P, Tail...>>
-    {
-    };
-
-    // Find
-
-    template <template <class> class P, typename... Args>
-    struct Find : FindHelper<0, P, Args...>
-    {
-    };
-
-
-
+    using Common_t = EnableIf_t<
+        all_v(IsSame<Head, Tail>::value...), Head>;
 }
 
 #endif

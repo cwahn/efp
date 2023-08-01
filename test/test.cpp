@@ -5,3 +5,4 @@
 #include "signal_test.hpp"
 #include "cyclic_test.hpp"
 #include "c_utility_test.hpp"
+#include "enum_type_test.hpp"
