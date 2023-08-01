@@ -44,4 +44,40 @@ TEST_CASE("minimum_v")
     CHECK(minimum_v(1, 2, -3.) == -3);
 }
 
+TEST_CASE("IsSame")
+{
+    CHECK(IsSame<void, double>::value == false);
+    CHECK(IsSame<int, double>::value == false);
+    CHECK(IsSame<int, int>::value == true);
+    CHECK(IsSame<int, int &>::value == false);
+    CHECK(IsSame<int, const int>::value == false);
+}
+
+TEST_CASE("PackAt_t")
+{
+    CHECK(IsSame<PackAt_t<0, int, double>, int>::value == true);
+    CHECK(IsSame<PackAt_t<0, int, double>, double>::value == false);
+    CHECK(IsSame<PackAt_t<1, int, double>, int>::value == false);
+    CHECK(IsSame<PackAt_t<1, int, double>, double>::value == true);
+}
+
+template <typename A>
+struct IsInt
+{
+    static constexpr bool value = false;
+};
+
+template <>
+struct IsInt<int>
+{
+    static constexpr bool value = true;
+};
+
+TEST_CASE("Find")
+{
+    CHECK(Find<IsInt, int, int, float>::value == 0);
+    CHECK(Find<IsInt, bool, int, float>::value == 1);
+    CHECK(Find<IsInt, bool, float, int>::value == 2);
+}
+
 #endif

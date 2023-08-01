@@ -3,6 +3,8 @@
 
 #include "limits.hpp"
 
+// Make it value as soon as possible and use constexpr function and avoid type_trait.
+
 namespace efp
 {
     // EnableIfType
@@ -58,7 +60,7 @@ namespace efp
         sizeof(A) <= size_of_ptr_v,
         A,
         // const A &>;
-        const typename std::remove_const<typename std::remove_reference<A>::type>::type&>;
+        const typename std::remove_const<typename std::remove_reference<A>::type>::type &>;
 
     // eq_v
 
@@ -356,6 +358,71 @@ namespace efp
 
     template <typename F>
     using Return_t = typename ReturnType<F, Argument_t<F>>::type;
+
+    // IsSame
+
+    template <typename A, typename B>
+    struct IsSame
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename A>
+    struct IsSame<A, A>
+    {
+        static constexpr bool value = true;
+    };
+
+    // PackAtType
+
+    template <uint8_t n, typename Head, typename... Tail>
+    struct PackAtType
+        : PackAtType<n - 1, Tail...>
+    {
+    };
+
+    template <typename Head, typename... Tail>
+    struct PackAtType<0, Head, Tail...>
+    {
+        using type = Head;
+    };
+
+    // PackAt_t
+
+    template <uint8_t n, typename... Args>
+    using PackAt_t = typename PackAtType<n, Args...>::type;
+
+    // FindHelperValue
+    template <uint8_t n>
+    struct FindHelperValue
+    {
+        static constexpr uint8_t value = n;
+    };
+
+    // FindHelper
+
+    template <size_t n, template <class> class P, typename... Args>
+    struct FindHelper
+    {
+    };
+
+    template <size_t n, template <class> class P, typename Head, typename... Tail>
+    struct FindHelper<n, P, Head, Tail...>
+        : Conditional_t<
+              P<Head>::value,
+              FindHelperValue<n>,
+              FindHelper<n + 1, P, Tail...>>
+    {
+    };
+
+    // Find
+
+    template <template <class> class P, typename... Args>
+    struct Find : FindHelper<0, P, Args...>
+    {
+    };
+
+
 
 }
 

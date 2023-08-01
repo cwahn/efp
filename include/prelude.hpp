@@ -6,8 +6,9 @@
 #include <tuple>
 #include <optional>
 
-#include "zero_copy.hpp"
 #include "sfinae.hpp"
+#include "enum_type.hpp"
+#include "zero_copy.hpp"
 
 namespace efp
 {
