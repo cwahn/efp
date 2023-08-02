@@ -39,12 +39,20 @@ namespace efp
         return (power >= n) ? power : power_2_ceiling(n, power * 2);
     }
 
+    template <int n, typename... As>
+    struct Match
+    {
+    };
+
+    template <uint8_t n, typename... As>
+    using NthVariant_t = PackAt_t<n, As...>;
+
     template <typename... As>
     class Enum
     {
     public:
-        // template <int n, typename... As>
-        // friend struct Match;
+        template <int n, typename... Bs>
+        friend struct Match;
 
         template <typename A>
         struct IsSameUnary
@@ -105,18 +113,15 @@ namespace efp
             return *(reinterpret_cast<const A *>(storage_));
         }
 
-        template <uint8_t n>
-        using NthVariant_t = PackAt_t<n, As...>;
-
         template <uint8_t n, typename = EnableIf_t<lt_v(n, sizeof...(As))>>
-        NthVariant_t<n> get()
+        NthVariant_t<n, As...> get()
         {
             if (index_ != n)
             {
                 abort();
             }
 
-            return *(reinterpret_cast<NthVariant_t<n> *>(storage_));
+            return *(reinterpret_cast<NthVariant_t<n, As...> *>(storage_));
         }
 
         // * Test if all of the branchs have same return type by Common_t.
@@ -135,11 +140,11 @@ namespace efp
 
         // Argument_t implementation will auto matically remove the const qualifier if there is.
 
-#define CASE(i)                                                                             \
-    case i:                                                                                 \
-    {                                                                                       \
-        return overloaded(*(reinterpret_cast<const NthVariant_t<i> *>(p_outer->storage_))); \
-        break;                                                                              \
+#define CASE(i)                                                                                    \
+    case i:                                                                                        \
+    {                                                                                              \
+        return overloaded(*(reinterpret_cast<const NthVariant_t<i, As...> *>(p_outer->storage_))); \
+        break;                                                                                     \
     }
 
 #define STAMP2(n, x) \
@@ -208,147 +213,6 @@ namespace efp
             // !any_v(IsWildCard<Fs...>::value...);
         };
 
-        template <int n>
-        struct Match
-        {
-        };
-
-        template <>
-        struct Match<2>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP2(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<4>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP4(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<8>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP8(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<16>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP16(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<32>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP32(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<64>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP64(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<128>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP128(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
-        template <>
-        struct Match<256>
-        {
-            template <typename... Fs>
-            static auto impl(
-                const Overloaded<Fs...> &overloaded,
-                const Enum *p_outer)
-                -> Common_t<Return_t<Fs>...>
-            {
-                switch (p_outer->index_)
-                {
-                    STAMP256(0, CASE)
-                    // todo default
-                }
-            }
-        };
-
         template <typename... Fs>
         auto match(const Fs &...fs)
             -> EnableIf_t<
@@ -357,7 +221,7 @@ namespace efp
                     IsWellFormed<Fs...>::value,
                 Common_t<Return_t<Fs>...>>
         {
-            return Match<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, this);
+            return Match<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<Fs...>{fs...}, this);
         }
 
     private:
@@ -368,6 +232,142 @@ namespace efp
         alignas(maximum_v(alignof(As)...)) uint8_t storage_[maximum_v(sizeof(As)...)];
         // todo Maybe need to modifiy the type of index
         uint8_t index_;
+    };
+
+    template <typename... As>
+    struct Match<2, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP2(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<4, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP4(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<8, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP8(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<16, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP16(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<32, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP32(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<64, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP64(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<128, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP128(0, CASE)
+                // todo default
+            }
+        }
+    };
+
+    template <typename... As>
+    struct Match<256, As...>
+    {
+        template <typename... Fs>
+        static auto impl(
+            const Overloaded<Fs...> &overloaded,
+            const Enum<As...> *p_outer)
+            -> Common_t<Return_t<Fs>...>
+        {
+            switch (p_outer->index_)
+            {
+                STAMP256(0, CASE)
+                // todo default
+            }
+        }
     };
 
     template <typename... As, typename... Fs>

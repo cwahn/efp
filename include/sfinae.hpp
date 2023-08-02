@@ -308,7 +308,7 @@ namespace efp
     template <uint8_t n, typename... Args>
     struct PackAtType
     {
-        static_assert(n < 0, "Index out of range");
+        static_assert(n >= 0, "Index out of range");
     };
 
     template <uint8_t n, typename Head, typename... Tail>
