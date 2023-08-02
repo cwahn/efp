@@ -43,6 +43,9 @@ namespace efp
     class Enum
     {
     public:
+        // template <int n, typename... As>
+        // friend struct Match;
+
         template <typename A>
         struct IsSameUnary
         {
@@ -356,7 +359,16 @@ namespace efp
         uint8_t index_;
     };
 
-    // todo undef
+    template <typename... As, typename... Fs>
+    auto match(const Enum<As...> &x, const Fs &...fs)
+        -> EnableIf_t<
+            all_v(Enum<As...>::template IsRelevantBranch<Fs>::value...) &&
+                Enum<As...>::template IsExhaustive<Fs...>::value &&
+                Enum<As...>::template IsWellFormed<Fs...>::value,
+            Common_t<Return_t<Fs>...>>
+    {
+        return Enum<As...>::template Match<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, &x);
+    }
 
 }
 
