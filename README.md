@@ -18,15 +18,20 @@ There is a better option, copy-elision (Return Value Optimization and Named Retu
 EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence types as solutions to the issue; `efp::Array`, `efp::Vector`, `efp::Vector`. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. To be exact, these types could be copy-assigned but not copy-constructed. These types are also used as the default output types of mixed-type, n-ary operations.
 
 ### Type Agnostic APIs
-EFP accepts C-style array, `std::array`, `std::vector`, `efp::Array`, `efp::ArrayVector`, and `efp::Vector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
+EFP accepts C-style array, `std::array`, `std::vector`, `efp::Array`, `efp::ArrVec`, and `efp::Vector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
 
-Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrayVector`, `efp::Vector` based on types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
+Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrVec`, `efp::Vector` based on types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
 - Static capacity && static length
   - Array (zero-copy analog of `std::array`)
 - Static capacity && dynamic length
-  - ArrayVector (zero-copy, fixed capacity, no-allocation, on-stack variant of `std::vector`)
+  - ArrVec (zero-copy, fixed capacity, no-allocation, on-stack variant of `std::vector`)
 - Dynamic capacity
   - Vector (zero-copy analog of `std::vector`)
+
+### Sum type (Enum) with Pattern Matching
+
+Supported
+WIP
 
 ## Examples
 ```cpp
