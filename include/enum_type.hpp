@@ -84,14 +84,14 @@ namespace efp
         }
 
         template <typename A, typename = EnableIf_t<any_v(IsSame<A, As>::value...)>>
-        A get()
+        A get() const
         {
             if (index_ != VariantIndex<A>::value)
             {
                 abort();
             }
 
-            return *(reinterpret_cast<A *>(storage_));
+            return *(reinterpret_cast<const A *>(storage_));
         }
 
         template <uint8_t n>

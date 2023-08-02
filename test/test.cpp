@@ -6,3 +6,4 @@
 #include "cyclic_test.hpp"
 #include "c_utility_test.hpp"
 #include "enum_type_test.hpp"
+#include "maybe_test.hpp"

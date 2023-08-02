@@ -1,118 +1,122 @@
-// #ifndef MAYBE_HPP_
-// #define MAYBE_HPP_
+#ifndef MAYBE_HPP_
+#define MAYBE_HPP_
 
-// template <typename T>
-// class Maybe
-// {
-// public:
-//     Maybe() : has_value_(false) {}
+#include "sfinae.hpp"
+#include "enum_type.hpp"
 
-//     Maybe(const T &value) : has_value_(true)
-//     {
-//         new (data_) T(value);
-//     }
+namespace efp
+{
+    struct Nothing
+    {
+    };
 
-//     Maybe(T &&value) : has_value_(true)
-//     {
-//         new (data_) T(std::move(value));
-//     }
+    template <typename A>
+    class Maybe : public Enum<Nothing, A>
+    {
+    public:
+        using Enum<Nothing, A>::Enum;
 
-//     Maybe(const Maybe &other) : has_value_(other.has_value_)
-//     {
-//         if (has_value_)
-//         {
-//             new (data_) T(*reinterpret_cast<const T *>(other.data_));
-//         }
-//     }
+        bool is_nothing() const
+        {
+            return Enum<Nothing, A>::index() == 0;
+        }
 
-//     Maybe(Maybe &&other) : has_value_(other.has_value_)
-//     {
-//         if (has_value_)
-//         {
-//             new (data_) T(std::move(*reinterpret_cast<T *>(other.data_)));
-//         }
-//     }
+        bool has_value() const
+        {
+            return Enum<Nothing, A>::index() == 1;
+        }
 
-//     ~Maybe()
-//     {
-//         destructValue();
-//     }
+        // ! Will crash if empty
+        A value() const
+        {
+            return Enum<Nothing, A>::template get<A>();
+        }
+    };
 
-//     Maybe &operator=(const Maybe &other)
-//     {
-//         if (this != &other)
-//         {
-//             destructValue();
-//             has_value_ = other.has_value_;
+    template <typename A>
+    struct IsMaybe : FalseType
+    {
+    };
 
-//             if (has_value_)
-//             {
-//                 new (data_) T(*reinterpret_cast<const T *>(other.data_));
-//             }
-//         }
-//         return *this;
-//     }
+    template <typename A>
+    struct IsMaybe<Maybe<A>> : TrueType
+    {
+    };
 
-//     Maybe &operator=(Maybe &&other)
-//     {
-//         if (this != &other)
-//         {
-//             destructValue();
-//             has_value_ = other.has_value_;
+    // functor
 
-//             if (has_value_)
-//             {
-//                 new (data_) T(std::move(*reinterpret_cast<T *>(other.data_)));
-//             }
-//         }
-//         return *this;
-//     }
+    template <typename A, typename F>
+    auto fmap(const F &f, const Maybe<A> &ma)
+        -> Maybe<CallReturn_t<F, A>>
+    {
+        if (ma.is_nothing())
+        {
+            return Nothing{};
+        }
 
-//     bool has_value() const
-//     {
-//         return has_value_;
-//     }
+        return f(ma.value());
 
-//     explicit operator bool() const
-//     {
-//         return has_value_;
-//     }
+        // return ma.match(
+        //     [](Nothing)
+        //     { return Nothing{}; },
+        //     [&](A a)
+        //     { return f(a); });
+    }
 
-//     T &value()
-//     {
-//         if (!has_value_)
-//         {
-//             throw std::runtime_error("Maybe has no value");
-//         }
-//         return *reinterpret_cast<T *>(data_);
-//     }
+    // applicative
+    template <typename A>
+    auto pure(const A &a)
+        -> EnableIf_t<
+            IsMaybe<A>::value,
+            A>
+    {
+        return a;
+    }
 
-//     const T &value() const
-//     {
-//         if (!has_value_)
-//         {
-//             throw std::runtime_error("Maybe has no value");
-//         }
-//         return *reinterpret_cast<const T *>(data_);
-//     }
+    template <typename A, typename F>
+    auto ap(const Maybe<F> &mf, const Maybe<A> &ma)
+        -> Maybe<CallReturn_t<F, A>>
+    {
+        if (mf.is_nothing() || ma.is_nothing())
+        {
+            return Nothing{};
+        }
 
-//     T value_or(T defaultValue) const
-//     {
-//         return has_value_ ? *reinterpret_cast<const T *>(data_) : defaultValue;
-//     }
+        return mf.value()(ma.value());
+    }
 
-// private:
-//     alignas(T) uint8_t data_[sizeof(T)];
-//     bool has_value_;
+    // monad
 
-//     void destructValue()
-//     {
-//         if (has_value_)
-//         {
-//             reinterpret_cast<T *>(storage)->~T();
-//             has_value_ = false;
-//         }
-//     }
-// };
+    template <typename A, typename F>
+    auto bind(const Maybe<A> &ma, const F &f)
+        -> EnableIf_t<
+            IsMaybe<CallReturn_t<F, A>>::value,
+            CallReturn_t<F, A>>
+    // todo test if monadic action
+    {
+        if (ma.is_nothing())
+        {
+            return Nothing{};
+        }
 
-// #endif
+        return f(ma.value());
+    }
+
+    template <typename A, typename F>
+    auto operator>>=(const Maybe<A> &ma, const F &f)
+        -> EnableIf_t<
+            IsMaybe<CallReturn_t<F, A>>::value,
+            CallReturn_t<F, A>>
+    // todo test if monadic action
+    {
+        if (ma.is_nothing())
+        {
+            return Nothing{};
+        }
+
+        return f(ma.value());
+    }
+
+}
+
+#endif

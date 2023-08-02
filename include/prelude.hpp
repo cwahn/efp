@@ -9,6 +9,7 @@
 #include "sfinae.hpp"
 #include "enum_type.hpp"
 #include "zero_copy.hpp"
+#include "maybe.hpp"
 
 namespace efp
 {
@@ -691,9 +692,8 @@ namespace efp
     //     return std::nullopt;
     // }
 
-    // ! temp -1 on fail
     template <typename SeqA>
-    int elem_index(const Element_t<SeqA> a, const SeqA &as)
+    Maybe<int> elem_index(const Element_t<SeqA> a, const SeqA &as)
     {
         const int length_a = length(as);
 
@@ -705,7 +705,7 @@ namespace efp
             }
         }
 
-        return -1;
+        return Nothing{};
     }
 
     // take
