@@ -108,9 +108,9 @@ TEST_CASE("append")
         CHECK(append(std_array_3, array_3) == res);
     }
 
-    SECTION("ArrayVector")
+    SECTION("ArrVec")
     {
-        ArrayVector<double, 6> res{1., 2., 3., 1., 2., 3.};
+        ArrVec<double, 6> res{1., 2., 3., 1., 2., 3.};
         CHECK(append(array_vector_3, array_3) == res);
     }
 
@@ -250,7 +250,7 @@ TEST_CASE("filter")
             return (int)x % 2 == 0;
         };
 
-        CHECK(filter(is_even, c_array_3) == ArrayVector<double, 3>{2.});
+        CHECK(filter(is_even, c_array_3) == ArrVec<double, 3>{2.});
     }
 
     SECTION("odd std::vector")
@@ -408,28 +408,26 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
-// TEST_CASE("elem_index")
-// {
-//     SECTION("c array")
-//     {
-//         CHECK(elem_index(2., c_array_3).value() == 1);
-//         CHECK(elem_index(9., c_array_3) == std::nullopt);
-//     }
+TEST_CASE("elem")
+{
+    SECTION("c array")
+    {
+        CHECK(elem(2., c_array_3) == true);
+        CHECK(elem(9., c_array_3) == false);
+    }
 
-//     SECTION("Array")
-//     {
-//         CHECK(elem_index(2., array_3).value() == 1);
-//         CHECK(elem_index(9., array_3) == std::nullopt);
-//     }
+    SECTION("Array")
+    {
+        CHECK(elem(2., array_3) == true);
+        CHECK(elem(9., array_3) == false);
+    }
 
-//     SECTION("ArrayView")
-//     {
-//         CHECK(elem_index(2., array_view_3).value() == 1);
-//         CHECK(elem_index(9., array_view_3) == std::nullopt);
-//     }
-// }
-
-// ! temp
+    SECTION("ArrayView")
+    {
+        CHECK(elem(2., array_view_3) == true);
+        CHECK(elem(9., array_view_3) == false);
+    }
+}
 
 TEST_CASE("elem_index")
 {
@@ -449,6 +447,30 @@ TEST_CASE("elem_index")
     {
         CHECK(elem_index(2., array_view_3).value() == 1);
         CHECK(elem_index(9., array_view_3).is_nothing() == true);
+    }
+}
+
+TEST_CASE("elem_indices")
+{
+    SECTION("c array")
+    {
+        double c_array_3_[3] = {1., 2., 2.};
+        CHECK(elem_indices(2., c_array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(elem_indices(9., c_array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Array")
+    {
+        double array_3_[3] = {1., 2., 2.};
+        CHECK(elem_indices(2., array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(elem_indices(9., array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Vector")
+    {
+        Vector<double> vector_3_ = {1, 2, 2};
+        CHECK(elem_indices(2., vector_3_) == Vector<int>{1, 2});
+        CHECK(elem_indices(9., vector_3_) == Vector<int>{});
     }
 }
 

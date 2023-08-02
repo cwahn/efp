@@ -126,25 +126,25 @@ namespace efp
     // }
 
     template <typename A, std::size_t Capacity>
-    class ArrayVector
+    class ArrVec
     {
     public:
         using value_type = A;
         using size_type = std::size_t;
 
         // Constructors
-        ArrayVector() : size_(0) {}
-        ArrayVector(const size_t s) : size_(0) {} // Unpredicatable data_
-        ArrayVector(const ArrayVector &);         // Not emplemented by design for RVO, NRVO enforcement
-        ArrayVector(ArrayVector &&);              // Not emplemented by design for RVO, NRVO enforcement
+        ArrVec() : size_(0) {}
+        ArrVec(const size_t s) : size_(0) {} // Unpredicatable data_
+        ArrVec(const ArrVec &);         // Not emplemented by design for RVO, NRVO enforcement
+        ArrVec(ArrVec &&);              // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Args>
-        ArrayVector(const Args &...args)
+        ArrVec(const Args &...args)
             : data_{args...},
               size_(sizeof...(args)) {}
 
         // Assignment
 
-        ArrayVector &operator=(const ArrayVector &other)
+        ArrVec &operator=(const ArrVec &other)
         {
             if (this != &other)
             {
@@ -230,7 +230,7 @@ namespace efp
     };
 
     template <typename A, std::size_t N>
-    bool operator==(const ArrayVector<A, N> &lhs, const ArrayVector<A, N> &rhs)
+    bool operator==(const ArrVec<A, N> &lhs, const ArrVec<A, N> &rhs)
     {
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
@@ -565,7 +565,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct IsStaticCapacity<ArrayVector<A, N>> : std::true_type
+    struct IsStaticCapacity<ArrVec<A, N>> : std::true_type
     {
     };
 
@@ -624,7 +624,7 @@ namespace efp
     };
 
     template <typename A, size_t N>
-    struct StaticCapacity<ArrayVector<A, N>>
+    struct StaticCapacity<ArrVec<A, N>>
     {
         static constexpr size_t value = N;
     };

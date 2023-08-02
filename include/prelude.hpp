@@ -128,7 +128,7 @@ namespace efp
             Conditional_t<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, sum_v(StaticCapacity<Seqs>::value...)>,
-                ArrayVector<A, sum_v(StaticCapacity<Seqs>::value...)>>,
+                ArrVec<A, sum_v(StaticCapacity<Seqs>::value...)>>,
             Vector<A>>;
 
     // AppendReturn_t
@@ -238,7 +238,7 @@ namespace efp
             Conditional_t<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, MinStaticCapacity<Seqs...>::value>,
-                ArrayVector<A, MinStaticCapacity<Seqs...>::value>>,
+                ArrVec<A, MinStaticCapacity<Seqs...>::value>>,
             Vector<A>>;
 
     // MapReturn_t
@@ -325,7 +325,8 @@ namespace efp
     // MapWithIndexReturn_t
 
     template <typename F, typename... Seqs>
-    using MapWithIndexReturn_t = MapSequence_t<CallReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
+    using MapWithIndexReturn_t =
+        MapSequence_t<CallReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
 
     // FilterReturn_t
 
@@ -333,7 +334,7 @@ namespace efp
     using FilterReturn_t =
         Conditional_t<
             IsStaticCapacity<SeqA>::value,
-            ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
+            ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
             Vector<Element_t<SeqA>>>;
 
     // filter
@@ -342,9 +343,9 @@ namespace efp
     auto filter(const F &f, const SeqA &as)
         -> EnableIf_t<
             IsStaticCapacity<SeqA>::value,
-            ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
+            ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
     {
-        ArrayVector<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
+        ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
 
         for (int i = 0; i < length(as); ++i)
         {
@@ -570,13 +571,13 @@ namespace efp
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            ArrayVector<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+            ArrVec<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
         using R = CallReturn_t<F, int, Element_t<Seqs>...>;
 
         const int result_length = min_length(seqs...);
 
-        ArrayVector<R, MinStaticCapacity<Seqs...>::value> result(result_length);
+        ArrVec<R, MinStaticCapacity<Seqs...>::value> result(result_length);
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -633,13 +634,13 @@ namespace efp
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            ArrayVector<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
+            ArrVec<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
         const size_t result_length = size_t_product(length(seqs)...);
 
-        ArrayVector<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
+        ArrVec<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
         int i = 0;
 
         const auto inner = [&](Element_t<Seqs>... xs)
@@ -675,29 +676,60 @@ namespace efp
         return result;
     }
 
-    // elem_index
+    // todo begin
 
-    // // todo No std
+    // todo end
+
+    // todo head
+    // ! Partial function. Make sure non empty
+
     // template <typename SeqA>
-    // std::optional<size_t> elem_index(const Element_t<SeqA> a, const SeqA &as)
+    // A head(const SeqA &as)
     // {
-    //     for (size_t i = 0; i < length(as); ++i)
-    //     {
-    //         if (as[i] == a)
-    //         {
-    //             return i;
-    //         }
-    //     }
-
-    //     return std::nullopt;
+    //     return *begin(as);
     // }
 
-    template <typename SeqA>
-    Maybe<int> elem_index(const Element_t<SeqA> a, const SeqA &as)
-    {
-        const int length_a = length(as);
+    // todo last
+    // ! Partial function. Make sure non empty
 
-        for (int i = 0; i < length_a; ++i)
+    // template <typename SeqA>
+    // A head(const SeqA &as)
+    // {
+    //     return *(end(as) - 1);
+    // }
+
+    // todo tail
+
+    // todo init
+
+    // todo is_null
+
+    // elem
+
+    template <typename SeqA>
+    bool elem(const Element_t<SeqA> &a, const SeqA &as)
+    {
+        const int length_as = length(as);
+
+        for (int i = 0; i < length_as; ++i)
+        {
+            if (as[i] == a)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // elem_index
+
+    template <typename SeqA>
+    Maybe<int> elem_index(const Element_t<SeqA> &a, const SeqA &as)
+    {
+        const int length_as = length(as);
+
+        for (int i = 0; i < length_as; ++i)
         {
             if (as[i] == a)
             {
@@ -707,6 +739,64 @@ namespace efp
 
         return Nothing{};
     }
+
+    // ElemIndicesReturn_t
+
+    template <typename SeqA>
+    using ElemIndicesReturn_t =
+        Conditional_t<
+            IsStaticCapacity<SeqA>::value,
+            ArrVec<int, StaticCapacity<SeqA>::value>,
+            Vector<int>>;
+
+    // elem_indices
+
+    template <typename SeqA>
+    auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
+        -> EnableIf_t<
+            IsStaticCapacity<SeqA>::value,
+            ElemIndicesReturn_t<SeqA>>
+    {
+        ElemIndicesReturn_t<SeqA> result;
+
+        for (int i = 0; i < length(as); ++i)
+        {
+            if (a == as[i])
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
+
+    template <typename SeqA>
+    auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
+        -> EnableIf_t<
+            !IsStaticCapacity<SeqA>::value,
+            ElemIndicesReturn_t<SeqA>>
+    {
+        const size_t sequance_length = length(as);
+
+        ElemIndicesReturn_t<SeqA> result;
+        result.reserve(sequance_length * 2);
+
+        for (int i = 0; i < sequance_length; ++i)
+        {
+            if (a == as[i])
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
+
+    // find
+
+    // find_index
+
+    // find_indicies
 
     // take
 

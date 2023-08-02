@@ -22,9 +22,9 @@ const Array<double, 0> array_0{};
 const Array<double, 3> array_3{1., 2., 3.};
 const Array<double, 5> array_5{1., 2., 3., 4., 5.};
 
-const ArrayVector<double, 0> array_vector_0{};
-const ArrayVector<double, 3> array_vector_3{1., 2., 3.};
-const ArrayVector<double, 5> array_vector_5{1., 2., 3., 4., 5.};
+const ArrVec<double, 0> array_vector_0{};
+const ArrVec<double, 3> array_vector_3{1., 2., 3.};
+const ArrVec<double, 5> array_vector_5{1., 2., 3., 4., 5.};
 
 const Vector<double> vector_0{};
 const Vector<double> vector_3{1., 2., 3.};

@@ -14,9 +14,9 @@ TEST_CASE("initialization")
         CHECK(a.size() == 3);
     }
 
-    SECTION("ArrayVector")
+    SECTION("ArrVec")
     {
-        ArrayVector<int, 4> a = {1, 2, 3};
+        ArrVec<int, 4> a = {1, 2, 3};
 
         CHECK(a.size() == 3);
         CHECK(a.capacity() == 4);
@@ -56,14 +56,14 @@ Array<int, 3> array_nrvo()
     return result;
 };
 
-ArrayVector<int, 3> array_vector_rvo()
+ArrVec<int, 3> array_vector_rvo()
 {
-    return ArrayVector<int, 3>{1, 2, 3};
+    return ArrVec<int, 3>{1, 2, 3};
 };
 
-ArrayVector<int, 3> array_vector_nrvo()
+ArrVec<int, 3> array_vector_nrvo()
 {
-    ArrayVector<int, 3> result{0, 0, 0};
+    ArrVec<int, 3> result{0, 0, 0};
 
     result[0] = 1;
     result[1] = 2;
@@ -96,10 +96,10 @@ TEST_CASE("copy elision")
         CHECK(Array<int, 3>{1, 2, 3} == array_nrvo());
     }
 
-    SECTION("ArrayVector")
+    SECTION("ArrVec")
     {
-        CHECK(ArrayVector<int, 3>{1, 2, 3} == array_vector_rvo());
-        CHECK(ArrayVector<int, 3>{1, 2, 3} == array_vector_nrvo());
+        CHECK(ArrVec<int, 3>{1, 2, 3} == array_vector_rvo());
+        CHECK(ArrVec<int, 3>{1, 2, 3} == array_vector_nrvo());
     }
 
     SECTION("Vector")
@@ -120,10 +120,10 @@ TEST_CASE("assignment")
         CHECK(a == b);
     }
 
-    SECTION("ArrayVector")
+    SECTION("ArrVec")
     {
-        ArrayVector<double, 3> a{1., 2., 3.};
-        ArrayVector<double, 3> b;
+        ArrVec<double, 3> a{1., 2., 3.};
+        ArrVec<double, 3> b;
 
         b = a;
         CHECK(a == b);
