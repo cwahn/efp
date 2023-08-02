@@ -44,9 +44,6 @@ namespace efp
     {
     };
 
-    template <uint8_t n, typename... As>
-    using NthVariant_t = PackAt_t<n, As...>;
-
     template <typename... As>
     class Enum
     {
@@ -102,8 +99,9 @@ namespace efp
             return index_;
         }
 
-        template <typename A, typename = EnableIf_t<any_v(IsSame<A, As>::value...)>>
-        A get() const
+        template <typename A>
+        auto get() const
+            -> EnableIf_t<any_v(IsSame<A, As>::value...), A>
         {
             if (index_ != VariantIndex<A>::value)
             {
@@ -113,15 +111,16 @@ namespace efp
             return *(reinterpret_cast<const A *>(storage_));
         }
 
-        template <uint8_t n, typename = EnableIf_t<lt_v(n, sizeof...(As))>>
-        NthVariant_t<n, As...> get()
+        template <uint8_t n>
+        auto get()
+            -> EnableIf_t<lt_v(n, sizeof...(As)), PackAt_t<n, As...>>
         {
             if (index_ != n)
             {
                 abort();
             }
 
-            return *(reinterpret_cast<NthVariant_t<n, As...> *>(storage_));
+            return *(reinterpret_cast<PackAt_t<n, As...> *>(storage_));
         }
 
         // * Test if all of the branchs have same return type by Common_t.
@@ -140,11 +139,11 @@ namespace efp
 
         // Argument_t implementation will auto matically remove the const qualifier if there is.
 
-#define CASE(i)                                                                                    \
-    case i:                                                                                        \
-    {                                                                                              \
-        return overloaded(*(reinterpret_cast<const NthVariant_t<i, As...> *>(p_outer->storage_))); \
-        break;                                                                                     \
+#define CASE(i)                                                                                \
+    case i:                                                                                    \
+    {                                                                                          \
+        return overloaded(*(reinterpret_cast<const PackAt_t<i, As...> *>(p_outer->storage_))); \
+        break;                                                                                 \
     }
 
 #define STAMP2(n, x) \
@@ -230,7 +229,6 @@ namespace efp
         }
 
         alignas(maximum_v(alignof(As)...)) uint8_t storage_[maximum_v(sizeof(As)...)];
-        // todo Maybe need to modifiy the type of index
         uint8_t index_;
     };
 
@@ -246,7 +244,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP2(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -263,7 +264,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP4(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -280,7 +284,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP8(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -297,7 +304,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP16(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -314,7 +324,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP32(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -331,7 +344,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP64(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -348,7 +364,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP128(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
@@ -365,7 +384,10 @@ namespace efp
             switch (p_outer->index_)
             {
                 STAMP256(0, CASE)
-                // todo default
+
+            default:
+                // assert(0);
+                abort();
             }
         }
     };
