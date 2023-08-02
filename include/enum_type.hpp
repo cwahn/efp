@@ -78,6 +78,17 @@ namespace efp
 
         ~Enum() {}
 
+        // bool operator==(const Enum &other) const
+        // {
+        //     if (index_ == other.index_)
+        //     {
+        //         switch index_{
+        //             // todo macro
+        //         }
+        //     }
+        //     return false;
+        // }
+
         uint8_t index() const
         {
             return index_;
