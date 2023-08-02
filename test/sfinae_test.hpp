@@ -106,10 +106,15 @@ void argument_t_function1(const int x0, float &x1)
 {
 }
 
+void argument_t_function2()
+{
+}
+
 TEST_CASE("Argument_t")
 {
     auto argument_t_lambda0 = [](int x0, float &&x1) {};
     auto argument_t_lambda1 = [](const int x0, float &x1) {};
+    auto argument_t_lambda2 = []() {};
 
     CHECK(IsSame<
               std::tuple<int, float>,
@@ -130,6 +135,15 @@ TEST_CASE("Argument_t")
               std::tuple<int, float &>,
               Argument_t<decltype(&argument_t_function1)>>::value == true);
 
+    // Catching function not taking any argument with empty tuple
+    CHECK(IsSame<
+              std::tuple<>,
+              Argument_t<decltype(&argument_t_function2)>>::value == true);
+
+    CHECK(IsSame<
+              std::tuple<void>,
+              Argument_t<decltype(&argument_t_function2)>>::value == false);
+
     // l-value reference will be preserved
     CHECK(IsSame<
               std::tuple<int, float>,
@@ -148,6 +162,15 @@ TEST_CASE("Argument_t")
     CHECK(IsSame<
               std::tuple<int, float &>,
               Argument_t<decltype(argument_t_lambda1)>>::value == true);
+
+    // Catching lambda not taking any argument with empty tuple
+    CHECK(IsSame<
+              std::tuple<>,
+              Argument_t<decltype(argument_t_lambda2)>>::value == true);
+
+    CHECK(IsSame<
+              std::tuple<void>,
+              Argument_t<decltype(argument_t_lambda2)>>::value == false);
 }
 
 double return_t_function0(int x0, float &&x1)

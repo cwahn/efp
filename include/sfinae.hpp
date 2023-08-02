@@ -486,10 +486,29 @@ namespace efp
     template <typename A>
     using RemoveReference_t = typename RemoveReferenceType<A>::type;
 
+    // Commontype
+
+    template <typename... As>
+    struct CommonType
+    {
+        using type = void;
+    };
+
+    template <typename A, typename... As>
+    struct CommonType<A, As...>
+    {
+        using type = EnableIf_t<
+            all_v(IsSame<A, As>::value...), A>;
+    };
+
     // Common_t
-    template <typename Head, typename... Tail>
-    using Common_t = EnableIf_t<
-        all_v(IsSame<Head, Tail>::value...), Head>;
+
+    template <typename... As>
+    using Common_t = typename CommonType<As...>::type;
+
+    // template <typename Head, typename... Tail>
+    // using Common_t = EnableIf_t<
+    //     all_v(IsSame<Head, Tail>::value...), Head>;
 }
 
 #endif
