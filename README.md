@@ -28,7 +28,7 @@ Sequence-returning functions will return zero-copy sequences of EFP, which are e
 - Dynamic capacity
   - Vector (zero-copy analog of `std::vector`)
 
-### Sum type (Enum) with Pattern Matching
+### Sum Type (Enum) with Pattern Matching
 
 EFP supports sum-type similar to `std::variant` with pattern matching at C++ 11. The matching is 
 - Coherent: The matching rule is the same as that of the overloaded function.
@@ -37,7 +37,8 @@ EFP supports sum-type similar to `std::variant` with pattern matching at C++ 11.
 
 One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, tends to result in twice the size of the largest variant.
 
-### Maybe acts as Functor, Applicative, Monad
+### Maybe
+EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad.  
 
 WIP
 
