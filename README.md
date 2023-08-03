@@ -20,7 +20,7 @@ EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence types as solu
 ### Type Agnostic APIs
 EFP accepts C-style array, `std::array`, `std::vector`, `efp::Array`, `efp::ArrVec`, and `efp::Vector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
 
-Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrVec`, `efp::Vector` based on types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
+Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrVec`, or `efp::Vector` based on the types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
 - Static capacity && static length
   - Array (zero-copy analog of `std::array`)
 - Static capacity && dynamic length
@@ -35,7 +35,7 @@ EFP supports sum-type similar to `std::variant` with pattern matching at C++ 11.
 - Exhaustive: Non-exhaustive branches will fail to be compiled.
 - Effective: Internally changes to switch-case statement.
 
-One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, tends to result in twice of the size of the largest variant.
+One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, tends to result in twice the size of the largest variant.
 
 ### Maybe acts as Functor, Applicative, Monad
 
