@@ -284,14 +284,10 @@ TEST_CASE("remove_dc")
     double b = 100;
 
     auto f = [&](double x)
-    {
-        return a * x + b;
-    };
+    { return a * x + b; };
 
     auto f_ref = [&](double x)
-    {
-        return a * (x - n / 2);
-    };
+    { return a * (x - n / 2); };
 
     SECTION("c style")
     {
@@ -361,9 +357,6 @@ TEST_CASE("linear_regression")
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
-        // CHECK(b_hat == b);
-        // CHECK(a_hat == a);
-
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
     }
@@ -381,9 +374,6 @@ TEST_CASE("linear_regression")
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression<double>(std_array_xs, ys);
 
-        // CHECK(b_hat == b);
-        // CHECK(a_hat == a);
-
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
     }
@@ -398,9 +388,6 @@ TEST_CASE("linear_regression")
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
-        // CHECK(b_hat == b);
-        // CHECK(a_hat == a);
-
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
     }
@@ -414,9 +401,6 @@ TEST_CASE("linear_regression")
 
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
-
-        // CHECK(b_hat == b);
-        // CHECK(a_hat == a);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -481,14 +465,10 @@ TEST_CASE("detrend")
     double b = 100;
 
     auto f1 = [&](double x)
-    {
-        return a * x + b;
-    };
+    { return a * x + b; };
 
     auto f2 = [](double x)
-    {
-        return sin(2 * M_PI * x / n);
-    };
+    { return sin(2 * M_PI * x / n); };
 
     SECTION("c style")
     {

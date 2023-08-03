@@ -22,10 +22,7 @@ namespace efp
     R sse(const SeqA &as, const SeqB &bs)
     {
         const auto square_error = [](const Element_t<SeqA> &a, const Element_t<SeqB> &b)
-        {
-            const auto error = a - b;
-            return error * error;
-        };
+        { return square(a - b); };
 
         return sum(map(square_error, as, bs));
     }
@@ -34,10 +31,7 @@ namespace efp
     R mse(const SeqA &as, const SeqB &bs)
     {
         const auto square_error = [](const Element_t<SeqA> &a, const Element_t<SeqB> &b)
-        {
-            const auto error = a - b;
-            return error * error;
-        };
+        { return square(a - b); };
 
         return mean<R>(map(square_error, as, bs));
     }
@@ -66,9 +60,7 @@ namespace efp
         const auto mean_as = mean<R>(as);
 
         auto square_deviation = [&](const Element_t<SeqA> &x)
-        {
-            return square(x - mean_as);
-        };
+        { return square(x - mean_as); };
 
         return bessel_correction
                    ? sum(map(square_deviation, as)) / (R)(length(as) - 1)
@@ -90,9 +82,7 @@ namespace efp
         const auto mean_bs = mean<R>(bs);
 
         const auto covar = [&](const Element_t<SeqA> &a, const Element_t<SeqB> &b)
-        {
-            return (a - mean_as) * (b - mean_bs);
-        };
+        { return (a - mean_as) * (b - mean_bs); };
 
         return bessel_correction
                    ? sum(map(covar, as, bs)) / (R)(length(as) - 1)
@@ -112,14 +102,11 @@ namespace efp
         const auto mean_as = mean<R>(as);
         const auto n = length(as);
         const int sum_length = n - lag;
-
         R summation = 0;
 
         for_index(
             [&](const int &i)
-            {
-                summation += (as[i] - mean_as) * (as[i + lag] - mean_as);
-            },
+            { summation += (as[i] - mean_as) * (as[i + lag] - mean_as); },
             sum_length);
 
         if (adjusted)
@@ -149,9 +136,7 @@ namespace efp
         const auto mean_as = mean<R>(as);
 
         const auto minus_mean_as = [&](const Element_t<SeqA> &x)
-        {
-            return (R)x - mean_as;
-        };
+        { return (R)x - mean_as; };
 
         return map(minus_mean_as, as);
     }
@@ -163,14 +148,9 @@ namespace efp
         const auto mean_bs = mean<R>(bs);
 
         const auto minus_mean_as = [&](const Element_t<SeqA> &x)
-        {
-            return (R)x - mean_as;
-        };
-
+        { return (R)x - mean_as; };
         const auto minus_mean_bs = [&](const Element_t<SeqB> &x)
-        {
-            return (R)x - mean_bs;
-        };
+        { return (R)x - mean_bs; };
 
         const auto a_deviations = map(minus_mean_as, as);
         const auto b_deviations = map(minus_mean_bs, bs);
@@ -193,9 +173,7 @@ namespace efp
         const auto mean_as = mean<R>(as);
 
         const auto get_ss_ia = [&](const int &i, const Element_t<SeqA> &a)
-        {
-            return (i - mean_is) * ((R)a - mean_as);
-        };
+        { return (i - mean_is) * ((R)a - mean_as); };
 
         const auto ss_ia = sum(map_with_index(get_ss_ia, as));
         const auto ss_ii = n * (n * n - 1) / 12.;
@@ -210,14 +188,11 @@ namespace efp
     MapSequence_t<R, SeqA> detrend(const SeqA &as)
     {
         const auto betas = linear_regression_with_index<R>(as);
-
         const auto beta_1 = std::get<0>(betas);
         const auto beta_2 = std::get<1>(betas);
 
         const auto detrend_elem = [&](const Element_t<SeqA> &i, const Element_t<SeqA> &x)
-        {
-            return (R)x - (beta_1 * (R)i + beta_2);
-        };
+        { return (R)x - (beta_1 * (R)i + beta_2); };
 
         return map_with_index(detrend_elem, as);
     }
