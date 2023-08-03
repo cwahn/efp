@@ -279,13 +279,50 @@ namespace efp
 
     // IsIntegralConstant
 
+    // template <typename A>
+    // struct IsIntegralConstant : std::false_type
+    // {
+    // };
+
+    // template <typename A, A Value>
+    // struct IsIntegralConstant<std::integral_constant<A, Value>> : std::true_type
+    // {
+    // };
+
+    // Constexpr
+
+    template <typename A, A a>
+    struct Constexpr
+    {
+        static constexpr A value = a;
+        using value_type = A;
+        using type = Constexpr;
+
+        constexpr operator value_type() const noexcept { return value; }   // Conversion operator
+        constexpr value_type operator()() const noexcept { return value; } // Function call operator
+    };
+
+    // IsConstexpr
+
     template <typename A>
-    struct IsIntegralConstant : std::false_type
+    struct IsConstexpr
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename A, A a>
+    struct IsConstexpr<Constexpr<A, a>>
+    {
+        static constexpr bool value = true;
+    };
+
+    template <typename A>
+    struct IsConstexpr<A &> : IsConstexpr<A>
     {
     };
 
-    template <typename A, A Value>
-    struct IsIntegralConstant<std::integral_constant<A, Value>> : std::true_type
+    template <typename A>
+    struct IsConstexpr<A &&> : IsConstexpr<A>
     {
     };
 

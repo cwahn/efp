@@ -307,7 +307,7 @@ TEST_CASE("from_function")
             return i + 1;
         };
 
-        CHECK(from_function(StaticSizeT<3>{}, plus_one) == Array<int, 3>{1, 2, 3});
+        CHECK(from_function(Constexpr<int, 3>{}, plus_one) == Array<int, 3>{1, 2, 3});
     }
 
     SECTION("DynamicArray")
@@ -408,15 +408,16 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
-// TEST_CASE("drop")
-// {
-//     SECTION("c array")
-//     {
-//         const auto res = drop(2, c_array_3);
-//         CHECK(res.data() == data(c_array_3) + 2);
-//         CHECK(length(res) == 1);
-//     }
-// }
+TEST_CASE("drop")
+{
+    SECTION("c array")
+    {
+        const auto res = drop(2, c_array_3);
+        CHECK(res.data() == data(c_array_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.);
+    }
+}
 
 TEST_CASE("elem")
 {

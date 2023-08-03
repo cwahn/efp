@@ -3,8 +3,6 @@
 
 using namespace efp;
 
-constexpr size_t n = 10;
-
 int main()
 {
     auto negate = [](int x)
@@ -16,7 +14,7 @@ int main()
     auto stdout = [&](int x)
     { std::cout << x << " "; };
 
-    auto as = from_function(StaticSizeT<n>{}, id<int>);
+    auto as = from_function(Constexpr<int, 10>{}, id<int>);
 
     auto minus_square = compose(negate, square<int>);
 
