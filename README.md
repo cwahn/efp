@@ -2,9 +2,9 @@
 
 "**Practical eager functional programming for C++**" 
 
-The major purpose of this library is to remove loops and utilize the power of functional programming on sequence operation while preserving the performance of bare C. 
+The major purpose of this library is to leverage the power of functional programming while preserving the performance of bare C. 
 
-It is a general-purpose library. The usage of no-STL, resource-tight embedded applications are also considered.
+It is a general-purpose library. The usage of no-STL, resource-tight embedded applications are also considered. (no-STL is WIP)
 
 ## Features
 ### Higher-Order Functions
@@ -30,10 +30,19 @@ Sequence-returning functions will return zero-copy sequences of EFP, which are e
 
 ### Sum type (Enum) with Pattern Matching
 
-Supported
+EFP supports sum-type similar to `std::variant` with pattern matching at C++ 11. The matching is 
+- Coherent: The matching rule is the same as that of the overloaded function.
+- Exhaustive: Non-exhaustive branches will fail to be compiled.
+- Effective: Internally changes to switch-case statement.
+
+One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, tends to result in twice of the size of the largest variant.
+
+### Maybe acts as Functor, Applicative, Monad
+
 WIP
 
 ## Examples
+### General
 ```cpp
 #include <iostream>
 #include "efp.hpp"
@@ -67,6 +76,22 @@ int main()
 }
 ```
 
+### Sum Type Matching
+```cpp
+Enum<bool, int, double> a = 0;
+int b = 42;
+
+int c = a.match(
+    [&](bool x)
+    { return b * 0; },
+    [&](int x)
+    { return b * 1; },
+    [&](double x)
+    { return b * 2; });
+
+CHECK(b == 42);
+```
+
 ## Benchmarks
 WIP
 
@@ -82,5 +107,7 @@ All tests passed (249 assertions in 54 test cases)
 Requires C++ 11 or later.
 
 ## License
+
+Drafting of this library is started in the July of 2023 by Ahn, Chanwoo for an embedded project. 
 
 This library is open-source under The MIT Liscence.

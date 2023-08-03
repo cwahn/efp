@@ -89,6 +89,22 @@ TEST_CASE("enum_match")
 
         CHECK(b == 42);
     }
+
+    SECTION("non-void2")
+    {
+        Enum<bool, int, double> a = 0;
+        int b = 42;
+
+        int c = a.match(
+            [&](bool x)
+            { return b * 0; },
+            [&](int x)
+            { return b * 1; },
+            [&](double x)
+            { return b * 2; });
+
+        CHECK(b == 42);
+    }
 }
 
 #endif

@@ -148,7 +148,7 @@ namespace efp
 
 #define STAMP2(n, x) \
     x(n)             \
-        x(n + 1)
+    x(n + 1)
 
 #define STAMP4(n, x) \
     STAMP2(n, x)     \
