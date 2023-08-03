@@ -8,7 +8,7 @@
 
 #include "sfinae.hpp"
 #include "enum_type.hpp"
-#include "zero_copy.hpp"
+#include "sequence.hpp"
 #include "maybe.hpp"
 
 namespace efp
@@ -83,34 +83,7 @@ namespace efp
     //     return Composed<F, Fs...>(f, fs...);
     // }
 
-    // length
 
-    template <typename SeqA>
-    size_t length(const SeqA &as)
-    {
-        return as.size();
-    }
-
-    template <typename A, size_t N>
-    auto length(const Array<A, N> &)
-        -> std::integral_constant<size_t, N>
-    {
-        return std::integral_constant<size_t, N>{};
-    }
-
-    template <typename A, size_t N>
-    auto length(const std::array<A, N> &)
-        -> std::integral_constant<size_t, N>
-    {
-        return std::integral_constant<size_t, N>{};
-    }
-
-    template <typename A, size_t N>
-    auto length(const A (&)[N])
-        -> std::integral_constant<size_t, N>
-    {
-        return std::integral_constant<size_t, N>{};
-    }
 
     // execute_pack
 
@@ -638,7 +611,7 @@ namespace efp
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
-        const size_t result_length = size_t_product(length(seqs)...);
+        const size_t result_length = size_v_product(length(seqs)...);
 
         ArrVec<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
         int i = 0;
@@ -661,7 +634,7 @@ namespace efp
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
-        const size_t result_length = size_t_product(length(seqs)...);
+        const size_t result_length = size_v_product(length(seqs)...);
 
         Vector<R> result(result_length);
         int i = 0;
@@ -703,6 +676,28 @@ namespace efp
     // todo init
 
     // todo is_null
+
+    // using View_t = Conditional_t<
+    //     template <typename SeqA>
+    //     IsStaticLength<SeqA>::value,
+    //     ArrayView<Element_t<SeqA>>,
+    //     VectorView<Element_t<SeqA>>>;
+
+    // todo take
+
+    // drop
+    template <typename N, typename SeqA>
+    auto drop(const N &n, const SeqA &as)
+        -> Conditional_t<
+            IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value,
+            ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>,
+            VectorView<Element_t<SeqA>>>
+    {
+        // ! What if larger than n? maybe last with 0?
+        return IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value
+                   ? ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{&(as[0]) + n}
+                   : VectorView<Element_t<SeqA>>{std::begin(as) + n, length(as) - n};
+    }
 
     // elem
 

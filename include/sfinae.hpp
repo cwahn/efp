@@ -310,7 +310,7 @@ namespace efp
     {
         // static_assert(n >= 0, "Index out of range");
         // static_assert(n < sizeof...(Args), "Index out of range");
-        using type = void*;
+        using type = void *;
     };
 
     template <typename Head, typename... Tail>
@@ -511,6 +511,17 @@ namespace efp
     // template <typename Head, typename... Tail>
     // using Common_t = EnableIf_t<
     //     all_v(IsSame<Head, Tail>::value...), Head>;
+
+    // IsConst
+    template <typename A>
+    struct IsConst : FalseType
+    {
+    };
+
+    template <typename A>
+    struct IsConst<const A> : TrueType
+    {
+    };
 }
 
 #endif

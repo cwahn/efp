@@ -1,5 +1,5 @@
-#ifndef ZERO_COPY_HPP_
-#define ZERO_COPY_HPP_
+#ifndef SEQUENCE_HPP_
+#define SEQUENCE_HPP_
 
 #include <array>
 
@@ -135,8 +135,8 @@ namespace efp
         // Constructors
         ArrVec() : size_(0) {}
         ArrVec(const size_t s) : size_(0) {} // Unpredicatable data_
-        ArrVec(const ArrVec &);         // Not emplemented by design for RVO, NRVO enforcement
-        ArrVec(ArrVec &&);              // Not emplemented by design for RVO, NRVO enforcement
+        ArrVec(const ArrVec &);              // Not emplemented by design for RVO, NRVO enforcement
+        ArrVec(ArrVec &&);                   // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Args>
         ArrVec(const Args &...args)
             : data_{args...},
@@ -196,6 +196,16 @@ namespace efp
         size_type size() const noexcept
         {
             return size_;
+        }
+
+        A *data()
+        {
+            return data_;
+        }
+
+        const A *data() const
+        {
+            return data_;
         }
 
         // Iterators
@@ -427,11 +437,13 @@ namespace efp
     public:
         using value_type = A;
         using size_type = std::size_t;
+        using pointer_type = A *;
 
-        ArrayView(A *const p_data)
+        ArrayView(pointer_type p_data)
             : data_(p_data)
         {
         }
+
         ~ArrayView()
         {
         }
@@ -446,9 +458,19 @@ namespace efp
             return data_[index];
         }
 
-        inline constexpr size_type size() const noexcept
+        constexpr size_type size() const noexcept
         {
             return N;
+        }
+
+        A *data()
+        {
+            return data_;
+        }
+
+        const A *data() const
+        {
+            return data_;
         }
 
         // Iterators
@@ -478,7 +500,7 @@ namespace efp
         }
 
     private:
-        A *const data_;
+        pointer_type data_;
     };
 
     // VectorView
@@ -489,8 +511,12 @@ namespace efp
     public:
         using value_type = A;
         using size_type = std::size_t;
+        using pointer_type = Conditional_t<
+            IsConst<A>::value,
+            const A *,
+            A *>;
 
-        VectorView(A *const p_data, const size_t size)
+        VectorView(pointer_type p_data, const size_t size)
             : data_(p_data), size_(size)
         {
         }
@@ -521,6 +547,16 @@ namespace efp
             return size_;
         }
 
+        A *data()
+        {
+            return data_;
+        }
+
+        const A *data() const
+        {
+            return data_;
+        }
+
         // Iterators
         A *begin() noexcept
         {
@@ -548,8 +584,8 @@ namespace efp
         }
 
     private:
-        A *const data_;
-        const size_type size_;
+        pointer_type data_;
+        size_type size_;
     };
 
     // IsStaticCapacity
@@ -704,45 +740,80 @@ namespace efp
     {
     };
 
+    // length
+
+    template <typename SeqA>
+    constexpr size_t length(const SeqA &as)
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t N>
+    constexpr size_t length(const A (&)[N])
+    {
+        return N;
+    }
+
+    // data
+
+    template <typename SeqA>
+    constexpr auto data(const SeqA &as)
+        -> decltype(as.size())
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t N>
+    constexpr A *data(A (&as)[N])
+    {
+        return N;
+    }
+
+    template <typename A, size_t N>
+    constexpr const A *data(const A (&as)[N])
+    {
+        return N;
+    }
+
     // StaticSizeT
 
     template <size_t N>
     using StaticSizeT = std::integral_constant<size_t, N>;
 
-    // min_size_t
+    // min_size_v
 
     template <typename A>
-    constexpr A min_size_t(const A &value)
+    constexpr A min_size_v(const A &value)
     {
         return value;
     }
 
     template <typename Head, typename... Tail>
-    constexpr auto min_size_t(const Head &head, const Tail &...tail)
+    constexpr auto min_size_v(const Head &head, const Tail &...tail)
         -> typename std::conditional<
             all_v(IsIntegralConstant<Head>::value, IsIntegralConstant<Tail>::value...),
             Head,
             size_t>::type
     {
-        return head < min_size_t(tail...) ? head : min_size_t(tail...);
+        return head < min_size_v(tail...) ? head : min_size_v(tail...);
     }
 
-    // size_t_product
+    // size_v_product
 
     template <typename A>
-    constexpr A size_t_product(const A &value)
+    constexpr A size_v_product(const A &value)
     {
         return value;
     }
 
     template <typename Head, typename... Tail>
-    constexpr auto size_t_product(const Head &head, const Tail &...tail)
+    constexpr auto size_v_product(const Head &head, const Tail &...tail)
         -> typename std::conditional<
             all_v(IsIntegralConstant<Head>::value, IsIntegralConstant<Tail>::value...),
             Head,
             size_t>::type
     {
-        return head * size_t_product(tail...);
+        return head * size_v_product(tail...);
     }
 
     // MinStaticCapacity
@@ -760,7 +831,7 @@ namespace efp
     struct MinStaticCapacity<Head, Tail...>
     {
         static constexpr size_t head = StaticCapacity<Head>::value;
-        static constexpr size_t tail = min_size_t(StaticCapacity<Tail>::value...);
+        static constexpr size_t tail = min_size_v(StaticCapacity<Tail>::value...);
         static constexpr size_t value = head < tail ? head : tail;
     };
 

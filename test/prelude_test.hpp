@@ -408,6 +408,16 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
+// TEST_CASE("drop")
+// {
+//     SECTION("c array")
+//     {
+//         const auto res = drop(std::integral_constant<int, 2>{}, c_array_3);
+//         CHECK(res.begin() == std::begin(c_array_3) + 2);
+//         CHECK(length(res) == 1);
+//     }
+// }
+
 TEST_CASE("elem")
 {
     SECTION("c array")

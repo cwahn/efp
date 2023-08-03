@@ -490,7 +490,6 @@ TEST_CASE("detrend")
 
     SECTION("std::array")
     {
-        // auto xs = from_function(StaticSizeT<n>{}, id<int>);
         auto xs = from_function(std::integral_constant<int, n>{}, id<int>);
 
         auto ys1 = map(f1, xs);

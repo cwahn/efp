@@ -1,5 +1,5 @@
-#ifndef ZERO_COPY_TEST_HPP_
-#define ZERO_COPY_TEST_HPP_
+#ifndef SEQUENCE_TEST_HPP_
+#define SEQUENCE_TEST_HPP_
 
 #include "efp.hpp"
 
@@ -137,6 +137,13 @@ TEST_CASE("assignment")
         b = a;
         CHECK(a == b);
     }
+}
+
+TEST_CASE("Element_t")
+{
+    CHECK(IsSame<double, Element_t<decltype(array_3)>>::value == true);
+    //  Element_t is not catching const of container.
+    CHECK(IsSame<const double, Element_t<decltype(array_3)>>::value == false);
 }
 
 #endif
