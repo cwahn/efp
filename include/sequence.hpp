@@ -760,19 +760,19 @@ namespace efp
     constexpr auto data(const SeqA &as)
         -> decltype(as.size())
     {
-        return as.size();
+        return as.data();
     }
 
     template <typename A, size_t N>
     constexpr A *data(A (&as)[N])
     {
-        return N;
+        return (A *)as;
     }
 
     template <typename A, size_t N>
     constexpr const A *data(const A (&as)[N])
     {
-        return N;
+        return (const A *)as;
     }
 
     // StaticSizeT

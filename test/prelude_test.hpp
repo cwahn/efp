@@ -412,8 +412,8 @@ TEST_CASE("cartesian_map")
 // {
 //     SECTION("c array")
 //     {
-//         const auto res = drop(std::integral_constant<int, 2>{}, c_array_3);
-//         CHECK(res.begin() == std::begin(c_array_3) + 2);
+//         const auto res = drop(2, c_array_3);
+//         CHECK(res.data() == data(c_array_3) + 2);
 //         CHECK(length(res) == 1);
 //     }
 // }

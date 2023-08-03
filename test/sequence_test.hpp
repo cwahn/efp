@@ -139,6 +139,26 @@ TEST_CASE("assignment")
     }
 }
 
+TEST_CASE("ArrayView")
+{
+    SECTION("construction")
+    {
+        int a = 0;
+        const int a_const = 0;
+
+        // const pointer will create read-only view.
+
+        ArrayView<int, 1> a_view0{&a};
+        ArrayView<const int, 1> a_view1{&a_const};
+        const ArrayView<int, 1> a_view2{&a};
+        const ArrayView<const int, 1> a_view3{&a_const};
+        // ArrayView<int, 1> a_view4{&a_const};
+        ArrayView<const int, 1> a_view5{&a};
+        // const ArrayView<int, 1> a_view6{&a_const};
+        const ArrayView<const int, 1> a_view7{&a};
+    }
+}
+
 TEST_CASE("Element_t")
 {
     CHECK(IsSame<double, Element_t<decltype(array_3)>>::value == true);

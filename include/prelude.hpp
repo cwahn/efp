@@ -83,8 +83,6 @@ namespace efp
     //     return Composed<F, Fs...>(f, fs...);
     // }
 
-
-
     // execute_pack
 
     template <typename... Args>
@@ -685,19 +683,31 @@ namespace efp
 
     // todo take
 
-    // drop
-    template <typename N, typename SeqA>
-    auto drop(const N &n, const SeqA &as)
-        -> Conditional_t<
-            IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value,
-            ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>,
-            VectorView<Element_t<SeqA>>>
-    {
-        // ! What if larger than n? maybe last with 0?
-        return IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value
-                   ? ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{&(as[0]) + n}
-                   : VectorView<Element_t<SeqA>>{std::begin(as) + n, length(as) - n};
-    }
+    // // drop
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> Conditional_t<
+    //         IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>,
+    //         VectorView<Element_t<SeqA>>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value
+    //                ? ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n}
+    //                : VectorView<Element_t<SeqA>>{std::begin(as) + n, length(as) - n};
+    // }
+
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, const SeqA &as)
+    //     -> Conditional_t<
+    //         IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>,
+    //         VectorView<const Element_t<SeqA>>>
+    // {
+    //     return IsIntegralConstant<N>::value && IsStaticLength<SeqA>::value
+    //                ? ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n}
+    //                : VectorView<const Element_t<SeqA>>{std::begin(as) + n, length(as) - n};
+    // }
 
     // elem
 
