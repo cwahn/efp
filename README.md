@@ -2,7 +2,7 @@
 
 "**Practical eager functional programming for C++**" 
 
-The major purpose of this library is to leverage the power of functional programming while preserving the performance of bare C. 
+The major purpose of this header-only library is to leverage the power of functional programming while preserving the performance of bare C. 
 
 It is a general-purpose library. The usage of no-STL, resource-tight embedded applications are also considered. (no-STL is WIP)
 
@@ -35,7 +35,7 @@ EFP supports sum-type similar to `std::variant` with pattern matching at C++ 11.
 - Exhaustive: Non-exhaustive branches will fail to be compiled.
 - Effective: Internally changes to switch-case statement.
 
-One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, tends to result in twice the size of the largest variant.
+One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence support 256 variant at max for now), but because of the memory alignment, the size of `efp::Enum` tends to be twice the size of the largest variant.
 
 ### Maybe
 EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad.  
@@ -64,13 +64,9 @@ int main()
     { std::cout << x << " "; };
 
     auto as = from_function(StaticSizeT<n>{}, id<int>);
-
     auto minus_square = compose(negate, square<int>);
-
     auto bs = map(minus_square, as);
-
     auto cs = filter(is_even, bs);
-
     for_each(stdout, cs); // 0 -4 -16 -36 -64
 
     return 0;
