@@ -60,7 +60,7 @@ namespace efp
         return rmse<R>(as, bs) / (R)max_min(bs);
     }
 
-    template <typename R, typename SeqA>
+    template <typename R, bool bessel_correction = false, typename SeqA>
     R variance(const SeqA &as)
     {
         const auto mean_as = mean<R>(as);
@@ -70,17 +70,21 @@ namespace efp
             return square(x - mean_as);
         };
 
-        return sum(map(square_deviation, as)) / (R)length(as);
+        return bessel_correction
+                   ? sum(map(square_deviation, as)) / (R)(length(as) - 1)
+                   : sum(map(square_deviation, as)) / (R)length(as);
     }
 
-    template <typename R, typename SeqA>
+    template <typename R, bool bessel_correction = false, typename SeqA>
     R standard_deviation(const SeqA &as)
+
     {
-        return sqrt(variance<R>(as));
+        return sqrt(variance<R, bessel_correction>(as));
     }
 
-    template <typename R, typename SeqA, typename SeqB>
+    template <typename R, bool bessel_correction = false, typename SeqA, typename SeqB>
     R covariance(const SeqA &as, const SeqB &bs)
+
     {
         const auto mean_as = mean<R>(as);
         const auto mean_bs = mean<R>(bs);
@@ -90,20 +94,24 @@ namespace efp
             return (a - mean_as) * (b - mean_bs);
         };
 
-        return sum(map(covar, as, bs)) / (R)length(as);
+        return bessel_correction
+                   ? sum(map(covar, as, bs)) / (R)(length(as) - 1)
+                   : sum(map(covar, as, bs)) / (R)length(as);
     }
 
-    template <typename R, typename SeqA, typename SeqB>
+    template <typename R, bool bessel_correction = false, typename SeqA, typename SeqB>
     R correlation(const SeqA &as, const SeqB &bs)
     {
-        return covariance<R>(as, bs) / (standard_deviation<R>(as) * standard_deviation<R>(bs));
+        return covariance<R, bessel_correction>(as, bs) /
+               (standard_deviation<R, bessel_correction>(as) * standard_deviation<R, bessel_correction>(bs));
     }
 
-    template <typename R, typename SeqA>
+    template <typename R, bool bessel_correction = false, bool adjusted = false, typename SeqA>
     R autocovariance(const SeqA &as, const int &lag)
     {
         const auto mean_as = mean<R>(as);
-        const int sum_length = length(as) - lag;
+        const auto n = length(as);
+        const int sum_length = n - lag;
 
         R summation = 0;
 
@@ -114,36 +122,25 @@ namespace efp
             },
             sum_length);
 
-        return summation / (R)sum_length;
-    }
-
-    template <typename R, typename SeqA>
-    MapSequence_t<R, SeqA> autocovariance_function(const SeqA &as)
-    {
-        const auto auto_covar = [&](const int &i, const Element_t<SeqA> &_)
+        if (adjusted)
         {
-            return autocovariance<R>(as, i);
-        };
-
-        return map_with_index(auto_covar, as);
-    }
-
-    template <typename R, typename SeqA>
-    MapSequence_t<R, SeqA> autocorrelation_function(const SeqA &as)
-    {
-        const auto variance_as = variance<R>(as);
-        const auto div_var_as = [&](const Element_t<SeqA> &x)
+            return bessel_correction
+                       ? summation / (R)(n - lag - 1)
+                       : summation / (R)(n - lag);
+        }
+        else
         {
-            return x / variance_as;
-        };
-
-        return map(div_var_as, as);
+            return bessel_correction
+                       ? summation / (R)(n - 1)
+                       : summation / (R)n;
+        }
     }
 
-    template <typename R, typename SeqA>
+    template <typename R, bool bessel_correction = false, bool adjusted = false, typename SeqA>
     R autocorrelation(const SeqA &as, const int &lag)
     {
-        return autocovariance<R>(as, lag) / variance<R>(as);
+        return autocovariance<R, bessel_correction, adjusted>(as, lag) /
+               variance<R, bessel_correction>(as);
     }
 
     template <typename R, typename SeqA>
