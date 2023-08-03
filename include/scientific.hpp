@@ -1,5 +1,5 @@
-#ifndef SIGNAL_HPP_
-#define SIGNAL_HPP_
+#ifndef SCIENTIFIC_HPP_
+#define SCIENTIFIC_HPP_
 
 #include "prelude.hpp"
 #include "numeric.hpp"
@@ -65,13 +65,12 @@ namespace efp
     {
         const auto mean_as = mean<R>(as);
 
-        auto minus_mean_as = [&](const Element_t<SeqA> &x)
+        auto square_deviation = [&](const Element_t<SeqA> &x)
         {
-            return x - mean_as;
+            return square(x - mean_as);
         };
 
-        const auto a_deviations = map(minus_mean_as, as);
-        return sum(a_deviations) / (R)length(as);
+        return sum(map(square_deviation, as)) / (R)length(as);
     }
 
     template <typename R, typename SeqA>

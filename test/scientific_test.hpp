@@ -1,5 +1,5 @@
-#ifndef SIGNAL_TEST_
-#define SIGNAL_TEST_
+#ifndef SCIENTIFIC_TEST_
+#define SCIENTIFIC_TEST_
 
 #include "catch2/catch_test_macros.hpp"
 
@@ -142,6 +142,24 @@ TEST_CASE("nrms")
         std::vector<double> twos = {2., 2., 2.};
         CHECK(nrmse_mean<double>(std_vector_3, std_vector_3) == 0.);
         CHECK(nrmse_mean<double>(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
+    }
+}
+
+TEST_CASE("variance")
+{
+    SECTION("c style")
+    {
+        CHECK(variance<double>(c_array_3) == 0.6666666666666666);
+    }
+
+    SECTION("std::array")
+    {
+        CHECK(variance<double>(std_array_3) == 0.6666666666666666);
+    }
+
+    SECTION("std::vectors")
+    {
+        CHECK(variance<double>(std_vector_3) == 0.6666666666666666);
     }
 }
 

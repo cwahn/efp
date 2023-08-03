@@ -4,10 +4,10 @@
 #include "prelude.hpp"
 
 #include "numeric.hpp"
-#include "signal.hpp"
 #include "c_utility.hpp"
 #include "cyclic.hpp"
 #include "enum_type.hpp"
 #include "maybe.hpp"
+#include "scientific.hpp"
 
 #endif
