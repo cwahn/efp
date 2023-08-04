@@ -14,7 +14,7 @@ int main()
     auto stdout = [&](int x)
     { std::cout << x << " "; };
 
-    auto as = from_function(Constexpr<int, 10>{}, id<int>);
+    auto as = from_function(IntegralConst<int, 10>{}, id<int>);
 
     auto minus_square = compose(negate, square<int>);
 

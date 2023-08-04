@@ -164,8 +164,8 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto min_length(const Head &head, const Tail &...tail)
         -> Conditional_t<
-            // All<IsConstexpr<Head>, IsConstexpr<Tail>...>::value,
-            all_v(IsConstexpr<Head>::value, IsConstexpr<Tail>::value...),
+            // All<IsIntegralConst<Head>, IsIntegralConst<Tail>...>::value,
+            all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
             decltype(length(head)),
             size_t>
     {
@@ -387,7 +387,7 @@ namespace efp
 
     template <typename N, typename F>
     using FromFunctionReturn_t = Conditional_t<
-        IsConstexpr<N>::value,
+        IsIntegralConst<N>::value,
         Array<CallReturn_t<F, int>, N::value>,
         Vector<CallReturn_t<F, int>>>;
 
@@ -396,7 +396,7 @@ namespace efp
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
         -> EnableIf_t<
-            IsConstexpr<N>::value,
+            IsIntegralConst<N>::value,
             Array<CallReturn_t<F, int>, N::value>>
     {
         Array<CallReturn_t<F, int>, N::value> result;
@@ -412,7 +412,7 @@ namespace efp
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
         -> EnableIf_t<
-            !IsConstexpr<N>::value,
+            !IsIntegralConst<N>::value,
             Vector<CallReturn_t<F, int>>>
     {
         Vector<CallReturn_t<F, int>> result(length);
@@ -688,7 +688,7 @@ namespace efp
     template <typename N, typename SeqA>
     auto drop(const N &n, SeqA &as)
         -> EnableIf_t<
-            IsConstexpr<N>::value && IsStaticLength<SeqA>::value,
+            IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
             ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
     {
         // ! What if larger than n? maybe last with 0?
@@ -698,7 +698,7 @@ namespace efp
     template <typename N, typename SeqA>
     auto drop(const N &n, const SeqA &as)
         -> EnableIf_t<
-            IsConstexpr<N>::value && IsStaticLength<SeqA>::value,
+            IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
             ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
     {
         return ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
@@ -707,7 +707,7 @@ namespace efp
     template <typename N, typename SeqA>
     auto drop(const N &n, SeqA &as)
         -> EnableIf_t<
-            !IsConstexpr<N>::value && IsStaticLength<SeqA>::value,
+            !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
             VectorView<Element_t<SeqA>>>
     {
         // ! What if larger than n? maybe last with 0?
@@ -717,7 +717,7 @@ namespace efp
     template <typename N, typename SeqA>
     auto drop(const N &n, const SeqA &as)
         -> EnableIf_t<
-            !IsConstexpr<N>::value && IsStaticLength<SeqA>::value,
+            !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
             VectorView<const Element_t<SeqA>>>
     {
         return VectorView<const Element_t<SeqA>>{data(as) + n, length(as) - n};

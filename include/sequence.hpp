@@ -753,16 +753,16 @@ namespace efp
     template <typename SeqA>
     constexpr auto length(const SeqA &as)
         -> EnableIf_t<IsStaticLength<SeqA>::value,
-                      Constexpr<size_t, StaticLength<SeqA>::value>>
+                      IntegralConst<size_t, StaticLength<SeqA>::value>>
     {
-        return Constexpr<size_t, StaticLength<SeqA>::value>{};
+        return IntegralConst<size_t, StaticLength<SeqA>::value>{};
     }
 
     template <typename A, size_t N>
     constexpr auto length(const A (&)[N])
-        -> Constexpr<size_t, N>
+        -> IntegralConst<size_t, N>
     {
-        return Constexpr<size_t, N>{};
+        return IntegralConst<size_t, N>{};
     }
 
     // data
@@ -789,7 +789,7 @@ namespace efp
     // StaticSizeT
 
     // template <size_t N>
-    // using StaticSizeT = Constexpr<size_t, N>;
+    // using StaticSizeT = IntegralConst<size_t, N>;
 
     // min_size_v
 
@@ -802,7 +802,7 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto min_size_v(const Head &head, const Tail &...tail)
         -> typename std::conditional<
-            all_v(IsConstexpr<Head>::value, IsConstexpr<Tail>::value...),
+            all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
             Head,
             size_t>::type
     {
@@ -820,7 +820,7 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto size_v_product(const Head &head, const Tail &...tail)
         -> typename std::conditional<
-            all_v(IsConstexpr<Head>::value, IsConstexpr<Tail>::value...),
+            all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
             Head,
             size_t>::type
     {

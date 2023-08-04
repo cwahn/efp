@@ -289,40 +289,40 @@ namespace efp
     // {
     // };
 
-    // Constexpr
+    // IntegralConst
 
     template <typename A, A a>
-    struct Constexpr
+    struct IntegralConst
     {
         static constexpr A value = a;
         using value_type = A;
-        using type = Constexpr;
+        using type = IntegralConst;
 
         constexpr operator value_type() const noexcept { return value; }   // Conversion operator
         constexpr value_type operator()() const noexcept { return value; } // Function call operator
     };
 
-    // IsConstexpr
+    // IsIntegralConst
 
     template <typename A>
-    struct IsConstexpr
+    struct IsIntegralConst
     {
         static constexpr bool value = false;
     };
 
     template <typename A, A a>
-    struct IsConstexpr<Constexpr<A, a>>
+    struct IsIntegralConst<IntegralConst<A, a>>
     {
         static constexpr bool value = true;
     };
 
     template <typename A>
-    struct IsConstexpr<A &> : IsConstexpr<A>
+    struct IsIntegralConst<A &> : IsIntegralConst<A>
     {
     };
 
     template <typename A>
-    struct IsConstexpr<A &&> : IsConstexpr<A>
+    struct IsIntegralConst<A &&> : IsIntegralConst<A>
     {
     };
 

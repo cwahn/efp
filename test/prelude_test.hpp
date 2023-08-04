@@ -307,7 +307,7 @@ TEST_CASE("from_function")
             return i + 1;
         };
 
-        CHECK(from_function(Constexpr<int, 3>{}, plus_one) == Array<int, 3>{1, 2, 3});
+        CHECK(from_function(IntegralConst<int, 3>{}, plus_one) == Array<int, 3>{1, 2, 3});
     }
 
     SECTION("DynamicArray")
