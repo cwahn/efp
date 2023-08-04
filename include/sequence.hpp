@@ -769,7 +769,7 @@ namespace efp
 
     template <typename SeqA>
     constexpr auto data(const SeqA &as)
-        -> decltype(as.size())
+        -> decltype(as.data())
     {
         return as.data();
     }
