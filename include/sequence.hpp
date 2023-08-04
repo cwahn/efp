@@ -7,7 +7,7 @@
 
 namespace efp
 {
-    template <typename A, std::size_t N>
+    template <typename A, size_t N>
     class ArrayProxy_ : public std::array<A, N>
     {
     public:
@@ -24,7 +24,7 @@ namespace efp
         ArrayProxy_(Args &&...args) : std::array<A, N>{{std::forward<Args>(args)...}} {}
     };
 
-    template <typename A, std::size_t N>
+    template <typename A, size_t N>
     class Array : public ArrayProxy_<A, N>
     {
     public:
@@ -41,13 +41,13 @@ namespace efp
         Array(Args &&...args) : ArrayProxy_<A, N>{std::forward<Args>(args)...} {}
     };
 
-    // template <typename A, std::size_t N>
+    // template <typename A, size_t N>
     // class Array : std::array<A, N>
     // {
     // public:
     //     // Type aliases to match std::array
     //     using value_type = A;
-    //     using size_type = std::size_t;
+    //     using size_type = size_t;
 
     //     // Default constructor
     //     Array() = default;          // Unpredicatable data_
@@ -64,7 +64,7 @@ namespace efp
     //     {
     //         if (this != &other)
     //         {
-    //             for (std::size_t i = 0; i < N; ++i)
+    //             for (size_t i = 0; i < N; ++i)
     //             {
     //                 data_[i] = other.data_[i];
     //             }
@@ -119,18 +119,18 @@ namespace efp
     //     A data_[N];
     // };
 
-    // template <typename A, std::size_t N>
+    // template <typename A, size_t N>
     // bool operator==(const Array<A, N> &lhs, const Array<A, N> &rhs)
     // {
     //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     // }
 
-    template <typename A, std::size_t Capacity>
+    template <typename A, size_t Capacity>
     class ArrVec
     {
     public:
         using value_type = A;
-        using size_type = std::size_t;
+        using size_type = size_t;
 
         // Constructors
         ArrVec() : size_(0) {}
@@ -149,7 +149,7 @@ namespace efp
             if (this != &other)
             {
                 size_ = other.size_;
-                for (std::size_t i = 0; i < size_; ++i)
+                for (size_t i = 0; i < size_; ++i)
                 {
                     data_[i] = other.data_[i];
                 }
@@ -239,7 +239,7 @@ namespace efp
         size_type size_;
     };
 
-    template <typename A, std::size_t N>
+    template <typename A, size_t N>
     bool operator==(const ArrVec<A, N> &lhs, const ArrVec<A, N> &rhs)
     {
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
@@ -279,7 +279,7 @@ namespace efp
     // public:
     //     // Type aliases
     //     using value_type = A;
-    //     using size_type = std::size_t;
+    //     using size_type = size_t;
 
     //     // Default constructor
     //     Vector() : data_(nullptr), size_(0), capacity_(0) {}
@@ -309,13 +309,13 @@ namespace efp
     //     {
     //         if (this != &other)
     //         {
-    //             const std::size_t other_size = other.size();
+    //             const size_t other_size = other.size();
     //             if (capacity_ < other_size)
     //             {
     //                 reserve(other.capacity());
     //             }
 
-    //             for (std::size_t i = 0; i < other_size; ++i)
+    //             for (size_t i = 0; i < other_size; ++i)
     //             {
     //                 data_[i] = other.data_[i];
     //             }
@@ -436,7 +436,7 @@ namespace efp
     {
     public:
         using value_type = A;
-        using size_type = std::size_t;
+        using size_type = size_t;
         using pointer_type = A *;
 
         ArrayView(pointer_type p_data)
@@ -510,7 +510,7 @@ namespace efp
     {
     public:
         using value_type = A;
-        using size_type = std::size_t;
+        using size_type = size_t;
         using pointer_type = Conditional_t<
             IsConst<A>::value,
             const A *,

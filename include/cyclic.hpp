@@ -13,10 +13,23 @@ namespace efp
     class Vcb
     {
     public:
+        using value_type = A;
+        using size_type = size_t;
+
         Vcb()
         {
             p_middle_ = buffer_.data() + N;
             p_data_ = buffer_.data();
+        }
+
+        A &operator[](const size_type index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](const size_type index) const
+        {
+            return p_data_[index];
         }
 
         void push_back(A value)
@@ -28,14 +41,19 @@ namespace efp
             p_data_ -= N * (p_data_ == p_middle_);
         }
 
+        constexpr size_t size() const
+        {
+            return N;
+        }
+
         A *data()
         {
             return p_data_;
         }
 
-        size_t size()
+        const A *data() const
         {
-            return N;
+            return p_data_;
         }
 
         bool is_empty()
@@ -63,6 +81,9 @@ namespace efp
     class Vcq
     {
     public:
+        using value_type = A;
+        using size_type = size_t;
+
         Vcq()
             : len_(0)
         {
@@ -71,6 +92,16 @@ namespace efp
             p_middle_ = buffer_.data() + N;
         }
         ~Vcq() {}
+
+        A &operator[](const size_type index)
+        {
+            return p_read_[index];
+        }
+
+        const A &operator[](const size_type index) const
+        {
+            return p_read_[index];
+        }
 
         void push_back(const A &value)
         {
@@ -103,9 +134,19 @@ namespace efp
             return value;
         }
 
-        size_t size()
+        constexpr size_t size() const
         {
             return len_;
+        }
+
+        A *data()
+        {
+            return p_read_;
+        }
+
+        const A *data() const
+        {
+            return p_read_;
         }
 
         bool is_empty()
