@@ -485,6 +485,90 @@ TEST_CASE("elem_indices")
     }
 }
 
+TEST_CASE("find")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("c array")
+    {
+        CHECK(find(is_two, c_array_3) == true);
+        CHECK(find(is_nine, c_array_3) == false);
+    }
+
+    SECTION("Array")
+    {
+        CHECK(find(is_two, array_3) == true);
+        CHECK(find(is_nine, array_3) == false);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(find(is_two, array_view_3) == true);
+        CHECK(find(is_nine, array_view_3) == false);
+    }
+}
+
+TEST_CASE("find_index")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("c array")
+    {
+        CHECK(find_index(is_two, c_array_3).value() == 1);
+        CHECK(find_index(is_nine, c_array_3).is_nothing() == true);
+    }
+
+    SECTION("Array")
+    {
+        CHECK(find_index(is_two, array_3).value() == 1);
+        CHECK(find_index(is_nine, array_3).is_nothing() == true);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(find_index(is_two, array_view_3).value() == 1);
+        CHECK(find_index(is_nine, array_view_3).is_nothing() == true);
+    }
+}
+
+TEST_CASE("find_indices")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("c array")
+    {
+        double c_array_3_[3] = {1., 2., 2.};
+        CHECK(find_indices(is_two, c_array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(find_indices(is_nine, c_array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Array")
+    {
+        double array_3_[3] = {1., 2., 2.};
+        CHECK(find_indices(is_two, array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(find_indices(is_nine, array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Vector")
+    {
+        Vector<double> vector_3_ = {1, 2, 2};
+        CHECK(find_indices(is_two, vector_3_) == Vector<int>{1, 2});
+        CHECK(find_indices(is_nine, vector_3_) == Vector<int>{});
+    }
+}
+
 // TEST_CASE("take")
 // {
 //     SECTION("c array")

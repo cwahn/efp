@@ -139,6 +139,7 @@ namespace efp
             !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
             AppendReturn_t<Head, Tail...>>
     {
+        // ! Error on int 
         const size_t result_length = sum_v((int)length(head), (int)length(tail)...);
 
         AppendReturn_t<Head, Tail...> result(result_length);
@@ -164,7 +165,6 @@ namespace efp
     template <typename Head, typename... Tail>
     constexpr auto min_length(const Head &head, const Tail &...tail)
         -> Conditional_t<
-            // All<IsIntegralConst<Head>, IsIntegralConst<Tail>...>::value,
             all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
             decltype(length(head)),
             size_t>
@@ -177,7 +177,6 @@ namespace efp
     template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     void for_each(const F &f, const Seqs &...seqs)
     {
-        // ? Will it be optimized out to a compile time constatnt?
         const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
@@ -191,7 +190,6 @@ namespace efp
     template <typename... Seqs, typename F = void (*)(Element_t<Seqs> &...)>
     void for_eachi(const F &f, Seqs &...seqs)
     {
-        // ? Will it be optimized out to a compile time constatnt?
         const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
@@ -255,44 +253,6 @@ namespace efp
         return result;
     }
 
-    // try to accept template function
-
-    // template <typename... Seqs, typename R, typename F = R (*)(const Element_t<Seqs> &...)>
-    // auto map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf_t<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-    //         MapReturn_t<decltype(f), Seqs...>>
-    // {
-    //     // using R = CallReturn_t<F, Element_t<Seqs>...>;
-
-    //     MapReturn_t<decltype(f), Seqs...> result;
-
-    //     for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
-    //     {
-    //         result[i] = f(seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename... Seqs, typename R, typename F = R (*)(const Element_t<Seqs> &...)>
-    // auto map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf_t<
-    //         !all_v(IsStaticLength<Seqs>::value...),
-    //         MapReturn_t<decltype(f), Seqs...>>
-    // {
-    //     const size_t result_length = min_length(seqs...);
-
-    //     MapReturn_t<decltype(f), Seqs...> result(result_length);
-
-    //     for (int i = 0; i < result_length; ++i)
-    //     {
-    //         result[i] = f(seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
-
     // MapWithIndexReturn_t
 
     template <typename F, typename... Seqs>
@@ -336,7 +296,7 @@ namespace efp
             !IsStaticCapacity<SeqA>::value,
             Vector<Element_t<SeqA>>>
     {
-        const size_t sequance_length = length(as);
+        const int sequance_length = length(as);
 
         Vector<Element_t<SeqA>> result;
         result.reserve(sequance_length * 2);
@@ -441,7 +401,6 @@ namespace efp
     template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     void for_each_with_index(const F &f, const Seqs &...seqs)
     {
-        // ? Will it be optimized out to a compile time constatnt?
         const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
@@ -455,7 +414,6 @@ namespace efp
     template <typename... Seqs, typename F = void (*)(const int &, Element_t<Seqs> &...)>
     void for_each_with_indexi(const F &f, Seqs &...seqs)
     {
-        // ? Will it be optimized out to a compile time constatnt?
         const int seq_length = min_length(seqs...);
 
         for (int i = 0; i < seq_length; ++i)
@@ -520,7 +478,7 @@ namespace efp
 
     // map_with_index
 
-    template <typename F, typename... Seqs>
+    template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
@@ -538,7 +496,7 @@ namespace efp
         return result;
     }
 
-    template <typename F, typename... Seqs>
+    template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
@@ -558,7 +516,7 @@ namespace efp
         return result;
     }
 
-    template <typename F, typename... Seqs>
+    template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             !all_v(IsStaticCapacity<Seqs>::value...),
@@ -580,7 +538,7 @@ namespace efp
 
     // cartesian_map
     // ! Maybe need to bechmark and optimize
-    template <typename F, typename... Seqs>
+    template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
@@ -601,7 +559,8 @@ namespace efp
         return result;
     }
 
-    template <typename F, typename... Seqs>
+    // todo Make both case as one.
+    template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
@@ -609,7 +568,7 @@ namespace efp
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
-        const size_t result_length = size_v_product(length(seqs)...);
+        const int result_length = size_v_product(length(seqs)...);
 
         ArrVec<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
         int i = 0;
@@ -624,7 +583,7 @@ namespace efp
         return result;
     }
 
-    template <typename F, typename... Seqs>
+    template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
         -> EnableIf_t<
             !all_v(IsStaticCapacity<Seqs>::value...),
@@ -632,7 +591,7 @@ namespace efp
     {
         using R = CallReturn_t<F, Element_t<Seqs>...>;
 
-        const size_t result_length = size_v_product(length(seqs)...);
+        const int result_length = size_v_product(length(seqs)...);
 
         Vector<R> result(result_length);
         int i = 0;
@@ -759,10 +718,10 @@ namespace efp
         return Nothing{};
     }
 
-    // ElemIndicesReturn_t
+    // IndicesReturn_t
 
     template <typename SeqA>
-    using ElemIndicesReturn_t =
+    using IndicesReturn_t =
         Conditional_t<
             IsStaticCapacity<SeqA>::value,
             ArrVec<int, StaticCapacity<SeqA>::value>,
@@ -774,9 +733,9 @@ namespace efp
     auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
         -> EnableIf_t<
             IsStaticCapacity<SeqA>::value,
-            ElemIndicesReturn_t<SeqA>>
+            IndicesReturn_t<SeqA>>
     {
-        ElemIndicesReturn_t<SeqA> result;
+        IndicesReturn_t<SeqA> result;
 
         for (int i = 0; i < length(as); ++i)
         {
@@ -793,14 +752,14 @@ namespace efp
     auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
         -> EnableIf_t<
             !IsStaticCapacity<SeqA>::value,
-            ElemIndicesReturn_t<SeqA>>
+            IndicesReturn_t<SeqA>>
     {
-        const size_t sequance_length = length(as);
+        const int length_as = length(as);
 
-        ElemIndicesReturn_t<SeqA> result;
-        result.reserve(sequance_length * 2);
+        IndicesReturn_t<SeqA> result;
+        result.reserve(length_as);
 
-        for (int i = 0; i < sequance_length; ++i)
+        for (int i = 0; i < length_as; ++i)
         {
             if (a == as[i])
             {
@@ -813,19 +772,80 @@ namespace efp
 
     // find
 
+    template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
+    bool find(const F &f, const SeqA &as)
+    {
+        for (int i = 0; i < length(as); ++i)
+        {
+            const Element_t<SeqA> a = as[i];
+            if (f(a))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // find_index
 
-    // find_indicies
+    template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
+    auto find_index(const F &f, const SeqA &as)
+        -> Maybe<int>
+    {
+        for (int i = 0; i < length(as); ++i)
+        {
+            if (f(as[i]) == true)
+            {
+                return i;
+            }
+        }
 
-    // take
+        return Nothing{};
+    }
 
-    // template <typename SeqA>
-    // VectorView<Element_t<SeqA>> take(int n, SeqA &as)
-    // {
-    //     const auto length_as = length(as);
-    //     const auto length = n < length_as ? n : length_as;
+    // find_indices
 
-    //     return VectorView<Element_t<SeqA>>(&(as[0]), length);
-    // }
+    template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
+    auto find_indices(const F &f, const SeqA &as)
+        -> EnableIf_t<
+            IsStaticCapacity<SeqA>::value,
+            IndicesReturn_t<SeqA>>
+    {
+        const int length_as = length(as);
+        IndicesReturn_t<SeqA> result;
+
+        for (int i = 0; i < length_as; ++i)
+        {
+            if (f(as[i]))
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
+
+    template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
+    auto find_indices(const F &f, const SeqA &as)
+        -> EnableIf_t<
+            !IsStaticCapacity<SeqA>::value,
+            IndicesReturn_t<SeqA>>
+    {
+        const int as_length = length(as);
+
+        IndicesReturn_t<SeqA> result;
+        result.reserve(as_length);
+
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (f(as[i]))
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
 }
 #endif
