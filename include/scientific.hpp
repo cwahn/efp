@@ -92,7 +92,7 @@ namespace efp
     template <typename R, bool bessel_correction = false, typename SeqA, typename SeqB>
     R correlation(const SeqA &as, const SeqB &bs)
     {
-        return covariance<R, bessel_correction>(as, bs) /
+        return covariance<R, bessel_correction>(as, bs) / 
                (standard_deviation<R, bessel_correction>(as) * standard_deviation<R, bessel_correction>(bs));
     }
 

@@ -711,7 +711,7 @@ namespace efp
             VectorView<Element_t<SeqA>>>
     {
         // ! What if larger than n? maybe last with 0?
-        return VectorView<Element_t<SeqA>>{data(as) + n, length(as) - n};
+        return VectorView<Element_t<SeqA>>{p_data(as) + n, length(as) - n};
     }
 
     template <typename N, typename SeqA>
@@ -720,7 +720,7 @@ namespace efp
             !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
             VectorView<const Element_t<SeqA>>>
     {
-        return VectorView<const Element_t<SeqA>>{data(as) + n, length(as) - n};
+        return VectorView<const Element_t<SeqA>>{p_data(as) + n, length(as) - n};
     }
 
     // elem

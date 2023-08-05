@@ -765,23 +765,23 @@ namespace efp
         return IntegralConst<size_t, N>{};
     }
 
-    // data
+    // p_data
 
     template <typename SeqA>
-    constexpr auto data(const SeqA &as)
+    constexpr auto p_data(const SeqA &as)
         -> decltype(as.data())
     {
         return as.data();
     }
 
     template <typename A, size_t N>
-    constexpr A *data(A (&as)[N])
+    constexpr A *p_data(A (&as)[N])
     {
         return (A *)as;
     }
 
     template <typename A, size_t N>
-    constexpr const A *data(const A (&as)[N])
+    constexpr const A *p_data(const A (&as)[N])
     {
         return (const A *)as;
     }

@@ -413,7 +413,7 @@ TEST_CASE("drop")
     SECTION("c array")
     {
         const auto res = drop(2, c_array_3);
-        CHECK(res.data() == data(c_array_3) + 2);
+        CHECK(res.data() == p_data(c_array_3) + 2);
         CHECK(length(res) == 1);
         CHECK(res[0] == 3.);
     }
