@@ -169,6 +169,21 @@ namespace efp
         return lhs * rhs;
     }
 
+    // bound_v
+
+    template <typename A, typename B, typename C>
+    constexpr auto bound_v(const A &lower, const B &upper, const C &x)
+        -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x))
+    {
+        return (x > upper) ? (upper) : ((x < lower) ? lower : x);
+    }
+
+    // template <typename A, typename B, typename C>
+    // constexpr typename C::value_type bound_v(const A &lower, const B &upper, const C &x)
+    // {
+    //     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
+    // }
+
     // Foldl
 
     template <template <class, class> class F, typename A, typename... Bs>
@@ -290,6 +305,8 @@ namespace efp
     // };
 
     // IntegralConst
+
+    // ! Issue on (int, IntegralConst, -1);
 
     template <typename A, A a>
     struct IntegralConst

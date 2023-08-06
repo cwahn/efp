@@ -139,7 +139,7 @@ namespace efp
             !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
             AppendReturn_t<Head, Tail...>>
     {
-        // ! Error on int 
+        // ! Error on int
         const size_t result_length = sum_v((int)length(head), (int)length(tail)...);
 
         AppendReturn_t<Head, Tail...> result(result_length);
@@ -642,45 +642,83 @@ namespace efp
 
     // todo take
 
+    // template <typename N, typename SeqA>
+    // auto take(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
+    // {
+    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{p_data(as)};
+    // }
+
+    // template <typename N, typename SeqA>
+    // auto take(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         VectorView<ViewElement_t<SeqA>>>
+    // {
+    //     return VectorView<ViewElement_t<SeqA>>{p_data(as), (size_t)bound_v(0, length(as), n)};
+    // }
+
     // drop
 
-    template <typename N, typename SeqA>
-    auto drop(const N &n, SeqA &as)
-        -> EnableIf_t<
-            IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-            ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
-    {
-        // ! What if larger than n? maybe last with 0?
-        return ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
-    }
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{p_data(as) + n};
+    // }
 
-    template <typename N, typename SeqA>
-    auto drop(const N &n, const SeqA &as)
-        -> EnableIf_t<
-            IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-            ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
-    {
-        return ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
-    }
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
+    // }
 
-    template <typename N, typename SeqA>
-    auto drop(const N &n, SeqA &as)
-        -> EnableIf_t<
-            !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-            VectorView<Element_t<SeqA>>>
-    {
-        // ! What if larger than n? maybe last with 0?
-        return VectorView<Element_t<SeqA>>{p_data(as) + n, length(as) - n};
-    }
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, const SeqA &as)
+    //     -> EnableIf_t<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
+    // {
+    //     return ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
+    // }
 
-    template <typename N, typename SeqA>
-    auto drop(const N &n, const SeqA &as)
-        -> EnableIf_t<
-            !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-            VectorView<const Element_t<SeqA>>>
-    {
-        return VectorView<const Element_t<SeqA>>{p_data(as) + n, length(as) - n};
-    }
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         VectorView<ViewElement_t<SeqA>>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return VectorView<ViewElement_t<SeqA>>{p_data(as) + n, (size_t)bound_v(0, length(as), length(as) - n)};
+    // }
+
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> EnableIf_t<
+    //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         VectorView<Element_t<SeqA>>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return VectorView<Element_t<SeqA>>{p_data(as) + n, length(as) - n};
+    // }
+
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, const SeqA &as)
+    //     -> EnableIf_t<
+    //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         VectorView<const Element_t<SeqA>>>
+    // {
+    //     return VectorView<const Element_t<SeqA>>{p_data(as) + n, length(as) - n};
+    // }
 
     // elem
 

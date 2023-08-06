@@ -408,16 +408,45 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
-TEST_CASE("drop")
-{
-    SECTION("c array")
-    {
-        const auto res = drop(2, c_array_3);
-        CHECK(res.data() == p_data(c_array_3) + 2);
-        CHECK(length(res) == 1);
-        CHECK(res[0] == 3.);
-    }
-}
+// TEST_CASE("take")
+// {
+//     SECTION("c array0")
+//     {
+//         const auto res = take(2, c_array_3);
+//         CHECK(p_data(res) == p_data(c_array_3));
+//         CHECK(length(res) == 2);
+//         CHECK(res[0] == 1.);
+//         CHECK(res[1] == 2.);
+//     }
+
+//     SECTION("c array1")
+//     {
+//         const auto res = take(-1, c_array_3);
+//         CHECK(p_data(res) == p_data(c_array_3));
+//         CHECK(length(res) == 0);
+//     }
+
+//     SECTION("c array2")
+//     {
+//         const auto res = take(9, c_array_3);
+//         CHECK(p_data(res) == p_data(c_array_3));
+//         CHECK(length(res) == 3);
+//         CHECK(res[0] == 1.);
+//         CHECK(res[1] == 2.);
+//         CHECK(res[2] == 3.);
+//     }
+// }
+
+// TEST_CASE("drop")
+// {
+//     SECTION("c array")
+//     {
+//         const auto res = drop(2, c_array_3);
+//         CHECK(res.data() == p_data(c_array_3) + 2);
+//         CHECK(length(res) == 1);
+//         CHECK(res[0] == 3.);
+//     }
+// }
 
 TEST_CASE("elem")
 {
@@ -568,22 +597,5 @@ TEST_CASE("find_indices")
         CHECK(find_indices(is_nine, vector_3_) == Vector<int>{});
     }
 }
-
-// TEST_CASE("take")
-// {
-//     SECTION("c array")
-//     {
-//         CHECK(take(0, c_array_3).size() == 0);
-//         CHECK(take(2, c_array_3)[1] == 2.);
-//         CHECK(take(5, c_array_3).size() == 3);
-//     }
-
-//     SECTION("Array")
-//     {
-//         CHECK(take(0, array_3).size() == 0);
-//         CHECK(take(2, array_3)[1] == 2.);
-//         CHECK(take(5, array_3).size() == 3);
-//     }
-// }
 
 #endif

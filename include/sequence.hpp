@@ -892,6 +892,47 @@ namespace efp
     template <typename A>
     using Element_t = typename ElementType<A>::type;
 
+    // ViewElementType
+
+    template <typename A>
+    struct ViewElementType
+    {
+        using type = typename A::value_type;
+    };
+
+    template <typename A>
+    struct ViewElementType<const A>
+    {
+        using type = const typename A::value_type;
+    };
+
+    template <typename A, size_t N>
+    struct ViewElementType<A[N]>
+    {
+        using type = A;
+    };
+
+    template <typename A, size_t N>
+    struct ViewElementType<const A[N]>
+    {
+        using type = const A;
+    };
+
+    template <typename A>
+    struct ViewElementType<A &> : ViewElementType<A>
+    {
+    };
+
+    template <typename A>
+    struct ViewElementType<A &&> : ViewElementType<A>
+    {
+    };
+
+    // ViewElement_t
+
+    template <typename A>
+    using ViewElement_t = typename ViewElementType<A>::type;
+
 };
 
 #endif
