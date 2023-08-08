@@ -68,4 +68,29 @@ TEST_CASE("Vcq")
     }
 }
 
+TEST_CASE("Csb")
+{
+    SECTION("0")
+    {
+        Csb<int, 3> csb;
+        CHECK(IsSame<Element_t<decltype(csb)>, int>::value == true);
+        CHECK(csb.size() == 3);
+        CHECK(length(csb) == 3);
+        CHECK(IsIntegralConst<decltype(length(csb))>::value == false);
+        CHECK(csb.is_empty() == false);
+
+        csb.push_back(1);
+        CHECK(csb[0] == 1);
+        csb.push_back(2);
+        CHECK(csb[0] == 1);
+        CHECK(csb[1] == 2);
+        csb.push_back(3);
+        csb.push_back(4);
+
+        CHECK(csb[0] == 2);
+        CHECK(csb[1] == 3);
+        CHECK(csb[2] == 4);
+    }
+}
+
 #endif
