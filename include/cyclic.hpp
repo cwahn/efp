@@ -17,6 +17,7 @@ namespace efp
         using size_type = size_t;
 
         Vcb()
+            : buffer_{}
         {
             p_middle_ = buffer_.data() + N;
             p_data_ = buffer_.data();
@@ -85,6 +86,7 @@ namespace efp
         using size_type = size_t;
 
         Vcq()
+            : buffer_{}
         {
             p_read_ = buffer_.data();
             p_write_ = buffer_.data();
