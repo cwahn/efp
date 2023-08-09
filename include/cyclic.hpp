@@ -181,7 +181,7 @@ public:
     using size_type = size_t;
 
     BufferArrVec()
-        : size_(0)
+        : buffer_{}, size_{0}
     {
         p_middle_ = buffer_.data() + N;
         p_data_ = buffer_.data();
