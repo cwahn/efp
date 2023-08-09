@@ -85,7 +85,6 @@ namespace efp
         using size_type = size_t;
 
         Vcq()
-            : len_(0)
         {
             p_read_ = buffer_.data();
             p_write_ = buffer_.data();
@@ -163,11 +162,11 @@ namespace efp
         }
 
     private:
-        Array<A, N * 2> buffer_;
+        Array<A, N * 2> buffer_ = {};
+        size_t len_ = 0;
         A *p_read_;
         A *p_write_;
         A *p_middle_;
-        size_t len_;
     };
 
 }
