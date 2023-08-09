@@ -172,14 +172,17 @@ namespace efp
 
 }
 
+// BufferArrVec
+
 template <typename A, size_t N>
-class Csb
+class BufferArrVec
 {
 public:
     using value_type = A;
     using size_type = size_t;
 
-    Csb()
+    BufferArrVec()
+        : size_(0)
     {
         p_middle_ = buffer_.data() + N;
         p_data_ = buffer_.data();
@@ -201,26 +204,23 @@ public:
         p_data_[N] = value;
 
         p_data_++;
-        if (p_data_ == p_middle_)
-        {
-            is_full_ = true;
-        }
         p_data_ -= N * (p_data_ == p_middle_);
+        size_ = size_ + (size_ < N);
     }
 
     constexpr size_t size() const
     {
-        return N;
+        return size_;
     }
 
     A *data()
     {
-        return is_full_ ? p_data_ : p_middle_ - N;
+        return p_data_;
     }
 
     const A *data() const
     {
-        return is_full_ ? p_data_ : p_middle_ - N;
+        return p_data_;
     }
 
     bool is_empty()
@@ -228,21 +228,21 @@ public:
         return false;
     }
 
-    // A *begin()
-    // {
-    //     return p_data_;
-    // }
+    A *begin()
+    {
+        return p_data_;
+    }
 
-    // A *end()
-    // {
-    //     return p_data_ + N;
-    // }
+    A *end()
+    {
+        return p_data_ + N;
+    }
 
 private:
     std::array<A, N * 2> buffer_;
     A *p_middle_;
     A *p_data_;
-    bool is_full_ = false;
+    size_type size_;
 };
 
 // template <typename A, size_t N>

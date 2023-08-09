@@ -68,28 +68,31 @@ TEST_CASE("Vcq")
     }
 }
 
-TEST_CASE("Csb")
+TEST_CASE("BufferArrVec")
 {
     SECTION("0")
     {
-        Csb<int, 3> csb;
-        CHECK(IsSame<Element_t<decltype(csb)>, int>::value == true);
-        CHECK(csb.size() == 3);
-        CHECK(length(csb) == 3);
-        CHECK(IsIntegralConst<decltype(length(csb))>::value == false);
-        CHECK(csb.is_empty() == false);
+        BufferArrVec<int, 3> as;
+        CHECK(IsSame<Element_t<decltype(as)>, int>::value == true);
+        CHECK(as.size() == 0);
+        CHECK(length(as) == 0);
+        CHECK(IsIntegralConst<decltype(length(as))>::value == false);
+        CHECK(as.is_empty() == false);
 
-        csb.push_back(1);
-        CHECK(csb[0] == 1);
-        csb.push_back(2);
-        CHECK(csb[0] == 1);
-        CHECK(csb[1] == 2);
-        csb.push_back(3);
-        csb.push_back(4);
+        as.push_back(1);
+        CHECK(as[2] == 1);
+        CHECK(length(as) == 1);
 
-        CHECK(csb[0] == 2);
-        CHECK(csb[1] == 3);
-        CHECK(csb[2] == 4);
+        as.push_back(2);
+        CHECK(as[1] == 1);
+        CHECK(as[2] == 2);
+        as.push_back(3);
+        as.push_back(4);
+
+        CHECK(as[0] == 2);
+        CHECK(as[1] == 3);
+        CHECK(as[2] == 4);
+        CHECK(length(as) == 3);
     }
 }
 
