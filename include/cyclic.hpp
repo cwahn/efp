@@ -171,78 +171,78 @@ namespace efp
 
 }
 
-// BufferArrVec
+// // BufferArrVec
 
-template <typename A, size_t N>
-class BufferArrVec
-{
-public:
-    using value_type = A;
-    using size_type = size_t;
+// template <typename A, size_t N>
+// class BufferArrVec
+// {
+// public:
+//     using value_type = A;
+//     using size_type = size_t;
 
-    BufferArrVec()
-        : buffer_{}, size_{0}
-    {
-        p_middle_ = buffer_.data() + N;
-        p_data_ = buffer_.data();
-    }
+//     BufferArrVec()
+//         : buffer_{}, size_{0}
+//     {
+//         p_middle_ = buffer_.data() + N;
+//         p_data_ = buffer_.data();
+//     }
 
-    A &operator[](const size_type index)
-    {
-        return data()[index];
-    }
+//     A &operator[](const size_type index)
+//     {
+//         return data()[index];
+//     }
 
-    const A &operator[](const size_type index) const
-    {
-        return data()[index];
-    }
+//     const A &operator[](const size_type index) const
+//     {
+//         return data()[index];
+//     }
 
-    void push_back(A value)
-    {
-        p_data_[0] = value;
-        p_data_[N] = value;
+//     void push_back(A value)
+//     {
+//         p_data_[0] = value;
+//         p_data_[N] = value;
 
-        p_data_++;
-        p_data_ -= N * (p_data_ == p_middle_);
-        size_ = size_ + (size_ < N);
-    }
+//         p_data_++;
+//         p_data_ -= N * (p_data_ == p_middle_);
+//         size_ = size_ + (size_ < N);
+//     }
 
-    constexpr size_t size() const
-    {
-        return size_;
-    }
+//     constexpr size_t size() const
+//     {
+//         return size_;
+//     }
 
-    A *data()
-    {
-        return p_data_;
-    }
+//     A *data()
+//     {
+//         return p_data_;
+//     }
 
-    const A *data() const
-    {
-        return p_data_;
-    }
+//     const A *data() const
+//     {
+//         return p_data_;
+//     }
 
-    bool is_empty()
-    {
-        return false;
-    }
+//     bool is_empty()
+//     {
+//         return false;
+//     }
 
-    A *begin()
-    {
-        return p_data_;
-    }
+//     A *begin()
+//     {
+//         return p_data_;
+//     }
 
-    A *end()
-    {
-        return p_data_ + N;
-    }
+//     A *end()
+//     {
+//         return p_data_ + N;
+//     }
 
-private:
-    std::array<A, N * 2> buffer_;
-    A *p_middle_;
-    A *p_data_;
-    size_type size_;
-};
+// private:
+//     std::array<A, N * 2> buffer_;
+//     A *p_middle_;
+//     A *p_data_;
+//     size_type size_;
+// };
 
 // template <typename A, size_t N>
 // class DynVcb
