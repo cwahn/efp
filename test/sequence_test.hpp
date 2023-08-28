@@ -157,6 +157,23 @@ TEST_CASE("ArrayView")
         // const ArrayView<int, 1> a_view6{&a_const};
         const ArrayView<const int, 1> a_view7{&a};
     }
+
+    SECTION("copy construction")
+    {
+        ArrayView<const double, 3> view_1{p_data(array_3)};
+        auto view_2 = view_1;
+        CHECK(view_1 == view_2);
+    }
+}
+
+TEST_CASE("VectorView")
+{
+    SECTION("copy construction")
+    {
+        VectorView<const double> view_1{p_data(array_3), 3};
+        auto view_2 = view_1;
+        CHECK(view_1 == view_2);
+    }
 }
 
 TEST_CASE("Element_t")

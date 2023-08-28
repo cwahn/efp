@@ -444,8 +444,24 @@ namespace efp
         {
         }
 
+        ArrayView(const ArrayView &other)
+            : data_(other.data_)
+        {
+        }
+
+        ArrayView(ArrayView &&other) noexcept
+            : data_(other.data_)
+        {
+            other.data_ = nullptr;
+        }
+
         ~ArrayView()
         {
+        }
+
+        friend bool operator==(const ArrayView &lhs, const ArrayView &rhs)
+        {
+            return lhs.data_ == rhs.data_;
         }
 
         A &operator[](size_type index)
@@ -520,8 +536,24 @@ namespace efp
             : data_(p_data), size_(size)
         {
         }
+        VectorView(const VectorView &other)
+            : data_(other.data_), size_(other.size_)
+        {
+        }
+
+        VectorView(VectorView &&other) noexcept
+            : data_(other.data_), size_(other.size_)
+        {
+            other.data_ = nullptr;
+            other.size_ = 0;
+        }
         ~VectorView()
         {
+        }
+
+        friend bool operator==(const VectorView &lhs, const VectorView &rhs)
+        {
+            return (lhs.data_ == rhs.data_) && (lhs.size_ == rhs.size_);
         }
 
         A &operator[](const size_type index)
@@ -536,7 +568,8 @@ namespace efp
 
         // Capacity
         // ? Do I need this?
-        size_type capacity() const noexcept
+        size_type
+        capacity() const noexcept
         {
             return size_;
         }
@@ -587,6 +620,12 @@ namespace efp
         pointer_type data_;
         size_type size_;
     };
+
+    // template <typename A>
+    // bool operator==(const VectorView<A> &lhs, const VectorView<A> &rhs)
+    // {
+    //     return (lhs.data_ == rhs.data_) && (lhs.size_ == rhs.size_);
+    // }
 
     // IsStaticCapacity
 
