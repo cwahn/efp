@@ -408,6 +408,54 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
+TEST_CASE("head")
+{
+    auto std_array = std::array<int, 3>{1, 2, 3};
+    auto std_vector = std::vector<int>{1, 2, 3};
+    auto array = Array<int, 3>{1, 2, 3};
+    auto arrvec = ArrVec<int, 3>{1, 2, 3};
+    auto vector = Vector<int>{1, 2, 3};
+
+    CHECK(head(std_array) == 1);
+    CHECK(head(std_vector) == 1);
+    CHECK(head(array) == 1);
+    CHECK(head(arrvec) == 1);
+    CHECK(head(vector) == 1);
+}
+
+TEST_CASE("tail")
+{
+    SECTION("const")
+    {
+        const auto std_array = std::array<int, 3>{1, 2, 3};
+        const auto std_vector = std::vector<int>{1, 2, 3};
+        const auto array = Array<int, 3>{1, 2, 3};
+        const auto arrvec = ArrVec<int, 3>{1, 2, 3};
+        const auto vector = Vector<int>{1, 2, 3};
+
+        CHECK(tail(std_array) == VectorView<const int>{p_data(std_array) + 1, length(std_array) - 1});
+        CHECK(tail(std_vector) == VectorView<const int>{p_data(std_vector) + 1, length(std_vector) - 1});
+        CHECK(tail(array) == VectorView<const int>{p_data(array) + 1, length(array) - 1});
+        CHECK(tail(arrvec) == VectorView<const int>{p_data(arrvec) + 1, length(arrvec) - 1});
+        CHECK(tail(vector) == VectorView<const int>{p_data(vector) + 1, length(vector) - 1});
+    }
+
+    SECTION("non const")
+    {
+        std::array<int, 3> std_array{1, 2, 3};
+        std::vector<int> std_vector{1, 2, 3};
+        Array<int, 3> array{1, 2, 3};
+        ArrVec<int, 3> arrvec{1, 2, 3};
+        Vector<int> vector{1, 2, 3};
+
+        CHECK(tail(std_array) == VectorView<int>{p_data(std_array) + 1, length(std_array) - 1});
+        CHECK(tail(std_vector) == VectorView<int>{p_data(std_vector) + 1, length(std_vector) - 1});
+        CHECK(tail(array) == VectorView<int>{p_data(array) + 1, length(array) - 1});
+        CHECK(tail(arrvec) == VectorView<int>{p_data(arrvec) + 1, length(arrvec) - 1});
+        CHECK(tail(vector) == VectorView<int>{p_data(vector) + 1, length(vector) - 1});
+    }
+}
+
 // TEST_CASE("take")
 // {
 //     SECTION("c array0")

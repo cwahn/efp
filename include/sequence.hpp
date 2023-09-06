@@ -804,27 +804,6 @@ namespace efp
         return IntegralConst<size_t, N>{};
     }
 
-    // p_data
-
-    template <typename SeqA>
-    constexpr auto p_data(const SeqA &as)
-        -> decltype(as.data())
-    {
-        return as.data();
-    }
-
-    template <typename A, size_t N>
-    constexpr A *p_data(A (&as)[N])
-    {
-        return (A *)as;
-    }
-
-    template <typename A, size_t N>
-    constexpr const A *p_data(const A (&as)[N])
-    {
-        return (const A *)as;
-    }
-
     // StaticSizeT
 
     // template <size_t N>
@@ -971,6 +950,61 @@ namespace efp
 
     template <typename A>
     using ViewElement_t = typename ViewElementType<A>::type;
+
+    // p_data
+
+    // template <typename SeqA>
+    // constexpr auto p_data(const SeqA &as)
+    //     -> decltype(as.data())
+    // {
+    //     return as.data();
+    // }
+
+    // template <typename A, size_t N>
+    // constexpr A *p_data(A (&as)[N])
+    // {
+    //     return (A *)as;
+    // }
+
+    // template <typename A, size_t N>
+    // constexpr const A *p_data(const A (&as)[N])
+    // {
+    //     return (const A *)as;
+    // }
+
+    template <typename SeqA>
+    constexpr auto p_data(const SeqA &as)
+        -> const Element_t<SeqA> *
+    {
+        return as.data();
+    }
+
+    template <typename SeqA>
+    constexpr auto p_data(SeqA &as)
+        -> Element_t<SeqA> *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t N>
+    constexpr A *p_data(A (&as)[N])
+    {
+        return (A *)as;
+    }
+
+    template <typename A, size_t N>
+    constexpr const A *p_data(const A (&as)[N])
+    {
+        return (const A *)as;
+    }
+
+    // p_end
+
+    template <typename SeqA>
+    constexpr Element_t<SeqA> *p_end(const SeqA &as)
+    {
+        return p_data(as) + length(as);
+    }
 
 };
 
