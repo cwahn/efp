@@ -636,15 +636,29 @@ namespace efp
     }
 
     // todo init
+    // ! Partial function. Make sure non empty
+    template <typename SeqA>
+    auto init(const SeqA &as)
+        -> VectorView<const Element_t<SeqA>>
+    {
+        return VectorView<const Element_t<SeqA>>{p_data(as), length(as) - 1};
+    }
+
+    // ! Partial function. Make sure non empty
+    template <typename SeqA>
+    auto init(SeqA &as)
+        -> VectorView<Element_t<SeqA>>
+    {
+        return VectorView<Element_t<SeqA>>{p_data(as), length(as) - 1};
+    }
 
     // todo last
     // ! Partial function. Make sure non empty
-
-    // template <typename SeqA>
-    // A head(const SeqA &as)
-    // {
-    //     return *(end(as) - 1);
-    // }
+    template <typename SeqA>
+    Element_t<SeqA> last(const SeqA &as)
+    {
+        return as[length(as) - 1];
+    }
 
     // todo is_null
 

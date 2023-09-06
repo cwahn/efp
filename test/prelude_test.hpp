@@ -456,6 +456,54 @@ TEST_CASE("tail")
     }
 }
 
+TEST_CASE("init")
+{
+    SECTION("const")
+    {
+        const auto std_array = std::array<int, 3>{1, 2, 3};
+        const auto std_vector = std::vector<int>{1, 2, 3};
+        const auto array = Array<int, 3>{1, 2, 3};
+        const auto arrvec = ArrVec<int, 3>{1, 2, 3};
+        const auto vector = Vector<int>{1, 2, 3};
+
+        CHECK(init(std_array) == VectorView<const int>{p_data(std_array), length(std_array) - 1});
+        CHECK(init(std_vector) == VectorView<const int>{p_data(std_vector), length(std_vector) - 1});
+        CHECK(init(array) == VectorView<const int>{p_data(array), length(array) - 1});
+        CHECK(init(arrvec) == VectorView<const int>{p_data(arrvec), length(arrvec) - 1});
+        CHECK(init(vector) == VectorView<const int>{p_data(vector), length(vector) - 1});
+    }
+
+    SECTION("non const")
+    {
+        std::array<int, 3> std_array{1, 2, 3};
+        std::vector<int> std_vector{1, 2, 3};
+        Array<int, 3> array{1, 2, 3};
+        ArrVec<int, 3> arrvec{1, 2, 3};
+        Vector<int> vector{1, 2, 3};
+
+        CHECK(init(std_array) == VectorView<int>{p_data(std_array), length(std_array) - 1});
+        CHECK(init(std_vector) == VectorView<int>{p_data(std_vector), length(std_vector) - 1});
+        CHECK(init(array) == VectorView<int>{p_data(array), length(array) - 1});
+        CHECK(init(arrvec) == VectorView<int>{p_data(arrvec), length(arrvec) - 1});
+        CHECK(init(vector) == VectorView<int>{p_data(vector), length(vector) - 1});
+    }
+}
+
+TEST_CASE("last")
+{
+    auto std_array = std::array<int, 3>{1, 2, 3};
+    auto std_vector = std::vector<int>{1, 2, 3};
+    auto array = Array<int, 3>{1, 2, 3};
+    auto arrvec = ArrVec<int, 3>{1, 2, 3};
+    auto vector = Vector<int>{1, 2, 3};
+
+    CHECK(last(std_array) == 3);
+    CHECK(last(std_vector) == 3);
+    CHECK(last(array) == 3);
+    CHECK(last(arrvec) == 3);
+    CHECK(last(vector) == 3);
+}
+
 // TEST_CASE("take")
 // {
 //     SECTION("c array0")
