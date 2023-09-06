@@ -1001,7 +1001,13 @@ namespace efp
     // p_end
 
     template <typename SeqA>
-    constexpr Element_t<SeqA> *p_end(const SeqA &as)
+    constexpr const Element_t<SeqA> *p_end(const SeqA &as)
+    {
+        return p_data(as) + length(as);
+    }
+
+    template <typename SeqA>
+    constexpr Element_t<SeqA> *p_end(SeqA &as)
     {
         return p_data(as) + length(as);
     }

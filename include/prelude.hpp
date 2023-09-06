@@ -762,6 +762,24 @@ namespace efp
     //     return VectorView<const Element_t<SeqA>>{p_data(as) + n, length(as) - n};
     // }
 
+    template <typename SeqA>
+    auto drop(int n, const SeqA &as)
+        -> VectorView<const Element_t<SeqA>>
+    {
+        auto as_length = length(as);
+        auto bound_n = (size_t)bound_v(0, (int)as_length, n);
+        return VectorView<const Element_t<SeqA>>{p_data(as) + bound_n, as_length - bound_n};
+    }
+
+    template <typename SeqA>
+    auto drop(int n, SeqA &as)
+        -> VectorView<Element_t<SeqA>>
+    {
+        auto as_length = length(as);
+        auto bound_n = (size_t)bound_v(0, (int)as_length, n);
+        return VectorView<Element_t<SeqA>>{p_data(as) + bound_n, as_length - bound_n};
+    }
+
     // elem
 
     template <typename SeqA>

@@ -535,16 +535,30 @@ TEST_CASE("take")
     }
 }
 
-// TEST_CASE("drop")
-// {
-//     SECTION("c array")
-//     {
-//         const auto res = drop(2, c_array_3);
-//         CHECK(res.data() == p_data(c_array_3) + 2);
-//         CHECK(length(res) == 1);
-//         CHECK(res[0] == 3.);
-//     }
-// }
+TEST_CASE("drop")
+{
+    SECTION("c array0")
+    {
+        const auto res = drop(2, c_array_3);
+        CHECK(p_data(res) == p_data(c_array_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.);
+    }
+
+    SECTION("c array1")
+    {
+        const auto res = drop(-1, c_array_3);
+        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(length(res) == 3);
+    }
+
+    SECTION("c array2")
+    {
+        const auto res = drop(9, c_array_3);
+        CHECK(p_data(res) == p_end(c_array_3));
+        CHECK(length(res) == 0);
+    }
+}
 
 TEST_CASE("elem")
 {
