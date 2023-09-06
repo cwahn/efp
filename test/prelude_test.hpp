@@ -408,6 +408,8 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
+// todo sequence view
+
 TEST_CASE("head")
 {
     auto std_array = std::array<int, 3>{1, 2, 3};
@@ -504,34 +506,34 @@ TEST_CASE("last")
     CHECK(last(vector) == 3);
 }
 
-// TEST_CASE("take")
-// {
-//     SECTION("c array0")
-//     {
-//         const auto res = take(2, c_array_3);
-//         CHECK(p_data(res) == p_data(c_array_3));
-//         CHECK(length(res) == 2);
-//         CHECK(res[0] == 1.);
-//         CHECK(res[1] == 2.);
-//     }
+TEST_CASE("take")
+{
+    SECTION("c array0")
+    {
+        const auto res = take(2, c_array_3);
+        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(length(res) == 2);
+        CHECK(res[0] == 1.);
+        CHECK(res[1] == 2.);
+    }
 
-//     SECTION("c array1")
-//     {
-//         const auto res = take(-1, c_array_3);
-//         CHECK(p_data(res) == p_data(c_array_3));
-//         CHECK(length(res) == 0);
-//     }
+    SECTION("c array1")
+    {
+        const auto res = take(-1, c_array_3);
+        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(length(res) == 0);
+    }
 
-//     SECTION("c array2")
-//     {
-//         const auto res = take(9, c_array_3);
-//         CHECK(p_data(res) == p_data(c_array_3));
-//         CHECK(length(res) == 3);
-//         CHECK(res[0] == 1.);
-//         CHECK(res[1] == 2.);
-//         CHECK(res[2] == 3.);
-//     }
-// }
+    SECTION("c array2")
+    {
+        const auto res = take(9, c_array_3);
+        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.);
+        CHECK(res[1] == 2.);
+        CHECK(res[2] == 3.);
+    }
+}
 
 // TEST_CASE("drop")
 // {
