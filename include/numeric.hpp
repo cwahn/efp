@@ -22,6 +22,20 @@ namespace efp
     };
 
     template <typename A>
+    struct ComplexBaseType
+    {
+    };
+
+    template <typename A>
+    struct ComplexBaseType<Complex<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    using ComplexBase_t = typename ComplexBaseType<A>::Type;
+
+    template <typename A>
     struct AssertComplex
     {
         using Type = Complex<A>;
