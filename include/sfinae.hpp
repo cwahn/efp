@@ -567,6 +567,7 @@ namespace efp
     //     all_v(IsSame<Head, Tail>::value...), Head>;
 
     // IsConst
+
     template <typename A>
     struct IsConst : FalseType
     {
@@ -576,6 +577,17 @@ namespace efp
     struct IsConst<const A> : TrueType
     {
     };
+
+    // Void_t
+
+    template <typename... Ts>
+    struct VoidType
+    {
+        typedef void type;
+    };
+
+    template <typename... Ts>
+    using Void_t = typename VoidType<Ts...>::type;
 }
 
 #endif

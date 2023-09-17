@@ -2,11 +2,40 @@
 #define NUMERIC_HPP_
 
 #include <cmath>
+#include <complex>
 
 #include "prelude.hpp"
 
 namespace efp
 {
+    template <typename A>
+    using Complex = typename std::complex<A>;
+
+    template <typename A>
+    struct IsComplex : FalseType
+    {
+    };
+
+    template <typename A>
+    struct IsComplex<Complex<A>> : TrueType
+    {
+    };
+
+    template <typename A>
+    struct AssertComplex
+    {
+        using Type = Complex<A>;
+    };
+
+    template <typename A>
+    struct AssertComplex<Complex<A>>
+    {
+        using Type = Complex<A>;
+    };
+
+    template <typename A>
+    using AssertComplex_t = typename AssertComplex<A>::Type;
+
     template <typename A, typename B>
     constexpr A max(const A &lhs, const B &rhs)
     {
@@ -84,6 +113,19 @@ namespace efp
     {
         using MorePrecise_t = Conditional_t<(sizeof(A) > sizeof(B)), A, B>;
         return abs(static_cast<MorePrecise_t>(lhs) - static_cast<MorePrecise_t>(rhs)) <= NumericLimits<MorePrecise_t>::epsilon();
+    }
+
+    template <typename A>
+    constexpr Maybe<A> real_from_complex(const Complex<A> &a)
+    {
+        if (is_approx(abs(a.imag()), 0))
+        {
+            return a.real();
+        }
+        else
+        {
+            return Nothing{};
+        }
     }
 
     // Reducing
