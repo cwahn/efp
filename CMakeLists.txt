@@ -13,7 +13,6 @@ set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 
 find_package(Catch2 3 REQUIRED)
 
-
 include(CTest)
 include(Catch)
 enable_testing()

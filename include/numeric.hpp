@@ -73,6 +73,19 @@ namespace efp
         return std::tan(a);
     }
 
+    template <typename A>
+    constexpr A abs(const A &a)
+    {
+        return a < 0 ? -a : a;
+    }
+
+    template <typename A, typename B>
+    constexpr A is_approx(const A &lhs, const B &rhs)
+    {
+        using MorePrecise_t = Conditional_t<(sizeof(A) > sizeof(B)), A, B>;
+        return abs(static_cast<MorePrecise_t>(lhs) - static_cast<MorePrecise_t>(rhs)) <= NumericLimits<MorePrecise_t>::epsilon();
+    }
+
     // Reducing
 
     template <typename SeqA>

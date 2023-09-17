@@ -59,10 +59,10 @@ namespace efp
     template <typename R, bool bessel_correction = false, typename SeqA>
     R variance(const SeqA &as)
     {
-        const auto mean_as = mean<R>(as);
+        const auto as_mean = mean<R>(as);
 
         auto square_deviation = [&](const Element_t<SeqA> &x)
-        { return square(x - mean_as); };
+        { return square(x - as_mean); };
 
         return bessel_correction
                    ? sum(map(square_deviation, as)) / (R)(length(as) - 1)
@@ -71,20 +71,18 @@ namespace efp
 
     template <typename R, bool bessel_correction = false, typename SeqA>
     R standard_deviation(const SeqA &as)
-
     {
         return sqrt(variance<R, bessel_correction>(as));
     }
 
     template <typename R, bool bessel_correction = false, typename SeqA, typename SeqB>
     R covariance(const SeqA &as, const SeqB &bs)
-
     {
-        const auto mean_as = mean<R>(as);
-        const auto mean_bs = mean<R>(bs);
+        const auto as_mean = mean<R>(as);
+        const auto bs_mean = mean<R>(bs);
 
         const auto covar = [&](const Element_t<SeqA> &a, const Element_t<SeqB> &b)
-        { return (a - mean_as) * (b - mean_bs); };
+        { return (a - as_mean) * (b - bs_mean); };
 
         return bessel_correction
                    ? sum(map(covar, as, bs)) / (R)(length(as) - 1)
@@ -101,14 +99,14 @@ namespace efp
     template <typename R, bool bessel_correction = false, bool adjusted = false, typename SeqA>
     R autocovariance(const SeqA &as, const int &lag)
     {
-        const auto mean_as = mean<R>(as);
+        const auto as_mean = mean<R>(as);
         const auto n = length(as);
         const int sum_length = n - lag;
         R summation = 0;
 
         for_index(
             [&](const int &i)
-            { summation += (as[i] - mean_as) * (as[i + lag] - mean_as); },
+            { summation += (as[i] - as_mean) * (as[i + lag] - as_mean); },
             sum_length);
 
         if (adjusted)
@@ -135,10 +133,10 @@ namespace efp
     template <typename R, typename SeqA>
     MapSequence_t<R, SeqA> remove_dc(const SeqA &as)
     {
-        const auto mean_as = mean<R>(as);
+        const auto as_mean = mean<R>(as);
 
         const auto minus_mean_as = [&](const Element_t<SeqA> &x)
-        { return (R)x - mean_as; };
+        { return (R)x - as_mean; };
 
         return map(minus_mean_as, as);
     }
@@ -146,13 +144,13 @@ namespace efp
     template <typename R, typename SeqA, typename SeqB>
     std::tuple<R, R> linear_regression(const SeqA &as, const SeqB &bs)
     {
-        const auto mean_as = mean<R>(as);
-        const auto mean_bs = mean<R>(bs);
+        const auto as_mean = mean<R>(as);
+        const auto bs_mean = mean<R>(bs);
 
         const auto minus_mean_as = [&](const Element_t<SeqA> &x)
-        { return (R)x - mean_as; };
+        { return (R)x - as_mean; };
         const auto minus_mean_bs = [&](const Element_t<SeqB> &x)
-        { return (R)x - mean_bs; };
+        { return (R)x - bs_mean; };
 
         const auto a_deviations = map(minus_mean_as, as);
         const auto b_deviations = map(minus_mean_bs, bs);
@@ -161,7 +159,7 @@ namespace efp
         const auto ss_aa = sum(map(square<R>, a_deviations));
 
         const auto beta_1 = ss_ab / ss_aa;
-        const auto beta_2 = mean_bs - (beta_1 * mean_as);
+        const auto beta_2 = bs_mean - (beta_1 * as_mean);
 
         return std::make_tuple(beta_1, beta_2);
     }
@@ -172,16 +170,16 @@ namespace efp
         const int n = length(as);
 
         const auto mean_is = (n - 1) / 2.;
-        const auto mean_as = mean<R>(as);
+        const auto as_mean = mean<R>(as);
 
         const auto get_ss_ia = [&](const int &i, const Element_t<SeqA> &a)
-        { return (i - mean_is) * ((R)a - mean_as); };
+        { return (i - mean_is) * ((R)a - as_mean); };
 
         const auto ss_ia = sum(map_with_index(get_ss_ia, as));
         const auto ss_ii = n * (n * n - 1) / 12.;
 
         const auto beta_1 = ss_ia / ss_ii;
-        const auto beta_2 = mean_as - (beta_1 * mean_is);
+        const auto beta_2 = as_mean - (beta_1 * mean_is);
 
         return std::make_tuple(beta_1, beta_2);
     }
