@@ -29,6 +29,17 @@ TEST_CASE("real_from_complex")
     }
 }
 
+TEST_CASE("complex_cast")
+{
+    const int real_a{42};
+    const Complex<int> complex_a{42, 0};
+
+    CHECK(complex_cast<true>(real_a) == complex_a);
+    CHECK(complex_cast<true>(complex_a) == complex_a);
+    CHECK(complex_cast<false>(real_a) == real_a); 
+    CHECK(complex_cast<false>(complex_a) == real_a);
+}
+
 TEST_CASE("maximum")
 {
     SECTION("c style ")

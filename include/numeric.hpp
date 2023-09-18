@@ -56,6 +56,27 @@ namespace efp
         return max_v(lhs, rhs);
     }
 
+    template <bool to_complex, typename A>
+    auto complex_cast(const A &a)
+        -> EnableIf_t<!to_complex && IsComplex<A>::value, ComplexBase_t<A>>
+    {
+        return a.real();
+    }
+
+    template <bool to_complex, typename A>
+    auto complex_cast(const A &a)
+        -> EnableIf_t<to_complex && !IsComplex<A>::value, Complex<A>>
+    {
+        return Complex<A>{a, 0};
+    }
+
+    template <bool to_complex, typename A>
+    auto complex_cast(const A &a)
+        -> EnableIf_t<to_complex == IsComplex<A>::value, A>
+    {
+        return a;
+    }
+
     template <typename A, typename B>
     constexpr A min(const A &lhs, const B &rhs)
     {
