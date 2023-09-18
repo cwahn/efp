@@ -606,6 +606,26 @@ namespace efp
         return result;
     }
 
+    // cartesian_for_index
+
+    template <typename F = void (*)(const int &)>
+    void cartesian_for_index(const F &f, const int &i)
+    {
+        for_index(f, i);
+    }
+
+    template <typename... Ints, typename F = void (*)(const int &)>
+    void cartesian_for_index(const F &f, const int &i, const Ints &...is)
+    {
+        for (int i_ = 0; i_ < i; ++i_)
+        {
+            const auto inner = [=](const Ints &...is)
+            { f(i_, is...); };
+
+            cartesian_for_index(inner, is...);
+        }
+    }
+
     // // todo begin
 
     // // todo end

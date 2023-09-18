@@ -408,6 +408,16 @@ TEST_CASE("cartesian_map")
     CHECK(res == Array<int, 4>{1, 3, 2, 6});
 }
 
+TEST_CASE("cartesian_for_index")
+{
+    Vector<int> res;
+    const auto f = [&](int a, int b)
+    { return res.push_back(a * b); };
+
+    cartesian_for_index(f, 2, 3);
+    CHECK(res == Vector<int>{0, 0, 0, 0, 1, 2});
+}
+
 // todo sequence view
 
 TEST_CASE("head")
