@@ -9,5 +9,6 @@
 #include "enum_type.hpp"
 #include "maybe.hpp"
 #include "scientific.hpp"
+#include "crtp_seq.hpp"
 
 #endif
