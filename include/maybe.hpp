@@ -34,12 +34,12 @@ namespace efp
     };
 
     template <typename A>
-    struct IsMaybe : FalseType
+    struct IsMaybe : False
     {
     };
 
     template <typename A>
-    struct IsMaybe<Maybe<A>> : TrueType
+    struct IsMaybe<Maybe<A>> : True
     {
     };
 
@@ -47,7 +47,7 @@ namespace efp
 
     template <typename A, typename F>
     auto fmap(const F &f, const Maybe<A> &ma)
-        -> Maybe<CallReturn_t<F, A>>
+        -> Maybe<CallReturn<F, A>>
     {
         if (ma.is_nothing())
         {
@@ -66,7 +66,7 @@ namespace efp
     // applicative
     template <typename A>
     auto pure(const A &a)
-        -> EnableIf_t<
+        -> EnableIf<
             IsMaybe<A>::value,
             A>
     {
@@ -75,7 +75,7 @@ namespace efp
 
     template <typename A, typename F>
     auto ap(const Maybe<F> &mf, const Maybe<A> &ma)
-        -> Maybe<CallReturn_t<F, A>>
+        -> Maybe<CallReturn<F, A>>
     {
         if (mf.is_nothing() || ma.is_nothing())
         {
@@ -89,9 +89,9 @@ namespace efp
 
     template <typename A, typename F>
     auto bind(const Maybe<A> &ma, const F &f)
-        -> EnableIf_t<
-            IsMaybe<CallReturn_t<F, A>>::value,
-            CallReturn_t<F, A>>
+        -> EnableIf<
+            IsMaybe<CallReturn<F, A>>::value,
+            CallReturn<F, A>>
     // todo test if monadic action
     {
         if (ma.is_nothing())
@@ -104,9 +104,9 @@ namespace efp
 
     template <typename A, typename F>
     auto operator>>=(const Maybe<A> &ma, const F &f)
-        -> EnableIf_t<
-            IsMaybe<CallReturn_t<F, A>>::value,
-            CallReturn_t<F, A>>
+        -> EnableIf<
+            IsMaybe<CallReturn<F, A>>::value,
+            CallReturn<F, A>>
     // todo test if monadic action
     {
         if (ma.is_nothing())

@@ -29,9 +29,12 @@ TEST_CASE("maybe_construction")
 TEST_CASE("maybe_functor")
 {
     Maybe<int> a = 2;
-    CHECK(fmap(square<int>, a).index() == 1);
-    CHECK(fmap(square<int>, a).is_nothing() == false);
-    CHECK(fmap(square<int>, a).value() == 4);
+    const auto square = [](int x)
+    { return x * x; };
+
+    CHECK(fmap(square, a).index() == 1);
+    CHECK(fmap(square, a).is_nothing() == false);
+    CHECK(fmap(square, a).value() == 4);
 }
 
 int times_2(int x)

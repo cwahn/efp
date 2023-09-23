@@ -527,7 +527,7 @@ namespace efp
     public:
         using value_type = A;
         using size_type = size_t;
-        using pointer_type = Conditional_t<
+        using pointer_type = Conditional<
             IsConst<A>::value,
             const A *,
             A *>;
@@ -783,7 +783,7 @@ namespace efp
 
     template <typename SeqA>
     constexpr auto length(const SeqA &as)
-        -> EnableIf_t<!IsStaticLength<SeqA>::value,
+        -> EnableIf<!IsStaticLength<SeqA>::value,
                       size_t>
     {
         return as.size();
@@ -791,7 +791,7 @@ namespace efp
 
     template <typename SeqA>
     constexpr auto length(const SeqA &as)
-        -> EnableIf_t<IsStaticLength<SeqA>::value,
+        -> EnableIf<IsStaticLength<SeqA>::value,
                       IntegralConst<size_t, StaticLength<SeqA>::value>>
     {
         return IntegralConst<size_t, StaticLength<SeqA>::value>{};

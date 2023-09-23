@@ -13,9 +13,9 @@
 
 namespace efp
 {
-    struct Unit
-    {
-    };
+    // struct Unit
+    // {
+    // };
 
     template <typename A>
     A id(const A &a)
@@ -94,9 +94,9 @@ namespace efp
 
     template <typename A, typename... Seqs>
     using AppendSequence_t =
-        Conditional_t<
+        Conditional<
             all_v(IsStaticCapacity<Seqs>::value...),
-            Conditional_t<
+            Conditional<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, sum_v(StaticCapacity<Seqs>::value...)>,
                 ArrVec<A, sum_v(StaticCapacity<Seqs>::value...)>>,
@@ -121,7 +121,7 @@ namespace efp
 
     template <typename Head, typename... Tail>
     auto append(const Head &head, const Tail &...tail)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Head>::value, IsStaticCapacity<Tail>::value...) && all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
             AppendReturn_t<Head, Tail...>>
     {
@@ -135,7 +135,7 @@ namespace efp
 
     template <typename Head, typename... Tail>
     auto append(const Head &head, const Tail &...tail)
-        -> EnableIf_t<
+        -> EnableIf<
             !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
             AppendReturn_t<Head, Tail...>>
     {
@@ -154,7 +154,7 @@ namespace efp
 
     template <typename SeqA>
     constexpr auto min_length(const SeqA &as)
-        -> Conditional_t<
+        -> Conditional<
             IsStaticLength<SeqA>::value,
             decltype(length(as)),
             size_t>
@@ -164,7 +164,7 @@ namespace efp
 
     template <typename Head, typename... Tail>
     constexpr auto min_length(const Head &head, const Tail &...tail)
-        -> Conditional_t<
+        -> Conditional<
             all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
             decltype(length(head)),
             size_t>
@@ -202,9 +202,9 @@ namespace efp
 
     template <typename A, typename... Seqs>
     using MapSequence_t =
-        Conditional_t<
+        Conditional<
             all_v(IsStaticCapacity<Seqs>::value...),
-            Conditional_t<
+            Conditional<
                 all_v(IsStaticLength<Seqs>::value...),
                 Array<A, MinStaticCapacity<Seqs...>::value>,
                 ArrVec<A, MinStaticCapacity<Seqs...>::value>>,
@@ -213,17 +213,17 @@ namespace efp
     // MapReturn_t
 
     template <typename F, typename... Seqs>
-    using MapReturn_t = MapSequence_t<CallReturn_t<F, Element_t<Seqs>...>, Seqs...>;
+    using MapReturn_t = MapSequence_t<CallReturn<F, Element_t<Seqs>...>, Seqs...>;
 
     // map
 
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
             MapReturn_t<F, Seqs...>>
     {
-        // using R = CallReturn_t<F, Element_t<Seqs>...>;
+        // using R = CallReturn<F, Element_t<Seqs>...>;
 
         MapReturn_t<F, Seqs...> result;
 
@@ -237,7 +237,7 @@ namespace efp
 
     template <typename F, typename... Seqs>
     auto map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             !all_v(IsStaticLength<Seqs>::value...),
             MapReturn_t<F, Seqs...>>
     {
@@ -257,13 +257,13 @@ namespace efp
 
     template <typename F, typename... Seqs>
     using MapWithIndexReturn_t =
-        MapSequence_t<CallReturn_t<F, int, Element_t<Seqs>...>, Seqs...>;
+        MapSequence_t<CallReturn<F, int, Element_t<Seqs>...>, Seqs...>;
 
     // FilterReturn_t
 
     template <typename SeqA>
     using FilterReturn_t =
-        Conditional_t<
+        Conditional<
             IsStaticCapacity<SeqA>::value,
             ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
             Vector<Element_t<SeqA>>>;
@@ -272,7 +272,7 @@ namespace efp
 
     template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
     auto filter(const F &f, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             IsStaticCapacity<SeqA>::value,
             ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
     {
@@ -292,7 +292,7 @@ namespace efp
 
     template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
     auto filter(const F &f, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             !IsStaticCapacity<SeqA>::value,
             Vector<Element_t<SeqA>>>
     {
@@ -346,20 +346,20 @@ namespace efp
     // FromFunctionReturn_t
 
     template <typename N, typename F>
-    using FromFunctionReturn_t = Conditional_t<
+    using FromFunctionReturn_t = Conditional<
         IsIntegralConst<N>::value,
-        Array<CallReturn_t<F, int>, N::value>,
-        Vector<CallReturn_t<F, int>>>;
+        Array<CallReturn<F, int>, N::value>,
+        Vector<CallReturn<F, int>>>;
 
     // from_function
 
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
-        -> EnableIf_t<
+        -> EnableIf<
             IsIntegralConst<N>::value,
-            Array<CallReturn_t<F, int>, N::value>>
+            Array<CallReturn<F, int>, N::value>>
     {
-        Array<CallReturn_t<F, int>, N::value> result;
+        Array<CallReturn<F, int>, N::value> result;
 
         for (int i = 0; i < N::value; ++i)
         {
@@ -371,11 +371,11 @@ namespace efp
 
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
-        -> EnableIf_t<
+        -> EnableIf<
             !IsIntegralConst<N>::value,
-            Vector<CallReturn_t<F, int>>>
+            Vector<CallReturn<F, int>>>
     {
-        Vector<CallReturn_t<F, int>> result(length);
+        Vector<CallReturn<F, int>> result(length);
 
         for (int i = 0; i < length; ++i)
         {
@@ -480,11 +480,11 @@ namespace efp
 
     template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            Array<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+            Array<CallReturn<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
-        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn<F, int, Element_t<Seqs>...>;
 
         Array<R, MinStaticCapacity<Seqs...>::value> result;
 
@@ -498,11 +498,11 @@ namespace efp
 
     template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            ArrVec<CallReturn_t<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
+            ArrVec<CallReturn<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
     {
-        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn<F, int, Element_t<Seqs>...>;
 
         const int result_length = min_length(seqs...);
 
@@ -518,11 +518,11 @@ namespace efp
 
     template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     auto map_with_index(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             !all_v(IsStaticCapacity<Seqs>::value...),
-            Vector<CallReturn_t<F, int, Element_t<Seqs>...>>>
+            Vector<CallReturn<F, int, Element_t<Seqs>...>>>
     {
-        using R = CallReturn_t<F, int, Element_t<Seqs>...>;
+        using R = CallReturn<F, int, Element_t<Seqs>...>;
 
         const int result_length = min_length(seqs...);
 
@@ -540,11 +540,11 @@ namespace efp
     // ! Maybe need to bechmark and optimize
     template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            Array<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
+            Array<CallReturn<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
-        using R = CallReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn<F, Element_t<Seqs>...>;
 
         Array<R, StaticCapacityProduct<Seqs...>::value> result;
         int i = 0;
@@ -562,11 +562,11 @@ namespace efp
     // todo Make both case as one.
     template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-            ArrVec<CallReturn_t<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
+            ArrVec<CallReturn<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
     {
-        using R = CallReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn<F, Element_t<Seqs>...>;
 
         const int result_length = size_v_product(length(seqs)...);
 
@@ -585,11 +585,11 @@ namespace efp
 
     template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
     auto cartesian_map(const F &f, const Seqs &...seqs)
-        -> EnableIf_t<
+        -> EnableIf<
             !all_v(IsStaticCapacity<Seqs>::value...),
-            Vector<CallReturn_t<F, Element_t<Seqs>...>>>
+            Vector<CallReturn<F, Element_t<Seqs>...>>>
     {
-        using R = CallReturn_t<F, Element_t<Seqs>...>;
+        using R = CallReturn<F, Element_t<Seqs>...>;
 
         const int result_length = size_v_product(length(seqs)...);
 
@@ -682,7 +682,7 @@ namespace efp
 
     // todo is_null
 
-    // using View_t = Conditional_t<
+    // using View_t = Conditional<
     //     template <typename SeqA>
     //     IsStaticLength<SeqA>::value,
     //     ArrayView<Element_t<SeqA>>,
@@ -692,7 +692,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto take(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
     // {
@@ -701,7 +701,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto take(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<ViewElement_t<SeqA>>>
     // {
@@ -726,7 +726,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
     // {
@@ -736,7 +736,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         ArrayView<Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
     // {
@@ -746,7 +746,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, const SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         ArrayView<const Element_t<SeqA>, StaticLength<SeqA>::value - N::value>>
     // {
@@ -755,7 +755,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<ViewElement_t<SeqA>>>
     // {
@@ -765,7 +765,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<Element_t<SeqA>>>
     // {
@@ -775,7 +775,7 @@ namespace efp
 
     // template <typename N, typename SeqA>
     // auto drop(const N &n, const SeqA &as)
-    //     -> EnableIf_t<
+    //     -> EnableIf<
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<const Element_t<SeqA>>>
     // {
@@ -840,7 +840,7 @@ namespace efp
 
     template <typename SeqA>
     using IndicesReturn_t =
-        Conditional_t<
+        Conditional<
             IsStaticCapacity<SeqA>::value,
             ArrVec<int, StaticCapacity<SeqA>::value>,
             Vector<int>>;
@@ -849,7 +849,7 @@ namespace efp
 
     template <typename SeqA>
     auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             IsStaticCapacity<SeqA>::value,
             IndicesReturn_t<SeqA>>
     {
@@ -868,7 +868,7 @@ namespace efp
 
     template <typename SeqA>
     auto elem_indices(const Element_t<SeqA> &a, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             !IsStaticCapacity<SeqA>::value,
             IndicesReturn_t<SeqA>>
     {
@@ -926,7 +926,7 @@ namespace efp
 
     template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
     auto find_indices(const F &f, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             IsStaticCapacity<SeqA>::value,
             IndicesReturn_t<SeqA>>
     {
@@ -946,7 +946,7 @@ namespace efp
 
     template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
     auto find_indices(const F &f, const SeqA &as)
-        -> EnableIf_t<
+        -> EnableIf<
             !IsStaticCapacity<SeqA>::value,
             IndicesReturn_t<SeqA>>
     {

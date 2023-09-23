@@ -15,13 +15,13 @@ namespace efp
     template <typename F, typename... Args>
     struct FunctionPointerType<F, std::tuple<Args...>>
     {
-        using type = Return_t<F>(*)(Args...);
+        using type = Return<F>(*)(Args...);
     };
 
     // FunctionPointer_t
 
     template <typename F>
-    using FunctionPointer_t = typename FunctionPointerType<F, Argument_t<F>>::type;
+    using FunctionPointer_t = typename FunctionPointerType<F, Arguments<F>>::type;
 
     // LambdaPointer
 
@@ -36,9 +36,9 @@ namespace efp
         template <typename... Args>
         struct Helper<std::tuple<Args...>>
         {
-            static Return_t<F> call(Args... args)
+            static Return<F> call(Args... args)
             {
-                return (Return_t<F>)(*(F *)inner_ptr)(args...);
+                return (Return<F>)(*(F *)inner_ptr)(args...);
             }
         };
 
@@ -55,7 +55,7 @@ namespace efp
     static FunctionPointer_t<F> to_function_pointer(F &f)
     {
         LambdaPointer<F>::inner_ptr = (void *)&f;
-        return (FunctionPointer_t<F>)LambdaPointer<F>::template Helper<Argument_t<F>>::call;
+        return (FunctionPointer_t<F>)LambdaPointer<F>::template Helper<Arguments<F>>::call;
     }
 }
 
