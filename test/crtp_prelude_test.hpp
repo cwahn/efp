@@ -19,4 +19,14 @@ TEST_CASE("for_each")
     CHECK(res_1 == 6);
 }
 
+TEST_CASE("map")
+{
+    Arr<int, 3> crtp_array{1, 2, 3};
+
+    auto times_2 = [](int x)
+    { return 2 * x; };
+
+    CHECK(map(times_2, crtp_array) == Arr<int, 3>{2, 4, 6});
+}
+
 #endif
