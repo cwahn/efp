@@ -8,16 +8,16 @@
 
 #include "sfinae.hpp"
 #include "enum_type.hpp"
-#include "crtp_sequence.hpp"
+#include "crtp_seq.hpp"
 #include "maybe.hpp"
 
 // Trust compiler for length calculation
 
 namespace efp
 {
-    struct Unit
-    {
-    };
+    // struct Unit
+    // {
+    // };
 
     template <typename A>
     A id(const A &a)
@@ -152,53 +152,59 @@ namespace efp
     //     return result;
     // }
 
-    // ct_length
+    // // ct_length
 
-    template <typename Seq<A>>
-    constexpr int ct_length(const Seq<A> &as)
-    {
-        return A::ct_len;
-    }
+    // template <typename Seq<A>>
+    // constexpr int ct_length(const Seq<A> &as)
+    // {
+    //     return A::ct_len;
+    // }
 
-    // length
+    // // length
 
-    template <typename Seq<A>>
-    int length(const Seq<A> &as)
-    {
-        return as.length();
-    }
+    // template <typename Seq<A>>
+    // int length(const Seq<A> &as)
+    // {
+    //     return as.length();
+    // }
 
     // min_length
 
-    template <typename A>
-    int min_length(const Seq<A> &as)
+    // template <typename A>
+    // int min_length(const Seq<A> &as)
+    // {
+    //     return length(as);
+    // }
+
+    // template <typename Head, typename... Tail>
+    // int min_length(const Head &head, const Tail &...tail)
+    // {
+    //     return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
+    // }
+
+    template <typename A, typename... Ts>
+    int min_length(const Seq<A> &as, const Seq<Ts> &...seqs)
     {
-        return length(as);
+        return minimum_v(static_cast<int>(length(as)), length(seqs)...);
     }
 
-    template <typename Head, typename... Tail>
-    int min_length(const Head &head, const Tail &...tail)
-    {
-        return length(head) < min_length(tail...) ? length(head) : min_length(tail...);
-    }
+    // // ct_min_length
 
-    // ct_min_length
+    // template <typename A>
+    // constexpr int ct_min_length(const Seq<A> &as)
+    // {
+    //     return ct_length(as);
+    // }
 
-    template <typename A>
-    constexpr int ct_min_length(const Seq<A> &as)
-    {
-        return ct_length(as);
-    }
-
-    template <typename Head, typename... Tail>
-    constexpr int ct_min_length(const Head &head, const Tail &...tail)
-    {
-        return ct_length(head) < ct_min_length(tail...) ? ct_length(head) : ct_min_length(tail...);
-    }
+    // template <typename Head, typename... Tail>
+    // constexpr int ct_min_length(const Head &head, const Tail &...tail)
+    // {
+    //     return ct_length(head) < ct_min_length(tail...) ? ct_length(head) : ct_min_length(tail...);
+    // }
 
     // for_each
 
-    template <typename... As, typename F = void (*)(const typename As::Element &...)>
+    template <typename... As, typename F = void (*)(const Element<As> &...)>
     void for_each(const F &f, const Seq<As> &...seqs)
     {
         const int seq_length = min_length(seqs...);
@@ -211,7 +217,7 @@ namespace efp
 
     // for_eachi
 
-    template <typename... As, typename F = void (*)(typename As::Element &...)>
+    template <typename... As, typename F = void (*)(Element<As> &...)>
     void for_eachi(const F &f, Seq<As> &...seqs)
     {
         const int seq_length = min_length(seqs...);
@@ -224,125 +230,188 @@ namespace efp
 
     // MapSequence_t
 
-    template <typename A, typename... Seqs>
-    using MapSequence_t =
-        Conditional<
-            all_v(IsStaticCapacity<Seqs>::value...),
-            Conditional<
-                all_v(IsStaticLength<Seqs>::value...),
-                Array<A, MinStaticCapacity<Seqs...>::value>,
-                ArrVec<A, MinStaticCapacity<Seqs...>::value>>,
-            Vector<A>>;
+    // template <typename A, typename... Seqs>
+    // using MapSequence_t =
+    //     Conditional<
+    //         all_v(IsStaticCapacity<Seqs>::value...),
+    //         Conditional<
+    //             all_v(IsStaticLength<Seqs>::value...),
+    //             Array<A, MinStaticCapacity<Seqs...>::value>,
+    //             ArrVec<A, MinStaticCapacity<Seqs...>::value>>,
+    //         Vector<A>>;
 
-    // MapReturn_t
+    template <typename F, typename... As>
+    using Map = Sequence<
+        CallReturn<F, Element<As>...>,
+        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
+        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
 
-    template <typename F, typename... Seqs>
-    using MapReturn_t = MapSequence_t<CallReturn<F, Element_t<Seqs>...>, Seqs...>;
+    // // MapReturn_t
+
+    // template <typename F, typename... Seqs>
+    // using MapReturn_t = MapSequence_t<CallReturn<F, Element_t<Seqs>...>, Seqs...>;
 
     // map
 
-    template <typename F, typename... Seqs>
-    auto map(const F &f, const Seqs &...seqs)
-        -> EnableIf<
-            all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-            MapReturn_t<F, Seqs...>>
+    // template <typename F, typename... Seqs>
+    // auto map(const F &f, const Seqs &...seqs)
+    //     -> EnableIf<
+    //         all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
+    //         MapReturn_t<F, Seqs...>>
+    // {
+    //     // using R = CallReturn<F, Element_t<Seqs>...>;
+
+    //     MapReturn_t<F, Seqs...> result;
+
+    //     for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
+    //     {
+    //         result[i] = f(seqs[i]...);
+    //     }
+
+    //     return result;
+    // }
+
+    // template <typename F, typename... Seqs>
+    // auto map(const F &f, const Seqs &...seqs)
+    //     -> EnableIf<
+    //         !all_v(IsStaticLength<Seqs>::value...),
+    //         MapReturn_t<F, Seqs...>>
+    // {
+    //     const int result_length = min_length(seqs...);
+
+    //     MapReturn_t<F, Seqs...> result(result_length);
+
+    //     for (int i = 0; i < result_length; ++i)
+    //     {
+    //         result[i] = f(seqs[i]...);
+    //     }
+
+    //     return result;
+    // }
+
+    template <typename F, typename... As>
+    auto map(const F &f, const Seq<As> &...seqs)
+        -> Map<F, As...>
     {
-        // using R = CallReturn<F, Element_t<Seqs>...>;
+        Map<F, As...> res{};
+        const int length_ = min_length(seqs...);
+        res.resize(length_);
 
-        MapReturn_t<F, Seqs...> result;
-
-        for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
+        for (int i = 0; i < length_; ++i)
         {
-            result[i] = f(seqs[i]...);
+            res[i] = f(seqs[i]...);
         }
 
-        return result;
-    }
-
-    template <typename F, typename... Seqs>
-    auto map(const F &f, const Seqs &...seqs)
-        -> EnableIf<
-            !all_v(IsStaticLength<Seqs>::value...),
-            MapReturn_t<F, Seqs...>>
-    {
-        const int result_length = min_length(seqs...);
-
-        MapReturn_t<F, Seqs...> result(result_length);
-
-        for (int i = 0; i < result_length; ++i)
-        {
-            result[i] = f(seqs[i]...);
-        }
-
-        return result;
+        return res;
     }
 
     // MapWithIndexReturn_t
 
-    template <typename F, typename... Seqs>
-    using MapWithIndexReturn_t =
-        MapSequence_t<CallReturn<F, int, Element_t<Seqs>...>, Seqs...>;
+    // template <typename F, typename... Seqs>
+    // using MapWithIndexReturn_t =
+    //     MapSequence_t<CallReturn<F, int, Element_t<Seqs>...>, Seqs...>;
 
     // FilterReturn_t
 
-    template <typename SeqA>
-    using FilterReturn_t =
-        Conditional<
-            IsStaticCapacity<SeqA>::value,
-            ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
-            Vector<Element_t<SeqA>>>;
+    // template <typename SeqA>
+    // using FilterReturn_t =
+    //     Conditional<
+    //         IsStaticCapacity<SeqA>::value,
+    //         ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
+    //         Vector<Element_t<SeqA>>>;
+
+    template <typename F, typename A>
+    using Filter = Sequence<
+        Element<A>,
+        A::ct_cap,
+        dyn>;
 
     // filter
 
-    template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
-    auto filter(const F &f, const SeqA &as)
-        -> EnableIf<
-            IsStaticCapacity<SeqA>::value,
-            ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
-    {
-        ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
+    // template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
+    // auto filter(const F &f, const SeqA &as)
+    //     -> EnableIf<
+    //         IsStaticCapacity<SeqA>::value,
+    //         ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
+    // {
+    //     ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
 
-        for (int i = 0; i < length(as); ++i)
+    //     for (int i = 0; i < length(as); ++i)
+    //     {
+    //         const auto a = as[i];
+    //         if (f(a))
+    //         {
+    //             result.push_back(a);
+    //         }
+    //     }
+
+    //     return result;
+    // }
+
+    // template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
+    // auto filter(const F &f, const SeqA &as)
+    //     -> EnableIf<
+    //         !IsStaticCapacity<SeqA>::value,
+    //         Vector<Element_t<SeqA>>>
+    // {
+    //     const int sequance_length = length(as);
+
+    //     Vector<Element_t<SeqA>> result;
+    //     result.reserve(sequance_length * 2);
+
+    //     for (int i = 0; i < sequance_length; ++i)
+    //     {
+    //         const auto a = as[i];
+    //         if (f(a))
+    //         {
+    //             result.push_back(a);
+    //         }
+    //     }
+
+    //     return result;
+    // }
+
+    template <typename A, typename F = bool (*)(Element<A> &)>
+    auto filter(const F &f, const Seq<A> &as)
+        -> Filter<A, F>
+    {
+        Filter<A, F> res{};
+        const auto length_ = length(as);
+        res.resize(length_);
+
+        int j = 0;
+        for (int i = 0; i < length_; ++i)
         {
             const auto a = as[i];
             if (f(a))
             {
-                result.push_back(a);
+                res[j] = a;
+                ++j;
             }
         }
 
-        return result;
-    }
-
-    template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
-    auto filter(const F &f, const SeqA &as)
-        -> EnableIf<
-            !IsStaticCapacity<SeqA>::value,
-            Vector<Element_t<SeqA>>>
-    {
-        const int sequance_length = length(as);
-
-        Vector<Element_t<SeqA>> result;
-        result.reserve(sequance_length * 2);
-
-        for (int i = 0; i < sequance_length; ++i)
-        {
-            const auto a = as[i];
-            if (f(a))
-            {
-                result.push_back(a);
-            }
-        }
-
-        return result;
+        return res;
     }
 
     // foldl
 
-    template <typename R, typename SeqA, typename F = R (*)(const R &, const Element_t<SeqA> &)>
-    R foldl(const F &f, const R &initial_value, const SeqA &as)
+    // template <typename R, typename SeqA, typename F = R (*)(const R &, const Element_t<SeqA> &)>
+    // R foldl(const F &f, const R &initial_value, const SeqA &as)
+    // {
+    //     R result = initial_value;
+
+    //     for (int i = 0; i < length(as); ++i)
+    //     {
+    //         result = f(result, as[i]);
+    //     }
+
+    //     return result;
+    // }
+
+    template <typename A, typename R, typename F = R (*)(const R &, const Element<A> &)>
+    R foldl(const F &f, const R &init, const Seq<A> &as)
     {
-        R result = initial_value;
+        R result = init;
 
         for (int i = 0; i < length(as); ++i)
         {
@@ -354,10 +423,23 @@ namespace efp
 
     // foldr
 
-    template <typename R, typename SeqA, typename F = R (*)(const Element_t<SeqA> &, const R &)>
-    R foldr(const F &f, const R &initial_value, const SeqA &as)
+    // template <typename R, typename SeqA, typename F = R (*)(const Element_t<SeqA> &, const R &)>
+    // R foldr(const F &f, const R &initial_value, const SeqA &as)
+    // {
+    //     R result = initial_value;
+
+    //     for (int i = length(as) - 1; i > -1; --i)
+    //     {
+    //         result = f(as[i], result);
+    //     }
+
+    //     return result;
+    // }
+
+    template <typename A, typename R, typename F = R (*)(const Element<A> &, const R &)>
+    R foldr(const F &f, const R &init, const Seq<A> &as)
     {
-        R result = initial_value;
+        R result = init;
 
         for (int i = length(as) - 1; i > -1; --i)
         {

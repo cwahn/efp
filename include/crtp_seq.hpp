@@ -927,6 +927,49 @@ namespace efp
         static constexpr int ct_cap = ct_capacity;
     };
 
+    // Element`
+
+    template <typename A>
+    struct ElementImpl
+    {
+        using type = typename A::Element;
+    };
+
+    template <typename A>
+    using Element = typename ElementImpl<A>::type;
+
+    // StaticLength
+
+    template <typename A>
+    struct StaticLength
+    {
+        static constexpr int value = A::ct_len;
+    };
+
+    // StaticCapacity
+
+    template <typename A>
+    struct StaticCapacity
+    {
+        static constexpr int value = A::ct_cap;
+    };
+
+    // IsStaticLength
+
+    template <typename A>
+    struct IsStaticLength
+    {
+        static constexpr bool value = A::ct_len != dyn;
+    };
+
+    // AreAllStaticLength
+
+    template <typename... A>
+    struct AreAllStaticLength
+    {
+        static constexpr bool value = all_v(IsStaticLength<A>::value...);
+    };
+
     // IsStaticCapacity
 
     template <typename A>
@@ -943,12 +986,20 @@ namespace efp
         static constexpr bool value = all_v(IsStaticCapacity<A>::value...);
     };
 
-    // IsStaticLength
+    // MinStaticLength
 
-    template <typename A>
-    struct IsStaticLength
+    template <typename... A>
+    struct MinStaticLength
     {
-        static constexpr bool value = A::ct_len != dyn;
+        static constexpr int value = minimum_v(StaticLength<A>::value...);
+    };
+
+    // MinStaticCapacity
+
+    template <typename... A>
+    struct MinStaticCapacity
+    {
+        static constexpr int value = minimum_v(StaticCapacity<A>::value...);
     };
 
     // length
