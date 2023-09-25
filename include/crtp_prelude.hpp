@@ -228,66 +228,14 @@ namespace efp
         }
     }
 
-    // MapSequence_t
-
-    // template <typename A, typename... Seqs>
-    // using MapSequence_t =
-    //     Conditional<
-    //         all_v(IsStaticCapacity<Seqs>::value...),
-    //         Conditional<
-    //             all_v(IsStaticLength<Seqs>::value...),
-    //             Array<A, MinStaticCapacity<Seqs...>::value>,
-    //             ArrVec<A, MinStaticCapacity<Seqs...>::value>>,
-    //         Vector<A>>;
+    // MapReturn
 
     template <typename F, typename... As>
     using MapReturn = Sequence<
         CallReturn<F, Element<As>...>,
         AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
         AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
-
-    // // MapReturn_t
-
-    // template <typename F, typename... Seqs>
-    // using MapReturn_t = MapSequence_t<CallReturn<F, Element_t<Seqs>...>, Seqs...>;
-
     // map
-
-    // template <typename F, typename... Seqs>
-    // auto map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-    //         MapReturn_t<F, Seqs...>>
-    // {
-    //     // using R = CallReturn<F, Element_t<Seqs>...>;
-
-    //     MapReturn_t<F, Seqs...> result;
-
-    //     for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
-    //     {
-    //         result[i] = f(seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename F, typename... Seqs>
-    // auto map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         !all_v(IsStaticLength<Seqs>::value...),
-    //         MapReturn_t<F, Seqs...>>
-    // {
-    //     const int result_length = min_length(seqs...);
-
-    //     MapReturn_t<F, Seqs...> result(result_length);
-
-    //     for (int i = 0; i < result_length; ++i)
-    //     {
-    //         result[i] = f(seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
 
     template <typename F, typename... As>
     auto map(const F &f, const Seq<As> &...seqs)
@@ -311,62 +259,12 @@ namespace efp
     // using MapWithIndexReturn_t =
     //     MapSequence_t<CallReturn<F, int, Element_t<Seqs>...>, Seqs...>;
 
-    // FilterReturn_t
-
-    // template <typename SeqA>
-    // using FilterReturn_t =
-    //     Conditional<
-    //         IsStaticCapacity<SeqA>::value,
-    //         ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>,
-    //         Vector<Element_t<SeqA>>>;
+    // FilterReturn
 
     template <typename F, typename A>
     using FilterReturn = Sequence<Element<A>, dyn, A::ct_cap>;
 
     // filter
-
-    // template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
-    // auto filter(const F &f, const SeqA &as)
-    //     -> EnableIf<
-    //         IsStaticCapacity<SeqA>::value,
-    //         ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value>>
-    // {
-    //     ArrVec<Element_t<SeqA>, StaticCapacity<SeqA>::value> result;
-
-    //     for (int i = 0; i < length(as); ++i)
-    //     {
-    //         const auto a = as[i];
-    //         if (f(a))
-    //         {
-    //             result.push_back(a);
-    //         }
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename SeqA, typename F = bool (*)(Element_t<SeqA> &...)>
-    // auto filter(const F &f, const SeqA &as)
-    //     -> EnableIf<
-    //         !IsStaticCapacity<SeqA>::value,
-    //         Vector<Element_t<SeqA>>>
-    // {
-    //     const int sequance_length = length(as);
-
-    //     Vector<Element_t<SeqA>> result;
-    //     result.reserve(sequance_length * 2);
-
-    //     for (int i = 0; i < sequance_length; ++i)
-    //     {
-    //         const auto a = as[i];
-    //         if (f(a))
-    //         {
-    //             result.push_back(a);
-    //         }
-    //     }
-
-    //     return result;
-    // }
 
     template <typename A, typename F = bool (*)(Element<A> &)>
     auto filter(const F &f, const Seq<A> &as)
@@ -393,19 +291,6 @@ namespace efp
 
     // foldl
 
-    // template <typename R, typename SeqA, typename F = R (*)(const R &, const Element_t<SeqA> &)>
-    // R foldl(const F &f, const R &initial_value, const SeqA &as)
-    // {
-    //     R result = initial_value;
-
-    //     for (int i = 0; i < length(as); ++i)
-    //     {
-    //         result = f(result, as[i]);
-    //     }
-
-    //     return result;
-    // }
-
     template <typename A, typename R, typename F = R (*)(const R &, const Element<A> &)>
     R foldl(const F &f, const R &init, const Seq<A> &as)
     {
@@ -420,19 +305,6 @@ namespace efp
     }
 
     // foldr
-
-    // template <typename R, typename SeqA, typename F = R (*)(const Element_t<SeqA> &, const R &)>
-    // R foldr(const F &f, const R &initial_value, const SeqA &as)
-    // {
-    //     R result = initial_value;
-
-    //     for (int i = length(as) - 1; i > -1; --i)
-    //     {
-    //         result = f(as[i], result);
-    //     }
-
-    //     return result;
-    // }
 
     template <typename A, typename R, typename F = R (*)(const Element<A> &, const R &)>
     R foldr(const F &f, const R &init, const Seq<A> &as)
@@ -455,7 +327,50 @@ namespace efp
     //     Array<CallReturn<F, int>, N::value>,
     //     Vector<CallReturn<F, int>>>;
 
-    // // from_function
+    // FromFunctionReturn
+
+    // using FromFunctionReturn = Sequence<CallReturn<F, int>,
+    //                                     IsIntegralConst<N>::value ? N::value : dyn,
+    //                                     IsIntegralConst<N>::value ? N::value : dyn>;
+
+    template <typename N, typename F>
+    using FromFunctionReturn = Conditional<IsIntegralConst<N>::value,
+                                           Sequence<CallReturn<F, int>, N::value, N::value>,
+                                           Sequence<CallReturn<F, int>, dyn, dyn>>;
+
+    // from_function
+
+    template <typename N, typename F>
+    auto from_function(const N &length, const F &f)
+        -> EnableIf<IsIntegralConst<N>::value,
+                    Sequence<CallReturn<F, int>, N::value, N::value>>
+    {
+        Sequence<CallReturn<F, int>, N::value, N::value> result{};
+        result.resize(length);
+
+        for (int i = 0; i < length; ++i)
+        {
+            result[i] = f(i);
+        }
+
+        return result;
+    }
+
+    template <typename N, typename F>
+    auto from_function(const N &length, const F &f)
+        -> EnableIf<!IsIntegralConst<N>::value,
+                    Sequence<CallReturn<F, int>, dyn, dyn>>
+    {
+        Sequence<CallReturn<F, int>, dyn, dyn> result{};
+        result.resize(length);
+
+        for (int i = 0; i < length; ++i)
+        {
+            result[i] = f(i);
+        }
+
+        return result;
+    }
 
     // template <typename N, typename F>
     // auto from_function(const N &length, const F &f)

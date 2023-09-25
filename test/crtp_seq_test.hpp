@@ -7,30 +7,30 @@ using namespace efp;
 
 TEST_CASE("crtp_seq_init")
 {
-    SECTION("Arr")
+    SECTION("Array")
     {
-        Arr<int, 3> a{1, 2, 3};
-        CHECK(a == Arr<int, 3>{1, 2, 3});
+        Array<int, 3> a{1, 2, 3};
+        CHECK(a == Array<int, 3>{1, 2, 3});
         CHECK(a.length() == 3);
     }
 
-    SECTION("ArrayVec")
+    SECTION("ArrVec")
     {
-        ArrayVec<int, 4> a = {1, 2, 3};
+        ArrVec<int, 4> a = {1, 2, 3};
 
         CHECK(a.length() == 3);
         CHECK(a.capacity() == 4);
     }
 
-    SECTION("Vec")
+    SECTION("Vector")
     {
-        Vec<int> a = {0, 0, 0};
+        Vector<int> a = {0, 0, 0};
         for (int i = 0; i < a.length(); ++i)
         {
             a[i] = i + 1;
         }
 
-        Vec<int> b = {1, 2, 3};
+        Vector<int> b = {1, 2, 3};
 
         CHECK(a == b);
         CHECK(a.length() == 3);

@@ -32,12 +32,13 @@ namespace efp
             return *this;
         }
 
-        Element &operator[](int index)
+        const Element &operator[](int index) const
         {
             return derived()[index];
         }
 
-        const Element &operator[](int index) const
+        // ! Mut
+        Element &operator[](int index)
         {
             return derived()[index];
         }
@@ -52,20 +53,23 @@ namespace efp
             return derived().length();
         }
 
-        int capacity() const
-        {
-            return derived().capacity();
-        }
+        // ! Not appropreate for ref of sequence
+        // int capacity() const
+        // {
+        //     return derived().capacity();
+        // }
 
-        void resize(int length)
-        {
-            derived().resize(length);
-        }
+        // ! Mut, Not appropreate for ref of sequence
+        // void resize(int length)
+        // {
+        //     derived().resize(length);
+        // }
 
-        void reserve(int capacity)
-        {
-            derived().reserve(capacity);
-        }
+        // ! Mut, Not appropreate for ref of sequence
+        // void reserve(int capacity)
+        // {
+        //     derived().reserve(capacity);
+        // }
 
         const Element *p_data() const
         {
@@ -77,22 +81,22 @@ namespace efp
             return derived().p_data();
         }
 
-        Element *p_begin()
-        {
-            return derived().p_begin();
-        }
-
         const Element *p_begin() const
         {
             return derived().p_begin();
         }
 
-        Element *p_end()
+        Element *p_begin()
+        {
+            return derived().p_begin();
+        }
+
+        const Element *p_end() const
         {
             return derived().p_end();
         }
 
-        const Element *p_end() const
+        Element *p_end()
         {
             return derived().p_end();
         }
@@ -239,7 +243,7 @@ namespace efp
     };
 
     template <typename A, int ct_length>
-    using Arr = EnableIf<ct_length != dyn, Sequence<A, ct_length, ct_length>>;
+    using Array = EnableIf<ct_length != dyn, Sequence<A, ct_length, ct_length>>;
 
     template <typename A, int ct_capacity>
     class Sequence<A, dyn, ct_capacity>
@@ -332,6 +336,19 @@ namespace efp
             }
         }
 
+        void push_back(const A &value)
+        {
+            if (length_ >= ct_cap)
+            {
+                abort();
+            }
+            else
+            {
+                p_data_[length_] = value;
+                ++length_;
+            }
+        }
+
         const A *p_data() const
         {
             return p_data_;
@@ -373,7 +390,7 @@ namespace efp
     };
 
     template <typename A, int ct_capacity>
-    using ArrayVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
+    using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
 
     template <typename A>
     class Sequence<A, dyn, dyn>
@@ -500,6 +517,19 @@ namespace efp
             }
         }
 
+        void push_back(const A &value)
+        {
+            if (length_ >= capacity_)
+            {
+                reserve(2 * capacity_);
+            }
+            else
+            {
+                p_data_[length_] = value;
+                ++length_;
+            }
+        }
+
         const A *p_data() const
         {
             return p_data_;
@@ -542,7 +572,7 @@ namespace efp
     };
 
     template <typename A>
-    using Vec = Sequence<A, dyn, dyn>;
+    using Vector = Sequence<A, dyn, dyn>;
 
     template <typename A, int ct_length, int ct_capacity>
     class SequenceTrait<Sequence<A, ct_length, ct_capacity>>
@@ -553,6 +583,7 @@ namespace efp
         static constexpr int ct_cap = ct_capacity;
     };
 
+    // Should have all these three template parameter not to break static link
     template <typename A, int ct_length, int ct_capacity>
     class SequenceView
     {
