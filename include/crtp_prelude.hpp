@@ -241,7 +241,7 @@ namespace efp
     //         Vector<A>>;
 
     template <typename F, typename... As>
-    using Map = Sequence<
+    using MapReturn = Sequence<
         CallReturn<F, Element<As>...>,
         AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
         AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
@@ -291,18 +291,18 @@ namespace efp
 
     template <typename F, typename... As>
     auto map(const F &f, const Seq<As> &...seqs)
-        -> Map<F, As...>
+        -> MapReturn<F, As...>
     {
-        Map<F, As...> res{};
-        const int length_ = min_length(seqs...);
-        res.resize(length_);
+        MapReturn<F, As...> result{};
+        const int result_length = min_length(seqs...);
+        result.resize(result_length);
 
-        for (int i = 0; i < length_; ++i)
+        for (int i = 0; i < result_length; ++i)
         {
-            res[i] = f(seqs[i]...);
+            result[i] = f(seqs[i]...);
         }
 
-        return res;
+        return result;
     }
 
     // MapWithIndexReturn_t
@@ -372,24 +372,23 @@ namespace efp
     auto filter(const F &f, const Seq<A> &as)
         -> FilterReturn<F, A>
     {
-        FilterReturn<F, A> res{};
-
+        FilterReturn<F, A> result{};
         // ! Can't determine the length in advance
-        // const auto length_ = length(as);
+        const auto input_length = length(as);
 
         int j = 0;
-        for (int i = 0; i < length(as); ++i)
+        for (int i = 0; i < input_length; ++i)
         {
             const auto a = as[i];
             if (f(a))
             {
-                res[j] = a;
+                result[j] = a;
                 ++j;
             }
         }
-        res.resize(j + 1);
+        result.resize(j);
 
-        return res;
+        return result;
     }
 
     // foldl

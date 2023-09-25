@@ -35,25 +35,32 @@ TEST_CASE("filter")
 
     auto is_even = [](int x)
     {
-        if (x % 2 == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return x % 2 == 0 ? true : false;
     };
 
     ArrayVec<int, 3> ref{};
     ref.resize(1);
     ref[0] = 2;
 
-    const auto filtered = filter(is_even, crtp_array);
-    CHECK(length(filtered) == 1);
-    CHECK(filtered[0] == 2);
+    CHECK(filter(is_even, crtp_array) == ref);
+}
 
-    // CHECK(filter(is_even, crtp_array) == ref);
+TEST_CASE("foldl")
+{
+    ArrayVec<int, 5> crtp_arrayvec{1, 2, 3, 4};
+    auto plus = [](int lhs, int rhs)
+    { return lhs + rhs; };
+
+    CHECK(foldl(plus, 0, crtp_arrayvec) == 10);
+}
+
+TEST_CASE("foldr")
+{
+    ArrayVec<int, 5> crtp_arrayvec{1, 2, 3, 4};
+    auto plus = [](int lhs, int rhs)
+    { return lhs + rhs; };
+
+    CHECK(foldr(plus, 0, crtp_arrayvec) == 10);
 }
 
 #endif
