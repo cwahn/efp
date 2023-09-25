@@ -321,10 +321,7 @@ namespace efp
     //         Vector<Element_t<SeqA>>>;
 
     template <typename F, typename A>
-    using Filter = Sequence<
-        Element<A>,
-        A::ct_cap,
-        dyn>;
+    using FilterReturn = Sequence<Element<A>, dyn, A::ct_cap>;
 
     // filter
 
@@ -373,14 +370,15 @@ namespace efp
 
     template <typename A, typename F = bool (*)(Element<A> &)>
     auto filter(const F &f, const Seq<A> &as)
-        -> Filter<A, F>
+        -> FilterReturn<F, A>
     {
-        Filter<A, F> res{};
-        const auto length_ = length(as);
-        res.resize(length_);
+        FilterReturn<F, A> res{};
+
+        // ! Can't determine the length in advance
+        // const auto length_ = length(as);
 
         int j = 0;
-        for (int i = 0; i < length_; ++i)
+        for (int i = 0; i < length(as); ++i)
         {
             const auto a = as[i];
             if (f(a))
@@ -389,6 +387,7 @@ namespace efp
                 ++j;
             }
         }
+        res.resize(j + 1);
 
         return res;
     }

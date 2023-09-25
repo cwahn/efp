@@ -29,4 +29,31 @@ TEST_CASE("map")
     CHECK(map(times_2, crtp_array) == Arr<int, 3>{2, 4, 6});
 }
 
+TEST_CASE("filter")
+{
+    Arr<int, 3> crtp_array{1, 2, 3};
+
+    auto is_even = [](int x)
+    {
+        if (x % 2 == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    ArrayVec<int, 3> ref{};
+    ref.resize(1);
+    ref[0] = 2;
+
+    const auto filtered = filter(is_even, crtp_array);
+    CHECK(length(filtered) == 1);
+    CHECK(filtered[0] == 2);
+
+    // CHECK(filter(is_even, crtp_array) == ref);
+}
+
 #endif
