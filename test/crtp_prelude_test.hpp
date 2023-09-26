@@ -111,4 +111,19 @@ TEST_CASE("for_each_with_index")
     CHECK(res == Array<int, 3>{1, 4, 9});
 }
 
+TEST_CASE("cartesian_for_each")
+{
+    Vector<int> res{};
+    auto as = Array<int, 2>{1, 2};
+    auto bs = Array<int, 2>{1, 3};
+
+    auto push_res = [&](int x0, int x1)
+    {
+        res.push_back(10 * x0 + x1);
+    };
+
+    cartesian_for_each(push_res, as, bs);
+    CHECK(res == Vector<int>{1, 3, 2, 6});
+}
+
 #endif

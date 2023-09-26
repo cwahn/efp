@@ -510,7 +510,7 @@ namespace efp
             if (capacity > capacity_)
             {
                 A *new_data = new A[capacity];
-                memcpy(new_data, p_data_, length_);
+                memcpy(new_data, p_data_, length_ * sizeof(A));
                 delete[] p_data_;
                 p_data_ = new_data;
                 capacity_ = capacity;
@@ -521,13 +521,11 @@ namespace efp
         {
             if (length_ >= capacity_)
             {
-                reserve(2 * capacity_);
+                reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
-            else
-            {
-                p_data_[length_] = value;
-                ++length_;
-            }
+
+            p_data_[length_] = value;
+            ++length_;
         }
 
         const A *p_data() const

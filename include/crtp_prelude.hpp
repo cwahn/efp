@@ -396,56 +396,41 @@ namespace efp
         }
     }
 
-    // template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
-    // void for_each_with_index(const F &f, const Seqs &...seqs)
-    // {
-    //     const int seq_length = min_length(seqs...);
+    // for_each_with_indexi
 
-    //     for (int i = 0; i < seq_length; ++i)
-    //     {
-    //         f(i, seqs[i]...);
-    //     }
-    // }
+    template <typename... Ts, typename F = void (*)(const int &, Element<Ts> &...)>
+    void for_each_with_indexi(const F &f, Seq<Ts> &...seqs)
+    {
+        const int min_length_ = min_length(seqs...);
 
-    // // for_each_with_indexi
+        for (int i = 0; i < min_length_; ++i)
+        {
+            f(i, seqs[i]...);
+        }
+    }
 
-    // template <typename... Seqs, typename F = void (*)(const int &, Element_t<Seqs> &...)>
-    // void for_each_with_indexi(const F &f, Seqs &...seqs)
-    // {
-    //     const int seq_length = min_length(seqs...);
+    // cartesian_for_each
 
-    //     for (int i = 0; i < seq_length; ++i)
-    //     {
-    //         f(i, seqs[i]...);
-    //     }
-    // }
+    template <typename A, typename F = void (*)(const Element<A> &)>
+    void cartesian_for_each(const F &f, const Seq<A> &as)
+    {
+        for_each(f, as);
+    }
 
-    // // cartesian_for_each
+    template <typename A, typename... Ts, typename F = void (*)(const Element<A> &, const Element<Ts> &...)>
+    void cartesian_for_each(const F &f, const Seq<A> &as, const Seq<Ts> &...seqs)
+    {
+        const auto as_length = length(as);
 
-    // template <typename SeqA, typename F = void (*)(const Element_t<SeqA> &)>
-    // void cartesian_for_each(const F &f, const SeqA &as)
-    // {
-    //     for_each(f, as);
-    // }
+        for (int i = 0; i < as_length; ++i)
+        {
+            const auto a = as[i];
+            const auto inner = [&](Element<Ts>... xs)
+            { f(a, xs...); };
 
-    // template <typename SeqA, typename... Seqs, typename F = void (*)(const Element_t<SeqA> &, const Element_t<Seqs> &...)>
-    // void cartesian_for_each(const F &f, const SeqA &as, const Seqs &...seqs)
-    // {
-    //     // ? Will it be optimized out to a compile time constatnt?
-    //     const int as_length = length(as);
-    //     Element_t<SeqA> a;
-
-    //     for (int i = 0; i < as_length; ++i)
-    //     {
-    //         a = as[i];
-    //         const auto inner = [=](Element_t<Seqs>... xs)
-    //         {
-    //             f(a, xs...);
-    //         };
-
-    //         cartesian_for_each<Seqs..., decltype(inner)>(inner, seqs...);
-    //     }
-    // }
+            cartesian_for_each<Ts..., decltype(inner)>(inner, seqs...);
+        }
+    }
 
     // // cartesian_for_eachi
 
