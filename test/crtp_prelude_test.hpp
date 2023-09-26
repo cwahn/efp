@@ -98,4 +98,17 @@ TEST_CASE("for_index")
     CHECK(res == 3);
 }
 
+TEST_CASE("for_each_with_index")
+{
+    Array<int, 3> res;
+
+    auto product = [&](int i, int x0, int x1)
+    {
+        res[i] = x0 * x1;
+    };
+
+    for_each_with_index(product, array_3, vector_5);
+    CHECK(res == Array<int, 3>{1, 4, 9});
+}
+
 #endif

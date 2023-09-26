@@ -383,16 +383,18 @@ namespace efp
         }
     }
 
-    // template <typename F = void (*)(const int &)>
-    // void for_index(const F &f, const int i)
-    // {
-    //     for (int i_ = 0; i_ < i; ++i_)
-    //     {
-    //         f(i_);
-    //     }
-    // }
+    // for_each_with_index
 
-    // // for_each_with_index
+    template <typename... Ts, typename F = void (*)(const int &, const Element<Ts> &...)>
+    void for_each_with_index(const F &f, const Seq<Ts> &...seqs)
+    {
+        const auto min_length_ = min_length(seqs...);
+
+        for (int i = 0; i < min_length_; ++i)
+        {
+            f(i, seqs[i]...);
+        }
+    }
 
     // template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
     // void for_each_with_index(const F &f, const Seqs &...seqs)
