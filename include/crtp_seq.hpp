@@ -509,10 +509,10 @@ namespace efp
         {
             if (capacity > capacity_)
             {
-                A *new_data = new A[capacity];
-                memcpy(new_data, p_data_, length_ * sizeof(A));
+                A *p_new_data = new A[capacity];
+                memcpy(p_new_data, p_data_, length_ * sizeof(A));
                 delete[] p_data_;
-                p_data_ = new_data;
+                p_data_ = p_new_data;
                 capacity_ = capacity;
             }
         }

@@ -432,92 +432,54 @@ namespace efp
         }
     }
 
-    // // cartesian_for_eachi
+    // cartesian_for_eachi
 
-    // template <typename SeqA, typename F = void (*)(Element_t<SeqA> &)>
-    // void cartesian_for_eachi(const F &f, SeqA &as)
-    // {
-    //     for_eachi(f, as);
-    // }
+    template <typename A, typename F = void (*)(const Element<A> &)>
+    void cartesian_for_eachi(const F &f, Seq<A> &as)
+    {
+        for_eachi(f, as);
+    }
 
-    // template <typename SeqA, typename... Seqs, typename F = void (*)(Element_t<SeqA> &, Element_t<Seqs> &...)>
-    // void cartesian_for_eachi(const F &f, SeqA &as, Seqs &...seqs)
-    // {
-    //     // ? Will it be optimized out to a compile time constatnt?
-    //     const int as_length = length(as);
-    //     Element_t<SeqA> a;
+    template <typename A, typename... Ts, typename F = void (*)(const Element<A> &, const Element<Ts> &...)>
+    void cartesian_for_eachi(const F &f, Seq<A> &as, Seq<Ts> &...seqs)
+    {
+        const auto as_length = length(as);
 
-    //     for (int i = 0; i < as_length; ++i)
-    //     {
-    //         a = as[i];
-    //         const auto inner = [=](Element_t<Seqs>... xs)
-    //         {
-    //             f(a, xs...);
-    //         };
+        for (int i = 0; i < as_length; ++i)
+        {
+            const auto a = as[i];
+            const auto inner = [&](Element<Ts>... xs)
+            { f(a, xs...); };
 
-    //         cartesian_for_eachi<decltype(inner), Seqs...>(inner, seqs...);
-    //     }
-    // }
+            cartesian_for_eachi<Ts..., decltype(inner)>(inner, seqs...);
+        }
+    }
 
-    // // map_with_index
+    // MapWithIndexRetrun
 
-    // template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
-    // auto map_with_index(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-    //         Array<CallReturn<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
-    // {
-    //     using R = CallReturn<F, int, Element_t<Seqs>...>;
+    template <typename F, typename... Ts>
+    using MapWithIndexRetrun = Sequence<
+        CallReturn<F, int, Element<Ts>...>,
+        AreAllStaticCapacity<Ts...>::value ? MinStaticCapacity<Ts...>::value : dyn,
+        AreAllStaticLength<Ts...>::value ? MinStaticLength<Ts...>::value : dyn>;
 
-    //     Array<R, MinStaticCapacity<Seqs...>::value> result;
+    // map_with_index
 
-    //     for (int i = 0; i < MinStaticCapacity<Seqs...>::value; ++i)
-    //     {
-    //         result[i] = f(i, seqs[i]...);
-    //     }
+    template <typename... Ts, typename F = void (*)(const int &, const Element<Ts> &...)>
+    auto map_with_index(const F &f, const Seq<Ts> &...seqs)
+        -> MapWithIndexRetrun<F, Ts...>
+    {
+        MapWithIndexRetrun<F, Ts...> result;
+        const auto result_length = min_length(seqs...);
+        result.resize(result_length);
 
-    //     return result;
-    // }
+        for (int i = 0; i < result_length; ++i)
+        {
+            result[i] = f(i, seqs[i]...);
+        }
 
-    // template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
-    // auto map_with_index(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-    //         ArrVec<CallReturn<F, int, Element_t<Seqs>...>, MinStaticCapacity<Seqs...>::value>>
-    // {
-    //     using R = CallReturn<F, int, Element_t<Seqs>...>;
-
-    //     const int result_length = min_length(seqs...);
-
-    //     ArrVec<R, MinStaticCapacity<Seqs...>::value> result(result_length);
-
-    //     for (int i = 0; i < result_length; ++i)
-    //     {
-    //         result[i] = f(i, seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename... Seqs, typename F = void (*)(const int &, const Element_t<Seqs> &...)>
-    // auto map_with_index(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         !all_v(IsStaticCapacity<Seqs>::value...),
-    //         Vector<CallReturn<F, int, Element_t<Seqs>...>>>
-    // {
-    //     using R = CallReturn<F, int, Element_t<Seqs>...>;
-
-    //     const int result_length = min_length(seqs...);
-
-    //     Vector<R> result(result_length);
-
-    //     for (int i = 0; i < result_length; ++i)
-    //     {
-    //         result[i] = f(i, seqs[i]...);
-    //     }
-
-    //     return result;
-    // }
+        return result;
+    }
 
     // // cartesian_map
     // // ! Maybe need to bechmark and optimize

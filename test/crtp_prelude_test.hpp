@@ -123,7 +123,40 @@ TEST_CASE("cartesian_for_each")
     };
 
     cartesian_for_each(push_res, as, bs);
-    CHECK(res == Vector<int>{1, 3, 2, 6});
+    CHECK(res == Vector<int>{11, 13, 21, 23});
+}
+
+TEST_CASE("map_with_index")
+{
+    SECTION("array")
+    {
+        auto times = [](int lhs, int rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, array_3) == Array<int, 3>{0, 2, 6});
+    }
+
+    SECTION("vector")
+    {
+        auto times = [](double lhs, double rhs)
+        {
+            return lhs * rhs;
+        };
+
+        CHECK(map_with_index(times, vector_3) == Vector<double>{0., 2., 6.});
+    }
+
+    SECTION("binary hetero")
+    {
+        auto product = [](int i, double a, double b)
+        {
+            return i * a * b;
+        };
+
+        CHECK(map_with_index(product, array_3, vector_3) == Vector<double>{0., 4., 18.});
+    }
 }
 
 #endif
