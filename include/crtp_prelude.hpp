@@ -372,39 +372,16 @@ namespace efp
         return result;
     }
 
-    // template <typename N, typename F>
-    // auto from_function(const N &length, const F &f)
-    //     -> EnableIf<
-    //         IsIntegralConst<N>::value,
-    //         Array<CallReturn<F, int>, N::value>>
-    // {
-    //     Array<CallReturn<F, int>, N::value> result;
+    // for_index
 
-    //     for (int i = 0; i < N::value; ++i)
-    //     {
-    //         result[i] = f(i);
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename N, typename F>
-    // auto from_function(const N &length, const F &f)
-    //     -> EnableIf<
-    //         !IsIntegralConst<N>::value,
-    //         Vector<CallReturn<F, int>>>
-    // {
-    //     Vector<CallReturn<F, int>> result(length);
-
-    //     for (int i = 0; i < length; ++i)
-    //     {
-    //         result[i] = f(i);
-    //     }
-
-    //     return result;
-    // }
-
-    // // for_index
+    template <typename F = void (*)(const int &)>
+    void for_index(const F &f, const int i)
+    {
+        for (int j = 0; j < i; ++j)
+        {
+            f(j);
+        }
+    }
 
     // template <typename F = void (*)(const int &)>
     // void for_index(const F &f, const int i)
