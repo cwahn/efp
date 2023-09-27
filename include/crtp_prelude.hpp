@@ -486,16 +486,53 @@ namespace efp
         return as[0];
     }
 
+    template <typename A, bool is_const>
+    using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
+                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
+                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+
     // todo tail
-    // ! Partial function. Make sure non empty
-    // template <typename A>
-    // auto tail(const Seq<A> &as)
-    //     -> SequenceView<Element<A>,
-    //                     IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-    //                     IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>
-    // {
-    //     return VectorView<const Element<SeqA>>{p_data(as) + 1, length(as) - 1};
-    // }
+    // ! Partial function. Application on empty list is abortion.
+    template <typename A>
+    auto tail(const Seq<A> &as)
+        -> TailReturn<A, true>
+    {
+        TailReturn<A, true> result{p_data(as) + 1};
+
+        if (A::ct_len == dyn)
+        {
+            const auto as_length = length(as);
+            if (as_length == 0)
+            {
+                abort();
+            }
+
+            result.resize(as_length - 1);
+        }
+
+        return result;
+    }
+
+    template <typename A>
+    auto tail(Seq<A> &as)
+        -> TailReturn<A, false>
+    {
+        TailReturn<A, false> result{p_data(as) + 1};
+
+        if (A::ct_len == dyn)
+        {
+            const auto as_length = length(as);
+            if (as_length == 0)
+            {
+                abort();
+            }
+
+            result.resize(as_length - 1);
+        }
+
+        return result;
+    }
 
     // // ! Partial function. Make sure non empty
     // template <typename SeqA>

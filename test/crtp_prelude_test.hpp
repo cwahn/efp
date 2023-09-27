@@ -181,4 +181,33 @@ TEST_CASE("cartesian_for_index")
     // Array<int, -2> invalid{};
 }
 
+TEST_CASE("head")
+{
+    CHECK(head(array_3) == 1);
+    CHECK(head(arrvec_3) == 1);
+    CHECK(head(vector_3) == 1);
+}
+
+TEST_CASE("tail")
+{
+    SECTION("const")
+    {
+        CHECK(tail(array_3) == ArrayView<const double, 2>{p_data(array_3) + 1});
+        CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{p_data(arrvec_3) + 1, 2});
+        CHECK(tail(vector_3) == VectorView<const double>{p_data(vector_3) + 1, 2, 2});
+    }
+
+    SECTION("non const")
+    {
+        Array<double, 3> array{1., 2., 3.};
+        ArrVec<double, 3> arrvec{1., 2., 3.};
+        Vector<double> vector{1., 2., 3.};
+
+        CHECK(tail(array) == ArrayView<double, 2>{p_data(array) + 1});
+        CHECK(tail(arrvec) == ArrVecView<double, 2>{p_data(arrvec) + 1, 2});
+        CHECK(tail(vector) == VectorView<double>{p_data(vector) + 1, 2, 2});
+        CHECK(std::vector<int>{1, 2} == std::vector<int>{1, 2});
+    }
+}
+
 #endif

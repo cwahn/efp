@@ -7,6 +7,9 @@
 // ct_capacity is compile time bound of length. It does not mean safety of access.
 // However, actual capacity does means the length of memory safe to access.
 
+// todo STL only
+#include <iostream>
+
 #include "sfinae.hpp"
 
 namespace efp
@@ -724,7 +727,7 @@ namespace efp
     };
 
     template <typename A, int ct_length>
-    using ArrayView = SequenceView<A, ct_length, ct_length>;
+    using ArrayView = EnableIf<ct_length != dyn, SequenceView<A, ct_length, ct_length>>;
 
     template <typename A, int ct_capacity>
     class SequenceView<A, dyn, ct_capacity>
@@ -741,6 +744,7 @@ namespace efp
         SequenceView() : p_data_{nullptr}, length_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *p_data) : p_data_{p_data} {}
         SequenceView(A *p_data, const int length)
             : p_data_{p_data}, length_{length}
         {
@@ -851,7 +855,7 @@ namespace efp
     };
 
     template <typename A, int ct_capacity>
-    using ArrVecView = SequenceView<A, dyn, ct_capacity>;
+    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
 
     template <typename A>
     class SequenceView<A, dyn, dyn>
@@ -868,6 +872,7 @@ namespace efp
         SequenceView() : p_data_{nullptr}, length_{0}, capacity_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *p_data) : p_data_{p_data} {}
         SequenceView(A *p_data, const int length, const int capacity)
             : p_data_{p_data}, length_{length}, capacity_{capacity}
         {
@@ -1001,7 +1006,41 @@ namespace efp
         // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
     };
 
-    // Element`
+    // todo STL only
+
+    template <typename A, int ct_length, int ct_capacity>
+    std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
+    {
+        os << "{ ";
+        for (int i = 0; i < seq.length(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.length() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
+    }
+
+    template <typename A, int ct_length, int ct_capacity>
+    std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
+    {
+        os << "{ ";
+        for (int i = 0; i < seq.length(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.length() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
+    }
+
+    // Element
 
     template <typename A>
     struct ElementImpl
