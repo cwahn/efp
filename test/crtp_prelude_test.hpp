@@ -159,4 +159,25 @@ TEST_CASE("map_with_index")
     }
 }
 
+TEST_CASE("cartesian_map")
+{
+    auto as = Array<int, 2>{1, 2};
+    auto bs = Array<int, 2>{1, 3};
+
+    auto res = cartesian_map([](int a, int b)
+                             { return a * b; },
+                             as, bs);
+    CHECK(res == Array<int, 4>{1, 3, 2, 6});
+}
+
+TEST_CASE("cartesian_for_index")
+{
+    Vector<int> res;
+    const auto f = [&](int a, int b)
+    { return res.push_back(a * b); };
+
+    cartesian_for_index(f, 2, 3);
+    CHECK(res == Vector<int>{0, 0, 0, 0, 1, 2});
+}
+
 #endif

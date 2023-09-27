@@ -481,95 +481,52 @@ namespace efp
         return result;
     }
 
-    // // cartesian_map
-    // // ! Maybe need to bechmark and optimize
-    // template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
-    // auto cartesian_map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && all_v(IsStaticLength<Seqs>::value...),
-    //         Array<CallReturn<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
-    // {
-    //     using R = CallReturn<F, Element_t<Seqs>...>;
+    // CartesianMapReturn
 
-    //     Array<R, StaticCapacityProduct<Seqs...>::value> result;
-    //     int i = 0;
+    template <typename F, typename... Ts>
+    using CartesianMapReturn = Sequence<
+        CallReturn<F, Element<Ts>...>,
+        AreAllStaticLength<Ts...>::value ? product_v(StaticLength<Ts>::value...) : dyn,
+        AreAllStaticCapacity<Ts...>::value ? product_v(StaticCapacity<Ts>::value...) : dyn>;
 
-    //     const auto inner = [&](Element_t<Seqs>... xs)
-    //     {
-    //         result[i++] = f(xs...);
-    //     };
+    // cartesian_map
 
-    //     cartesian_for_each(inner, seqs...);
+    // ! Maybe need to bechmark and optimize
+    template <typename... Ts, typename F = void (*)(const Element<Ts> &...)>
+    auto cartesian_map(const F &f, const Seq<Ts> &...seqs)
+        -> CartesianMapReturn<F, Ts...>
+    {
+        CartesianMapReturn<F, Ts...> result;
+        result.resize(product_v(static_cast<int>(length(seqs))...));
 
-    //     return result;
-    // }
+        int i = 0;
+        const auto inner = [&](Element<Ts>... xs)
+        { result[i++] = f(xs...); };
 
-    // // todo Make both case as one.
-    // template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
-    // auto cartesian_map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Seqs>::value...) && !all_v(IsStaticLength<Seqs>::value...),
-    //         ArrVec<CallReturn<F, Element_t<Seqs>...>, StaticCapacityProduct<Seqs...>::value>>
-    // {
-    //     using R = CallReturn<F, Element_t<Seqs>...>;
+        cartesian_for_each(inner, seqs...);
 
-    //     const int result_length = size_v_product(length(seqs)...);
+        return result;
+    }
 
-    //     ArrVec<R, StaticCapacityProduct<Seqs...>::value> result(result_length);
-    //     int i = 0;
+    // cartesian_for_index
 
-    //     const auto inner = [&](Element_t<Seqs>... xs)
-    //     {
-    //         result[i++] = f(xs...);
-    //     };
+    template <typename F = void (*)(const int &)>
+    void cartesian_for_index(const F &f, const int &i)
+    {
+        for_index(f, i);
+    }
 
-    //     cartesian_for_each(inner, seqs...);
+    template <typename... Ints, typename F = void (*)(const int &)>
+    void cartesian_for_index(const F &f, const int &i, const Ints &...is)
+    {
+        for (int i_ = 0; i_ < i; ++i_)
+        {
+            const auto inner = [&](const Ints &...is)
+            { f(i_, is...); };
 
-    //     return result;
-    // }
-
-    // template <typename... Seqs, typename F = void (*)(const Element_t<Seqs> &...)>
-    // auto cartesian_map(const F &f, const Seqs &...seqs)
-    //     -> EnableIf<
-    //         !all_v(IsStaticCapacity<Seqs>::value...),
-    //         Vector<CallReturn<F, Element_t<Seqs>...>>>
-    // {
-    //     using R = CallReturn<F, Element_t<Seqs>...>;
-
-    //     const int result_length = size_v_product(length(seqs)...);
-
-    //     Vector<R> result(result_length);
-    //     int i = 0;
-
-    //     const auto inner = [&](Element_t<Seqs>... xs)
-    //     {
-    //         result[i++] = f(xs...);
-    //     };
-
-    //     cartesian_for_each(inner, seqs...);
-
-    //     return result;
-    // }
-
-    // // cartesian_for_index
-
-    // template <typename F = void (*)(const int &)>
-    // void cartesian_for_index(const F &f, const int &i)
-    // {
-    //     for_index(f, i);
-    // }
-
-    // template <typename... Ints, typename F = void (*)(const int &)>
-    // void cartesian_for_index(const F &f, const int &i, const Ints &...is)
-    // {
-    //     for (int i_ = 0; i_ < i; ++i_)
-    //     {
-    //         const auto inner = [=](const Ints &...is)
-    //         { f(i_, is...); };
-
-    //         cartesian_for_index(inner, is...);
-    //     }
-    // }
+            cartesian_for_index(inner, is...);
+        }
+    }
 
     // // // todo begin
 
