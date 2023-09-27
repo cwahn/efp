@@ -206,8 +206,35 @@ TEST_CASE("tail")
         CHECK(tail(array) == ArrayView<double, 2>{p_data(array) + 1});
         CHECK(tail(arrvec) == ArrVecView<double, 2>{p_data(arrvec) + 1, 2});
         CHECK(tail(vector) == VectorView<double>{p_data(vector) + 1, 2, 2});
-        CHECK(std::vector<int>{1, 2} == std::vector<int>{1, 2});
     }
+}
+
+TEST_CASE("init")
+{
+    SECTION("const")
+    {
+        CHECK(init(array_3) == ArrayView<const double, 2>{p_data(array_3)});
+        CHECK(init(arrvec_3) == ArrVecView<const double, 2>{p_data(arrvec_3), 2});
+        CHECK(init(vector_3) == VectorView<const double>{p_data(vector_3), 2, 2});
+    }
+
+    SECTION("non const")
+    {
+        Array<double, 3> array{1., 2., 3.};
+        ArrVec<double, 3> arrvec{1., 2., 3.};
+        Vector<double> vector{1., 2., 3.};
+
+        CHECK(init(array) == ArrayView<double, 2>{p_data(array)});
+        CHECK(init(arrvec) == ArrVecView<double, 2>{p_data(arrvec), 2});
+        CHECK(init(vector) == VectorView<double>{p_data(vector), 2, 2});
+    }
+}
+
+TEST_CASE("last")
+{
+    CHECK(last(array_3) == 3);
+    CHECK(last(arrvec_3) == 3);
+    CHECK(last(vector_3) == 3);
 }
 
 #endif

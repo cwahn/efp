@@ -486,6 +486,8 @@ namespace efp
         return as[0];
     }
 
+    // TailReturn
+
     template <typename A, bool is_const>
     using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
                                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
@@ -534,38 +536,66 @@ namespace efp
         return result;
     }
 
-    // // ! Partial function. Make sure non empty
-    // template <typename SeqA>
-    // auto tail(SeqA &as)
-    //     -> VectorView<Element<SeqA>>
-    // {
-    //     return VectorView<Element<SeqA>>{p_data(as) + 1, length(as) - 1};
-    // }
+    // InitReturn
 
-    // // todo init
-    // // ! Partial function. Make sure non empty
-    // template <typename SeqA>
-    // auto init(const SeqA &as)
-    //     -> VectorView<const Element<SeqA>>
-    // {
-    //     return VectorView<const Element<SeqA>>{p_data(as), length(as) - 1};
-    // }
+    template <typename A, bool is_const>
+    using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
+                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
+                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
-    // // ! Partial function. Make sure non empty
-    // template <typename SeqA>
-    // auto init(SeqA &as)
-    //     -> VectorView<Element<SeqA>>
-    // {
-    //     return VectorView<Element<SeqA>>{p_data(as), length(as) - 1};
-    // }
+    // init
 
-    // // todo last
-    // // ! Partial function. Make sure non empty
-    // template <typename SeqA>
-    // Element<SeqA> last(const SeqA &as)
-    // {
-    //     return as[length(as) - 1];
-    // }
+    // ! Zero length input will envoke abort.
+    template <typename A>
+    auto init(const Seq<A> &as)
+        -> InitReturn<A, true>
+    {
+        InitReturn<A, true> result{p_data(as)};
+
+        if (A::ct_len == dyn)
+        {
+            const auto as_length = length(as);
+            if (as_length == 0)
+            {
+                abort();
+            }
+
+            result.resize(as_length - 1);
+        }
+
+        return result;
+    }
+
+    // ! Partial function. Make sure non empty
+    template <typename A>
+    auto init(Seq<A> &as)
+        -> InitReturn<A, false>
+    {
+        InitReturn<A, false> result{p_data(as)};
+
+        if (A::ct_len == dyn)
+        {
+            const auto as_length = length(as);
+            if (as_length == 0)
+            {
+                abort();
+            }
+
+            result.resize(as_length - 1);
+        }
+
+        return result;
+    }
+
+    // last
+
+    // ! Partial function. Make sure non
+    template <typename A>
+    Element<A> last(const Seq<A> &as)
+    {
+        return as[length(as) - 1];
+    }
 
     // // todo is_null
 
