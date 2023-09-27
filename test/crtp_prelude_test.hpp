@@ -178,6 +178,7 @@ TEST_CASE("cartesian_for_index")
 
     cartesian_for_index(f, 2, 3);
     CHECK(res == Vector<int>{0, 0, 0, 0, 1, 2});
+    // Array<int, -2> invalid{};
 }
 
 #endif

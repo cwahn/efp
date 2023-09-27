@@ -7,5 +7,5 @@
 // #include "enum_type_test.hpp"
 // #include "maybe_test.hpp"
 // #include "scientific_test.hpp"
-#include "crtp_seq_test.hpp"
+#include "crtp_sequence_test.hpp"
 #include "crtp_prelude_test.hpp"

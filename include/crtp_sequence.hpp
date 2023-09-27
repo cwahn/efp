@@ -1,8 +1,11 @@
-#ifndef CRTP_SEQ_HPP_
-#define CRTP_SEQ_HPP_
+#ifndef CRTP_SEQUENCE_HPP_
+#define CRTP_SEQUENCE_HPP_
 
 // Curiously Recurring Template Pattern Sequence
 // Check validity on data store
+
+// ct_capacity is compile time bound of length. It does not mean safety of access.
+// However, actual capacity does means the length of memory safe to access.
 
 #include "sfinae.hpp"
 
@@ -22,6 +25,9 @@ namespace efp
         using Element = typename Trait::Element;
         static constexpr int ct_len = Trait::ct_len;
         static constexpr int ct_cap = Trait::ct_cap;
+
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Derived &operator=(const Derived &other)
         {
@@ -128,6 +134,9 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_length;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
@@ -253,6 +262,9 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = ct_capacity;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
@@ -400,6 +412,9 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = dyn;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : p_data_{nullptr}, length_{0}, capacity_{0} {}
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
@@ -579,6 +594,9 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_capacity;
+
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
     };
 
     // Should have all these three template parameter not to break static link
@@ -596,10 +614,13 @@ namespace efp
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_length;
 
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
         SequenceView() : p_data_{nullptr} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *p_data, const int length, const int capacity)
+        SequenceView(A *p_data)
             : p_data_{p_data}
         {
         }
@@ -649,7 +670,7 @@ namespace efp
 
         void resize(int length)
         {
-            if (length != ct_len)
+            if (length > ct_cap || length < 0)
             {
                 abort();
             }
@@ -657,7 +678,7 @@ namespace efp
 
         void reserve(int capacity)
         {
-            if (capacity != ct_cap)
+            if (capacity > ct_cap)
             {
                 abort();
             }
@@ -702,6 +723,9 @@ namespace efp
         A *p_data_;
     };
 
+    template <typename A, int ct_length>
+    using ArrayView = SequenceView<A, ct_length, ct_length>;
+
     template <typename A, int ct_capacity>
     class SequenceView<A, dyn, ct_capacity>
         : SequenceBase<SequenceView<A, dyn, ct_capacity>>
@@ -711,10 +735,13 @@ namespace efp
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = ct_capacity;
 
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
         SequenceView() : p_data_{nullptr}, length_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *p_data, const int length, const int capacity)
+        SequenceView(A *p_data, const int length)
             : p_data_{p_data}, length_{length}
         {
         }
@@ -823,6 +850,9 @@ namespace efp
         int length_;
     };
 
+    template <typename A, int ct_capacity>
+    using ArrVecView = SequenceView<A, dyn, ct_capacity>;
+
     template <typename A>
     class SequenceView<A, dyn, dyn>
         : SequenceBase<SequenceView<A, dyn, dyn>>
@@ -832,10 +862,12 @@ namespace efp
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = dyn;
 
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
         SequenceView() : p_data_{nullptr}, length_{0}, capacity_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        // ? Does view need capacity? if it has to be used for mutable operation, yes it does.
         SequenceView(A *p_data, const int length, const int capacity)
             : p_data_{p_data}, length_{length}, capacity_{capacity}
         {
@@ -892,17 +924,24 @@ namespace efp
 
         void resize(int length)
         {
-            if (length < 0 || length > capacity_)
+            if (length < 0)
             {
                 abort();
             }
+
+            if (length > capacity_)
+            {
+                reserve(length);
+            }
+
+            length_ = length;
         }
 
         void reserve(int capacity)
         {
             if (capacity > capacity_)
             {
-                abort();
+                capacity_ = capacity;
             }
         }
 
@@ -947,6 +986,9 @@ namespace efp
         int capacity_;
     };
 
+    template <typename A>
+    using VectorView = SequenceView<A, dyn, dyn>;
+
     template <typename A, int ct_length, int ct_capacity>
     class SequenceTrait<SequenceView<A, ct_length, ct_capacity>>
     {
@@ -954,6 +996,9 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_capacity;
+
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
     };
 
     // Element`

@@ -1,11 +1,11 @@
-#ifndef CRTP_SEQ_TEST_HPP_
-#define CRTP_SEQ_TEST_HPP_
+#ifndef CRTP_SEQUENCE_TEST_HPP_
+#define CRTP_SEQUENCE_TEST_HPP_
 
-#include "crtp_seq.hpp"
+#include "crtp_sequence.hpp"
 
 using namespace efp;
 
-TEST_CASE("crtp_seq_init")
+TEST_CASE("crtp sequence init")
 {
     SECTION("Array")
     {
