@@ -610,7 +610,7 @@ namespace efp
 
     template <typename A, int ct_length>
     class SequenceView<A, ct_length, ct_length>
-        : SequenceBase<SequenceView<A, ct_length, ct_length>>
+        : public SequenceBase<SequenceView<A, ct_length, ct_length>>
     {
     public:
         using Element = A;
@@ -731,7 +731,7 @@ namespace efp
 
     template <typename A, int ct_capacity>
     class SequenceView<A, dyn, ct_capacity>
-        : SequenceBase<SequenceView<A, dyn, ct_capacity>>
+        : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
     {
     public:
         using Element = A;
@@ -859,7 +859,7 @@ namespace efp
 
     template <typename A>
     class SequenceView<A, dyn, dyn>
-        : SequenceBase<SequenceView<A, dyn, dyn>>
+        : public SequenceBase<SequenceView<A, dyn, dyn>>
     {
     public:
         using Element = A;

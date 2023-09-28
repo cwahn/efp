@@ -605,16 +605,88 @@ namespace efp
     // //     ArrayView<Element<SeqA>>,
     // //     VectorView<Element<SeqA>>>;
 
-    // // todo take
+    // TakeReturnImpl
+    template <typename N, typename A, bool is_const>
+    struct TakeReturnImpl
+    {
+    };
 
-    // // template <typename N, typename SeqA>
-    // // auto take(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
-    // // {
-    // //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{p_data(as)};
-    // // }
+    template <int n, typename A, bool is_const>
+    struct TakeReturnImpl<IntegralConst<int, n>, A, is_const>
+    {
+        using type = Conditional<
+            IsStaticLength<A>::value,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
+            Conditional<
+                IsStaticCapacity<A>::value,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+    };
+
+    template <typename A, bool is_const>
+    struct TakeReturnImpl<int, A, is_const>
+    {
+        using type = Conditional<
+            IsStaticCapacity<A>::value,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+    };
+
+    // TakeReturn
+
+    template <typename N, typename A, bool is_const>
+    using TakeReturn = typename TakeReturnImpl<N, A, is_const>::type;
+
+    // template <typename N, typename A>
+    // using TakeReturn = Conditional<
+    //     IsStaticLength<A>::value,
+    //     Conditional<
+    //         IsIntegralConst<N>::value,
+    //         SequenceView<Element<A>, bound_v(0, A::ct_len, N::value), bound_v(0, A::ct_len, N::value)>,
+    //         SequenceView<Element<A>, dyn, A::ct_cap>>,
+    //     Conditional<
+    //         IsStaticCapacity<A>::value,
+    //         SequenceView<Element<A>, dyn, A::ct_cap>,
+    //         SequenceView<Element<A>, dyn, dyn>>>;
+
+    // take
+
+    template <typename N, typename A>
+    auto take(const N &n, const Seq<A> &as)
+        -> TakeReturn<N, A, true>
+    {
+        TakeReturn<N, A, true> result{p_data(as)};
+
+        if (TakeReturn<N, A, true>::ct_len == dyn)
+        {
+            result.resize(bound_v(0, length(as), n));
+        }
+
+        return result;
+    }
+
+    template <typename N, typename A>
+    auto take(const N &n, Seq<A> &as)
+        -> TakeReturn<N, A, false>
+    {
+        TakeReturn<N, A, false> result{p_data(as)};
+
+        if (TakeReturn<N, A, false>::ct_len == dyn)
+        {
+            result.resize(bound_v(0, length(as), n));
+        }
+
+        return result;
+    }
+
+    // template <typename N, typename SeqA>
+    // auto take(const N &n, SeqA &as)
+    //     -> EnableIf<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
+    // {
+    //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{p_data(as)};
+    // }
 
     // // template <typename N, typename SeqA>
     // // auto take(const N &n, SeqA &as)
