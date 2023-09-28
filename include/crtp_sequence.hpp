@@ -269,7 +269,7 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() {}
+        Sequence() : length_{0} {}
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Arg>

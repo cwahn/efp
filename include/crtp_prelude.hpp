@@ -202,7 +202,10 @@ namespace efp
     {
         MapReturn<F, As...> result{};
         const int result_length = min_length(seqs...);
-        result.resize(result_length);
+        if (MapReturn<F, As...>::ct_len == dyn)
+        {
+            result.resize(result_length);
+        }
 
         for (int i = 0; i < result_length; ++i)
         {
@@ -224,20 +227,16 @@ namespace efp
         -> FilterReturn<F, A>
     {
         FilterReturn<F, A> result{};
-        // ! Can't determine the length in advance
         const auto input_length = length(as);
 
-        int j = 0;
         for (int i = 0; i < input_length; ++i)
         {
             const auto a = as[i];
             if (f(a))
             {
-                result[j] = a;
-                ++j;
+                result.push_back(a);
             }
         }
-        result.resize(j);
 
         return result;
     }
@@ -272,22 +271,46 @@ namespace efp
         return result;
     }
 
+    // FromFunctionReturnImpl
+
+    template <typename N, typename F>
+    struct FromFunctionReturnImpl
+    {
+    };
+
+    template <int n, typename F>
+    struct FromFunctionReturnImpl<IntegralConst<int, n>, F>
+    {
+        using type = Sequence<CallReturn<F, int>, n, n>;
+    };
+
+    template <typename F>
+    struct FromFunctionReturnImpl<int, F>
+    {
+        using type = Sequence<CallReturn<F, int>, dyn, dyn>;
+    };
+
     // FromFunctionReturn
 
     template <typename N, typename F>
-    using FromFunctionReturn = Conditional<IsIntegralConst<N>::value,
-                                           Sequence<CallReturn<F, int>, N::value, N::value>,
-                                           Sequence<CallReturn<F, int>, dyn, dyn>>;
+    using FromFunctionReturn = typename FromFunctionReturnImpl<N, F>::type;
+
+    // template <typename N, typename F>
+    // using FromFunctionReturn = Conditional<IsIntegralConst<N>::value,
+    //                                        Sequence<CallReturn<F, int>, N::value, N::value>,
+    //                                        Sequence<CallReturn<F, int>, dyn, dyn>>;
 
     // from_function
 
     template <typename N, typename F>
     auto from_function(const N &length, const F &f)
-        -> EnableIf<IsIntegralConst<N>::value,
-                    Sequence<CallReturn<F, int>, N::value, N::value>>
+        -> FromFunctionReturn<N, F>
     {
-        Sequence<CallReturn<F, int>, N::value, N::value> result{};
-        result.resize(length);
+        FromFunctionReturn<N, F> result{};
+        if (FromFunctionReturn<N, F>::ct_len == dyn)
+        {
+            result.resize(length);
+        }
 
         for (int i = 0; i < length; ++i)
         {
@@ -297,21 +320,37 @@ namespace efp
         return result;
     }
 
-    template <typename N, typename F>
-    auto from_function(const N &length, const F &f)
-        -> EnableIf<!IsIntegralConst<N>::value,
-                    Sequence<CallReturn<F, int>, dyn, dyn>>
-    {
-        Sequence<CallReturn<F, int>, dyn, dyn> result{};
-        result.resize(length);
+    // template <typename N, typename F>
+    // auto from_function(const N &length, const F &f)
+    //     -> EnableIf<IsIntegralConst<N>::value,
+    //                 Sequence<CallReturn<F, int>, N::value, N::value>>
+    // {
+    //     Sequence<CallReturn<F, int>, N::value, N::value> result{};
+    //     result.resize(length);
 
-        for (int i = 0; i < length; ++i)
-        {
-            result[i] = f(i);
-        }
+    //     for (int i = 0; i < length; ++i)
+    //     {
+    //         result[i] = f(i);
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
+
+    // template <typename N, typename F>
+    // auto from_function(const N &length, const F &f)
+    //     -> EnableIf<!IsIntegralConst<N>::value,
+    //                 Sequence<CallReturn<F, int>, dyn, dyn>>
+    // {
+    //     Sequence<CallReturn<F, int>, dyn, dyn> result{};
+    //     result.resize(length);
+
+    //     for (int i = 0; i < length; ++i)
+    //     {
+    //         result[i] = f(i);
+    //     }
+
+    //     return result;
+    // }
 
     // for_index
 
@@ -442,7 +481,10 @@ namespace efp
         -> CartesianMapReturn<F, Ts...>
     {
         CartesianMapReturn<F, Ts...> result;
-        result.resize(product_v(static_cast<int>(length(seqs))...));
+        if (CartesianMapReturn<F, Ts...>::ct_len == dyn)
+        {
+            result.resize(product_v(static_cast<int>(length(seqs))...));
+        }
 
         int i = 0;
         const auto inner = [&](Element<Ts>... xs)
