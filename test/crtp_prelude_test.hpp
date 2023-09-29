@@ -315,4 +315,25 @@ TEST_CASE("elem")
     }
 }
 
+TEST_CASE("elem_index")
+{
+    SECTION("Array")
+    {
+        CHECK(elem_index(2., array_3).value() == 1);
+        CHECK(elem_index(9., array_3).is_nothing() == true);
+    }
+
+    SECTION("ArrVec")
+    {
+        CHECK(elem_index(2., arrvec_3).value() == 1);
+        CHECK(elem_index(9., arrvec_3).is_nothing() == true);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(elem_index(2., array_view_3).value() == 1);
+        CHECK(elem_index(9., array_view_3).is_nothing() == true);
+    }
+}
+
 #endif

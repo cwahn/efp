@@ -806,23 +806,23 @@ namespace efp
         return false;
     }
 
-    // // elem_index
+    // elem_index
 
-    // template <typename SeqA>
-    // Maybe<int> elem_index(const Element<SeqA> &a, const SeqA &as)
-    // {
-    //     const int length_as = length(as);
+    template <typename A>
+    Maybe<int> elem_index(const Element<A> &a, const Seq<A> &as)
+    {
+        const int as_length = length(as);
 
-    //     for (int i = 0; i < length_as; ++i)
-    //     {
-    //         if (as[i] == a)
-    //         {
-    //             return i;
-    //         }
-    //     }
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (as[i] == a)
+            {
+                return i;
+            }
+        }
 
-    //     return Nothing{};
-    // }
+        return Nothing{};
+    }
 
     // // IndicesReturn_t
 

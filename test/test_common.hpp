@@ -30,12 +30,16 @@ const Vector<double> vector_0{};
 const Vector<double> vector_3{1., 2., 3.};
 const Vector<double> vector_5{1., 2., 3., 4., 5.};
 
-// const ArrayView<const double, 0> array_view_0{};
-// const ArrayView<const double, 3> array_view_3{};
-// const ArrayView<const double, 5> array_view_5{};
+const ArrayView<const double, 0> array_view_0{p_data(array_0)};
+const ArrayView<const double, 3> array_view_3{p_data(array_3)};
+const ArrayView<const double, 5> array_view_5{p_data(array_5)};
 
-// const VectorView<const double> vector_view_0{p_data(vector_0), 0};
-// const VectorView<const double> vector_view_3{p_data(vector_3), 3};
-// const VectorView<const double> vector_view_5{p_data(vector_5), 5};
+const ArrVecView<const double, 0> arrvec_view_0{p_data(vector_0), 0};
+const ArrVecView<const double, 3> arrvec_view_3{p_data(vector_3), 3};
+const ArrVecView<const double, 5> arrvec_view_5{p_data(vector_5), 5};
+
+const VectorView<const double> vector_view_0{p_data(vector_0), 0, 0};
+const VectorView<const double> vector_view_3{p_data(vector_3), 3, 3};
+const VectorView<const double> vector_view_5{p_data(vector_5), 5, 5};
 
 #endif
