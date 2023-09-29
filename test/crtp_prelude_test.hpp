@@ -360,4 +360,31 @@ TEST_CASE("elem_indices")
     }
 }
 
+TEST_CASE("find")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("Array")
+    {
+        CHECK(find(is_two, array_3) == true);
+        CHECK(find(is_nine, array_3) == false);
+    }
+
+    SECTION("Vector")
+    {
+        CHECK(find(is_two, vector_3) == true);
+        CHECK(find(is_nine, vector_3) == false);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(find(is_two, array_view_3) == true);
+        CHECK(find(is_nine, array_view_3) == false);
+    }
+}
+
 #endif

@@ -841,63 +841,23 @@ namespace efp
         return result;
     }
 
-    // template <typename SeqA>
-    // auto elem_indices(const Element<SeqA> &a, const SeqA &as)
-    //     -> EnableIf<
-    //         IsStaticCapacity<SeqA>::value,
-    //         IndicesReturn_t<SeqA>>
-    // {
-    //     IndicesReturn_t<SeqA> result;
+    // find
 
-    //     for (int i = 0; i < length(as); ++i)
-    //     {
-    //         if (a == as[i])
-    //         {
-    //             result.push_back(i);
-    //         }
-    //     }
+    template <typename A, typename F = void (*)(const Element<A> &)>
+    bool find(const F &f, const Seq<A> &as)
+    {
+        const auto as_length = length(as);
 
-    //     return result;
-    // }
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (f(as[i]))
+            {
+                return true;
+            }
+        }
 
-    // template <typename SeqA>
-    // auto elem_indices(const Element<SeqA> &a, const SeqA &as)
-    //     -> EnableIf<
-    //         !IsStaticCapacity<SeqA>::value,
-    //         IndicesReturn_t<SeqA>>
-    // {
-    //     const int length_as = length(as);
-
-    //     IndicesReturn_t<SeqA> result;
-    //     result.reserve(length_as);
-
-    //     for (int i = 0; i < length_as; ++i)
-    //     {
-    //         if (a == as[i])
-    //         {
-    //             result.push_back(i);
-    //         }
-    //     }
-
-    //     return result;
-    // }
-
-    // // find
-
-    // template <typename SeqA, typename F = void (*)(const Element<SeqA> &)>
-    // bool find(const F &f, const SeqA &as)
-    // {
-    //     for (int i = 0; i < length(as); ++i)
-    //     {
-    //         const Element<SeqA> a = as[i];
-    //         if (f(a))
-    //         {
-    //             return true;
-    //         }
-    //     }
-
-    //     return false;
-    // }
+        return false;
+    }
 
     // // find_index
 
