@@ -266,4 +266,32 @@ TEST_CASE("take")
     }
 }
 
+TEST_CASE("drop")
+{
+    SECTION("array 0")
+    {
+        const auto res = drop(2, array_3);
+        CHECK(p_data(res) == p_data(array_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.);
+    }
+
+    SECTION("array 1")
+    {
+        const auto res = drop(-1, array_3);
+        CHECK(p_data(res) == p_data(array_3));
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.);
+        CHECK(res[1] == 2.);
+        CHECK(res[2] == 3.);
+    }
+
+    SECTION("array 2")
+    {
+        const auto res = drop(9, array_3);
+        CHECK(p_data(res) == p_data(array_3) + 3);
+        CHECK(length(res) == 0);
+    }
+}
+
 #endif

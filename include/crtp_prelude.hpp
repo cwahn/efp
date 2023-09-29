@@ -536,7 +536,7 @@ namespace efp
                                              IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
                                              IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
-    // todo tail
+    // tail
     // ! Partial function. Application on empty list is abortion.
     template <typename A>
     auto tail(const Seq<A> &as)
@@ -753,17 +753,82 @@ namespace efp
     //     return VectorView<Element<SeqA>>{p_data(as), (size_t)bound_v(0, (int)length(as), n)};
     // }
 
-    // // drop
+    // DropReturnImpl
 
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
-    // // {
-    // //     // ! What if larger than n? maybe last with 0?
-    // //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{p_data(as) + n};
-    // // }
+    template <typename N, typename A, bool is_const>
+    struct DropReturnImpl
+    {
+    };
+
+    template <int n, typename A, bool is_const>
+    struct DropReturnImpl<IntegralConst<int, n>, A, is_const>
+    {
+        using type = Conditional<
+            IsStaticLength<A>::value,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
+            Conditional<
+                IsStaticCapacity<A>::value,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+    };
+
+    template <typename A, bool is_const>
+    struct DropReturnImpl<int, A, is_const>
+    {
+        using type = Conditional<
+            IsStaticCapacity<A>::value,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+    };
+
+    // DropReturn
+
+    template <typename N, typename A, bool is_const>
+    using DropReturn = typename DropReturnImpl<N, A, is_const>::type;
+
+    // drop
+    template <typename N, typename A>
+    auto drop(const N &n, const Seq<A> &as)
+        -> DropReturn<N, A, true>
+    {
+        const auto as_length = length(as);
+        const auto result_length = bound_v(0, as_length, n);
+        DropReturn<N, A, true> result{p_data(as) + result_length};
+
+        if (DropReturn<N, A, true>::ct_len == dyn)
+        {
+            result.resize(as_length - result_length);
+        }
+        
+        return result;
+    }
+
+    template <typename N, typename A>
+    auto drop(const N &n, Seq<A> &as)
+        -> DropReturn<N, A, false>
+    {
+        const auto as_length = length(as);
+        const auto result_length = bound_v(0, as_length, n);
+        DropReturn<N, A, false> result{p_data(as) + result_length};
+
+        if (DropReturn<N, A, false>::ct_len == dyn)
+        {
+            result.resize(as_length - result_length);
+        }
+        
+        return result;
+    }
+
+
+    // template <typename N, typename SeqA>
+    // auto drop(const N &n, SeqA &as)
+    //     -> EnableIf<
+    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
+    //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
+    // {
+    //     // ! What if larger than n? maybe last with 0?
+    //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{p_data(as) + n};
+    // }
 
     // // template <typename N, typename SeqA>
     // // auto drop(const N &n, SeqA &as)
