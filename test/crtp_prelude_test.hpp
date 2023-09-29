@@ -414,4 +414,34 @@ TEST_CASE("find_index")
     }
 }
 
+TEST_CASE("find_indices")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("Array")
+    {
+        const Array<double, 3> array_3_ = {1., 2., 2.};
+        CHECK(find_indices(is_two, array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(find_indices(is_nine, array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("ArrVec")
+    {
+        const ArrVec<double, 3> arrvec_3_{1., 2., 2.};
+        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Vector")
+    {
+        const Vector<double> vector_3_{1., 2., 2.};
+        CHECK(find_indices(is_two, vector_3_) == Vector<int>{1, 2});
+        CHECK(find_indices(is_nine, vector_3_) == Vector<int>{});
+    }
+}
+
 #endif

@@ -806,17 +806,10 @@ namespace efp
         return Nothing{};
     }
 
-    // IndicesReturn_t
-
-    template <typename SeqA>
-    using IndicesReturn_t =
-        Conditional<
-            IsStaticCapacity<SeqA>::value,
-            ArrVec<int, StaticCapacity<SeqA>::value>,
-            Vector<int>>;
+    // ElemIndicesReturn
 
     template <typename A>
-    using IndicesReturn = Conditional<
+    using ElemIndicesReturn = Conditional<
         IsStaticCapacity<A>::value,
         Sequence<int, dyn, A::ct_cap>,
         Sequence<int, dyn, dyn>>;
@@ -825,9 +818,9 @@ namespace efp
 
     template <typename A>
     auto elem_indices(const Element<A> &a, const Seq<A> &as)
-        -> IndicesReturn<A>
+        -> ElemIndicesReturn<A>
     {
-        IndicesReturn<A> result{};
+        ElemIndicesReturn<A> result{};
         const auto as_length = length(as);
 
         for (int i = 0; i < as_length; ++i)
@@ -878,27 +871,33 @@ namespace efp
         return Nothing{};
     }
 
-    // // find_indices
+    // FindIndicesReturn
 
-    // template <typename SeqA, typename F = void (*)(const Element<SeqA> &)>
-    // auto find_indices(const F &f, const SeqA &as)
-    //     -> EnableIf<
-    //         IsStaticCapacity<SeqA>::value,
-    //         IndicesReturn_t<SeqA>>
-    // {
-    //     const int length_as = length(as);
-    //     IndicesReturn_t<SeqA> result;
+    template <typename A>
+    using FindIndicesReturn = Conditional<
+        IsStaticCapacity<A>::value,
+        Sequence<int, dyn, A::ct_cap>,
+        Sequence<int, dyn, dyn>>;
 
-    //     for (int i = 0; i < length_as; ++i)
-    //     {
-    //         if (f(as[i]))
-    //         {
-    //             result.push_back(i);
-    //         }
-    //     }
+    // find_indices
 
-    //     return result;
-    // }
+    template <typename A, typename F = void (*)(const Element<A> &)>
+    auto find_indices(const F &f, const A &as)
+        -> FindIndicesReturn<A>
+    {
+        FindIndicesReturn<A> result{};
+        const auto as_length = length(as);
+
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (f(as[i]))
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
 
     // template <typename SeqA, typename F = void (*)(const Element<SeqA> &)>
     // auto find_indices(const F &f, const SeqA &as)
