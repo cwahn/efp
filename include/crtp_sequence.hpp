@@ -429,7 +429,7 @@ namespace efp
               length_(sizeof...(args))
         {
             int i = 0;
-            for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
+            for (auto arg : std::initializer_list<Common<Args...>>{args...})
                 p_data_[i++] = arg;
         }
 

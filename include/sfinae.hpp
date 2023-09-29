@@ -33,13 +33,13 @@ namespace efp
     template <typename A>
     struct EnableIfImpl<true, A>
     {
-        typedef A type;
+        typedef A Type;
     };
 
     // EnableIf
 
     template <bool cond, typename A = void>
-    using EnableIf = typename EnableIfImpl<cond, A>::type;
+    using EnableIf = typename EnableIfImpl<cond, A>::Type;
 
     // ConditionalImpl
 
@@ -51,19 +51,19 @@ namespace efp
     template <typename T, typename F>
     struct ConditionalImpl<true, T, F>
     {
-        using type = T;
+        using Type = T;
     };
 
     template <typename T, typename F>
     struct ConditionalImpl<false, T, F>
     {
-        using type = F;
+        using Type = F;
     };
 
     // Conditionl_t
 
     template <bool cond, typename T, typename F>
-    using Conditional = typename ConditionalImpl<cond, T, F>::type;
+    using Conditional = typename ConditionalImpl<cond, T, F>::Type;
 
     // size_of_ptr_v
     constexpr auto size_of_ptr_v = sizeof(void *);
@@ -76,7 +76,7 @@ namespace efp
     //     sizeof(A) <= size_of_ptr_v,
     //     A,
     //     // const A &>;
-    //     const typename std::remove_const<typename std::remove_reference<A>::type>::type &>;
+    //     const typename std::remove_const<typename std::remove_reference<A>::Type>::Type &>;
 
     // eq_v
 
@@ -196,19 +196,19 @@ namespace efp
     };
 
     template <template <class, class> class F, typename A, typename B>
-    struct FoldlImpl<F, A, B> : F<A, B>::type
+    struct FoldlImpl<F, A, B> : F<A, B>::Type
     {
     };
 
     template <template <class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-    struct FoldlImpl<F, A, B0, B1, Bs...> : FoldlImpl<F, typename F<A, B0>::type, B1, Bs...>
+    struct FoldlImpl<F, A, B0, B1, Bs...> : FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...>
     {
     };
 
     // Foldl
 
     template <template <class, class> class F, typename A, typename... Bs>
-    using Foldl = typename FoldlImpl<F, A, Bs...>::type;
+    using Foldl = typename FoldlImpl<F, A, Bs...>::Type;
 
     // * Maybe just recursive constexpr template function could be enough
 
@@ -287,14 +287,14 @@ namespace efp
     // ! Deprecated
 
     // template <typename A>
-    // using ReferenceRemoved = typename std::remove_reference<A>::type;
+    // using ReferenceRemoved = typename std::remove_reference<A>::Type;
 
     // CommonImpl
 
     // ! Deprecated
 
     // template <typename... Args>
-    // using Common = typename std::common_type<Args...>::type;
+    // using Common = typename std::common_type<Args...>::Type;
 
     // IsIntegralConstant
 
@@ -317,7 +317,7 @@ namespace efp
     {
         static constexpr A value = a;
         using value_type = A;
-        using type = IntegralConst;
+        using Type = IntegralConst;
 
         constexpr operator value_type() const noexcept { return value; }   // Conversion operator
         constexpr value_type operator()() const noexcept { return value; } // Function call operator
@@ -368,13 +368,13 @@ namespace efp
     {
         // static_assert(n >= 0, "Index out of range");
         // static_assert(n < sizeof...(Args), "Index out of range");
-        using type = void *;
+        using Type = void *;
     };
 
     template <typename Head, typename... Tail>
     struct PackAtImpl<0, Head, Tail...>
     {
-        using type = Head;
+        using Type = Head;
     };
 
     template <uint8_t n, typename Head, typename... Tail>
@@ -386,7 +386,7 @@ namespace efp
     // PackAt
 
     template <uint8_t n, typename... Args>
-    using PackAt = typename PackAtImpl<n, Args...>::type;
+    using PackAt = typename PackAtImpl<n, Args...>::Type;
 
     // FindHelperValue
     template <uint8_t n>
@@ -426,11 +426,11 @@ namespace efp
     template <typename F, typename... Args>
     struct CallReturnImpl
     {
-        using type = decltype(std::declval<F>()(std::declval<Args>()...));
+        using Type = decltype(std::declval<F>()(std::declval<Args>()...));
     };
 
     template <typename F, typename... Args>
-    using CallReturn = typename CallReturnImpl<F, Args...>::type;
+    using CallReturn = typename CallReturnImpl<F, Args...>::Type;
 
     // IsCallOperator
 
@@ -460,32 +460,32 @@ namespace efp
     template <typename F>
     struct ArgumentsImpl<F, true> : ArgumentsImpl<decltype(&F::operator()), false>
     {
-        // using type = typename
+        // using Type = typename
     };
 
     template <typename R, typename... Args>
     struct ArgumentsImpl<R (*)(Args...), false>
     {
-        using type = std::tuple<Args...>;
+        using Type = std::tuple<Args...>;
     };
 
     template <typename R, typename A, typename... Args>
     struct ArgumentsImpl<R (A::*)(Args...), false>
     {
-        using type = std::tuple<Args...>;
+        using Type = std::tuple<Args...>;
     };
 
     template <typename R, typename A, typename... Args>
     struct ArgumentsImpl<R (A::*)(Args...) const, false>
     {
-        using type = std::tuple<Args...>;
+        using Type = std::tuple<Args...>;
     };
 
     // Arguement_t
     // l-value and r-value reference will preserved at the result, but const will be removed.
 
     template <typename F>
-    using Arguments = typename ArgumentsImpl<F, IsCallOperator<F>::value>::type;
+    using Arguments = typename ArgumentsImpl<F, IsCallOperator<F>::value>::Type;
 
     // ReturnImpl
 
@@ -497,13 +497,13 @@ namespace efp
     template <typename F, typename... Args>
     struct ReturnImpl<F, std::tuple<Args...>>
     {
-        using type = CallReturn<F, Args...>;
+        using Type = CallReturn<F, Args...>;
     };
 
     // Return
 
     template <typename F>
-    using Return = typename ReturnImpl<F, Arguments<F>>::type;
+    using Return = typename ReturnImpl<F, Arguments<F>>::Type;
 
     // IsInvocable
 
@@ -526,45 +526,45 @@ namespace efp
     template <typename A>
     struct ReferenceRemovedImpl
     {
-        using type = A;
+        using Type = A;
     };
 
     template <typename A>
     struct ReferenceRemovedImpl<A &>
     {
-        using type = A;
+        using Type = A;
     };
 
     template <typename A>
     struct ReferenceRemovedImpl<A &&>
     {
-        using type = A;
+        using Type = A;
     };
 
     // ReferenceRemoved
 
     template <typename A>
-    using ReferenceRemoved = typename ReferenceRemovedImpl<A>::type;
+    using ReferenceRemoved = typename ReferenceRemovedImpl<A>::Type;
 
     // Commontype
 
     template <typename... As>
     struct CommonImpl
     {
-        using type = void;
+        using Type = void;
     };
 
     template <typename A, typename... As>
     struct CommonImpl<A, As...>
     {
-        using type = EnableIf<
+        using Type = EnableIf<
             all_v(IsSame<A, As>::value...), A>;
     };
 
     // Common
 
     template <typename... As>
-    using Common = typename CommonImpl<As...>::type;
+    using Common = typename CommonImpl<As...>::Type;
 
     // template <typename Head, typename... Tail>
     // using Common = EnableIf<
@@ -591,7 +591,7 @@ namespace efp
     };
 
     template <typename... Ts>
-    using Void = typename VoidImpl<Ts...>::type;
+    using Void = typename VoidImpl<Ts...>::Type;
 }
 
 #endif

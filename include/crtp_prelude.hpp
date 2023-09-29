@@ -142,9 +142,9 @@ namespace efp
     //         AppendReturn_t<Head, Tail...>>
     // {
     //     // ! Error on int
-    //     const size_t result_length = sum_v((int)length(head), (int)length(tail)...);
+    //     const size_t bounded_n = sum_v((int)length(head), (int)length(tail)...);
 
-    //     AppendReturn_t<Head, Tail...> result(result_length);
+    //     AppendReturn_t<Head, Tail...> result(bounded_n);
     //     int idx{0};
 
     //     execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
@@ -201,13 +201,13 @@ namespace efp
         -> MapReturn<F, As...>
     {
         MapReturn<F, As...> result{};
-        const int result_length = min_length(seqs...);
+        const int bounded_n = min_length(seqs...);
         if (MapReturn<F, As...>::ct_len == dyn)
         {
-            result.resize(result_length);
+            result.resize(bounded_n);
         }
 
-        for (int i = 0; i < result_length; ++i)
+        for (int i = 0; i < bounded_n; ++i)
         {
             result[i] = f(seqs[i]...);
         }
@@ -281,19 +281,19 @@ namespace efp
     template <int n, typename F>
     struct FromFunctionReturnImpl<IntegralConst<int, n>, F>
     {
-        using type = Sequence<CallReturn<F, int>, n, n>;
+        using Type = Sequence<CallReturn<F, int>, n, n>;
     };
 
     template <typename F>
     struct FromFunctionReturnImpl<int, F>
     {
-        using type = Sequence<CallReturn<F, int>, dyn, dyn>;
+        using Type = Sequence<CallReturn<F, int>, dyn, dyn>;
     };
 
     // FromFunctionReturn
 
     template <typename N, typename F>
-    using FromFunctionReturn = typename FromFunctionReturnImpl<N, F>::type;
+    using FromFunctionReturn = typename FromFunctionReturnImpl<N, F>::Type;
 
     // template <typename N, typename F>
     // using FromFunctionReturn = Conditional<IsIntegralConst<N>::value,
@@ -450,14 +450,14 @@ namespace efp
         -> MapWithIndexRetrun<F, Ts...>
     {
         MapWithIndexRetrun<F, Ts...> result;
-        const auto result_length = min_length(seqs...);
+        const auto bounded_n = min_length(seqs...);
 
         if (MapWithIndexRetrun<F, Ts...>::ct_len == dyn)
         {
-            result.resize(result_length);
+            result.resize(bounded_n);
         }
 
-        for (int i = 0; i < result_length; ++i)
+        for (int i = 0; i < bounded_n; ++i)
         {
             result[i] = f(i, seqs[i]...);
         }
@@ -656,7 +656,7 @@ namespace efp
     template <int n, typename A, bool is_const>
     struct TakeReturnImpl<IntegralConst<int, n>, A, is_const>
     {
-        using type = Conditional<
+        using Type = Conditional<
             IsStaticLength<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
             Conditional<
@@ -668,7 +668,7 @@ namespace efp
     template <typename A, bool is_const>
     struct TakeReturnImpl<int, A, is_const>
     {
-        using type = Conditional<
+        using Type = Conditional<
             IsStaticCapacity<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
@@ -677,7 +677,7 @@ namespace efp
     // TakeReturn
 
     template <typename N, typename A, bool is_const>
-    using TakeReturn = typename TakeReturnImpl<N, A, is_const>::type;
+    using TakeReturn = typename TakeReturnImpl<N, A, is_const>::Type;
 
     // template <typename N, typename A>
     // using TakeReturn = Conditional<
@@ -721,38 +721,6 @@ namespace efp
         return result;
     }
 
-    // template <typename N, typename SeqA>
-    // auto take(const N &n, SeqA &as)
-    //     -> EnableIf<
-    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
-    // {
-    //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{p_data(as)};
-    // }
-
-    // // template <typename N, typename SeqA>
-    // // auto take(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         VectorView<ViewElement<SeqA>>>
-    // // {
-    // //     return VectorView<ViewElement<SeqA>>{p_data(as), (size_t)bound_v(0, length(as), n)};
-    // // }
-
-    // template <typename SeqA>
-    // auto take(int n, const SeqA &as)
-    //     -> VectorView<const Element<SeqA>>
-    // {
-    //     return VectorView<const Element<SeqA>>{p_data(as), (size_t)bound_v(0, (int)length(as), n)};
-    // }
-
-    // template <typename SeqA>
-    // auto take(int n, SeqA &as)
-    //     -> VectorView<Element<SeqA>>
-    // {
-    //     return VectorView<Element<SeqA>>{p_data(as), (size_t)bound_v(0, (int)length(as), n)};
-    // }
-
     // DropReturnImpl
 
     template <typename N, typename A, bool is_const>
@@ -763,7 +731,7 @@ namespace efp
     template <int n, typename A, bool is_const>
     struct DropReturnImpl<IntegralConst<int, n>, A, is_const>
     {
-        using type = Conditional<
+        using Type = Conditional<
             IsStaticLength<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
             Conditional<
@@ -775,7 +743,7 @@ namespace efp
     template <typename A, bool is_const>
     struct DropReturnImpl<int, A, is_const>
     {
-        using type = Conditional<
+        using Type = Conditional<
             IsStaticCapacity<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
@@ -784,22 +752,23 @@ namespace efp
     // DropReturn
 
     template <typename N, typename A, bool is_const>
-    using DropReturn = typename DropReturnImpl<N, A, is_const>::type;
+    using DropReturn = typename DropReturnImpl<N, A, is_const>::Type;
 
     // drop
+
     template <typename N, typename A>
     auto drop(const N &n, const Seq<A> &as)
         -> DropReturn<N, A, true>
     {
         const auto as_length = length(as);
-        const auto result_length = bound_v(0, as_length, n);
-        DropReturn<N, A, true> result{p_data(as) + result_length};
+        const auto bounded_n = bound_v(0, as_length, n);
+        DropReturn<N, A, true> result{p_data(as) + bounded_n};
 
         if (DropReturn<N, A, true>::ct_len == dyn)
         {
-            result.resize(as_length - result_length);
+            result.resize(as_length - bounded_n);
         }
-        
+
         return result;
     }
 
@@ -808,75 +777,16 @@ namespace efp
         -> DropReturn<N, A, false>
     {
         const auto as_length = length(as);
-        const auto result_length = bound_v(0, as_length, n);
-        DropReturn<N, A, false> result{p_data(as) + result_length};
+        const auto bounded_n = bound_v(0, as_length, n);
+        DropReturn<N, A, false> result{p_data(as) + bounded_n};
 
         if (DropReturn<N, A, false>::ct_len == dyn)
         {
-            result.resize(as_length - result_length);
+            result.resize(as_length - bounded_n);
         }
-        
+
         return result;
     }
-
-
-    // template <typename N, typename SeqA>
-    // auto drop(const N &n, SeqA &as)
-    //     -> EnableIf<
-    //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    //         ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
-    // {
-    //     // ! What if larger than n? maybe last with 0?
-    //     return ArrayView<ViewElement<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{p_data(as) + n};
-    // }
-
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         ArrayView<Element<SeqA>, StaticLength<SeqA>::value - N::value>>
-    // // {
-    // //     // ! What if larger than n? maybe last with 0?
-    // //     return ArrayView<Element<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
-    // // }
-
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, const SeqA &as)
-    // //     -> EnableIf<
-    // //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         ArrayView<const Element<SeqA>, StaticLength<SeqA>::value - N::value>>
-    // // {
-    // //     return ArrayView<const Element<SeqA>, StaticLength<SeqA>::value - N::value>{data(as) + n};
-    // // }
-
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         VectorView<ViewElement<SeqA>>>
-    // // {
-    // //     // ! What if larger than n? maybe last with 0?
-    // //     return VectorView<ViewElement<SeqA>>{p_data(as) + n, (size_t)bound_v(0, length(as), length(as) - n)};
-    // // }
-
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, SeqA &as)
-    // //     -> EnableIf<
-    // //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         VectorView<Element<SeqA>>>
-    // // {
-    // //     // ! What if larger than n? maybe last with 0?
-    // //     return VectorView<Element<SeqA>>{p_data(as) + n, length(as) - n};
-    // // }
-
-    // // template <typename N, typename SeqA>
-    // // auto drop(const N &n, const SeqA &as)
-    // //     -> EnableIf<
-    // //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
-    // //         VectorView<const Element<SeqA>>>
-    // // {
-    // //     return VectorView<const Element<SeqA>>{p_data(as) + n, length(as) - n};
-    // // }
 
     // template <typename SeqA>
     // auto drop(int n, const SeqA &as)
