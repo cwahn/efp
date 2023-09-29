@@ -294,4 +294,25 @@ TEST_CASE("drop")
     }
 }
 
+TEST_CASE("elem")
+{
+    SECTION("Array")
+    {
+        CHECK(elem(2., array_3) == true);
+        CHECK(elem(9., array_3) == false);
+    }
+
+    SECTION("ArrVec")
+    {
+        CHECK(elem(2., arrvec_3) == true);
+        CHECK(elem(9., arrvec_3) == false);
+    }
+
+    SECTION("Vector")
+    {
+        CHECK(elem(2., vector_3) == true);
+        CHECK(elem(9., vector_3) == false);
+    }
+}
+
 #endif
