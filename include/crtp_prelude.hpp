@@ -859,22 +859,24 @@ namespace efp
         return false;
     }
 
-    // // find_index
+    // find_index
 
-    // template <typename SeqA, typename F = void (*)(const Element<SeqA> &)>
-    // auto find_index(const F &f, const SeqA &as)
-    //     -> Maybe<int>
-    // {
-    //     for (int i = 0; i < length(as); ++i)
-    //     {
-    //         if (f(as[i]) == true)
-    //         {
-    //             return i;
-    //         }
-    //     }
+    template <typename A, typename F = void (*)(const Element<A> &)>
+    auto find_index(const F &f, const Seq<A> &as)
+        -> Maybe<int>
+    {
+        const auto as_length = length(as);
 
-    //     return Nothing{};
-    // }
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (f(as[i]))
+            {
+                return i;
+            }
+        }
+
+        return Nothing{};
+    }
 
     // // find_indices
 

@@ -387,4 +387,31 @@ TEST_CASE("find")
     }
 }
 
+TEST_CASE("find_index")
+{
+    auto is_two = [](double x)
+    { return x == 2. ? true : false; };
+
+    auto is_nine = [](double x)
+    { return x == 9. ? true : false; };
+
+    SECTION("Array")
+    {
+        CHECK(find_index(is_two, array_3).value() == 1);
+        CHECK(find_index(is_nine, array_3).is_nothing() == true);
+    }
+
+    SECTION("Vector")
+    {
+        CHECK(find_index(is_two, vector_3).value() == 1);
+        CHECK(find_index(is_nine, vector_3).is_nothing() == true);
+    }
+
+    SECTION("ArrayView")
+    {
+        CHECK(find_index(is_two, array_view_3).value() == 1);
+        CHECK(find_index(is_nine, array_view_3).is_nothing() == true);
+    }
+}
+
 #endif
