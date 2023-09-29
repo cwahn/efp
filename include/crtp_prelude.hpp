@@ -639,13 +639,7 @@ namespace efp
         return as[length(as) - 1];
     }
 
-    // // todo is_null
-
-    // // using View_t = Conditional<
-    // //     template <typename SeqA>
-    // //     IsStaticLength<SeqA>::value,
-    // //     ArrayView<Element<SeqA>>,
-    // //     VectorView<Element<SeqA>>>;
+    // todo is_null
 
     // TakeReturnImpl
     template <typename N, typename A, bool is_const>
@@ -678,18 +672,6 @@ namespace efp
 
     template <typename N, typename A, bool is_const>
     using TakeReturn = typename TakeReturnImpl<N, A, is_const>::Type;
-
-    // template <typename N, typename A>
-    // using TakeReturn = Conditional<
-    //     IsStaticLength<A>::value,
-    //     Conditional<
-    //         IsIntegralConst<N>::value,
-    //         SequenceView<Element<A>, bound_v(0, A::ct_len, N::value), bound_v(0, A::ct_len, N::value)>,
-    //         SequenceView<Element<A>, dyn, A::ct_cap>>,
-    //     Conditional<
-    //         IsStaticCapacity<A>::value,
-    //         SequenceView<Element<A>, dyn, A::ct_cap>,
-    //         SequenceView<Element<A>, dyn, dyn>>>;
 
     // take
 
@@ -824,16 +806,40 @@ namespace efp
         return Nothing{};
     }
 
-    // // IndicesReturn_t
+    // IndicesReturn_t
 
-    // template <typename SeqA>
-    // using IndicesReturn_t =
-    //     Conditional<
-    //         IsStaticCapacity<SeqA>::value,
-    //         ArrVec<int, StaticCapacity<SeqA>::value>,
-    //         Vector<int>>;
+    template <typename SeqA>
+    using IndicesReturn_t =
+        Conditional<
+            IsStaticCapacity<SeqA>::value,
+            ArrVec<int, StaticCapacity<SeqA>::value>,
+            Vector<int>>;
 
-    // // elem_indices
+    template <typename A>
+    using IndicesReturn = Conditional<
+        IsStaticCapacity<A>::value,
+        Sequence<int, dyn, A::ct_cap>,
+        Sequence<int, dyn, dyn>>;
+
+    // elem_indices
+
+    template <typename A>
+    auto elem_indices(const Element<A> &a, const Seq<A> &as)
+        -> IndicesReturn<A>
+    {
+        IndicesReturn<A> result{};
+        const auto as_length = length(as);
+
+        for (int i = 0; i < as_length; ++i)
+        {
+            if (a == as[i])
+            {
+                result.push_back(i);
+            }
+        }
+
+        return result;
+    }
 
     // template <typename SeqA>
     // auto elem_indices(const Element<SeqA> &a, const SeqA &as)

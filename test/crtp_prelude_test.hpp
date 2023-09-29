@@ -336,4 +336,28 @@ TEST_CASE("elem_index")
     }
 }
 
+TEST_CASE("elem_indices")
+{
+    SECTION("Array")
+    {
+        const Array<double, 3> array_3_ = {1., 2., 2.};
+        CHECK(elem_indices(2., array_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(elem_indices(9., array_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("ArrVec")
+    {
+        const ArrVec<double, 3> arrvec_3_ = {1., 2., 2.};
+        CHECK(elem_indices(2., arrvec_3_) == ArrVec<int, 3>{1, 2});
+        CHECK(elem_indices(9., arrvec_3_) == ArrVec<int, 3>{});
+    }
+
+    SECTION("Vector")
+    {
+        Vector<double> vector_3_ = {1, 2, 2};
+        CHECK(elem_indices(2., vector_3_) == Vector<int>{1, 2});
+        CHECK(elem_indices(9., vector_3_) == Vector<int>{});
+    }
+}
+
 #endif
