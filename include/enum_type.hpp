@@ -67,14 +67,14 @@ namespace efp
         {
         };
 
-        template <typename A, typename = EnableIf_t<any_v(IsSame<A, As>::value...)>>
+        template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
         Enum(const A &a)
             : index_(VariantIndex<A>::value)
         {
             *(reinterpret_cast<A *>(storage_)) = a;
         }
 
-        template <typename A, typename = EnableIf_t<any_v(IsSame<A, As>::value...)>>
+        template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
         Enum(A &&a)
             : index_(VariantIndex<A>::value)
         {
@@ -101,7 +101,7 @@ namespace efp
 
         template <typename A>
         auto get() const
-            -> EnableIf_t<any_v(IsSame<A, As>::value...), A>
+            -> EnableIf<any_v(IsSame<A, As>::value...), A>
         {
             if (index_ != VariantIndex<A>::value)
             {
@@ -113,17 +113,17 @@ namespace efp
 
         template <uint8_t n>
         auto get()
-            -> EnableIf_t<lt_v(n, sizeof...(As)), PackAt_t<n, As...>>
+            -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...>>
         {
             if (index_ != n)
             {
                 abort();
             }
 
-            return *(reinterpret_cast<PackAt_t<n, As...> *>(storage_));
+            return *(reinterpret_cast<PackAt<n, As...> *>(storage_));
         }
 
-        // * Test if all of the branchs have same return type by Common_t.
+        // * Test if all of the branchs have same return type by Common.
         // * Check if each F has at least one matching with As. (RelevantBranch)
         // * Check if all the variants are matched at least one of Fs or there is wildcard at last (Exhaustiveness)
         // * Compile time function uint8_t -> uint8_t, which is variant index to branch index.
@@ -137,12 +137,12 @@ namespace efp
         // * Need type level find (Type -> bool) -> Types -> int
         // * Need type level indexing
 
-        // Argument_t implementation will auto matically remove the const qualifier if there is.
+        // Arguments implementation will auto matically remove the const qualifier if there is.
 
 #define CASE(i)                                                                                \
     case i:                                                                                    \
     {                                                                                          \
-        return overloaded(*(reinterpret_cast<const PackAt_t<i, As...> *>(p_outer->storage_))); \
+        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
         break;                                                                                 \
     }
 
@@ -182,11 +182,11 @@ namespace efp
         struct IsRelevantBranch
         {
             static constexpr bool value =
-                any_v(IsInvocable<F, As>::value...) || IsSame<std::tuple<>, Argument_t<F>>::value;
+                any_v(IsInvocable<F, As>::value...) || IsSame<std::tuple<>, Arguments<F>>::value;
         };
 
         template <typename F>
-        struct IsWildCard : IsSame<std::tuple<>, Argument_t<F>>
+        struct IsWildCard : IsSame<std::tuple<>, Arguments<F>>
         {
         };
 
@@ -198,7 +198,7 @@ namespace efp
         };
 
         template <typename... Fs>
-        struct IsExhaustive : FalseType
+        struct IsExhaustive : False
         {
             static constexpr bool value = all_v(IsVariantCovered<As, Fs...>::value...);
         };
@@ -214,11 +214,11 @@ namespace efp
 
         template <typename... Fs>
         auto match(const Fs &...fs)
-            -> EnableIf_t<
+            -> EnableIf<
                 all_v(IsRelevantBranch<Fs>::value...) &&
                     IsExhaustive<Fs...>::value &&
                     IsWellFormed<Fs...>::value,
-                Common_t<Return_t<Fs>...>>
+                Common<Return<Fs>...>>
         {
             return Match<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<Fs...>{fs...}, this);
         }
@@ -238,10 +238,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP2(0, CASE)
 
@@ -258,10 +258,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP4(0, CASE)
 
@@ -278,10 +278,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP8(0, CASE)
 
@@ -298,10 +298,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP16(0, CASE)
 
@@ -318,10 +318,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP32(0, CASE)
 
@@ -338,10 +338,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP64(0, CASE)
 
@@ -358,10 +358,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP128(0, CASE)
 
@@ -378,10 +378,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
-            -> Common_t<Return_t<Fs>...>
+            const Enum<As...> *outer)
+            -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP256(0, CASE)
 
@@ -394,11 +394,11 @@ namespace efp
 
     template <typename... As, typename... Fs>
     auto match(const Enum<As...> &x, const Fs &...fs)
-        -> EnableIf_t<
+        -> EnableIf<
             all_v(Enum<As...>::template IsRelevantBranch<Fs>::value...) &&
                 Enum<As...>::template IsExhaustive<Fs...>::value &&
                 Enum<As...>::template IsWellFormed<Fs...>::value,
-            Common_t<Return_t<Fs>...>>
+            Common<Return<Fs>...>>
     {
         return Enum<As...>::template Match<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, &x);
     }

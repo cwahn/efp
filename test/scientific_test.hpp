@@ -15,169 +15,169 @@ double abs_error(double x_hat, double x)
 
 TEST_CASE("mean")
 {
-    SECTION("c style ")
+    SECTION("Array")
     {
-        CHECK(mean<double>(c_array_5) == 3.);
+        CHECK(mean<double>(array_5) == 3.);
     }
 
-    SECTION("std::array ")
+    SECTION("ArrVec")
     {
-        CHECK(mean<double>(std_array_5) == 3.);
+        CHECK(mean<double>(arrvec_5) == 3.);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(mean<double>(std_vector_5) == 3.);
+        CHECK(mean<double>(vector_5) == 3.);
     }
 }
 
 TEST_CASE("rms")
 {
-    SECTION("c style ")
+    SECTION("Array")
     {
-        CHECK(rms<double>(c_array_5) == 3.3166247903554);
+        CHECK(rms<double>(array_5) == 3.3166247903554);
     }
 
-    SECTION("std::array ")
+    SECTION("ArrVec")
     {
-        CHECK(rms<double>(std_array_5) == 3.3166247903554);
+        CHECK(rms<double>(arrvec_5) == 3.3166247903554);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(rms<double>(std_vector_5) == 3.3166247903554);
+        CHECK(rms<double>(vector_5) == 3.3166247903554);
     }
 }
 
 TEST_CASE("sse")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        int zeros[3] = {0, 0, 0};
-        CHECK(sse<double>(c_array_3, c_array_3) == 0);
-        CHECK(sse<double>(c_array_3, zeros) == 14);
+        Array<int, 3> zeros = {0, 0, 0};
+        CHECK(sse<double>(array_3, array_3) == 0);
+        CHECK(sse<double>(array_3, zeros) == 14);
     }
 
-    SECTION("std::array")
+    SECTION("ArrVec")
     {
-        std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(sse<double>(std_array_3, std_array_3) == 0.);
-        CHECK(sse<double>(std_array_3, zeros) == 14.);
+        ArrVec<double, 3> zeros = {0., 0., 0.};
+        CHECK(sse<double>(arrvec_3, arrvec_3) == 0.);
+        CHECK(sse<double>(arrvec_3, zeros) == 14.);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        std::vector<double> zeros = {0., 0., 0.};
-        CHECK(sse<double>(std_vector_3, std_vector_3) == 0.);
-        CHECK(sse<double>(std_vector_3, zeros) == 14.);
+        Vector<double> zeros = {0., 0., 0.};
+        CHECK(sse<double>(vector_3, vector_3) == 0.);
+        CHECK(sse<double>(vector_3, zeros) == 14.);
     }
 }
 
 TEST_CASE("mse")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        int zeros[3] = {0, 0, 0};
-        CHECK(mse<double>(c_array_3, c_array_3) == 0);
-        CHECK(mse<double>(c_array_3, zeros) == 14 / 3.);
+        Array<int, 3> zeros = {0, 0, 0};
+        CHECK(mse<double>(array_3, array_3) == 0);
+        CHECK(mse<double>(array_3, zeros) == 14 / 3.);
     }
 
     SECTION("std::array")
     {
-        std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(mse<double>(std_array_3, std_array_3) == 0.);
-        CHECK(mse<double>(std_array_3, zeros) == 14. / 3.);
+        ArrVec<double, 3> zeros = {0., 0., 0.};
+        CHECK(mse<double>(arrvec_3, arrvec_3) == 0.);
+        CHECK(mse<double>(arrvec_3, zeros) == 14. / 3.);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        std::vector<double> zeros = {0., 0., 0.};
-        CHECK(mse<double>(std_vector_3, std_vector_3) == 0.);
-        CHECK(mse<double>(std_vector_3, zeros) == 14. / 3.);
+        Vector<double> zeros = {0., 0., 0.};
+        CHECK(mse<double>(vector_3, vector_3) == 0.);
+        CHECK(mse<double>(vector_3, zeros) == 14. / 3.);
     }
 }
 
 TEST_CASE("rmse")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        int zeros[3] = {0, 0, 0};
-        CHECK(rmse<double>(c_array_3, c_array_3) == 0);
-        CHECK(rmse<double>(c_array_3, zeros) == sqrt(14 / 3.));
+        Array<int, 3> zeros = {0, 0, 0};
+        CHECK(rmse<double>(array_3, array_3) == 0);
+        CHECK(rmse<double>(array_3, zeros) == sqrt(14 / 3.));
     }
 
     SECTION("std::array")
     {
-        std::array<double, 3> zeros = {0., 0., 0.};
-        CHECK(rmse<double>(std_array_3, std_array_3) == 0.);
-        CHECK(rmse<double>(std_array_3, zeros) == sqrt(14. / 3.));
+        ArrVec<double, 3> zeros = {0., 0., 0.};
+        CHECK(rmse<double>(arrvec_3, arrvec_3) == 0.);
+        CHECK(rmse<double>(arrvec_3, zeros) == sqrt(14. / 3.));
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        std::vector<double> zeros = {0., 0., 0.};
-        CHECK(rmse<double>(std_vector_3, std_vector_3) == 0.);
-        CHECK(rmse<double>(std_vector_3, zeros) == sqrt(14. / 3.));
+        Vector<double> zeros = {0., 0., 0.};
+        CHECK(rmse<double>(vector_3, vector_3) == 0.);
+        CHECK(rmse<double>(vector_3, zeros) == sqrt(14. / 3.));
     }
 }
 
 TEST_CASE("nrms")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        int twos[3] = {2, 2, 2};
-        CHECK(nrmse_mean<double>(c_array_3, c_array_3) == 0);
-        CHECK(nrmse_mean<double>(c_array_3, twos) == sqrt(2 / 3.) / 2.);
+        Array<int, 3> twos = {2, 2, 2};
+        CHECK(nrmse_mean<double>(array_3, array_3) == 0);
+        CHECK(nrmse_mean<double>(array_3, twos) == sqrt(2 / 3.) / 2.);
     }
 
     SECTION("std::array")
     {
-        std::array<double, 3> twos = {2., 2., 2.};
-        CHECK(nrmse_mean<double>(std_array_3, std_array_3) == 0.);
-        CHECK(nrmse_mean<double>(std_array_3, twos) == sqrt(2. / 3.) / 2.);
+        ArrVec<double, 3> twos = {2., 2., 2.};
+        CHECK(nrmse_mean<double>(arrvec_3, arrvec_3) == 0.);
+        CHECK(nrmse_mean<double>(arrvec_3, twos) == sqrt(2. / 3.) / 2.);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        std::vector<double> twos = {2., 2., 2.};
-        CHECK(nrmse_mean<double>(std_vector_3, std_vector_3) == 0.);
-        CHECK(nrmse_mean<double>(std_vector_3, twos) == sqrt(2. / 3.) / 2.);
+        Vector<double> twos = {2., 2., 2.};
+        CHECK(nrmse_mean<double>(vector_3, vector_3) == 0.);
+        CHECK(nrmse_mean<double>(vector_3, twos) == sqrt(2. / 3.) / 2.);
     }
 }
 
 TEST_CASE("variance")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(variance<double>(c_array_3) == 0.6666666666666666);
+        CHECK(variance<double>(array_3) == 0.6666666666666666);
     }
 
     SECTION("std::array")
     {
-        CHECK(variance<double>(std_array_3) == 0.6666666666666666);
+        CHECK(variance<double>(arrvec_3) == 0.6666666666666666);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(variance<double>(std_vector_3) == 0.6666666666666666);
+        CHECK(variance<double>(vector_3) == 0.6666666666666666);
     }
 }
 
 TEST_CASE("standard_deviation")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(standard_deviation<double>(c_array_3) == 0.816496580927726);
+        CHECK(standard_deviation<double>(array_3) == 0.816496580927726);
     }
 
     SECTION("std::array")
     {
-        CHECK(standard_deviation<double>(std_array_3) == 0.816496580927726);
+        CHECK(standard_deviation<double>(arrvec_3) == 0.816496580927726);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(standard_deviation<double>(std_vector_3) == 0.816496580927726);
+        CHECK(standard_deviation<double>(vector_3) == 0.816496580927726);
     }
 }
 
@@ -185,19 +185,19 @@ TEST_CASE("covariance")
 {
     Array<double, 3> ref = {-1., -2., -3.};
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(covariance<double>(c_array_3, ref) == -0.6666666666666666);
+        CHECK(covariance<double>(array_3, ref) == -0.6666666666666666);
     }
 
     SECTION("std::array")
     {
-        CHECK(covariance<double>(std_array_3, ref) == -0.6666666666666666);
+        CHECK(covariance<double>(arrvec_3, ref) == -0.6666666666666666);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(covariance<double>(std_vector_3, ref) == -0.6666666666666666);
+        CHECK(covariance<double>(vector_3, ref) == -0.6666666666666666);
     }
 }
 
@@ -205,80 +205,80 @@ TEST_CASE("correlation")
 {
     Array<double, 3> ref = {-1., -2., -3.};
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(correlation<double>(c_array_3, ref) == -1.);
+        CHECK(correlation<double>(array_3, ref) == -1.);
     }
 
     SECTION("std::array")
     {
-        CHECK(correlation<double>(std_array_3, ref) == -1.);
+        CHECK(correlation<double>(arrvec_3, ref) == -1.);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(correlation<double>(std_vector_3, ref) == -1.);
+        CHECK(correlation<double>(vector_3, ref) == -1.);
     }
 }
 
 TEST_CASE("autocovariance")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(autocovariance<double, false, false>(c_array_5, 2) == -0.2);
-        CHECK(autocovariance<double, true, false>(c_array_5, 2) == -0.25);
-        CHECK(autocovariance<double, false, true>(c_array_5, 2) == -0.3333333333333333);
-        CHECK(autocovariance<double, true, true>(c_array_5, 2) == -0.5);
+        CHECK(autocovariance<double, false, false>(array_5, 2) == -0.2);
+        CHECK(autocovariance<double, true, false>(array_5, 2) == -0.25);
+        CHECK(autocovariance<double, false, true>(array_5, 2) == -0.3333333333333333);
+        CHECK(autocovariance<double, true, true>(array_5, 2) == -0.5);
     }
 
     SECTION("std::array")
     {
-        CHECK(autocovariance<double, false, false>(std_array_5, 2) == -0.2);
-        CHECK(autocovariance<double, true, false>(std_array_5, 2) == -0.25);
-        CHECK(autocovariance<double, false, true>(std_array_5, 2) == -0.3333333333333333);
-        CHECK(autocovariance<double, true, true>(std_array_5, 2) == -0.5);
+        CHECK(autocovariance<double, false, false>(arrvec_5, 2) == -0.2);
+        CHECK(autocovariance<double, true, false>(arrvec_5, 2) == -0.25);
+        CHECK(autocovariance<double, false, true>(arrvec_5, 2) == -0.3333333333333333);
+        CHECK(autocovariance<double, true, true>(arrvec_5, 2) == -0.5);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(autocovariance<double, false, false>(std_vector_5, 2) == -0.2);
-        CHECK(autocovariance<double, true, false>(std_vector_5, 2) == -0.25);
-        CHECK(autocovariance<double, false, true>(std_vector_5, 2) == -0.3333333333333333);
-        CHECK(autocovariance<double, true, true>(std_vector_5, 2) == -0.5);
+        CHECK(autocovariance<double, false, false>(vector_5, 2) == -0.2);
+        CHECK(autocovariance<double, true, false>(vector_5, 2) == -0.25);
+        CHECK(autocovariance<double, false, true>(vector_5, 2) == -0.3333333333333333);
+        CHECK(autocovariance<double, true, true>(vector_5, 2) == -0.5);
     }
 }
 
 TEST_CASE("autocorrelation")
 {
-    SECTION("c style")
+    SECTION("Array")
     {
-        CHECK(autocorrelation<double, false, false>(c_array_5, 2) == -0.1);
-        CHECK(autocorrelation<double, true, false>(c_array_5, 2) == -0.1);
-        CHECK(autocorrelation<double, false, true>(c_array_5, 2) == -0.16666666666666666);
-        CHECK(autocorrelation<double, true, true>(c_array_5, 2) == -0.2);
+        CHECK(autocorrelation<double, false, false>(array_5, 2) == -0.1);
+        CHECK(autocorrelation<double, true, false>(array_5, 2) == -0.1);
+        CHECK(autocorrelation<double, false, true>(array_5, 2) == -0.16666666666666666);
+        CHECK(autocorrelation<double, true, true>(array_5, 2) == -0.2);
     }
 
     SECTION("std::array")
     {
-        CHECK(autocorrelation<double, false, false>(std_array_5, 2) == -0.1);
-        CHECK(autocorrelation<double, true, false>(std_array_5, 2) == -0.1);
-        CHECK(autocorrelation<double, false, true>(std_array_5, 2) == -0.16666666666666666);
-        CHECK(autocorrelation<double, true, true>(std_array_5, 2) == -0.2);
+        CHECK(autocorrelation<double, false, false>(arrvec_5, 2) == -0.1);
+        CHECK(autocorrelation<double, true, false>(arrvec_5, 2) == -0.1);
+        CHECK(autocorrelation<double, false, true>(arrvec_5, 2) == -0.16666666666666666);
+        CHECK(autocorrelation<double, true, true>(arrvec_5, 2) == -0.2);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        CHECK(autocorrelation<double, false, false>(std_vector_5, 2) == -0.1);
-        CHECK(autocorrelation<double, true, false>(std_vector_5, 2) == -0.1);
-        CHECK(autocorrelation<double, false, true>(std_vector_5, 2) == -0.16666666666666666);
-        CHECK(autocorrelation<double, true, true>(std_vector_5, 2) == -0.2);
+        CHECK(autocorrelation<double, false, false>(vector_5, 2) == -0.1);
+        CHECK(autocorrelation<double, true, false>(vector_5, 2) == -0.1);
+        CHECK(autocorrelation<double, false, true>(vector_5, 2) == -0.16666666666666666);
+        CHECK(autocorrelation<double, true, true>(vector_5, 2) == -0.2);
     }
 }
 
 TEST_CASE("remove_dc")
 {
 
-    constexpr size_t n = 100;
+    constexpr int n = 100;
 
     double a = 2;
     double b = 100;
@@ -289,13 +289,9 @@ TEST_CASE("remove_dc")
     auto f_ref = [&](double x)
     { return a * (x - n / 2); };
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        double xs[n];
-        std::iota(std::begin(xs), std::end(xs), 0);
-
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -306,11 +302,7 @@ TEST_CASE("remove_dc")
 
     SECTION("std::array")
     {
-        std::array<double, n> xs;
-        std::iota(std::begin(xs), std::end(xs), 0);
-
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -321,11 +313,7 @@ TEST_CASE("remove_dc")
 
     SECTION("std::vector")
     {
-        std::vector<double> xs(n);
-        std::iota(std::begin(xs), std::end(xs), 0);
-
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -337,8 +325,7 @@ TEST_CASE("remove_dc")
 
 TEST_CASE("linear_regression")
 {
-
-    constexpr size_t n = 100;
+    constexpr int n = 100;
 
     double a = 2;
     double b = 100;
@@ -361,18 +348,15 @@ TEST_CASE("linear_regression")
         CHECK(abs_error(b_hat, b) < 0.05);
     }
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        double xs[n];
-        std::iota(std::begin(xs), std::end(xs), 0);
 
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
 
         double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression<double>(std_array_xs, ys);
+        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -380,8 +364,8 @@ TEST_CASE("linear_regression")
 
     SECTION("std::array")
     {
-        std::array<double, n> xs;
-        std::iota(std::begin(xs), std::end(xs), 0);
+
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -394,8 +378,7 @@ TEST_CASE("linear_regression")
 
     SECTION("std::vector")
     {
-        std::vector<double> xs(n);
-        std::iota(std::begin(xs), std::end(xs), 0);
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -409,8 +392,7 @@ TEST_CASE("linear_regression")
 
 TEST_CASE("linear_regression_with_index")
 {
-
-    constexpr size_t n = 100;
+    constexpr int n = 100;
 
     double a = 2;
     double b = 100;
@@ -420,9 +402,9 @@ TEST_CASE("linear_regression_with_index")
         return sin(x * 2 * M_PI / n) + a * x + b;
     };
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        double ys[n];
+        Array<double, 3> ys{};
         for_each_with_indexi([&](int i, double &x)
                              { x = f(i); },
                              ys);
@@ -436,7 +418,7 @@ TEST_CASE("linear_regression_with_index")
 
     SECTION("std::array")
     {
-        auto ys = from_function(std::integral_constant<int, n>{}, f);
+        auto ys = from_function(IntegralConst<int, n>{}, f);
 
         double a_hat, b_hat;
         std::tie(a_hat, b_hat) = linear_regression_with_index<double>(ys);
@@ -459,7 +441,7 @@ TEST_CASE("linear_regression_with_index")
 
 TEST_CASE("detrend")
 {
-    constexpr size_t n = 100;
+    constexpr int n = 100;
 
     double a = 2;
     double b = 100;
@@ -470,33 +452,29 @@ TEST_CASE("detrend")
     auto f2 = [](double x)
     { return sin(2 * M_PI * x / n); };
 
-    SECTION("c style")
+    SECTION("Array")
     {
-        double xs[n];
-        std::iota(std::begin(xs), std::end(xs), 0);
+        const auto xs = from_function(n, id<int>);
+        
+        const auto ys = map(f1, xs);
 
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto ys_ref = from_function(n, [](int _)
+                                          { return 0; });
 
-        auto ys = map(f1, xs);
-
-        std::vector<double> ys_ref(n);
-        std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
-
-        auto detrended = detrend<double>(ys);
+        const auto detrended = detrend<double>(ys);
 
         CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }
 
     SECTION("std::array")
     {
-        auto xs = from_function(std::integral_constant<int, n>{}, id<int>);
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
-        auto ys1 = map(f1, xs);
-        auto ys2 = map(f2, xs);
+        const auto ys1 = map(f1, xs);
+        const auto ys2 = map(f2, xs);
 
-        double ys_ref[n];
-        std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
+        const auto ys_ref = from_function(n, [](int _)
+                                          { return 0; });
 
         auto ys = map(plus<double, double>, ys1, ys2);
 
@@ -505,23 +483,19 @@ TEST_CASE("detrend")
         CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }
 
-    SECTION("std::vectors")
+    SECTION("Vector")
     {
-        double xs[n];
-        std::iota(std::begin(xs), std::end(xs), 0);
+        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
 
-        std::array<double, n> std_array_xs;
-        std::copy(std::begin(xs), std::end(xs), std::begin(std_array_xs));
+        const auto ys1 = map(f1, xs);
+        const auto ys2 = map(f2, xs);
 
-        auto ys1 = map(f1, xs);
-        auto ys2 = map(f2, xs);
+        const auto ys_ref = from_function(n, [](int _)
+                                          { return 0; });
 
-        std::array<double, n> ys_ref;
-        std::fill(std::begin(ys_ref), std::end(ys_ref), 0);
+        const auto ys = map(plus<double, double>, ys1, ys2);
 
-        auto ys = map(plus<double, double>, ys1, ys2);
-
-        auto detrended = detrend<double>(ys);
+        const auto detrended = detrend<double>(ys);
 
         CHECK(rmse<double>(detrended, ys_ref) < 0.5);
     }

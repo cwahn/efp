@@ -12,12 +12,12 @@ namespace efp
     using Complex = typename std::complex<A>;
 
     template <typename A>
-    struct IsComplex : FalseType
+    struct IsComplex : False
     {
     };
 
     template <typename A>
-    struct IsComplex<Complex<A>> : TrueType
+    struct IsComplex<Complex<A>> : True
     {
     };
 
@@ -58,21 +58,21 @@ namespace efp
 
     template <bool to_complex, typename A>
     auto complex_cast(const A &a)
-        -> EnableIf_t<!to_complex && IsComplex<A>::value, ComplexBase_t<A>>
+        -> EnableIf<!to_complex && IsComplex<A>::value, ComplexBase_t<A>>
     {
         return a.real();
     }
 
     template <bool to_complex, typename A>
     auto complex_cast(const A &a)
-        -> EnableIf_t<to_complex && !IsComplex<A>::value, Complex<A>>
+        -> EnableIf<to_complex && !IsComplex<A>::value, Complex<A>>
     {
         return Complex<A>{a, 0};
     }
 
     template <bool to_complex, typename A>
     auto complex_cast(const A &a)
-        -> EnableIf_t<to_complex == IsComplex<A>::value, A>
+        -> EnableIf<to_complex == IsComplex<A>::value, A>
     {
         return a;
     }
@@ -146,7 +146,7 @@ namespace efp
     template <typename A, typename B>
     constexpr A is_approx(const A &lhs, const B &rhs)
     {
-        using MorePrecise_t = Conditional_t<(sizeof(A) > sizeof(B)), A, B>;
+        using MorePrecise_t = Conditional<(sizeof(A) > sizeof(B)), A, B>;
         return abs(static_cast<MorePrecise_t>(lhs) - static_cast<MorePrecise_t>(rhs)) <= NumericLimits<MorePrecise_t>::epsilon();
     }
 
@@ -165,32 +165,32 @@ namespace efp
 
     // Reducing
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> maximum(const SeqA &as)
+    template <typename A>
+    constexpr Element<A> maximum(const Seq<A> &as)
     {
-        return foldl(max, NumericLimits<Element_t<SeqA>>::min(), as);
+        return foldl(max, NumericLimits<Element<A>>::min(), as);
     }
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> minimum(const SeqA &as)
+    template <typename A>
+    constexpr Element<A> minimum(const Seq<A> &as)
     {
-        return foldl(min, NumericLimits<Element_t<SeqA>>::max(), as);
+        return foldl(min, NumericLimits<Element<A>>::max(), as);
     }
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> max_min(const SeqA &as)
+    template <typename A>
+    constexpr Element<A> max_min(const Seq<A> &as)
     {
         return maximum(as) - minimum(as);
     }
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> sum(const SeqA &as)
+    template <typename A>
+    constexpr Element<A> sum(const Seq<A> &as)
     {
         return foldl(plus, 0, as);
     }
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> product(const SeqA &as)
+    template <typename A>
+    constexpr Element<A> product(const Seq<A> &as)
     {
         return foldl(times, 1, as);
     }

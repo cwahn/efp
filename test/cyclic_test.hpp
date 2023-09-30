@@ -10,10 +10,10 @@ TEST_CASE("Vcb")
     SECTION("0")
     {
         Vcb<int, 3> vcb;
-        CHECK(IsSame<Element_t<decltype(vcb)>, int>::value == true);
+        CHECK(IsSame<Element<decltype(vcb)>, int>::value == true);
         CHECK(vcb.size() == 3);
         CHECK(length(vcb) == 3);
-        CHECK(IsIntegralConst<decltype(length(vcb))>::value == false);
+        CHECK(IsIntegralConst<decltype(length(vcb))>::value == true);
         CHECK(vcb.is_empty() == false);
 
         vcb.push_back(1);
@@ -32,7 +32,7 @@ TEST_CASE("Vcq")
     SECTION("Array")
     {
         Vcq<int, 3> vcq;
-        CHECK(IsSame<Element_t<decltype(vcq)>, int>::value == true);
+        CHECK(IsSame<Element<decltype(vcq)>, int>::value == true);
         CHECK(vcq.size() == 0);
         CHECK(vcq.is_empty() == true);
         CHECK(length(vcq) == 0);
@@ -73,7 +73,7 @@ TEST_CASE("Vcq")
 //     SECTION("0")
 //     {
 //         BufferArrVec<int, 3> as;
-//         CHECK(IsSame<Element_t<decltype(as)>, int>::value == true);
+//         CHECK(IsSame<Element<decltype(as)>, int>::value == true);
 //         CHECK(as.size() == 0);
 //         CHECK(length(as) == 0);
 //         CHECK(IsIntegralConst<decltype(length(as))>::value == false);

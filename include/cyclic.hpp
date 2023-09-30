@@ -9,166 +9,220 @@
 
 namespace efp
 {
-    template <typename A, size_t N>
+    template <typename A, int n>
     class Vcb
+        : public SequenceBase<Vcb<A, n>>
     {
     public:
-        using value_type = A;
-        using size_type = size_t;
+        using Element = A;
+        using SizeType = int;
+
+        static constexpr int ct_len = n;
+        static constexpr int ct_cap = n;
+
+        static_assert(ct_len >= 0, "ct_length must greater or equal than 0.");
+        static_assert(ct_cap >= 0, "ct_capacity must greater or equal than 0.");
 
         Vcb()
             : buffer_{}
         {
-            p_middle_ = buffer_.data() + N;
-            p_data_ = buffer_.data();
+            middle_ = buffer_.data() + ct_len;
+            data_ = buffer_.data();
         }
 
-        A &operator[](const size_type index)
+        A &operator[](const SizeType index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
-        const A &operator[](const size_type index) const
+        const A &operator[](const SizeType index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         void push_back(A value)
         {
-            p_data_[0] = value;
-            p_data_[N] = value;
+            data_[0] = value;
+            data_[ct_len] = value;
 
-            ++p_data_;
-            p_data_ -= N * (p_data_ == p_middle_);
+            ++data_;
+            data_ -= ct_len * (data_ == middle_);
         }
 
-        constexpr size_t size() const
+        constexpr SizeType size() const
         {
-            return N;
+            return ct_len;
         }
 
         A *data()
         {
-            return p_data_;
+            return data_;
         }
 
         const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        bool is_empty()
+        bool is_empty() const
         {
             return false;
         }
 
+        const A *begin() const
+        {
+            return data_;
+        }
+
         A *begin()
         {
-            return p_data_;
+            return data_;
+        }
+
+        const A *end() const
+        {
+            return data_ + ct_len;
         }
 
         A *end()
         {
-            return p_data_ + N;
+            return data_ + ct_len;
         }
 
     private:
-        std::array<A, N * 2> buffer_;
-        A *p_middle_;
-        A *p_data_;
+        std::array<A, ct_len * 2> buffer_;
+        A *middle_;
+        A *data_;
     };
 
-    template <typename A, size_t N>
-    class Vcq
+    template <typename A, int n>
+    class SequenceTrait<Vcb<A, n>>
     {
     public:
-        using value_type = A;
-        using size_type = size_t;
+        using Element = A;
+        static constexpr int ct_len = n;
+        static constexpr int ct_cap = n;
+    };
+
+    template <typename A, int n>
+    class Vcq
+        : public SequenceBase<Vcq<A, n>>
+    {
+    public:
+        using Element = A;
+        using SizeType = int;
+
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = n;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Vcq()
             : buffer_{}
         {
-            p_read_ = buffer_.data();
-            p_write_ = buffer_.data();
-            p_middle_ = buffer_.data() + N;
+            read_ = buffer_.data();
+            write_ = buffer_.data();
+            middle_ = buffer_.data() + ct_cap;
         }
         ~Vcq() {}
 
-        A &operator[](const size_type index)
+        A &operator[](const SizeType index)
         {
-            return p_read_[index];
+            return read_[index];
         }
 
-        const A &operator[](const size_type index) const
+        const A &operator[](const SizeType index) const
         {
-            return p_read_[index];
+            return read_[index];
         }
 
         void push_back(const A &value)
         {
-            p_write_[0] = value;
-            p_write_[N] = value;
+            write_[0] = value;
+            write_[ct_cap] = value;
 
-            ++p_write_;
-            p_write_ -= N * (p_write_ == p_middle_);
+            ++write_;
+            write_ -= ct_cap * (write_ == middle_);
 
-            if (len_ < N)
+            if (length_ < ct_cap)
             {
-                ++len_;
+                ++length_;
             }
             else
             {
-                p_read_++;
-                p_read_ -= N * (p_read_ == p_middle_);
+                read_++;
+                read_ -= ct_cap * (read_ == middle_);
             }
         }
         // ! Undefined if empty
 
         A pop_front()
         {
-            A value = *(p_read_);
-            len_--;
+            A value = *(read_);
+            length_--;
 
-            p_read_++;
-            p_read_ -= N * (p_read_ == p_middle_);
+            read_++;
+            read_ -= ct_cap * (read_ == middle_);
 
             return value;
         }
 
-        constexpr size_t size() const
+        constexpr SizeType size() const
         {
-            return len_;
+            return length_;
+        }
+
+        bool is_empty() const
+        {
+            return length_ == 0;
         }
 
         A *data()
         {
-            return p_read_;
+            return read_;
         }
 
         const A *data() const
         {
-            return p_read_;
+            return read_;
         }
 
-        bool is_empty()
+        const A *begin() const
         {
-            return len_ == 0;
+            return read_;
         }
+
         A *begin()
         {
-            return p_read_;
+            return read_;
         }
+
+        const A *end() const
+        {
+            return write_ > read_ ? write_ : write_ + ct_cap;
+        }
+
         A *end()
         {
-            return p_write_ > p_read_ ? p_write_ : p_write_ + N;
+            return write_ > read_ ? write_ : write_ + ct_cap;
         }
 
     private:
-        Array<A, N * 2> buffer_ = {};
-        size_t len_ = 0;
-        A *p_read_;
-        A *p_write_;
-        A *p_middle_;
+        Array<A, ct_cap * 2> buffer_ = {};
+        int length_ = 0;
+        A *read_;
+        A *write_;
+        A *middle_;
+    };
+
+    template <typename A, int n>
+    class SequenceTrait<Vcq<A, n>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = n;
     };
 
 }
@@ -179,33 +233,33 @@ namespace efp
 // class BufferArrVec
 // {
 // public:
-//     using value_type = A;
-//     using size_type = size_t;
+//     using Element = A;
+//     using SizeType = size_t;
 
 //     BufferArrVec()
 //         : buffer_{}, size_{0}
 //     {
-//         p_middle_ = buffer_.data() + N;
-//         p_data_ = buffer_.data();
+//         middle_ = buffer_.data() + N;
+//         data_ = buffer_.data();
 //     }
 
-//     A &operator[](const size_type index)
+//     A &operator[](const SizeType index)
 //     {
 //         return data()[index];
 //     }
 
-//     const A &operator[](const size_type index) const
+//     const A &operator[](const SizeType index) const
 //     {
 //         return data()[index];
 //     }
 
 //     void push_back(A value)
 //     {
-//         p_data_[0] = value;
-//         p_data_[N] = value;
+//         data_[0] = value;
+//         data_[N] = value;
 
-//         p_data_++;
-//         p_data_ -= N * (p_data_ == p_middle_);
+//         data_++;
+//         data_ -= N * (data_ == middle_);
 //         size_ = size_ + (size_ < N);
 //     }
 
@@ -216,12 +270,12 @@ namespace efp
 
 //     A *data()
 //     {
-//         return p_data_;
+//         return data_;
 //     }
 
 //     const A *data() const
 //     {
-//         return p_data_;
+//         return data_;
 //     }
 
 //     bool is_empty()
@@ -231,19 +285,19 @@ namespace efp
 
 //     A *begin()
 //     {
-//         return p_data_;
+//         return data_;
 //     }
 
 //     A *end()
 //     {
-//         return p_data_ + N;
+//         return data_ + N;
 //     }
 
 // private:
 //     std::array<A, N * 2> buffer_;
-//     A *p_middle_;
-//     A *p_data_;
-//     size_type size_;
+//     A *middle_;
+//     A *data_;
+//     SizeType size_;
 // };
 
 // template <typename A, size_t N>

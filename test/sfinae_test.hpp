@@ -64,12 +64,12 @@ TEST_CASE("IsSame")
     CHECK(IsSame<int, const int>::value == false);
 }
 
-TEST_CASE("PackAt_t")
+TEST_CASE("PackAt")
 {
-    CHECK(IsSame<PackAt_t<0, int, double>, int>::value == true);
-    CHECK(IsSame<PackAt_t<0, int, double>, double>::value == false);
-    CHECK(IsSame<PackAt_t<1, int, double>, int>::value == false);
-    CHECK(IsSame<PackAt_t<1, int, double>, double>::value == true);
+    CHECK(IsSame<PackAt<0, int, double>, int>::value == true);
+    CHECK(IsSame<PackAt<0, int, double>, double>::value == false);
+    CHECK(IsSame<PackAt<1, int, double>, int>::value == false);
+    CHECK(IsSame<PackAt<1, int, double>, double>::value == true);
 }
 
 template <typename A>
@@ -121,7 +121,7 @@ void argument_t_function2()
 {
 }
 
-TEST_CASE("Argument_t")
+TEST_CASE("Arguments")
 {
     auto argument_t_lambda0 = [](int x0, float &&x1) {};
     auto argument_t_lambda1 = [](const int x0, float &x1) {};
@@ -129,59 +129,59 @@ TEST_CASE("Argument_t")
 
     CHECK(IsSame<
               std::tuple<int, float>,
-              Argument_t<decltype(&argument_t_function0)>>::value == false);
+              Arguments<decltype(&argument_t_function0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
               std::tuple<int, float &&>,
-              Argument_t<decltype(&argument_t_function0)>>::value == true);
+              Arguments<decltype(&argument_t_function0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
               std::tuple<const int, float &>,
-              Argument_t<decltype(&argument_t_function1)>>::value == false);
+              Arguments<decltype(&argument_t_function1)>>::value == false);
 
     // const quialifier will be removed at the result
     CHECK(IsSame<
               std::tuple<int, float &>,
-              Argument_t<decltype(&argument_t_function1)>>::value == true);
+              Arguments<decltype(&argument_t_function1)>>::value == true);
 
     // Catching function not taking any argument with empty tuple
     CHECK(IsSame<
               std::tuple<>,
-              Argument_t<decltype(&argument_t_function2)>>::value == true);
+              Arguments<decltype(&argument_t_function2)>>::value == true);
 
     CHECK(IsSame<
               std::tuple<void>,
-              Argument_t<decltype(&argument_t_function2)>>::value == false);
+              Arguments<decltype(&argument_t_function2)>>::value == false);
 
     // l-value reference will be preserved
     CHECK(IsSame<
               std::tuple<int, float>,
-              Argument_t<decltype(argument_t_lambda0)>>::value == false);
+              Arguments<decltype(argument_t_lambda0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
               std::tuple<int, float &&>,
-              Argument_t<decltype(argument_t_lambda0)>>::value == true);
+              Arguments<decltype(argument_t_lambda0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
               std::tuple<const int, float &>,
-              Argument_t<decltype(argument_t_lambda1)>>::value == false);
+              Arguments<decltype(argument_t_lambda1)>>::value == false);
 
     CHECK(IsSame<
               std::tuple<int, float &>,
-              Argument_t<decltype(argument_t_lambda1)>>::value == true);
+              Arguments<decltype(argument_t_lambda1)>>::value == true);
 
     // Catching lambda not taking any argument with empty tuple
     CHECK(IsSame<
               std::tuple<>,
-              Argument_t<decltype(argument_t_lambda2)>>::value == true);
+              Arguments<decltype(argument_t_lambda2)>>::value == true);
 
     CHECK(IsSame<
               std::tuple<void>,
-              Argument_t<decltype(argument_t_lambda2)>>::value == false);
+              Arguments<decltype(argument_t_lambda2)>>::value == false);
 }
 
 double return_t_function0(int x0, float &&x1)
@@ -194,7 +194,7 @@ double *return_t_function1(const int x0, float &x1)
     return nullptr;
 }
 
-TEST_CASE("Return_t")
+TEST_CASE("Return")
 {
     auto return_t_lambda0 = [](int x0, float x1)
     { return x1 + x0; };
@@ -204,41 +204,41 @@ TEST_CASE("Return_t")
 
     CHECK(IsSame<
               double,
-              Return_t<decltype(&return_t_function0)>>::value == true);
+              Return<decltype(&return_t_function0)>>::value == true);
 
     CHECK(IsSame<
               double &,
-              Return_t<decltype(&return_t_function0)>>::value == false);
+              Return<decltype(&return_t_function0)>>::value == false);
 
     CHECK(IsSame<
               double *,
-              Return_t<decltype(&return_t_function1)>>::value == true);
+              Return<decltype(&return_t_function1)>>::value == true);
 
     CHECK(IsSame<
               double,
-              Return_t<decltype(&return_t_function1)>>::value == false);
+              Return<decltype(&return_t_function1)>>::value == false);
 
     CHECK(IsSame<
               float,
-              Return_t<decltype(return_t_lambda0)>>::value == true);
+              Return<decltype(return_t_lambda0)>>::value == true);
 
     CHECK(IsSame<
               int &,
-              Return_t<decltype(return_t_lambda0)>>::value == false);
+              Return<decltype(return_t_lambda0)>>::value == false);
 
     CHECK(IsSame<
               float,
-              Return_t<decltype(return_t_lambda1)>>::value == true);
+              Return<decltype(return_t_lambda1)>>::value == true);
 
     CHECK(IsSame<
               float *,
-              Return_t<decltype(return_t_lambda1)>>::value == false);
+              Return<decltype(return_t_lambda1)>>::value == false);
 
     // Does catch void return
 
     CHECK(IsSame<
               void,
-              Return_t<decltype(return_t_lambda2)>>::value == true);
+              Return<decltype(return_t_lambda2)>>::value == true);
 }
 
 int is_invocable_add(int a, int b)
