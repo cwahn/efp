@@ -29,9 +29,6 @@ namespace efp
         static constexpr int ct_len = Trait::ct_len;
         static constexpr int ct_cap = Trait::ct_cap;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
-
         const Element &operator[](int index) const
         {
             return derived()[index];
@@ -570,9 +567,6 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_capacity;
-
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
     };
 
     // Should have all these three template parameter not to break static link
@@ -978,9 +972,6 @@ namespace efp
         using Element = A;
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_capacity;
-
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
     };
 
     // todo STL only

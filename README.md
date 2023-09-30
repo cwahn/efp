@@ -8,17 +8,17 @@ It is a general-purpose library. The usage of no-STL, resource-tight embedded ap
 
 ## Features
 ### Higher-Order Functions
-EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_index`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` etc.
+EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_index`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` and many more.
 
 ### Zero-Copy Sequence Types
 Copying sequence is often an expensive operation yet does not necessary. Move semantic, introduced in C++ 11 somewhat eases the problem. However, the move helps little about stack sequence types like `std::array`, since moving such types is essentially a series of element-wise moves which is often no better than an element-wise copy.
 
 There is a better option, copy-elision (Return Value Optimization and Named Return Value Optimization). It makes returning heavy data free. Unfortunately, copy-elision is not guaranteed but at the compiler's discretion. (Since, C++ 17 some of them are guaranteed.)
 
-EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence types as solutions to the issue; `efp::Array`, `efp::Vector`, `efp::Vector`. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. To be exact, these types could be copy-assigned but not copy-constructed. These types are also used as the default output types of mixed-type, n-ary operations.
+EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence type as solutions to the issue; `efp::Sequence`, or `efp::Array`, `efp::ArrVec`, `efp::Vector` as aliased name. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. To be exact, these types could be copy-assigned but not copy-constructed. These types are also used as the default output types of mixed-type, n-ary operations.
 
-### Type Agnostic APIs
-EFP accepts C-style array, `std::array`, `std::vector`, `efp::Array`, `efp::ArrVec`, and `efp::Vector` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
+### Compile-Time Polymorphism
+HOFs of EFP accept `efp::Sequence` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
 
 Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrVec`, or `efp::Vector` based on the types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
 - Static capacity && static length
@@ -96,7 +96,7 @@ WIP
 EFP is tested with Catch2 with g++ and clang.
 ```
 ===============================================================================
-All tests passed (249 assertions in 54 test cases)
+All tests passed (344 assertions in 70 test cases)
 ```
 
 ## Requirements
