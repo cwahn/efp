@@ -73,11 +73,11 @@ namespace efp
 
     // // compose
 
-    // template <typename F, typename G>
-    // auto compose(const F &f, const G &g) -> Composed<F, G>
-    // {
-    //     return Composed<F, G>(f, g);
-    // }
+    // // template <typename F, typename G>
+    // // auto compose(const F &f, const G &g) -> Composed<F, G>
+    // // {
+    // //     return Composed<F, G>(f, g);
+    // // }
 
     // // template <typename F, typename... Fs>
     // // auto compose(const F &f, const Fs &...fs) -> Composed<F, Fs...>
@@ -85,72 +85,55 @@ namespace efp
     // //     return Composed<F, Fs...>(f, fs...);
     // // }
 
-    // // execute_pack
+    // execute_pack
 
-    // template <typename... Args>
-    // void execute_pack(Args... args)
-    // {
-    // }
+    template <typename... Args>
+    void execute_pack(Args... args) {}
 
-    // // AppendSequence_t
+    // AppendReturn
 
-    // template <typename A, typename... Seqs>
-    // using AppendSequence_t =
-    //     Conditional<
-    //         all_v(IsStaticCapacity<Seqs>::value...),
-    //         Conditional<
-    //             all_v(IsStaticLength<Seqs>::value...),
-    //             Array<A, sum_v(StaticCapacity<Seqs>::value...)>,
-    //             ArrVec<A, sum_v(StaticCapacity<Seqs>::value...)>>,
-    //         Vector<A>>;
+    template <typename... Ts>
+    using AppendReturn = Conditional<
+        AreAllStaticLength<Ts...>::value,
+        Sequence<Common<Element<Ts>...>, sum_v(Ts::ct_len...), sum_v(Ts::ct_len...)>,
+        Conditional<
+            AreAllStaticCapacity<Ts...>::value,
+            Sequence<Common<Element<Ts>...>, dyn, sum_v(Ts::ct_cap...)>,
+            Sequence<Common<Element<Ts>...>, dyn, dyn>>>;
 
-    // // AppendReturn_t
-    // template <typename Head, typename... Tail>
-    // using AppendReturn_t = AppendSequence_t<Element<Head>, Head, Tail...>;
+    // append
 
-    // // append
+    template <typename A, typename B>
+    Unit append_impl(int &idx, Seq<A> &result, const Seq<B> &seq)
+    {
+        const auto seq_length = length(seq);
 
-    // template <typename A, typename B>
-    // Unit append_(A &result, int &idx, const B &seq)
-    // {
-    //     for (auto elem : seq)
-    //     {
-    //         result[idx] = elem;
-    //         idx++;
-    //     }
-    //     return Unit{};
-    // }
+        for (int i = 0; i < seq_length; ++i)
+        {
+            result[idx] = seq[i];
+            idx++;
+        }
 
-    // template <typename Head, typename... Tail>
-    // auto append(const Head &head, const Tail &...tail)
-    //     -> EnableIf<
-    //         all_v(IsStaticCapacity<Head>::value, IsStaticCapacity<Tail>::value...) && all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
-    //         AppendReturn_t<Head, Tail...>>
-    // {
-    //     AppendReturn_t<Head, Tail...> result;
-    //     int idx{0};
+        return Unit{};
+    }
 
-    //     execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
+    template <typename H, typename... Ts>
+    auto append(const Seq<H> &head, const Seq<Ts> &...tail)
+        -> AppendReturn<H, Ts...>
+    {
+        AppendReturn<H, Ts...> result{};
 
-    //     return result;
-    // }
+        if (AppendReturn<H, Ts...>::ct_len == dyn)
+        {
+            result.resize(sum_v(static_cast<int>(length(head)), length(tail)...));
+        }
 
-    // template <typename Head, typename... Tail>
-    // auto append(const Head &head, const Tail &...tail)
-    //     -> EnableIf<
-    //         !all_v(IsStaticLength<Head>::value, IsStaticLength<Tail>::value...),
-    //         AppendReturn_t<Head, Tail...>>
-    // {
-    //     // ! Error on int
-    //     const size_t bounded_n = sum_v((int)length(head), (int)length(tail)...);
+        int idx{0};
+        execute_pack(append_impl(idx, result, head),
+                     append_impl(idx, result, tail)...);
 
-    //     AppendReturn_t<Head, Tail...> result(bounded_n);
-    //     int idx{0};
-
-    //     execute_pack(append_(result, idx, head), append_(result, idx, tail)...);
-
-    //     return result;
-    // }
+        return result;
+    }
 
     // min_length
 
@@ -295,11 +278,6 @@ namespace efp
     template <typename N, typename F>
     using FromFunctionReturn = typename FromFunctionReturnImpl<N, F>::Type;
 
-    // template <typename N, typename F>
-    // using FromFunctionReturn = Conditional<IsIntegralConst<N>::value,
-    //                                        Sequence<CallReturn<F, int>, N::value, N::value>,
-    //                                        Sequence<CallReturn<F, int>, dyn, dyn>>;
-
     // from_function
 
     template <typename N, typename F>
@@ -319,38 +297,6 @@ namespace efp
 
         return result;
     }
-
-    // template <typename N, typename F>
-    // auto from_function(const N &length, const F &f)
-    //     -> EnableIf<IsIntegralConst<N>::value,
-    //                 Sequence<CallReturn<F, int>, N::value, N::value>>
-    // {
-    //     Sequence<CallReturn<F, int>, N::value, N::value> result{};
-    //     result.resize(length);
-
-    //     for (int i = 0; i < length; ++i)
-    //     {
-    //         result[i] = f(i);
-    //     }
-
-    //     return result;
-    // }
-
-    // template <typename N, typename F>
-    // auto from_function(const N &length, const F &f)
-    //     -> EnableIf<!IsIntegralConst<N>::value,
-    //                 Sequence<CallReturn<F, int>, dyn, dyn>>
-    // {
-    //     Sequence<CallReturn<F, int>, dyn, dyn> result{};
-    //     result.resize(length);
-
-    //     for (int i = 0; i < length; ++i)
-    //     {
-    //         result[i] = f(i);
-    //     }
-
-    //     return result;
-    // }
 
     // for_index
 
@@ -775,7 +721,7 @@ namespace efp
     template <typename A>
     bool elem(const Element<A> &a, const Seq<A> &as)
     {
-        const int as_length = length(as);
+        const auto as_length = length(as);
 
         for (int i = 0; i < as_length; ++i)
         {
@@ -793,7 +739,7 @@ namespace efp
     template <typename A>
     Maybe<int> elem_index(const Element<A> &a, const Seq<A> &as)
     {
-        const int as_length = length(as);
+        const auto as_length = length(as);
 
         for (int i = 0; i < as_length; ++i)
         {
@@ -898,27 +844,5 @@ namespace efp
 
         return result;
     }
-
-    // template <typename SeqA, typename F = void (*)(const Element<SeqA> &)>
-    // auto find_indices(const F &f, const SeqA &as)
-    //     -> EnableIf<
-    //         !IsStaticCapacity<SeqA>::value,
-    //         IndicesReturn_t<SeqA>>
-    // {
-    //     const int as_length = length(as);
-
-    //     IndicesReturn_t<SeqA> result;
-    //     result.reserve(as_length);
-
-    //     for (int i = 0; i < as_length; ++i)
-    //     {
-    //         if (f(as[i]))
-    //         {
-    //             result.push_back(i);
-    //         }
-    //     }
-
-    //     return result;
-    // }
 }
 #endif

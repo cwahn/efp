@@ -7,6 +7,27 @@
 
 using namespace efp;
 
+TEST_CASE("append")
+{
+    SECTION("Array")
+    {
+        Array<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(array_3, array_3) == res);
+    }
+
+    SECTION("ArrVec")
+    {
+        ArrVec<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(arrvec_3, array_3) == res);
+    }
+
+    SECTION("Array")
+    {
+        Vector<double> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(array_3, vector_3) == res);
+    }
+}
+
 TEST_CASE("for_each")
 {
     Array<int, 3> crtp_array{1, 2, 3};
