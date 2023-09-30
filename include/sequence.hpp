@@ -1,675 +1,1062 @@
-#ifndef SEQUENCE_HPP_
-#define SEQUENCE_HPP_
+#ifndef CRTP_SEQUENCE_HPP_
+#define CRTP_SEQUENCE_HPP_
 
-#include <array>
+// Curiously Recurring Template Pattern Sequence
+// Check validity on data store
+
+// ct_capacity is compile time bound of length. It does not mean safety of access.
+// However, actual capacity does means the length of memory safe to access.
+
+// todo STL only
+#include <iostream>
 
 #include "sfinae.hpp"
 
 namespace efp
 {
-    template <typename A, size_t N>
-    class ArrayProxy_ : public std::array<A, N>
+    constexpr int dyn = -1;
+
+    template <typename Derived>
+    class SequenceTrait;
+
+    template <typename Derived>
+    class SequenceBase
     {
     public:
-        using std::array<A, N>::array;
-        ArrayProxy_(const ArrayProxy_ &) = delete;
-        ArrayProxy_(ArrayProxy_ &&) = delete;
+        using Trait = SequenceTrait<Derived>;
 
-        // Assignment operators
-        ArrayProxy_ &operator=(const ArrayProxy_ &) = default;
-        ArrayProxy_ &operator=(ArrayProxy_ &&) = default;
+        using Element = typename Trait::Element;
+        static constexpr int ct_len = Trait::ct_len;
+        static constexpr int ct_cap = Trait::ct_cap;
 
-        // Variadic constructor for the derived class
-        template <typename... Args>
-        ArrayProxy_(Args &&...args) : std::array<A, N>{{std::forward<Args>(args)...}} {}
-    };
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-    template <typename A, size_t N>
-    class Array : public ArrayProxy_<A, N>
-    {
-    public:
-        using ArrayProxy_<A, N>::ArrayProxy_;
-        Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
-        Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
-
-        // Assignment operator
-        Array &operator=(const Array &) = default;
-        Array &operator=(Array &&) = default;
-
-        // Variadic constructor for the derived class
-        template <typename... Args>
-        Array(Args &&...args) : ArrayProxy_<A, N>{std::forward<Args>(args)...} {}
-    };
-
-    // template <typename A, size_t N>
-    // class Array : std::array<A, N>
-    // {
-    // public:
-    //     // Type aliases to match std::array
-    //     using value_type = A;
-    //     using size_type = size_t;
-
-    //     // Default constructor
-    //     Array() = default;          // Unpredicatable data_
-    //     Array(const Array &); // Not emplemented by design for RVO, NRVO enforcement
-    //     Array(Array &&);      // Not emplemented by design for RVO, NRVO enforcement
-
-    //     template <typename... Args>
-    //     Array(Args &&...args)
-    //         : data_{std::forward<Args>(args)...} {}
-
-    //     // Assignment
-
-    //     Array &operator=(const Array &other)
-    //     {
-    //         if (this != &other)
-    //         {
-    //             for (size_t i = 0; i < N; ++i)
-    //             {
-    //                 data_[i] = other.data_[i];
-    //             }
-    //         }
-    //         return *this;
-    //     }
-
-    //     // Accessors
-    //     // ! Temp no constexpr
-    //     A &operator[](size_type index)
-    //     {
-    //         return data_[index];
-    //     }
-
-    //     constexpr const A &operator[](size_type index) const
-    //     {
-    //         return data_[index];
-    //     }
-
-    //     inline constexpr size_type size() const noexcept
-    //     {
-    //         return N;
-    //     }
-
-    //     // Iterators
-    //     A *begin() noexcept
-    //     {
-    //         return data_;
-    //     }
-
-    //     const A *begin() const noexcept
-    //     {
-    //         return data_;
-    //     }
-
-    //     A *end() noexcept
-    //     {
-    //         return data_ + N;
-    //     }
-
-    //     const A *end() const noexcept
-    //     {
-    //         return data_ + N;
-    //     }
-
-    //     bool empty() const noexcept
-    //     {
-    //         return N == 0;
-    //     }
-
-    // private:
-    //     A data_[N];
-    // };
-
-    // template <typename A, size_t N>
-    // bool operator==(const Array<A, N> &lhs, const Array<A, N> &rhs)
-    // {
-    //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    // }
-
-    template <typename A, size_t Capacity>
-    class ArrVec
-    {
-    public:
-        using value_type = A;
-        using size_type = size_t;
-
-        // Constructors
-        ArrVec() : size_(0) {}
-        ArrVec(const size_t s) : size_(0) {} // Unpredicatable data_
-        ArrVec(const ArrVec &);              // Not emplemented by design for RVO, NRVO enforcement
-        ArrVec(ArrVec &&);                   // Not emplemented by design for RVO, NRVO enforcement
-        template <typename... Args>
-        ArrVec(const Args &...args)
-            : data_{args...},
-              size_(sizeof...(args)) {}
-
-        // Assignment
-
-        ArrVec &operator=(const ArrVec &other)
+        Derived &operator=(const Derived &other)
         {
-            if (this != &other)
+            if (this != other)
             {
-                size_ = other.size_;
-                for (size_t i = 0; i < size_; ++i)
-                {
-                    data_[i] = other.data_[i];
-                }
+                derived().assign_from(other);
             }
             return *this;
         }
 
-        // Accessors
-        A &operator[](const size_type index)
+        const Element &operator[](int index) const
         {
-            return data_[index];
+            return derived()[index];
         }
 
-        const A &operator[](const size_type index) const
+        // ! Mut
+        Element &operator[](int index)
         {
-            return data_[index];
+            return derived()[index];
         }
 
-        // Modifiers
-        void push_back(const value_type &value)
+        bool operator==(const SequenceBase &other) const
         {
-            if (size_ < Capacity)
-            {
-                data_[size_] = value;
-                ++size_;
-            }
+            return derived() == other.derived();
         }
 
-        void pop_back()
+        int length() const
         {
-            if (size_ > 0)
-            {
-                --size_;
-            }
+            return derived().length();
         }
 
-        // Capacity
-        constexpr size_type capacity() const noexcept
+        // ! Not appropreate for ref of sequence
+        // int capacity() const
+        // {
+        //     return derived().capacity();
+        // }
+
+        // ! Mut, Not appropreate for ref of sequence
+        // void resize(int length)
+        // {
+        //     derived().resize(length);
+        // }
+
+        // ! Mut, Not appropreate for ref of sequence
+        // void reserve(int capacity)
+        // {
+        //     derived().reserve(capacity);
+        // }
+
+        const Element *p_data() const
         {
-            return Capacity;
+            return derived().p_data();
         }
 
-        // size
-        size_type size() const noexcept
+        Element *p_data()
         {
-            return size_;
+            return derived().p_data();
         }
 
-        A *data()
+        const Element *p_begin() const
         {
-            return data_;
+            return derived().p_begin();
         }
 
-        const A *data() const
+        Element *p_begin()
         {
-            return data_;
+            return derived().p_begin();
         }
 
-        // Iterators
-        A *begin() noexcept
+        const Element *p_end() const
         {
-            return data_;
+            return derived().p_end();
         }
 
-        const A *begin() const noexcept
+        Element *p_end()
         {
-            return data_;
-        }
-
-        A *end() noexcept
-        {
-            return data_ + size_;
-        }
-
-        const A *end() const noexcept
-        {
-            return data_ + size_;
-        }
-
-        bool empty() const noexcept
-        {
-            return size_ == 0;
+            return derived().p_end();
         }
 
     private:
-        A data_[Capacity];
-        size_type size_;
+        Derived &derived()
+        {
+            return *static_cast<Derived *>(this);
+        }
+        const Derived &derived() const
+        {
+            return *static_cast<const Derived *>(this);
+        }
     };
 
-    template <typename A, size_t N>
-    bool operator==(const ArrVec<A, N> &lhs, const ArrVec<A, N> &rhs)
+    template <typename Derived>
+    using Seq = SequenceBase<Derived>;
+
+    template <typename A, int ct_length, int ct_capacity>
+    class Sequence
     {
-        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    };
+
+    template <typename A, int ct_length>
+    class Sequence<A, ct_length, ct_length>
+        : public SequenceBase<Sequence<A, ct_length, ct_length>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = ct_length;
+        static constexpr int ct_cap = ct_length;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        Sequence() {}
+        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
+        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+        template <typename... Arg>
+        Sequence(const Arg &...args)
+            : p_data_{args...} {}
+
+        Sequence &operator=(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                memcpy(p_data_, other.p_data_, ct_cap);
+            }
+            return *this;
+        }
+
+        Sequence assign_impl(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                memcpy(p_data_, other.p_data_, ct_cap);
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const Sequence &other) const
+        {
+            for (int i = 0; i < ct_len; ++i)
+            {
+                if (p_data_[i] != other.p_data_[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        int length() const
+        {
+            return ct_len;
+        }
+
+        int capacity() const
+        {
+            return ct_cap;
+        }
+
+        void resize(int length)
+        {
+            if (length != ct_len)
+            {
+                abort();
+            }
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > ct_cap)
+            {
+                abort();
+            }
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + ct_len;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + ct_len;
+        }
+
+        bool is_empty() const
+        {
+            return ct_len == 0;
+        }
+
+    private:
+        A p_data_[ct_cap];
+    };
+
+    template <typename A, int ct_length>
+    using Array = EnableIf<ct_length != dyn, Sequence<A, ct_length, ct_length>>;
+
+    template <typename A, int ct_capacity>
+    class Sequence<A, dyn, ct_capacity>
+        : public SequenceBase<Sequence<A, dyn, ct_capacity>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = ct_capacity;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        Sequence() : length_{0} {}
+        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
+        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+        template <typename... Arg>
+        Sequence(const Arg &...args)
+            : p_data_{args...},
+              length_(sizeof...(args)) {}
+
+        Sequence &operator=(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                memcpy(p_data_, other.p_data_, ct_cap);
+            }
+            return *this;
+        }
+
+        Sequence assign_impl(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                memcpy(p_data_, other.p_data_, ct_cap);
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const Sequence &other) const
+        {
+            if (length_ != other.length_)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < length_; ++i)
+            {
+                if (p_data_[i] != other.p_data_[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        int length() const
+        {
+            return length_;
+        }
+
+        int capacity() const
+        {
+            return ct_cap;
+        }
+
+        void resize(int length)
+        {
+            if (length > ct_cap || length < 0)
+            {
+                abort();
+            }
+
+            length_ = length;
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > ct_cap)
+            {
+                abort();
+            }
+        }
+
+        void push_back(const A &value)
+        {
+            if (length_ >= ct_cap)
+            {
+                abort();
+            }
+            else
+            {
+                p_data_[length_] = value;
+                ++length_;
+            }
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + length_;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + length_;
+        }
+
+        bool is_empty() const
+        {
+            return length_ == 0;
+        }
+
+    private:
+        A p_data_[ct_cap];
+        int length_;
+    };
+
+    template <typename A, int ct_capacity>
+    using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
+
+    template <typename A>
+    class Sequence<A, dyn, dyn>
+        : public SequenceBase<Sequence<A, dyn, dyn>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = dyn;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        Sequence() : p_data_{nullptr}, length_{0}, capacity_{0} {}
+        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
+        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+        template <typename... Args>
+        Sequence(const Args &...args)
+            : p_data_{new A[sizeof...(args)]},
+              capacity_(sizeof...(args)),
+              length_(sizeof...(args))
+        {
+            int i = 0;
+            for (auto arg : std::initializer_list<Common<Args...>>{args...})
+                p_data_[i++] = arg;
+        }
+
+        ~Sequence()
+        {
+            delete[] p_data_;
+        }
+
+        Sequence &operator=(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                const int other_length = other.length();
+
+                if (capacity_ < other_length)
+                {
+                    reserve(other_length);
+                }
+
+                memcpy(p_data_, other.p_data_, other_length);
+            }
+            return *this;
+        }
+
+        Sequence assign_impl(const Sequence &other)
+        {
+            if (this != &other)
+            {
+                const int other_length = other.length();
+
+                if (capacity_ < other_length)
+                {
+                    reserve(other_length);
+                }
+
+                memcpy(p_data_, other.p_data_, other_length);
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const Sequence &other) const
+        {
+            if (length_ != other.length_)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < length_; ++i)
+            {
+                if (p_data_[i] != other.p_data_[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        int length() const
+        {
+            return length_;
+        }
+
+        int capacity() const
+        {
+            return capacity_;
+        }
+
+        void resize(int length)
+        {
+            if (length < 0)
+            {
+                abort();
+            }
+
+            if (length > capacity_)
+            {
+                reserve(length);
+            }
+
+            length_ = length;
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > capacity_)
+            {
+                A *p_new_data = new A[capacity];
+                memcpy(p_new_data, p_data_, length_ * sizeof(A));
+                delete[] p_data_;
+                p_data_ = p_new_data;
+                capacity_ = capacity;
+            }
+        }
+
+        void push_back(const A &value)
+        {
+            if (length_ >= capacity_)
+            {
+                reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+            }
+
+            p_data_[length_] = value;
+            ++length_;
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + length_;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + length_;
+        }
+
+        bool is_empty() const
+        {
+            return length_ == 0;
+        }
+
+    private:
+        A *p_data_;
+        int length_;
+        int capacity_;
+    };
+
+    template <typename A>
+    using Vector = Sequence<A, dyn, dyn>;
+
+    template <typename A, int ct_length, int ct_capacity>
+    class SequenceTrait<Sequence<A, ct_length, ct_capacity>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = ct_length;
+        static constexpr int ct_cap = ct_capacity;
+
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+    };
+
+    // Should have all these three template parameter not to break static link
+    template <typename A, int ct_length, int ct_capacity>
+    class SequenceView
+    {
+    };
+
+    template <typename A, int ct_length>
+    class SequenceView<A, ct_length, ct_length>
+        : public SequenceBase<SequenceView<A, ct_length, ct_length>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = ct_length;
+        static constexpr int ct_cap = ct_length;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        SequenceView() : p_data_{nullptr} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *p_data)
+            : p_data_{p_data}
+        {
+        }
+
+        SequenceView &operator=(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+            }
+            return *this;
+        }
+
+        SequenceView assign_impl(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const SequenceView &other) const
+        {
+            return p_data_ == other.p_data_;
+        }
+
+        int length() const
+        {
+            return ct_len;
+        }
+
+        int capacity() const
+        {
+            return ct_cap;
+        }
+
+        void resize(int length)
+        {
+            if (length > ct_cap || length < 0)
+            {
+                abort();
+            }
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > ct_cap)
+            {
+                abort();
+            }
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + ct_len;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + ct_len;
+        }
+
+        bool is_empty() const
+        {
+            return ct_len == 0;
+        }
+
+    private:
+        A *p_data_;
+    };
+
+    template <typename A, int ct_length>
+    using ArrayView = EnableIf<ct_length != dyn, SequenceView<A, ct_length, ct_length>>;
+
+    template <typename A, int ct_capacity>
+    class SequenceView<A, dyn, ct_capacity>
+        : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = ct_capacity;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        SequenceView() : p_data_{nullptr}, length_{0} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *p_data) : p_data_{p_data} {}
+        SequenceView(A *p_data, const int length)
+            : p_data_{p_data}, length_{length}
+        {
+        }
+
+        SequenceView &operator=(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+                length_ = other.length_;
+            }
+            return *this;
+        }
+
+        SequenceView assign_impl(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+                length_ = other.length_;
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const SequenceView &other) const
+        {
+            return (p_data_ == other.p_data_) &&
+                   (length_ == other.length_);
+        }
+
+        int length() const
+        {
+            return length_;
+        }
+
+        int capacity() const
+        {
+            return ct_cap;
+        }
+
+        void resize(int length)
+        {
+            if (length > ct_cap || length < 0)
+            {
+                abort();
+            }
+
+            length_ = length;
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > ct_cap)
+            {
+                abort();
+            }
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + length_;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + length_;
+        }
+
+        bool is_empty() const
+        {
+            return length_ == 0;
+        }
+
+    private:
+        A *p_data_;
+        int length_;
+    };
+
+    template <typename A, int ct_capacity>
+    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
+
+    template <typename A>
+    class SequenceView<A, dyn, dyn>
+        : public SequenceBase<SequenceView<A, dyn, dyn>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = dyn;
+        static constexpr int ct_cap = dyn;
+
+        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+
+        SequenceView() : p_data_{nullptr}, length_{0}, capacity_{0} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *p_data) : p_data_{p_data} {}
+        SequenceView(A *p_data, const int length, const int capacity)
+            : p_data_{p_data}, length_{length}, capacity_{capacity}
+        {
+        }
+
+        SequenceView &operator=(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+            }
+            return *this;
+        }
+
+        SequenceView assign_impl(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                p_data_ = other.p_data_;
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+            }
+            return *this;
+        }
+
+        A &operator[](int index)
+        {
+            return p_data_[index];
+        }
+
+        const A &operator[](int index) const
+        {
+            return p_data_[index];
+        }
+
+        bool operator==(const SequenceView &other) const
+        {
+            return (p_data_ == other.p_data_) &&
+                   (length_ == other.length_) &&
+                   (capacity_ == other.capacity_);
+        }
+
+        int length() const
+        {
+            return length_;
+        }
+
+        int capacity() const
+        {
+            return capacity_;
+        }
+
+        void resize(int length)
+        {
+            if (length < 0)
+            {
+                abort();
+            }
+
+            if (length > capacity_)
+            {
+                reserve(length);
+            }
+
+            length_ = length;
+        }
+
+        void reserve(int capacity)
+        {
+            if (capacity > capacity_)
+            {
+                capacity_ = capacity;
+            }
+        }
+
+        const A *p_data() const
+        {
+            return p_data_;
+        }
+
+        A *p_data()
+        {
+            return p_data_;
+        }
+
+        A *p_begin()
+        {
+            return p_data_;
+        }
+
+        const A *p_begin() const
+        {
+            return p_data_;
+        }
+
+        A *p_end()
+        {
+            return p_data_ + length_;
+        }
+
+        const A *p_end() const
+        {
+            return p_data_ + length_;
+        }
+
+        bool is_empty() const
+        {
+            return length_ == 0;
+        }
+
+    private:
+        A *p_data_;
+        int length_;
+        int capacity_;
+    };
+
+    template <typename A>
+    using VectorView = SequenceView<A, dyn, dyn>;
+
+    template <typename A, int ct_length, int ct_capacity>
+    class SequenceTrait<SequenceView<A, ct_length, ct_capacity>>
+    {
+    public:
+        using Element = A;
+        static constexpr int ct_len = ct_length;
+        static constexpr int ct_cap = ct_capacity;
+
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+    };
+
+    // todo STL only
+
+    template <typename A, int ct_length, int ct_capacity>
+    std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
+    {
+        os << "{ ";
+        for (int i = 0; i < seq.length(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.length() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
     }
 
-    // Vector
+    template <typename A, int ct_length, int ct_capacity>
+    std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
+    {
+        os << "{ ";
+        for (int i = 0; i < seq.length(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.length() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
+    }
+
+    // Element
 
     template <typename A>
-    class VectorProxy_ : public std::vector<A>
+    struct ElementImpl
     {
-    public:
-        using std::vector<A>::vector;
-        VectorProxy_(const VectorProxy_ &) = delete;
-        VectorProxy_(VectorProxy_ &&) = delete;
-
-        // Assignment operators
-        VectorProxy_ &operator=(const VectorProxy_ &) = default;
-        VectorProxy_ &operator=(VectorProxy_ &&) = default;
+        using type = typename A::Element;
     };
 
     template <typename A>
-    class Vector : public VectorProxy_<A>
-    {
-    public:
-        using VectorProxy_<A>::VectorProxy_;
-        Vector(const Vector &); // Not emplemented by design for RVO, NRVO enforcement
-        Vector(Vector &&);      // Not emplemented by design for RVO, NRVO enforcement
+    using Element = typename ElementImpl<A>::type;
 
-        // Assignment operators
-        Vector &operator=(const Vector &) = default;
-        Vector &operator=(Vector &&) = default;
-    };
-
-    // template <typename A>
-    // class Vector
-    // {
-    // public:
-    //     // Type aliases
-    //     using value_type = A;
-    //     using size_type = size_t;
-
-    //     // Default constructor
-    //     Vector() : data_(nullptr), size_(0), capacity_(0) {}
-    //     Vector(const size_t size) : data_(new A[size * 2]), size_(size), capacity_(size * 2) {} // Unpredicatable data_
-    //     Vector(const Vector &);                                                          // Not emplemented by design for RVO, NRVO enforcement
-    //     Vector(Vector &&);                                                               // Not emplemented by design for RVO, NRVO enforcement
-    //     template <typename... Args>
-    //     Vector(const Args &...args)
-    //         : data_(new A[sizeof...(args) * 2]),
-    //           size_(sizeof...(args)),
-    //           capacity_(sizeof...(args) * 2)
-    //     {
-    //         int i = 0;
-    //         for (auto arg : std::initializer_list<typename std::common_type<Args...>::type>{args...})
-    //             data_[i++] = arg;
-    //     }
-
-    //     // Destructor
-    //     ~Vector()
-    //     {
-    //         delete[] data_;
-    //     }
-
-    //     // Assignment
-
-    //     Vector &operator=(const Vector &other)
-    //     {
-    //         if (this != &other)
-    //         {
-    //             const size_t other_size = other.size();
-    //             if (capacity_ < other_size)
-    //             {
-    //                 reserve(other.capacity());
-    //             }
-
-    //             for (size_t i = 0; i < other_size; ++i)
-    //             {
-    //                 data_[i] = other.data_[i];
-    //             }
-    //             size_ = other_size;
-    //         }
-    //         return *this;
-    //     }
-
-    //     // Element access
-    //     A &operator[](const size_type index)
-    //     {
-    //         return data_[index];
-    //     }
-
-    //     const A &operator[](const size_type index) const
-    //     {
-    //         return data_[index];
-    //     }
-
-    //     // Modifiers
-    //     void push_back(const A &value)
-    //     {
-    //         if (size_ == capacity_)
-    //         {
-    //             reserve(capacity_ == 0 ? 1 : capacity_ * 2);
-    //         }
-    //         data_[size_++] = value;
-    //     }
-
-    //     void pop_back()
-    //     {
-    //         if (size_ > 0)
-    //         {
-    //             --size_;
-    //         }
-    //     }
-
-    //     // Capacity
-    //     size_type capacity() const noexcept
-    //     {
-    //         return capacity_;
-    //     }
-
-    //     // size
-    //     size_type size() const noexcept
-    //     {
-    //         return size_;
-    //     }
-
-    //     // Reserve capacity
-    //     void reserve(const size_type new_capacity)
-    //     {
-    //         if (new_capacity > capacity_)
-    //         {
-    //             A *new_data = new A[new_capacity];
-    //             for (size_type i = 0; i < size_; ++i)
-    //             {
-    //                 new_data[i] = data_[i];
-    //             }
-    //             delete[] data_;
-    //             data_ = new_data;
-    //             capacity_ = new_capacity;
-    //         }
-    //     }
-
-    //     // Resizing the vector
-    //     void resize(const size_type new_size)
-    //     {
-    //         if (new_size > capacity_)
-    //         {
-    //             reserve(new_size);
-    //         }
-    //         size_ = new_size;
-    //     }
-
-    //     // Iterators
-    //     A *begin() noexcept
-    //     {
-    //         return data_;
-    //     }
-
-    //     const A *begin() const noexcept
-    //     {
-    //         return data_;
-    //     }
-
-    //     A *end() noexcept
-    //     {
-    //         return data_ + size_;
-    //     }
-
-    //     const A *end() const noexcept
-    //     {
-    //         return data_ + size_;
-    //     }
-
-    //     bool empty() const noexcept
-    //     {
-    //         return size_ == 0;
-    //     }
-
-    // private:
-    //     A *data_;
-    //     size_type size_;
-    //     size_type capacity_;
-    // };
-
-    // template <typename A>
-    // bool operator==(const Vector<A> &lhs, const Vector<A> &rhs)
-    // {
-    //     return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    // }
-
-    // ArrayView
-
-    template <typename A, size_t N>
-    class ArrayView
-    {
-    public:
-        using value_type = A;
-        using size_type = size_t;
-        using pointer_type = A *;
-
-        ArrayView(pointer_type p_data)
-            : data_(p_data)
-        {
-        }
-
-        ArrayView(const ArrayView &other)
-            : data_(other.data_)
-        {
-        }
-
-        ArrayView(ArrayView &&other) noexcept
-            : data_(other.data_)
-        {
-            other.data_ = nullptr;
-        }
-
-        ~ArrayView()
-        {
-        }
-
-        friend bool operator==(const ArrayView &lhs, const ArrayView &rhs)
-        {
-            return lhs.data_ == rhs.data_;
-        }
-
-        A &operator[](size_type index)
-        {
-            return data_[index];
-        }
-
-        constexpr const A &operator[](size_type index) const
-        {
-            return data_[index];
-        }
-
-        constexpr size_type size() const noexcept
-        {
-            return N;
-        }
-
-        A *data()
-        {
-            return data_;
-        }
-
-        const A *data() const
-        {
-            return data_;
-        }
-
-        // Iterators
-        A *begin() noexcept
-        {
-            return data_;
-        }
-
-        const A *begin() const noexcept
-        {
-            return data_;
-        }
-
-        A *end() noexcept
-        {
-            return data_ + N;
-        }
-
-        const A *end() const noexcept
-        {
-            return data_ + N;
-        }
-
-        bool empty() const noexcept
-        {
-            return N == 0;
-        }
-
-    private:
-        pointer_type data_;
-    };
-
-    // VectorView
+    // StaticLength
 
     template <typename A>
-    class VectorView
+    struct StaticLength
     {
-    public:
-        using value_type = A;
-        using size_type = size_t;
-        using pointer_type = Conditional<
-            IsConst<A>::value,
-            const A *,
-            A *>;
-
-        VectorView(pointer_type p_data, const size_t size)
-            : data_(p_data), size_(size)
-        {
-        }
-        VectorView(const VectorView &other)
-            : data_(other.data_), size_(other.size_)
-        {
-        }
-
-        VectorView(VectorView &&other) noexcept
-            : data_(other.data_), size_(other.size_)
-        {
-            other.data_ = nullptr;
-            other.size_ = 0;
-        }
-        ~VectorView()
-        {
-        }
-
-        friend bool operator==(const VectorView &lhs, const VectorView &rhs)
-        {
-            return (lhs.data_ == rhs.data_) && (lhs.size_ == rhs.size_);
-        }
-
-        A &operator[](const size_type index)
-        {
-            return data_[index];
-        }
-
-        const A &operator[](const size_type index) const
-        {
-            return data_[index];
-        }
-
-        // Capacity
-        // ? Do I need this?
-        size_type
-        capacity() const noexcept
-        {
-            return size_;
-        }
-
-        // size
-        size_type size() const noexcept
-        {
-            return size_;
-        }
-
-        A *data()
-        {
-            return data_;
-        }
-
-        const A *data() const
-        {
-            return data_;
-        }
-
-        // Iterators
-        A *begin() noexcept
-        {
-            return data_;
-        }
-
-        const A *begin() const noexcept
-        {
-            return data_;
-        }
-
-        A *end() noexcept
-        {
-            return data_ + size_;
-        }
-
-        const A *end() const noexcept
-        {
-            return data_ + size_;
-        }
-
-        bool empty() const noexcept
-        {
-            return size_ == 0;
-        }
-
-    private:
-        pointer_type data_;
-        size_type size_;
-    };
-
-    // template <typename A>
-    // bool operator==(const VectorView<A> &lhs, const VectorView<A> &rhs)
-    // {
-    //     return (lhs.data_ == rhs.data_) && (lhs.size_ == rhs.size_);
-    // }
-
-    // IsStaticCapacity
-
-    template <typename SeqA>
-    struct IsStaticCapacity : std::false_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<Array<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<ArrVec<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<std::array<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticCapacity<A[N]> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct IsStaticCapacity<T &> : IsStaticCapacity<T>
-    {
-    };
-
-    template <typename T>
-    struct IsStaticCapacity<T &&> : IsStaticCapacity<T>
-    {
-    };
-
-    // AreAllStaticCapacity
-
-    template <typename... Seqs>
-    struct AreAllStaticCapacity
-    {
-        static constexpr bool value = all_v(IsStaticCapacity<Seqs>::value...);
+        static constexpr int value = A::ct_len;
     };
 
     // StaticCapacity
@@ -677,339 +1064,120 @@ namespace efp
     template <typename A>
     struct StaticCapacity
     {
-        static constexpr size_t value = 0;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<A[N]>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<std::array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<Array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticCapacity<ArrVec<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A>
-    struct StaticCapacity<A &> : StaticCapacity<A>
-    {
-    };
-
-    template <typename A>
-    struct StaticCapacity<A &&> : StaticCapacity<A>
-    {
+        static constexpr int value = A::ct_cap;
     };
 
     // IsStaticLength
 
-    template <typename T>
-    struct IsStaticLength : std::false_type
+    template <typename A>
+    struct IsStaticLength
     {
+        static constexpr bool value = A::ct_len != dyn;
     };
 
-    template <typename A, size_t N>
-    struct IsStaticLength<Array<A, N>> : std::true_type
+    // AreAllStaticLength
+
+    template <typename... A>
+    struct AreAllStaticLength
     {
+        static constexpr bool value = all_v(IsStaticLength<A>::value...);
     };
 
-    template <typename A, size_t N>
-    struct IsStaticLength<std::array<A, N>> : std::true_type
-    {
-    };
-
-    template <typename A, size_t N>
-    struct IsStaticLength<A[N]> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct IsStaticLength<T &> : IsStaticLength<T>
-    {
-    };
-
-    template <typename T>
-    struct IsStaticLength<T &&> : IsStaticLength<T>
-    {
-    };
-
-    // StaticLength
-
-    template <typename SeqA>
-    struct StaticLength;
-
-    template <typename A, size_t N>
-    struct StaticLength<Array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticLength<std::array<A, N>>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename A, size_t N>
-    struct StaticLength<A[N]>
-    {
-        static constexpr size_t value = N;
-    };
-
-    template <typename SeqA>
-    struct StaticLength<SeqA &> : StaticLength<SeqA>
-    {
-    };
-
-    template <typename SeqA>
-    struct StaticLength<SeqA &&> : StaticLength<SeqA>
-    {
-    };
-
-    // length
-
-    template <typename SeqA>
-    constexpr auto length(const SeqA &as)
-        -> EnableIf<!IsStaticLength<SeqA>::value,
-                      size_t>
-    {
-        return as.size();
-    }
-
-    template <typename SeqA>
-    constexpr auto length(const SeqA &as)
-        -> EnableIf<IsStaticLength<SeqA>::value,
-                      IntegralConst<size_t, StaticLength<SeqA>::value>>
-    {
-        return IntegralConst<size_t, StaticLength<SeqA>::value>{};
-    }
-
-    template <typename A, size_t N>
-    constexpr auto length(const A (&)[N])
-        -> IntegralConst<size_t, N>
-    {
-        return IntegralConst<size_t, N>{};
-    }
-
-    // StaticSizeT
-
-    // template <size_t N>
-    // using StaticSizeT = IntegralConst<size_t, N>;
-
-    // min_size_v
+    // IsStaticCapacity
 
     template <typename A>
-    constexpr A min_size_v(const A &value)
+    struct IsStaticCapacity
     {
-        return value;
-    }
+        static constexpr bool value = A::ct_cap != dyn;
+    };
 
-    template <typename Head, typename... Tail>
-    constexpr auto min_size_v(const Head &head, const Tail &...tail)
-        -> typename std::conditional<
-            all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
-            Head,
-            size_t>::type
+    // AreAllStaticCapacity
+
+    template <typename... A>
+    struct AreAllStaticCapacity
     {
-        return head < min_size_v(tail...) ? head : min_size_v(tail...);
-    }
+        static constexpr bool value = all_v(IsStaticCapacity<A>::value...);
+    };
 
-    // size_v_product
+    // MinStaticLength
 
-    template <typename A>
-    constexpr A size_v_product(const A &value)
+    template <typename... A>
+    struct MinStaticLength
     {
-        return value;
-    }
-
-    template <typename Head, typename... Tail>
-    constexpr auto size_v_product(const Head &head, const Tail &...tail)
-        -> typename std::conditional<
-            all_v(IsIntegralConst<Head>::value, IsIntegralConst<Tail>::value...),
-            Head,
-            size_t>::type
-    {
-        return head * size_v_product(tail...);
-    }
+        static constexpr int value = minimum_v(StaticLength<A>::value...);
+    };
 
     // MinStaticCapacity
 
-    template <typename... Seqs>
-    struct MinStaticCapacity;
-
-    template <typename Seq>
-    struct MinStaticCapacity<Seq>
+    template <typename... A>
+    struct MinStaticCapacity
     {
-        static constexpr size_t value = StaticCapacity<Seq>::value;
+        static constexpr int value = minimum_v(StaticCapacity<A>::value...);
     };
 
-    template <typename Head, typename... Tail>
-    struct MinStaticCapacity<Head, Tail...>
-    {
-        static constexpr size_t head = StaticCapacity<Head>::value;
-        static constexpr size_t tail = min_size_v(StaticCapacity<Tail>::value...);
-        static constexpr size_t value = head < tail ? head : tail;
-    };
-
-    // StaticCapacityProduct
-
-    template <typename... Seqs>
-    struct StaticCapacityProduct;
-
-    template <typename SeqA>
-    struct StaticCapacityProduct<SeqA>
-    {
-        static constexpr size_t value = StaticCapacity<SeqA>::value;
-    };
-
-    template <typename Head, typename... Tail>
-    struct StaticCapacityProduct<Head, Tail...>
-    {
-        static constexpr size_t value = StaticCapacity<Head>::value * StaticCapacityProduct<Tail...>::value;
-    };
-
-    // ElementType
+    // length
+    // ? Maybe need to be at prelude
 
     template <typename A>
-    struct ElementType
+    constexpr auto length(const Seq<A> &as)
+        -> EnableIf<A::ct_len != dyn, IntegralConst<int, A::ct_len>>
     {
-        using type = typename A::value_type;
-    };
-
-    template <typename A, size_t N>
-    struct ElementType<A[N]>
-    {
-        using type = A;
-    };
+        return IntegralConst<int, A::ct_len>{};
+    }
 
     template <typename A>
-    struct ElementType<A &> : ElementType<A>
+    constexpr auto length(const Seq<A> &as)
+        -> EnableIf<A::ct_len == dyn, int>
     {
-    };
-
-    template <typename A>
-    struct ElementType<A &&> : ElementType<A>
-    {
-    };
-
-    // Element_t
-
-    template <typename A>
-    using Element_t = typename ElementType<A>::type;
-
-    // ViewElementType
-
-    template <typename A>
-    struct ViewElementType
-    {
-        using type = typename A::value_type;
-    };
-
-    template <typename A>
-    struct ViewElementType<const A>
-    {
-        using type = const typename A::value_type;
-    };
-
-    template <typename A, size_t N>
-    struct ViewElementType<A[N]>
-    {
-        using type = A;
-    };
-
-    template <typename A, size_t N>
-    struct ViewElementType<const A[N]>
-    {
-        using type = const A;
-    };
-
-    template <typename A>
-    struct ViewElementType<A &> : ViewElementType<A>
-    {
-    };
-
-    template <typename A>
-    struct ViewElementType<A &&> : ViewElementType<A>
-    {
-    };
-
-    // ViewElement_t
-
-    template <typename A>
-    using ViewElement_t = typename ViewElementType<A>::type;
+        return as.length();
+    }
 
     // p_data
 
-    // template <typename SeqA>
-    // constexpr auto p_data(const SeqA &as)
-    //     -> decltype(as.data())
-    // {
-    //     return as.data();
-    // }
-
-    // template <typename A, size_t N>
-    // constexpr A *p_data(A (&as)[N])
-    // {
-    //     return (A *)as;
-    // }
-
-    // template <typename A, size_t N>
-    // constexpr const A *p_data(const A (&as)[N])
-    // {
-    //     return (const A *)as;
-    // }
-
-    template <typename SeqA>
-    constexpr auto p_data(const SeqA &as)
-        -> const Element_t<SeqA> *
+    template <typename A>
+    constexpr auto p_data(const Seq<A> &as)
+        -> const Element<A> *
     {
-        return as.data();
+        return as.p_data();
     }
 
-    template <typename SeqA>
-    constexpr auto p_data(SeqA &as)
-        -> Element_t<SeqA> *
+    template <typename A>
+    constexpr auto p_data(Seq<A> &as)
+        -> Element<A> *
     {
-        return as.data();
+        return as.p_data();
     }
 
-    template <typename A, size_t N>
-    constexpr A *p_data(A (&as)[N])
+    // p_begin
+
+    template <typename A>
+    constexpr auto p_begin(const Seq<A> &as)
+        -> const Element<A> *
     {
-        return (A *)as;
+        return as.p_begin();
     }
 
-    template <typename A, size_t N>
-    constexpr const A *p_data(const A (&as)[N])
+    template <typename A>
+    constexpr auto p_begin(Seq<A> &as)
+        -> Element<A> *
     {
-        return (const A *)as;
+        return as.p_begin();
     }
 
     // p_end
 
-    template <typename SeqA>
-    constexpr const Element_t<SeqA> *p_end(const SeqA &as)
+    template <typename A>
+    constexpr auto p_end(const Seq<A> &as)
+        -> const Element<A> *
     {
-        return p_data(as) + length(as);
+        return as.p_end();
     }
 
-    template <typename SeqA>
-    constexpr Element_t<SeqA> *p_end(SeqA &as)
+    template <typename A>
+    constexpr auto p_end(Seq<A> &as)
+        -> Element<A> *
     {
-        return p_data(as) + length(as);
+        return as.p_end();
     }
 
 };

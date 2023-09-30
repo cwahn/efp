@@ -1,7 +1,7 @@
 #ifndef EFP_HPP_
 #define EFP_HPP_
 
-// #include "prelude.hpp"
+#include "prelude.hpp"
 
 // #include "numeric.hpp"
 // #include "c_utility.hpp"
@@ -9,6 +9,6 @@
 #include "enum_type.hpp"
 #include "maybe.hpp"
 // #include "scientific.hpp"
-#include "crtp_sequence.hpp"
+#include "sequence.hpp"
 
 #endif
