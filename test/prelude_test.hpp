@@ -162,6 +162,11 @@ TEST_CASE("from_function")
     {
         CHECK(from_function(3, plus_one) == Vector<int>{1, 2, 3});
     }
+
+    SECTION("template")
+    {
+        CHECK(from_function(IntegralConst<int, 3>{}, id<int>) == Array<int, 3>{0, 1, 2});
+    }
 }
 
 TEST_CASE("for_index")

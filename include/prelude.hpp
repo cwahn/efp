@@ -167,13 +167,18 @@ namespace efp
         }
     }
 
+    // NAryReturn
+
+    template <typename R, typename... As>
+    using NAryReturn = Sequence<
+        R,
+        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn,
+        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn>;
+
     // MapReturn
 
     template <typename F, typename... As>
-    using MapReturn = Sequence<
-        CallReturn<F, Element<As>...>,
-        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
-        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
+    using MapReturn = NAryReturn<CallReturn<F, Element<As>...>, As...>;
 
     // map
 

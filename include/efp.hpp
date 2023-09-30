@@ -7,8 +7,8 @@
 #include "maybe.hpp"
 #include "sequence.hpp"
 #include "numeric.hpp"
+#include "scientific.hpp"
 // #include "c_utility.hpp"
 // #include "cyclic.hpp"
-// #include "scientific.hpp"
 
 #endif
