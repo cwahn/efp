@@ -142,7 +142,7 @@ namespace efp
 #define CASE(i)                                                                                \
     case i:                                                                                    \
     {                                                                                          \
-        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(p_outer->storage_))); \
+        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
         break;                                                                                 \
     }
 
@@ -238,10 +238,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP2(0, CASE)
 
@@ -258,10 +258,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP4(0, CASE)
 
@@ -278,10 +278,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP8(0, CASE)
 
@@ -298,10 +298,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP16(0, CASE)
 
@@ -318,10 +318,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP32(0, CASE)
 
@@ -338,10 +338,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP64(0, CASE)
 
@@ -358,10 +358,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP128(0, CASE)
 
@@ -378,10 +378,10 @@ namespace efp
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...> &overloaded,
-            const Enum<As...> *p_outer)
+            const Enum<As...> *outer)
             -> Common<Return<Fs>...>
         {
-            switch (p_outer->index_)
+            switch (outer->index_)
             {
                 STAMP256(0, CASE)
 

@@ -491,7 +491,7 @@ namespace efp
     auto tail(const Seq<A> &as)
         -> TailReturn<A, true>
     {
-        TailReturn<A, true> result{p_data(as) + 1};
+        TailReturn<A, true> result{data(as) + 1};
 
         if (A::ct_len == dyn)
         {
@@ -511,7 +511,7 @@ namespace efp
     auto tail(Seq<A> &as)
         -> TailReturn<A, false>
     {
-        TailReturn<A, false> result{p_data(as) + 1};
+        TailReturn<A, false> result{data(as) + 1};
 
         if (A::ct_len == dyn)
         {
@@ -542,7 +542,7 @@ namespace efp
     auto init(const Seq<A> &as)
         -> InitReturn<A, true>
     {
-        InitReturn<A, true> result{p_data(as)};
+        InitReturn<A, true> result{data(as)};
 
         if (A::ct_len == dyn)
         {
@@ -563,7 +563,7 @@ namespace efp
     auto init(Seq<A> &as)
         -> InitReturn<A, false>
     {
-        InitReturn<A, false> result{p_data(as)};
+        InitReturn<A, false> result{data(as)};
 
         if (A::ct_len == dyn)
         {
@@ -628,7 +628,7 @@ namespace efp
     auto take(const N &n, const Seq<A> &as)
         -> TakeReturn<N, A, true>
     {
-        TakeReturn<N, A, true> result{p_data(as)};
+        TakeReturn<N, A, true> result{data(as)};
 
         if (TakeReturn<N, A, true>::ct_len == dyn)
         {
@@ -642,7 +642,7 @@ namespace efp
     auto take(const N &n, Seq<A> &as)
         -> TakeReturn<N, A, false>
     {
-        TakeReturn<N, A, false> result{p_data(as)};
+        TakeReturn<N, A, false> result{data(as)};
 
         if (TakeReturn<N, A, false>::ct_len == dyn)
         {
@@ -693,7 +693,7 @@ namespace efp
     {
         const auto as_length = length(as);
         const auto bounded_n = bound_v(0, as_length, n);
-        DropReturn<N, A, true> result{p_data(as) + bounded_n};
+        DropReturn<N, A, true> result{data(as) + bounded_n};
 
         if (DropReturn<N, A, true>::ct_len == dyn)
         {
@@ -709,7 +709,7 @@ namespace efp
     {
         const auto as_length = length(as);
         const auto bounded_n = bound_v(0, as_length, n);
-        DropReturn<N, A, false> result{p_data(as) + bounded_n};
+        DropReturn<N, A, false> result{data(as) + bounded_n};
 
         if (DropReturn<N, A, false>::ct_len == dyn)
         {

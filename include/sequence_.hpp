@@ -439,8 +439,8 @@ namespace efp
         using size_type = size_t;
         using pointer_type = A *;
 
-        ArrayView(pointer_type p_data)
-            : data_(p_data)
+        ArrayView(pointer_type data)
+            : data_(data)
         {
         }
 
@@ -532,8 +532,8 @@ namespace efp
             const A *,
             A *>;
 
-        VectorView(pointer_type p_data, const size_t size)
-            : data_(p_data), size_(size)
+        VectorView(pointer_type data, const size_t size)
+            : data_(data), size_(size)
         {
         }
         VectorView(const VectorView &other)
@@ -951,65 +951,65 @@ namespace efp
     template <typename A>
     using ViewElement_t = typename ViewElementType<A>::type;
 
-    // p_data
+    // data
 
     // template <typename SeqA>
-    // constexpr auto p_data(const SeqA &as)
+    // constexpr auto data(const SeqA &as)
     //     -> decltype(as.data())
     // {
     //     return as.data();
     // }
 
     // template <typename A, size_t N>
-    // constexpr A *p_data(A (&as)[N])
+    // constexpr A *data(A (&as)[N])
     // {
     //     return (A *)as;
     // }
 
     // template <typename A, size_t N>
-    // constexpr const A *p_data(const A (&as)[N])
+    // constexpr const A *data(const A (&as)[N])
     // {
     //     return (const A *)as;
     // }
 
     template <typename SeqA>
-    constexpr auto p_data(const SeqA &as)
+    constexpr auto data(const SeqA &as)
         -> const Element_t<SeqA> *
     {
         return as.data();
     }
 
     template <typename SeqA>
-    constexpr auto p_data(SeqA &as)
+    constexpr auto data(SeqA &as)
         -> Element_t<SeqA> *
     {
         return as.data();
     }
 
     template <typename A, size_t N>
-    constexpr A *p_data(A (&as)[N])
+    constexpr A *data(A (&as)[N])
     {
         return (A *)as;
     }
 
     template <typename A, size_t N>
-    constexpr const A *p_data(const A (&as)[N])
+    constexpr const A *data(const A (&as)[N])
     {
         return (const A *)as;
     }
 
-    // p_end
+    // end
 
     template <typename SeqA>
-    constexpr const Element_t<SeqA> *p_end(const SeqA &as)
+    constexpr const Element_t<SeqA> *end(const SeqA &as)
     {
-        return p_data(as) + length(as);
+        return data(as) + length(as);
     }
 
     template <typename SeqA>
-    constexpr Element_t<SeqA> *p_end(SeqA &as)
+    constexpr Element_t<SeqA> *end(SeqA &as)
     {
-        return p_data(as) + length(as);
+        return data(as) + length(as);
     }
 
 };

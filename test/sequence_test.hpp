@@ -11,21 +11,21 @@ TEST_CASE("crtp sequence init")
     {
         Array<int, 3> a{1, 2, 3};
         CHECK(a == Array<int, 3>{1, 2, 3});
-        CHECK(a.length() == 3);
+        CHECK(a.size() == 3);
     }
 
     SECTION("ArrVec")
     {
         ArrVec<int, 4> a = {1, 2, 3};
 
-        CHECK(a.length() == 3);
+        CHECK(a.size() == 3);
         CHECK(a.capacity() == 4);
     }
 
     SECTION("Vector")
     {
         Vector<int> a = {0, 0, 0};
-        for (int i = 0; i < a.length(); ++i)
+        for (int i = 0; i < a.size(); ++i)
         {
             a[i] = i + 1;
         }
@@ -33,8 +33,8 @@ TEST_CASE("crtp sequence init")
         Vector<int> b = {1, 2, 3};
 
         CHECK(a == b);
-        CHECK(a.length() == 3);
-        CHECK(b.length() == 3);
+        CHECK(a.size() == 3);
+        CHECK(b.size() == 3);
         CHECK(a.capacity() == 3);
         CHECK(b.capacity() == 3);
     }
@@ -195,7 +195,7 @@ TEST_CASE("crtp sequence init")
 
 //     SECTION("copy construction")
 //     {
-//         ArrayView<const double, 3> view_1{p_data(array_3)};
+//         ArrayView<const double, 3> view_1{data(array_3)};
 //         auto view_2 = view_1;
 //         CHECK(view_1 == view_2);
 //     }
@@ -205,7 +205,7 @@ TEST_CASE("crtp sequence init")
 // {
 //     SECTION("copy construction")
 //     {
-//         VectorView<const double> view_1{p_data(array_3), 3};
+//         VectorView<const double> view_1{data(array_3), 3};
 //         auto view_2 = view_1;
 //         CHECK(view_1 == view_2);
 //     }

@@ -8,7 +8,7 @@
 #include "sequence.hpp"
 #include "numeric.hpp"
 #include "scientific.hpp"
-// #include "c_utility.hpp"
-// #include "cyclic.hpp"
+#include "c_utility.hpp"
+#include "cyclic.hpp"
 
 #endif

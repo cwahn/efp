@@ -644,7 +644,7 @@ namespace efp
     auto tail(const SeqA &as)
         -> VectorView<const Element_t<SeqA>>
     {
-        return VectorView<const Element_t<SeqA>>{p_data(as) + 1, length(as) - 1};
+        return VectorView<const Element_t<SeqA>>{data(as) + 1, length(as) - 1};
     }
 
     // ! Partial function. Make sure non empty
@@ -652,7 +652,7 @@ namespace efp
     auto tail(SeqA &as)
         -> VectorView<Element_t<SeqA>>
     {
-        return VectorView<Element_t<SeqA>>{p_data(as) + 1, length(as) - 1};
+        return VectorView<Element_t<SeqA>>{data(as) + 1, length(as) - 1};
     }
 
     // todo init
@@ -661,7 +661,7 @@ namespace efp
     auto init(const SeqA &as)
         -> VectorView<const Element_t<SeqA>>
     {
-        return VectorView<const Element_t<SeqA>>{p_data(as), length(as) - 1};
+        return VectorView<const Element_t<SeqA>>{data(as), length(as) - 1};
     }
 
     // ! Partial function. Make sure non empty
@@ -669,7 +669,7 @@ namespace efp
     auto init(SeqA &as)
         -> VectorView<Element_t<SeqA>>
     {
-        return VectorView<Element_t<SeqA>>{p_data(as), length(as) - 1};
+        return VectorView<Element_t<SeqA>>{data(as), length(as) - 1};
     }
 
     // todo last
@@ -696,7 +696,7 @@ namespace efp
     //         IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>>
     // {
-    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{p_data(as)};
+    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, N::value)>{data(as)};
     // }
 
     // template <typename N, typename SeqA>
@@ -705,21 +705,21 @@ namespace efp
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<ViewElement_t<SeqA>>>
     // {
-    //     return VectorView<ViewElement_t<SeqA>>{p_data(as), (size_t)bound_v(0, length(as), n)};
+    //     return VectorView<ViewElement_t<SeqA>>{data(as), (size_t)bound_v(0, length(as), n)};
     // }
 
     template <typename SeqA>
     auto take(int n, const SeqA &as)
         -> VectorView<const Element_t<SeqA>>
     {
-        return VectorView<const Element_t<SeqA>>{p_data(as), (size_t)bound_v(0, (int)length(as), n)};
+        return VectorView<const Element_t<SeqA>>{data(as), (size_t)bound_v(0, (int)length(as), n)};
     }
 
     template <typename SeqA>
     auto take(int n, SeqA &as)
         -> VectorView<Element_t<SeqA>>
     {
-        return VectorView<Element_t<SeqA>>{p_data(as), (size_t)bound_v(0, (int)length(as), n)};
+        return VectorView<Element_t<SeqA>>{data(as), (size_t)bound_v(0, (int)length(as), n)};
     }
 
     // drop
@@ -731,7 +731,7 @@ namespace efp
     //         ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>>
     // {
     //     // ! What if larger than n? maybe last with 0?
-    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{p_data(as) + n};
+    //     return ArrayView<ViewElement_t<SeqA>, bound_v(0, StaticLength<SeqA>::value, StaticLength<SeqA>::value - N::value)>{data(as) + n};
     // }
 
     // template <typename N, typename SeqA>
@@ -760,7 +760,7 @@ namespace efp
     //         VectorView<ViewElement_t<SeqA>>>
     // {
     //     // ! What if larger than n? maybe last with 0?
-    //     return VectorView<ViewElement_t<SeqA>>{p_data(as) + n, (size_t)bound_v(0, length(as), length(as) - n)};
+    //     return VectorView<ViewElement_t<SeqA>>{data(as) + n, (size_t)bound_v(0, length(as), length(as) - n)};
     // }
 
     // template <typename N, typename SeqA>
@@ -770,7 +770,7 @@ namespace efp
     //         VectorView<Element_t<SeqA>>>
     // {
     //     // ! What if larger than n? maybe last with 0?
-    //     return VectorView<Element_t<SeqA>>{p_data(as) + n, length(as) - n};
+    //     return VectorView<Element_t<SeqA>>{data(as) + n, length(as) - n};
     // }
 
     // template <typename N, typename SeqA>
@@ -779,7 +779,7 @@ namespace efp
     //         !IsIntegralConst<N>::value && IsStaticLength<SeqA>::value,
     //         VectorView<const Element_t<SeqA>>>
     // {
-    //     return VectorView<const Element_t<SeqA>>{p_data(as) + n, length(as) - n};
+    //     return VectorView<const Element_t<SeqA>>{data(as) + n, length(as) - n};
     // }
 
     template <typename SeqA>
@@ -788,7 +788,7 @@ namespace efp
     {
         auto as_length = length(as);
         auto bound_n = (size_t)bound_v(0, (int)as_length, n);
-        return VectorView<const Element_t<SeqA>>{p_data(as) + bound_n, as_length - bound_n};
+        return VectorView<const Element_t<SeqA>>{data(as) + bound_n, as_length - bound_n};
     }
 
     template <typename SeqA>
@@ -797,7 +797,7 @@ namespace efp
     {
         auto as_length = length(as);
         auto bound_n = (size_t)bound_v(0, (int)as_length, n);
-        return VectorView<Element_t<SeqA>>{p_data(as) + bound_n, as_length - bound_n};
+        return VectorView<Element_t<SeqA>>{data(as) + bound_n, as_length - bound_n};
     }
 
     // elem

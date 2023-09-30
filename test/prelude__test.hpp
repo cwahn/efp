@@ -445,11 +445,11 @@ TEST_CASE("tail")
         const auto arrvec = ArrVec<int, 3>{1, 2, 3};
         const auto vector = Vector<int>{1, 2, 3};
 
-        CHECK(tail(std_array) == VectorView<const int>{p_data(std_array) + 1, length(std_array) - 1});
-        CHECK(tail(std_vector) == VectorView<const int>{p_data(std_vector) + 1, length(std_vector) - 1});
-        CHECK(tail(array) == VectorView<const int>{p_data(array) + 1, length(array) - 1});
-        CHECK(tail(arrvec) == VectorView<const int>{p_data(arrvec) + 1, length(arrvec) - 1});
-        CHECK(tail(vector) == VectorView<const int>{p_data(vector) + 1, length(vector) - 1});
+        CHECK(tail(std_array) == VectorView<const int>{data(std_array) + 1, length(std_array) - 1});
+        CHECK(tail(std_vector) == VectorView<const int>{data(std_vector) + 1, length(std_vector) - 1});
+        CHECK(tail(array) == VectorView<const int>{data(array) + 1, length(array) - 1});
+        CHECK(tail(arrvec) == VectorView<const int>{data(arrvec) + 1, length(arrvec) - 1});
+        CHECK(tail(vector) == VectorView<const int>{data(vector) + 1, length(vector) - 1});
     }
 
     SECTION("non const")
@@ -460,11 +460,11 @@ TEST_CASE("tail")
         ArrVec<int, 3> arrvec{1, 2, 3};
         Vector<int> vector{1, 2, 3};
 
-        CHECK(tail(std_array) == VectorView<int>{p_data(std_array) + 1, length(std_array) - 1});
-        CHECK(tail(std_vector) == VectorView<int>{p_data(std_vector) + 1, length(std_vector) - 1});
-        CHECK(tail(array) == VectorView<int>{p_data(array) + 1, length(array) - 1});
-        CHECK(tail(arrvec) == VectorView<int>{p_data(arrvec) + 1, length(arrvec) - 1});
-        CHECK(tail(vector) == VectorView<int>{p_data(vector) + 1, length(vector) - 1});
+        CHECK(tail(std_array) == VectorView<int>{data(std_array) + 1, length(std_array) - 1});
+        CHECK(tail(std_vector) == VectorView<int>{data(std_vector) + 1, length(std_vector) - 1});
+        CHECK(tail(array) == VectorView<int>{data(array) + 1, length(array) - 1});
+        CHECK(tail(arrvec) == VectorView<int>{data(arrvec) + 1, length(arrvec) - 1});
+        CHECK(tail(vector) == VectorView<int>{data(vector) + 1, length(vector) - 1});
     }
 }
 
@@ -478,11 +478,11 @@ TEST_CASE("init")
         const auto arrvec = ArrVec<int, 3>{1, 2, 3};
         const auto vector = Vector<int>{1, 2, 3};
 
-        CHECK(init(std_array) == VectorView<const int>{p_data(std_array), length(std_array) - 1});
-        CHECK(init(std_vector) == VectorView<const int>{p_data(std_vector), length(std_vector) - 1});
-        CHECK(init(array) == VectorView<const int>{p_data(array), length(array) - 1});
-        CHECK(init(arrvec) == VectorView<const int>{p_data(arrvec), length(arrvec) - 1});
-        CHECK(init(vector) == VectorView<const int>{p_data(vector), length(vector) - 1});
+        CHECK(init(std_array) == VectorView<const int>{data(std_array), length(std_array) - 1});
+        CHECK(init(std_vector) == VectorView<const int>{data(std_vector), length(std_vector) - 1});
+        CHECK(init(array) == VectorView<const int>{data(array), length(array) - 1});
+        CHECK(init(arrvec) == VectorView<const int>{data(arrvec), length(arrvec) - 1});
+        CHECK(init(vector) == VectorView<const int>{data(vector), length(vector) - 1});
     }
 
     SECTION("non const")
@@ -493,11 +493,11 @@ TEST_CASE("init")
         ArrVec<int, 3> arrvec{1, 2, 3};
         Vector<int> vector{1, 2, 3};
 
-        CHECK(init(std_array) == VectorView<int>{p_data(std_array), length(std_array) - 1});
-        CHECK(init(std_vector) == VectorView<int>{p_data(std_vector), length(std_vector) - 1});
-        CHECK(init(array) == VectorView<int>{p_data(array), length(array) - 1});
-        CHECK(init(arrvec) == VectorView<int>{p_data(arrvec), length(arrvec) - 1});
-        CHECK(init(vector) == VectorView<int>{p_data(vector), length(vector) - 1});
+        CHECK(init(std_array) == VectorView<int>{data(std_array), length(std_array) - 1});
+        CHECK(init(std_vector) == VectorView<int>{data(std_vector), length(std_vector) - 1});
+        CHECK(init(array) == VectorView<int>{data(array), length(array) - 1});
+        CHECK(init(arrvec) == VectorView<int>{data(arrvec), length(arrvec) - 1});
+        CHECK(init(vector) == VectorView<int>{data(vector), length(vector) - 1});
     }
 }
 
@@ -521,7 +521,7 @@ TEST_CASE("take")
     SECTION("c array0")
     {
         const auto res = take(2, c_array_3);
-        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(data(res) == data(c_array_3));
         CHECK(length(res) == 2);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
@@ -530,14 +530,14 @@ TEST_CASE("take")
     SECTION("c array1")
     {
         const auto res = take(-1, c_array_3);
-        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(data(res) == data(c_array_3));
         CHECK(length(res) == 0);
     }
 
     SECTION("c array2")
     {
         const auto res = take(9, c_array_3);
-        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(data(res) == data(c_array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
@@ -550,7 +550,7 @@ TEST_CASE("drop")
     SECTION("c array0")
     {
         const auto res = drop(2, c_array_3);
-        CHECK(p_data(res) == p_data(c_array_3) + 2);
+        CHECK(data(res) == data(c_array_3) + 2);
         CHECK(length(res) == 1);
         CHECK(res[0] == 3.);
     }
@@ -558,14 +558,14 @@ TEST_CASE("drop")
     SECTION("c array1")
     {
         const auto res = drop(-1, c_array_3);
-        CHECK(p_data(res) == p_data(c_array_3));
+        CHECK(data(res) == data(c_array_3));
         CHECK(length(res) == 3);
     }
 
     SECTION("c array2")
     {
         const auto res = drop(9, c_array_3);
-        CHECK(p_data(res) == p_end(c_array_3));
+        CHECK(data(res) == end(c_array_3));
         CHECK(length(res) == 0);
     }
 }

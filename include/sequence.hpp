@@ -32,15 +32,6 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Derived &operator=(const Derived &other)
-        {
-            if (this != other)
-            {
-                derived().assign_from(other);
-            }
-            return *this;
-        }
-
         const Element &operator[](int index) const
         {
             return derived()[index];
@@ -57,57 +48,39 @@ namespace efp
             return derived() == other.derived();
         }
 
-        int length() const
+        int size() const
         {
-            return derived().length();
+            return derived().size();
         }
 
-        // ! Not appropreate for ref of sequence
-        // int capacity() const
-        // {
-        //     return derived().capacity();
-        // }
-
-        // ! Mut, Not appropreate for ref of sequence
-        // void resize(int length)
-        // {
-        //     derived().resize(length);
-        // }
-
-        // ! Mut, Not appropreate for ref of sequence
-        // void reserve(int capacity)
-        // {
-        //     derived().reserve(capacity);
-        // }
-
-        const Element *p_data() const
+        const Element *data() const
         {
-            return derived().p_data();
+            return derived().data();
         }
 
-        Element *p_data()
+        Element *data()
         {
-            return derived().p_data();
+            return derived().data();
         }
 
-        const Element *p_begin() const
+        const Element *begin() const
         {
-            return derived().p_begin();
+            return derived().begin();
         }
 
-        Element *p_begin()
+        Element *begin()
         {
-            return derived().p_begin();
+            return derived().begin();
         }
 
-        const Element *p_end() const
+        const Element *end() const
         {
-            return derived().p_end();
+            return derived().end();
         }
 
-        Element *p_end()
+        Element *end()
         {
-            return derived().p_end();
+            return derived().end();
         }
 
     private:
@@ -146,13 +119,13 @@ namespace efp
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Arg>
         Sequence(const Arg &...args)
-            : p_data_{args...} {}
+            : data_{args...} {}
 
         Sequence &operator=(const Sequence &other)
         {
             if (this != &other)
             {
-                memcpy(p_data_, other.p_data_, ct_cap);
+                memcpy(data_, other.data_, ct_cap);
             }
             return *this;
         }
@@ -161,26 +134,26 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(p_data_, other.p_data_, ct_cap);
+                memcpy(data_, other.data_, ct_cap);
             }
             return *this;
         }
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const Sequence &other) const
         {
             for (int i = 0; i < ct_len; ++i)
             {
-                if (p_data_[i] != other.p_data_[i])
+                if (data_[i] != other.data_[i])
                 {
                     return false;
                 }
@@ -189,7 +162,7 @@ namespace efp
             return true;
         }
 
-        int length() const
+        int size() const
         {
             return ct_len;
         }
@@ -215,34 +188,34 @@ namespace efp
             }
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + ct_len;
+            return data_ + ct_len;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + ct_len;
+            return data_ + ct_len;
         }
 
         bool is_empty() const
@@ -251,7 +224,7 @@ namespace efp
         }
 
     private:
-        A p_data_[ct_cap];
+        A data_[ct_cap];
     };
 
     template <typename A, int ct_length>
@@ -274,14 +247,14 @@ namespace efp
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Arg>
         Sequence(const Arg &...args)
-            : p_data_{args...},
+            : data_{args...},
               length_(sizeof...(args)) {}
 
         Sequence &operator=(const Sequence &other)
         {
             if (this != &other)
             {
-                memcpy(p_data_, other.p_data_, ct_cap);
+                memcpy(data_, other.data_, ct_cap);
             }
             return *this;
         }
@@ -290,19 +263,19 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(p_data_, other.p_data_, ct_cap);
+                memcpy(data_, other.data_, ct_cap);
             }
             return *this;
         }
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const Sequence &other) const
@@ -314,7 +287,7 @@ namespace efp
 
             for (int i = 0; i < length_; ++i)
             {
-                if (p_data_[i] != other.p_data_[i])
+                if (data_[i] != other.data_[i])
                 {
                     return false;
                 }
@@ -323,7 +296,7 @@ namespace efp
             return true;
         }
 
-        int length() const
+        int size() const
         {
             return length_;
         }
@@ -359,39 +332,39 @@ namespace efp
             }
             else
             {
-                p_data_[length_] = value;
+                data_[length_] = value;
                 ++length_;
             }
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
         bool is_empty() const
@@ -400,7 +373,7 @@ namespace efp
         }
 
     private:
-        A p_data_[ct_cap];
+        A data_[ct_cap];
         int length_;
     };
 
@@ -419,37 +392,37 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : p_data_{nullptr}, length_{0}, capacity_{0} {}
+        Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
         template <typename... Args>
         Sequence(const Args &...args)
-            : p_data_{new A[sizeof...(args)]},
+            : data_{new A[sizeof...(args)]},
               capacity_(sizeof...(args)),
               length_(sizeof...(args))
         {
             int i = 0;
             for (auto arg : std::initializer_list<Common<Args...>>{args...})
-                p_data_[i++] = arg;
+                data_[i++] = arg;
         }
 
         ~Sequence()
         {
-            delete[] p_data_;
+            delete[] data_;
         }
 
         Sequence &operator=(const Sequence &other)
         {
             if (this != &other)
             {
-                const int other_length = other.length();
+                const int other_length = other.size();
 
                 if (capacity_ < other_length)
                 {
                     reserve(other_length);
                 }
 
-                memcpy(p_data_, other.p_data_, other_length);
+                memcpy(data_, other.data_, other_length);
             }
             return *this;
         }
@@ -458,26 +431,26 @@ namespace efp
         {
             if (this != &other)
             {
-                const int other_length = other.length();
+                const int other_length = other.size();
 
                 if (capacity_ < other_length)
                 {
                     reserve(other_length);
                 }
 
-                memcpy(p_data_, other.p_data_, other_length);
+                memcpy(data_, other.data_, other_length);
             }
             return *this;
         }
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const Sequence &other) const
@@ -489,7 +462,7 @@ namespace efp
 
             for (int i = 0; i < length_; ++i)
             {
-                if (p_data_[i] != other.p_data_[i])
+                if (data_[i] != other.data_[i])
                 {
                     return false;
                 }
@@ -498,7 +471,7 @@ namespace efp
             return true;
         }
 
-        int length() const
+        int size() const
         {
             return length_;
         }
@@ -527,10 +500,10 @@ namespace efp
         {
             if (capacity > capacity_)
             {
-                A *p_new_data = new A[capacity];
-                memcpy(p_new_data, p_data_, length_ * sizeof(A));
-                delete[] p_data_;
-                p_data_ = p_new_data;
+                A *new_data = new A[capacity];
+                memcpy(new_data, data_, length_ * sizeof(A));
+                delete[] data_;
+                data_ = new_data;
                 capacity_ = capacity;
             }
         }
@@ -542,38 +515,38 @@ namespace efp
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
 
-            p_data_[length_] = value;
+            data_[length_] = value;
             ++length_;
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
         bool is_empty() const
@@ -582,7 +555,7 @@ namespace efp
         }
 
     private:
-        A *p_data_;
+        A *data_;
         int length_;
         int capacity_;
     };
@@ -620,19 +593,21 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : p_data_{nullptr} {}
+        SequenceView() : data_{nullptr} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *p_data)
-            : p_data_{p_data}
-        {
-        }
+        SequenceView(A *data)
+            : data_{data} {}
+        // SequenceView(const A (&c_array)[ct_len])
+        //     : data_{c_array} {}
+        // SequenceView(const std::array<A, ct_len> &stl_array)
+        //     : data_{stl_array.data()} {}
 
         SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
             }
             return *this;
         }
@@ -641,27 +616,27 @@ namespace efp
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
             }
             return *this;
         }
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const SequenceView &other) const
         {
-            return p_data_ == other.p_data_;
+            return data_ == other.data_;
         }
 
-        int length() const
+        int size() const
         {
             return ct_len;
         }
@@ -687,34 +662,34 @@ namespace efp
             }
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + ct_len;
+            return data_ + ct_len;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + ct_len;
+            return data_ + ct_len;
         }
 
         bool is_empty() const
@@ -723,7 +698,7 @@ namespace efp
         }
 
     private:
-        A *p_data_;
+        A *data_;
     };
 
     template <typename A, int ct_length>
@@ -741,12 +716,12 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : p_data_{nullptr}, length_{0} {}
+        SequenceView() : data_{nullptr}, length_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *p_data) : p_data_{p_data} {}
-        SequenceView(A *p_data, const int length)
-            : p_data_{p_data}, length_{length}
+        SequenceView(A *data) : data_{data} {}
+        SequenceView(A *data, const int length)
+            : data_{data}, length_{length}
         {
         }
 
@@ -754,7 +729,7 @@ namespace efp
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
                 length_ = other.length_;
             }
             return *this;
@@ -764,7 +739,7 @@ namespace efp
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
                 length_ = other.length_;
             }
             return *this;
@@ -772,21 +747,21 @@ namespace efp
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const SequenceView &other) const
         {
-            return (p_data_ == other.p_data_) &&
+            return (data_ == other.data_) &&
                    (length_ == other.length_);
         }
 
-        int length() const
+        int size() const
         {
             return length_;
         }
@@ -814,34 +789,34 @@ namespace efp
             }
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
         bool is_empty() const
@@ -850,7 +825,7 @@ namespace efp
         }
 
     private:
-        A *p_data_;
+        A *data_;
         int length_;
     };
 
@@ -869,20 +844,22 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : p_data_{nullptr}, length_{0}, capacity_{0} {}
+        SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *p_data) : p_data_{p_data} {}
-        SequenceView(A *p_data, const int length, const int capacity)
-            : p_data_{p_data}, length_{length}, capacity_{capacity}
-        {
-        }
+        SequenceView(A *data) : data_{data} {}
+        SequenceView(A *data, const int length, const int capacity)
+            : data_{data}, length_{length}, capacity_{capacity} {}
+        SequenceView(const std::vector<A> &stl_vector)
+            : data_{stl_vector.data()},
+              length_(stl_vector.size()),
+              capacity_(stl_vector.capacity()) {}
 
         SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
                 length_ = other.length_;
                 capacity_ = other.capacity_;
             }
@@ -893,7 +870,7 @@ namespace efp
         {
             if (this != &other)
             {
-                p_data_ = other.p_data_;
+                data_ = other.data_;
                 length_ = other.length_;
                 capacity_ = other.capacity_;
             }
@@ -902,22 +879,22 @@ namespace efp
 
         A &operator[](int index)
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         const A &operator[](int index) const
         {
-            return p_data_[index];
+            return data_[index];
         }
 
         bool operator==(const SequenceView &other) const
         {
-            return (p_data_ == other.p_data_) &&
+            return (data_ == other.data_) &&
                    (length_ == other.length_) &&
                    (capacity_ == other.capacity_);
         }
 
-        int length() const
+        int size() const
         {
             return length_;
         }
@@ -950,34 +927,34 @@ namespace efp
             }
         }
 
-        const A *p_data() const
+        const A *data() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_data()
+        A *data()
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_begin()
+        A *begin()
         {
-            return p_data_;
+            return data_;
         }
 
-        const A *p_begin() const
+        const A *begin() const
         {
-            return p_data_;
+            return data_;
         }
 
-        A *p_end()
+        A *end()
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
-        const A *p_end() const
+        const A *end() const
         {
-            return p_data_ + length_;
+            return data_ + length_;
         }
 
         bool is_empty() const
@@ -986,7 +963,7 @@ namespace efp
         }
 
     private:
-        A *p_data_;
+        A *data_;
         int length_;
         int capacity_;
     };
@@ -1009,13 +986,14 @@ namespace efp
     // todo STL only
 
     template <typename A, int ct_length, int ct_capacity>
-    std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
+    std::ostream &
+    operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
-        for (int i = 0; i < seq.length(); ++i)
+        for (int i = 0; i < seq.size(); ++i)
         {
             os << seq[i];
-            if (i != seq.length() - 1)
+            if (i != seq.size() - 1)
             {
                 os << ", ";
             }
@@ -1028,10 +1006,10 @@ namespace efp
     std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
-        for (int i = 0; i < seq.length(); ++i)
+        for (int i = 0; i < seq.size(); ++i)
         {
             os << seq[i];
-            if (i != seq.length() - 1)
+            if (i != seq.size() - 1)
             {
                 os << ", ";
             }
@@ -1129,55 +1107,55 @@ namespace efp
     constexpr auto length(const Seq<A> &as)
         -> EnableIf<A::ct_len == dyn, int>
     {
-        return as.length();
+        return as.size();
     }
 
-    // p_data
+    // data
 
     template <typename A>
-    constexpr auto p_data(const Seq<A> &as)
+    constexpr auto data(const Seq<A> &as)
         -> const Element<A> *
     {
-        return as.p_data();
+        return as.data();
     }
 
     template <typename A>
-    constexpr auto p_data(Seq<A> &as)
+    constexpr auto data(Seq<A> &as)
         -> Element<A> *
     {
-        return as.p_data();
+        return as.data();
     }
 
-    // p_begin
+    // begin
 
     template <typename A>
-    constexpr auto p_begin(const Seq<A> &as)
+    constexpr auto begin(const Seq<A> &as)
         -> const Element<A> *
     {
-        return as.p_begin();
+        return as.begin();
     }
 
     template <typename A>
-    constexpr auto p_begin(Seq<A> &as)
+    constexpr auto begin(Seq<A> &as)
         -> Element<A> *
     {
-        return as.p_begin();
+        return as.begin();
     }
 
-    // p_end
+    // end
 
     template <typename A>
-    constexpr auto p_end(const Seq<A> &as)
+    constexpr auto end(const Seq<A> &as)
         -> const Element<A> *
     {
-        return as.p_end();
+        return as.end();
     }
 
     template <typename A>
-    constexpr auto p_end(Seq<A> &as)
+    constexpr auto end(Seq<A> &as)
         -> Element<A> *
     {
-        return as.p_end();
+        return as.end();
     }
 
 };

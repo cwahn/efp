@@ -160,7 +160,7 @@ TEST_CASE("ArrayView")
 
     SECTION("copy construction")
     {
-        ArrayView<const double, 3> view_1{p_data(array_3)};
+        ArrayView<const double, 3> view_1{data(array_3)};
         auto view_2 = view_1;
         CHECK(view_1 == view_2);
     }
@@ -170,7 +170,7 @@ TEST_CASE("VectorView")
 {
     SECTION("copy construction")
     {
-        VectorView<const double> view_1{p_data(array_3), 3};
+        VectorView<const double> view_1{data(array_3), 3};
         auto view_2 = view_1;
         CHECK(view_1 == view_2);
     }

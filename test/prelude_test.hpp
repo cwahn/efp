@@ -104,12 +104,19 @@ TEST_CASE("for_each")
 
 TEST_CASE("map")
 {
-    Array<int, 3> crtp_array{1, 2, 3};
-
     auto times_2 = [](int x)
     { return 2 * x; };
 
-    CHECK(map(times_2, crtp_array) == Array<int, 3>{2, 4, 6});
+    SECTION("Array")
+    {
+        CHECK(map(times_2, array_3) == Array<int, 3>{2, 4, 6});
+    }
+    SECTION("C array")
+    {
+        // ArrayView<double, 3> view{stl_array_3};
+        // CHECK(map(times_2, StlArrayAdapter<double, 3>{stl_array_3}) == Array<int, 3>{2, 4, 6});
+        // CHECK(map(times_2, stl_array_3) == Array<int, 3>{2, 4, 6});
+    }
 }
 
 TEST_CASE("filter")
@@ -280,9 +287,9 @@ TEST_CASE("tail")
 {
     SECTION("const")
     {
-        CHECK(tail(array_3) == ArrayView<const double, 2>{p_data(array_3) + 1});
-        CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{p_data(arrvec_3) + 1, 2});
-        CHECK(tail(vector_3) == VectorView<const double>{p_data(vector_3) + 1, 2, 2});
+        CHECK(tail(array_3) == ArrayView<const double, 2>{data(array_3) + 1});
+        CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3) + 1, 2});
+        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2, 2});
     }
 
     SECTION("non const")
@@ -291,9 +298,9 @@ TEST_CASE("tail")
         ArrVec<double, 3> arrvec{1., 2., 3.};
         Vector<double> vector{1., 2., 3.};
 
-        CHECK(tail(array) == ArrayView<double, 2>{p_data(array) + 1});
-        CHECK(tail(arrvec) == ArrVecView<double, 2>{p_data(arrvec) + 1, 2});
-        CHECK(tail(vector) == VectorView<double>{p_data(vector) + 1, 2, 2});
+        CHECK(tail(array) == ArrayView<double, 2>{data(array) + 1});
+        CHECK(tail(arrvec) == ArrVecView<double, 2>{data(arrvec) + 1, 2});
+        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2, 2});
     }
 }
 
@@ -301,9 +308,9 @@ TEST_CASE("init")
 {
     SECTION("const")
     {
-        CHECK(init(array_3) == ArrayView<const double, 2>{p_data(array_3)});
-        CHECK(init(arrvec_3) == ArrVecView<const double, 2>{p_data(arrvec_3), 2});
-        CHECK(init(vector_3) == VectorView<const double>{p_data(vector_3), 2, 2});
+        CHECK(init(array_3) == ArrayView<const double, 2>{data(array_3)});
+        CHECK(init(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3), 2});
+        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2, 2});
     }
 
     SECTION("non const")
@@ -312,9 +319,9 @@ TEST_CASE("init")
         ArrVec<double, 3> arrvec{1., 2., 3.};
         Vector<double> vector{1., 2., 3.};
 
-        CHECK(init(array) == ArrayView<double, 2>{p_data(array)});
-        CHECK(init(arrvec) == ArrVecView<double, 2>{p_data(arrvec), 2});
-        CHECK(init(vector) == VectorView<double>{p_data(vector), 2, 2});
+        CHECK(init(array) == ArrayView<double, 2>{data(array)});
+        CHECK(init(arrvec) == ArrVecView<double, 2>{data(arrvec), 2});
+        CHECK(init(vector) == VectorView<double>{data(vector), 2, 2});
     }
 }
 
@@ -330,7 +337,7 @@ TEST_CASE("take")
     SECTION("array 0")
     {
         const auto res = take(2, array_3);
-        CHECK(p_data(res) == p_data(array_3));
+        CHECK(data(res) == data(array_3));
         CHECK(length(res) == 2);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
@@ -339,14 +346,14 @@ TEST_CASE("take")
     SECTION("array 1")
     {
         const auto res = take(-1, array_3);
-        CHECK(p_data(res) == p_data(array_3));
+        CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
 
     SECTION("array 2")
     {
         const auto res = take(9, array_3);
-        CHECK(p_data(res) == p_data(array_3));
+        CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
@@ -359,7 +366,7 @@ TEST_CASE("drop")
     SECTION("array 0")
     {
         const auto res = drop(2, array_3);
-        CHECK(p_data(res) == p_data(array_3) + 2);
+        CHECK(data(res) == data(array_3) + 2);
         CHECK(length(res) == 1);
         CHECK(res[0] == 3.);
     }
@@ -367,7 +374,7 @@ TEST_CASE("drop")
     SECTION("array 1")
     {
         const auto res = drop(-1, array_3);
-        CHECK(p_data(res) == p_data(array_3));
+        CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
@@ -377,7 +384,7 @@ TEST_CASE("drop")
     SECTION("array 2")
     {
         const auto res = drop(9, array_3);
-        CHECK(p_data(res) == p_data(array_3) + 3);
+        CHECK(data(res) == data(array_3) + 3);
         CHECK(length(res) == 0);
     }
 }
