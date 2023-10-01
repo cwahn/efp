@@ -289,28 +289,7 @@ namespace efp
     // template <typename A>
     // using ReferenceRemoved = typename std::remove_reference<A>::Type;
 
-    // CommonImpl
-
-    // ! Deprecated
-
-    // template <typename... Args>
-    // using Common = typename std::common_type<Args...>::Type;
-
-    // IsIntegralConstant
-
-    // template <typename A>
-    // struct IsIntegralConstant : std::false_type
-    // {
-    // };
-
-    // template <typename A, A Value>
-    // struct IsIntegralConstant<std::integral_constant<A, Value>> : std::true_type
-    // {
-    // };
-
     // IntegralConst
-
-    // ! Issue on (int, IntegralConst, -1);
 
     template <typename A, A a>
     struct IntegralConst
@@ -322,6 +301,38 @@ namespace efp
         constexpr operator value_type() const noexcept { return value; }   // Conversion operator
         constexpr value_type operator()() const noexcept { return value; } // Function call operator
     };
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs + rhs> operator+(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs + rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs - rhs> operator-(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs - rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs * rhs> operator*(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs * rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs / rhs> operator/(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs / rhs>{};
+    }
 
     // IsIntegralConst
 
@@ -546,7 +557,7 @@ namespace efp
     template <typename A>
     using ReferenceRemoved = typename ReferenceRemovedImpl<A>::Type;
 
-    // Commontype
+    // Common
 
     template <typename... As>
     struct CommonImpl

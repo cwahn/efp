@@ -1,5 +1,5 @@
-#ifndef CRTP_PRELUDE_HPP_
-#define CRTP_PRELUDE_HPP_
+#ifndef PRELUDE_HPP_
+#define PRELUDE_HPP_
 
 #include <array>
 #include <vector>
@@ -265,7 +265,7 @@ namespace efp
     };
 
     template <int n, typename F>
-    struct FromFunctionReturnImpl<IntegralConst<int, n>, F>
+    struct FromFunctionReturnImpl<Int<n>, F>
     {
         using Type = Sequence<CallReturn<F, int>, n, n>;
     };
@@ -481,9 +481,9 @@ namespace efp
 
     template <typename A, bool is_const>
     using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>,
+                                            IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                            IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
     // tail
     // ! Partial function. Application on empty list is abortion.
@@ -531,9 +531,9 @@ namespace efp
 
     template <typename A, bool is_const>
     using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>,
+                                            IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                            IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
     // init
 
@@ -588,24 +588,31 @@ namespace efp
         return as[length(as) - 1];
     }
 
-    // todo is_null
+    // is_null
+
+    template <typename A>
+    bool is_null(const Seq<A> &as)
+    {
+        return length(as) == 0;
+    }
 
     // TakeReturnImpl
+
     template <typename N, typename A, bool is_const>
     struct TakeReturnImpl
     {
     };
 
     template <int n, typename A, bool is_const>
-    struct TakeReturnImpl<IntegralConst<int, n>, A, is_const>
+    struct TakeReturnImpl<Int<n>, A, is_const>
     {
         using Type = Conditional<
             IsStaticLength<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
     template <typename A, bool is_const>
@@ -613,8 +620,8 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
     // TakeReturn
@@ -660,15 +667,15 @@ namespace efp
     };
 
     template <int n, typename A, bool is_const>
-    struct DropReturnImpl<IntegralConst<int, n>, A, is_const>
+    struct DropReturnImpl<Int<n>, A, is_const>
     {
         using Type = Conditional<
             IsStaticLength<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
     template <typename A, bool is_const>
@@ -676,8 +683,8 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
     // DropReturn
@@ -714,6 +721,54 @@ namespace efp
         if (DropReturn<N, A, false>::ct_len == dyn)
         {
             result.resize(as_length - bounded_n);
+        }
+
+        return result;
+    }
+
+    // SliceReturn
+
+    template <typename S, typename E, typename A, bool is_const>
+    using SliceReturn = TakeReturn<decltype(E{} - S{}), DropReturn<S, A, is_const>, is_const>;
+
+    // slice
+
+    // todo Optimization
+    template <typename S, typename E, typename A>
+    auto slice(const S &start, const E &end, const Seq<A> &as)
+        -> SliceReturn<S, E, A, true>
+    {
+        // return take(end - start, drop(start, as));
+
+        const auto as_length = length(as);
+        const auto bounded_start = bound_v(0, as_length, start);
+        const auto bounded_end = bound_v(0, as_length, end);
+
+        SliceReturn<S, E, A, true> result{data(as) + bounded_start};
+
+        if (SliceReturn<S, E, A, true>::ct_len == dyn)
+        {
+            result.resize(bounded_end - bounded_start);
+        }
+
+        return result;
+    }
+
+    template <typename S, typename E, typename A>
+    auto slice(const S &start, const E &end, Seq<A> &as)
+        -> SliceReturn<S, E, A, false>
+    {
+        // return take(end - start, drop(start, as));
+
+        const auto as_length = length(as);
+        const auto bounded_start = bound_v(0, as_length, start);
+        const auto bounded_end = bound_v(0, as_length, end);
+
+        SliceReturn<S, E, A, false> result{data(as) + bounded_start};
+
+        if (SliceReturn<S, E, A, false>::ct_len == dyn)
+        {
+            result.resize(bounded_end - bounded_start);
         }
 
         return result;

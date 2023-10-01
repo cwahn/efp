@@ -1,14 +1,13 @@
 #ifndef EFP_HPP_
 #define EFP_HPP_
 
-#include "prelude.hpp"
-
+#include "sequence.hpp"
 #include "enum_type.hpp"
 #include "maybe.hpp"
-#include "sequence.hpp"
+#include "prelude.hpp"
 #include "numeric.hpp"
 #include "scientific.hpp"
-#include "c_utility.hpp"
 #include "cyclic.hpp"
+#include "c_utility.hpp"
 
 #endif
