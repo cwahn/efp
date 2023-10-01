@@ -9,6 +9,9 @@
 
 // todo STL only
 #include <iostream>
+#include <vector>
+#include <array>
+#include <cstring>
 
 #include "sfinae.hpp"
 
@@ -592,10 +595,6 @@ namespace efp
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(A *data)
             : data_{data} {}
-        // SequenceView(const A (&c_array)[ct_len])
-        //     : data_{c_array} {}
-        // SequenceView(const std::array<A, ct_len> &stl_array)
-        //     : data_{stl_array.data()} {}
 
         SequenceView &operator=(const SequenceView &other)
         {
@@ -841,13 +840,9 @@ namespace efp
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *data) : data_{data} {}
+        SequenceView(A *data) : data_{data}, length_{0}, capacity_{0} {}
         SequenceView(A *data, const int length, const int capacity)
             : data_{data}, length_{length}, capacity_{capacity} {}
-        SequenceView(const std::vector<A> &stl_vector)
-            : data_{stl_vector.data()},
-              length_(stl_vector.size()),
-              capacity_(stl_vector.capacity()) {}
 
         SequenceView &operator=(const SequenceView &other)
         {
