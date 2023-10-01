@@ -63,7 +63,7 @@ int main()
     auto stdout = [&](int x)
     { std::cout << x << " "; };
 
-    auto as = from_function(StaticSizeT<n>{}, id<int>);
+    auto as = from_function(Int<n>{}, id<int>);
     auto minus_square = compose(negate, square<int>);
     auto bs = map(minus_square, as);
     auto cs = filter(is_even, bs);
