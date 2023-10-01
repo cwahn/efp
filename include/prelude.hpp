@@ -481,7 +481,7 @@ namespace efp
 
     template <typename A, bool is_const>
     using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>,
+                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
@@ -531,7 +531,7 @@ namespace efp
 
     template <typename A, bool is_const>
     using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>,
+                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
@@ -608,11 +608,11 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticLength<A>::value,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, n), bound_v(0, A::ct_len, n)>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
     template <typename A, bool is_const>
@@ -620,8 +620,8 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
     // TakeReturn
@@ -671,11 +671,11 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticLength<A>::value,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, bound_v(0, A::ct_len, A::ct_len - n), bound_v(0, A::ct_len, A::ct_len - n)>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
     template <typename A, bool is_const>
@@ -683,8 +683,8 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceRef<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
     // DropReturn

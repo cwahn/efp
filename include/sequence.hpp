@@ -571,13 +571,13 @@ namespace efp
 
     // Should have all these three template parameter not to break static link
     template <typename A, int ct_length, int ct_capacity>
-    class SequenceRef
+    class SequenceView
     {
     };
 
     template <typename A, int ct_length>
-    class SequenceRef<A, ct_length, ct_length>
-        : public SequenceBase<SequenceRef<A, ct_length, ct_length>>
+    class SequenceView<A, ct_length, ct_length>
+        : public SequenceBase<SequenceView<A, ct_length, ct_length>>
     {
     public:
         using Element = A;
@@ -587,17 +587,17 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceRef() : data_{nullptr} {}
-        SequenceRef(const SequenceRef &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(SequenceRef &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(A *data)
+        SequenceView() : data_{nullptr} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *data)
             : data_{data} {}
-        // SequenceRef(const A (&c_array)[ct_len])
+        // SequenceView(const A (&c_array)[ct_len])
         //     : data_{c_array} {}
-        // SequenceRef(const std::array<A, ct_len> &stl_array)
+        // SequenceView(const std::array<A, ct_len> &stl_array)
         //     : data_{stl_array.data()} {}
 
-        SequenceRef &operator=(const SequenceRef &other)
+        SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -606,7 +606,7 @@ namespace efp
             return *this;
         }
 
-        SequenceRef assign_impl(const SequenceRef &other)
+        SequenceView assign_impl(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -625,7 +625,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceRef &other) const
+        bool operator==(const SequenceView &other) const
         {
             return data_ == other.data_;
         }
@@ -696,11 +696,11 @@ namespace efp
     };
 
     template <typename A, int ct_length>
-    using ArrayView = EnableIf<ct_length != dyn, SequenceRef<A, ct_length, ct_length>>;
+    using ArrayView = EnableIf<ct_length != dyn, SequenceView<A, ct_length, ct_length>>;
 
     template <typename A, int ct_capacity>
-    class SequenceRef<A, dyn, ct_capacity>
-        : public SequenceBase<SequenceRef<A, dyn, ct_capacity>>
+    class SequenceView<A, dyn, ct_capacity>
+        : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
     {
     public:
         using Element = A;
@@ -710,16 +710,16 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceRef() : data_{nullptr}, length_{0} {}
-        SequenceRef(const SequenceRef &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(SequenceRef &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(A *data) : data_{data} {}
-        SequenceRef(A *data, const int length)
+        SequenceView() : data_{nullptr}, length_{0} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *data) : data_{data} {}
+        SequenceView(A *data, const int length)
             : data_{data}, length_{length}
         {
         }
 
-        SequenceRef &operator=(const SequenceRef &other)
+        SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -729,7 +729,7 @@ namespace efp
             return *this;
         }
 
-        SequenceRef assign_impl(const SequenceRef &other)
+        SequenceView assign_impl(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -749,7 +749,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceRef &other) const
+        bool operator==(const SequenceView &other) const
         {
             return (data_ == other.data_) &&
                    (length_ == other.length_);
@@ -824,11 +824,11 @@ namespace efp
     };
 
     template <typename A, int ct_capacity>
-    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceRef<A, dyn, ct_capacity>>;
+    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
 
     template <typename A>
-    class SequenceRef<A, dyn, dyn>
-        : public SequenceBase<SequenceRef<A, dyn, dyn>>
+    class SequenceView<A, dyn, dyn>
+        : public SequenceBase<SequenceView<A, dyn, dyn>>
     {
     public:
         using Element = A;
@@ -838,18 +838,18 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceRef() : data_{nullptr}, length_{0}, capacity_{0} {}
-        SequenceRef(const SequenceRef &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(SequenceRef &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceRef(A *data) : data_{data} {}
-        SequenceRef(A *data, const int length, const int capacity)
+        SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
+        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        SequenceView(A *data) : data_{data} {}
+        SequenceView(A *data, const int length, const int capacity)
             : data_{data}, length_{length}, capacity_{capacity} {}
-        SequenceRef(const std::vector<A> &stl_vector)
+        SequenceView(const std::vector<A> &stl_vector)
             : data_{stl_vector.data()},
               length_(stl_vector.size()),
               capacity_(stl_vector.capacity()) {}
 
-        SequenceRef &operator=(const SequenceRef &other)
+        SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -860,7 +860,7 @@ namespace efp
             return *this;
         }
 
-        SequenceRef assign_impl(const SequenceRef &other)
+        SequenceView assign_impl(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -881,7 +881,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceRef &other) const
+        bool operator==(const SequenceView &other) const
         {
             return (data_ == other.data_) &&
                    (length_ == other.length_) &&
@@ -963,10 +963,10 @@ namespace efp
     };
 
     template <typename A>
-    using VectorView = SequenceRef<A, dyn, dyn>;
+    using VectorView = SequenceView<A, dyn, dyn>;
 
     template <typename A, int ct_length, int ct_capacity>
-    class SequenceTrait<SequenceRef<A, ct_length, ct_capacity>>
+    class SequenceTrait<SequenceView<A, ct_length, ct_capacity>>
     {
     public:
         using Element = A;
@@ -994,7 +994,7 @@ namespace efp
     }
 
     template <typename A, int ct_length, int ct_capacity>
-    std::ostream &operator<<(std::ostream &os, const SequenceRef<A, ct_length, ct_capacity> &seq)
+    std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
         for (int i = 0; i < seq.size(); ++i)
