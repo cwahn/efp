@@ -115,11 +115,15 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
+#ifndef _WIN32
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+#endif
         template <typename... Arg>
         Sequence(const Arg &...args)
-            : data_{args...} {}
+            : data_{args...}
+        {
+        }
 
         Sequence &operator=(const Sequence &other)
         {
@@ -243,12 +247,16 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : length_{0} {}
+#ifndef _WIN32
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+#endif
         template <typename... Arg>
         Sequence(const Arg &...args)
             : data_{args...},
-              length_(sizeof...(args)) {}
+              length_(sizeof...(args))
+        {
+        }
 
         Sequence &operator=(const Sequence &other)
         {
@@ -393,8 +401,24 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
+#ifndef _WIN32
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
+#else
+        Sequence(const Sequence &other) 
+        : data_{new A[other.capacity()]}, length_{other.size()}, capacity_{other.capacity()}
+        {
+            if (other.data())
+            {
+                memcpy(data_, other.data(), sizeof(A) * length_);
+            }
+        };
+
+        Sequence(Sequence &&other) : data_{other.data()}, length_{other.size()}, capacity_{other.capacity()}
+        {
+            other.data_ = nullptr;
+        };
+#endif
         template <typename... Args>
         Sequence(const Args &...args)
             : data_{new A[sizeof...(args)]},
@@ -591,10 +615,14 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr} {}
+#ifndef _WIN32
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+#endif
         SequenceView(A *data)
-            : data_{data} {}
+            : data_{data}
+        {
+        }
 
         SequenceView &operator=(const SequenceView &other)
         {
@@ -710,9 +738,13 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0} {}
+#ifndef _WIN32
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *data) : data_{data} {}
+#endif
+        SequenceView(A *data) : data_{data}
+        {
+        }
         SequenceView(A *data, const int length)
             : data_{data}, length_{length}
         {
@@ -838,9 +870,13 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
+#ifndef _WIN32
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(A *data) : data_{data}, length_{0}, capacity_{0} {}
+#endif
+        SequenceView(A *data) : data_{data}, length_{0}, capacity_{0}
+        {
+        }
         SequenceView(A *data, const int length, const int capacity)
             : data_{data}, length_{length}, capacity_{capacity} {}
 
