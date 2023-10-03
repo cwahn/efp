@@ -14,7 +14,15 @@ namespace efp
     class Maybe : public Enum<Nothing, A>
     {
     public:
-        using Enum<Nothing, A>::Enum;
+        template <typename T, typename = EnableIf<any_v(IsSame<T, Nothing>::value, IsSame<T, A>::value)>>
+        Maybe(const T &a) : Enum<Nothing, A>(a)
+        {
+        }
+
+        template <typename T, typename = EnableIf<any_v(IsSame<T, Nothing>::value, IsSame<T, A>::value)>>
+        Maybe(T &&a) : Enum<Nothing, A>(a)
+        {
+        }
 
         bool is_nothing() const
         {
