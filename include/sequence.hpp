@@ -115,7 +115,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
@@ -247,7 +247,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : length_{0} {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
@@ -401,7 +401,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
 #else
@@ -615,7 +615,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr} {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
@@ -738,7 +738,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0} {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
@@ -870,7 +870,7 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
-#ifndef _WIN32
+#ifndef _MSC_VER
         SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
         SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
