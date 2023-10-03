@@ -139,16 +139,16 @@ namespace efp
 
         // Arguments implementation will auto matically remove the const qualifier if there is.
 
-#define CASE(i)                                                                                \
-    case i:                                                                                    \
-    {                                                                                          \
+#define CASE(i)                                                                            \
+    case i:                                                                                \
+    {                                                                                      \
         return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
-        break;                                                                                 \
+        break;                                                                             \
     }
 
 #define STAMP2(n, x) \
     x(n)             \
-    x(n + 1)
+        x(n + 1)
 
 #define STAMP4(n, x) \
     STAMP2(n, x)     \
@@ -185,6 +185,12 @@ namespace efp
                 any_v(IsInvocable<F, As>::value...) || IsSame<std::tuple<>, Arguments<F>>::value;
         };
 
+        template <typename... Fs>
+        struct AreAllRelevantBranchs
+        {
+            static constexpr bool value = all_v(IsRelevantBranch<Fs>::value...);
+        };
+
         template <typename F>
         struct IsWildCard : IsSame<std::tuple<>, Arguments<F>>
         {
@@ -215,7 +221,7 @@ namespace efp
         template <typename... Fs>
         auto match(const Fs &...fs)
             -> EnableIf<
-                all_v(IsRelevantBranch<Fs>::value...) &&
+                AreAllRelevantBranchs<Fs...>::value &&
                     IsExhaustive<Fs...>::value &&
                     IsWellFormed<Fs...>::value,
                 Common<Return<Fs>...>>
