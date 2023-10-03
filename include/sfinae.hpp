@@ -603,6 +603,53 @@ namespace efp
 
     template <typename... Ts>
     using Void = typename VoidImpl<Ts...>::Type;
+
+    // RemoveReference
+
+    template <typename A>
+    struct RemoveReference
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct RemoveReference<A &>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct RemoveReference<A &&>
+    {
+        using Type = A;
+    };
+
+    // IsLvalueReference
+
+    template <typename A>
+    struct IsLvalueReference : False
+    {
+    };
+
+    template <typename A>
+    struct IsLvalueReference<A &> : True
+    {
+    };
+
+    // Forward
+
+    template <typename A>
+    A &&forward(typename RemoveReference<A>::Type &a) noexcept
+    {
+        return static_cast<A &&>(a);
+    }
+
+    template <typename A>
+    A &&forward(typename RemoveReference<A>::Type &&a) noexcept
+    {
+        static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
+        return static_cast<A &&>(a);
+    }
 }
 
 #endif
