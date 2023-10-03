@@ -7,9 +7,9 @@ project(
     LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+    message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n") 
     if(MSVC_VERSION VERSION_LESS "1934")
-        message(WARNING "Return value optimization(NRVO) disabled.\n
-                        NRVO not supported under the Visual Studio 2022 version 17.4 .")
+        message(WARNING  "NVRO is not encouraged. Zc:NRVO not supported under MSVC 17.4.")
     endif()
 endif()
 
