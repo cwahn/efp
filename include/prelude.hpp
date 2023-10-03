@@ -4,7 +4,6 @@
 #include <array>
 #include <vector>
 #include <tuple>
-#include <optional>
 
 #include "sfinae.hpp"
 #include "enum_type.hpp"
