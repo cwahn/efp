@@ -129,7 +129,7 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, ct_cap);
+                memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
         }
@@ -138,7 +138,7 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, ct_cap);
+                memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
         }
@@ -262,7 +262,7 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, ct_cap);
+                memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
         }
@@ -271,7 +271,7 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, ct_cap);
+                memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
         }
@@ -446,7 +446,7 @@ namespace efp
                     reserve(other_length);
                 }
 
-                memcpy(data_, other.data_, other_length);
+                memcpy(data_, other.data_, sizeof(A) * other_length);
             }
             return *this;
         }
@@ -462,7 +462,7 @@ namespace efp
                     reserve(other_length);
                 }
 
-                memcpy(data_, other.data_, other_length);
+                memcpy(data_, other.data_, sizeof(A) * other_length);
             }
             return *this;
         }
@@ -525,7 +525,7 @@ namespace efp
             if (capacity > capacity_)
             {
                 A *new_data = new A[capacity];
-                memcpy(new_data, data_, length_ * sizeof(A));
+                memcpy(new_data, data_, sizeof(A) * length_);
                 delete[] data_;
                 data_ = new_data;
                 capacity_ = capacity;
