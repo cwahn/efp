@@ -3,11 +3,9 @@
 
 #include <array>
 #include <vector>
-#include <numeric>
+#include "efp.hpp"
 
 using namespace efp;
-
-const double M_PI = 3.14159265358979323846;
 
 const Array<double, 3> array_3{1., 2., 3.};
 const Array<double, 5> array_5{1., 2., 3., 4., 5.};
