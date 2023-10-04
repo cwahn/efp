@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.11)
 
+# CMake 3.24 and above prefers to set the timestamps of all extracted contents to the time of the extraction. 
+# This ensures that anything that depends on the extracted contents will be rebuilt whenever the URL changes.
 if(POLICY CMP0135)
-    # Extracted files to time of extraction
     cmake_policy(SET CMP0135 NEW) 
 endif()
 
