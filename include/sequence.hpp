@@ -405,8 +405,8 @@ namespace efp
         Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
         Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
 #else
-        Sequence(const Sequence &other) 
-        : data_{new A[other.capacity()]}, length_{other.size()}, capacity_{other.capacity()}
+        Sequence(const Sequence &other)
+            : data_{new A[other.capacity()]}, length_{other.size()}, capacity_{other.capacity()}
         {
             if (other.data())
             {
@@ -440,12 +440,7 @@ namespace efp
             if (this != &other)
             {
                 const int other_length = other.size();
-
-                if (capacity_ < other_length)
-                {
-                    reserve(other_length);
-                }
-
+                resize(other_length);
                 memcpy(data_, other.data_, sizeof(A) * other_length);
             }
             return *this;
