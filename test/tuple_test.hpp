@@ -37,4 +37,28 @@ TEST_CASE("Tuple")
     }
 }
 
+TEST_CASE("Tuple match")
+{
+    SECTION("case 0")
+    {
+        const Tuple<bool, int> tpl{true, 42};
+        CHECK(tpl.match([](bool p, int x)
+                        { return p ? x : -x; }) == 42);
+    }
+
+    SECTION("case 1")
+    {
+        const Tuple<bool, int> tpl{false, 42};
+        CHECK(tpl.match([](bool p, int x)
+                        { return p ? x : -x; }) == -42);
+    }
+
+    SECTION("case empty")
+    {
+        const Tuple<> empty{};
+        CHECK(empty.match([]()
+                        { return 42; }) == 42);
+    }
+}
+
 #endif

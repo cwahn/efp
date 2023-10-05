@@ -67,6 +67,16 @@ namespace efp
             : TupleLeaf<idxs, As>{as}...
         {
         }
+
+    protected:
+        template <typename F>
+        auto match_impl(const F &f) const
+            -> EnableIf<
+                IsInvocable<F, As...>::value,
+                CallReturn<F, As...>>
+        {
+            return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
+        }
     };
 
     template <typename... As>
@@ -91,6 +101,15 @@ namespace efp
             -> PackAt<idx, As...> &
         {
             return TupleLeaf<idx, PackAt<idx, As...>>::get();
+        }
+
+        template <typename F>
+        auto match(const F &f) const
+            -> EnableIf<
+                IsInvocable<F, As...>::value,
+                CallReturn<F, As...>>
+        {
+            return TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
         }
 
     private:
