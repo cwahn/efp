@@ -40,9 +40,9 @@ namespace efp
 
         template <typename... Arg>
         inline auto operator()(Arg &&...arg) const
-            -> decltype(f(std::forward<Arg>(arg)...))
+            -> decltype(f(forward<Arg>(arg)...))
         {
-            return f(std::forward<Arg>(arg)...);
+            return f(forward<Arg>(arg)...);
         }
     };
 
@@ -56,9 +56,9 @@ namespace efp
 
         template <typename... Arg>
         inline auto operator()(Arg &&...arg) const
-            -> decltype(f(fs(std::forward<Arg>(arg)...)))
+            -> decltype(f(fs(forward<Arg>(arg)...)))
         {
-            return f(fs(std::forward<Arg>(arg)...));
+            return f(fs(forward<Arg>(arg)...));
         }
     };
 

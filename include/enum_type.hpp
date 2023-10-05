@@ -15,7 +15,7 @@ namespace efp
 
         template <class G>
         Overloaded(G &&g)
-            : F(std::forward<G>(g))
+            : F(forward<G>(g))
         {
         }
     };
@@ -28,8 +28,8 @@ namespace efp
 
         template <class G, class... Gs>
         Overloaded(G &&g, Gs &&...gs)
-            : F(std::forward<G>(g)),
-              Overloaded<Fs...>(std::forward<Gs>(gs)...)
+            : F(forward<G>(g)),
+              Overloaded<Fs...>(forward<Gs>(gs)...)
         {
         }
     };
