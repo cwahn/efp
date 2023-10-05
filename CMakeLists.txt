@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
 
-# CMake 3.24 and above prefers to set the timestamps of all extracted contents to the time of the extraction. 
+# CMake 3.24 and above prefers to set the timestamps of all extracted contents to the time of the extraction.
 # This ensures that anything that depends on the extracted contents will be rebuilt whenever the URL changes.
 if(POLICY CMP0135)
-    cmake_policy(SET CMP0135 NEW) 
+    cmake_policy(SET CMP0135 NEW)
 endif()
 
 include(FetchContent)
@@ -15,9 +15,10 @@ project(
     LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-    message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n") 
+    message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
+
     if(MSVC_VERSION VERSION_LESS "1934")
-        message(WARNING  "NVRO is not encouraged. Zc:NRVO not supported under MSVC 17.4.")
+        message(WARNING "NVRO is not encouraged. Zc:NRVO not supported under MSVC 17.4.")
     endif()
 endif()
 
@@ -25,7 +26,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 # set(CMAKE_CXX_COMPILER /usr/bin/clang++)
-# set(CMAKE_CXX_COMPILER /usr/bin/g++)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 if(MSVC)
     if(MSVC_VERSION VERSION_GREATER_EQUAL "1934")
@@ -34,6 +35,7 @@ if(MSVC)
 endif()
 
 find_package(Catch2 3.4.0)
+
 if(NOT CATCH2_FOUND)
     message("Catch2 not found on the system.\nBuild from source.")
     FetchContent_Declare(
@@ -46,7 +48,6 @@ if(NOT CATCH2_FOUND)
     FetchContent_MakeAvailable(Catch2)
     find_package(Catch2 REQUIRED)
 endif()
-
 
 include(CTest)
 include(Catch)

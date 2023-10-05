@@ -3,6 +3,8 @@
 
 namespace efp
 {
+    // TupleLeaf
+
     template <int index, typename A>
     class TupleLeaf
     {
@@ -30,10 +32,14 @@ namespace efp
         A value_;
     };
 
+    // IndexSequence
+
     template <int... ns>
     struct IndexSequence
     {
     };
+
+    // MakeIndexSequenceImpl
 
     template <int n, int... ns>
     struct MakeIndexSequenceImpl
@@ -47,12 +53,17 @@ namespace efp
         using Type = IndexSequence<ns...>;
     };
 
+    // MakeIndexSequence
+
     template <int n>
     using MakeIndexSequence = typename MakeIndexSequenceImpl<n>::Type;
+
+    // IndexSequenceFor
 
     template <typename... Ts>
     using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
+    // TupleImpl
     template <typename IndexSequence, typename... As>
     class TupleImpl
     {
@@ -78,6 +89,8 @@ namespace efp
             return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
         }
     };
+
+    // Tuple
 
     template <typename... As>
     class Tuple
