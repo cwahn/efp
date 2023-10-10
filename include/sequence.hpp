@@ -262,6 +262,7 @@ namespace efp
         {
             if (this != &other)
             {
+                resize(other.size());
                 memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
@@ -271,6 +272,7 @@ namespace efp
         {
             if (this != &other)
             {
+                resize(other.size());
                 memcpy(data_, other.data_, sizeof(A) * ct_cap);
             }
             return *this;
@@ -861,8 +863,8 @@ namespace efp
 
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
 #ifndef _MSC_VER
-        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
+        // SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
+        // SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
 #endif
         SequenceView(A *data) : data_{data}, length_{0}, capacity_{0}
         {
