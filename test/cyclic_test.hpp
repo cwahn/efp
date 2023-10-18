@@ -66,6 +66,23 @@ TEST_CASE("Vcq")
         CHECK(vcq.pop_front() == 7);
         CHECK(vcq.pop_front() == 8);
     }
+    
+    SECTION("FullAndEmpty")
+    {
+        Vcq<int, 10> vcq;
+  
+        for(int i = 0; i < 12; ++i)
+        {
+            vcq.push_back(1);
+        }
+        CHECK(vcq.size() == 10);
+
+        for(int i = 0; i < vcq.size(); ++i)
+        {
+            vcq.pop_front();
+        }
+        CHECK(vcq.size() == 0);
+    }
 }
 
 // TEST_CASE("BufferArrVec")
