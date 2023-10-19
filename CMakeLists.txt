@@ -26,7 +26,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 # set(CMAKE_CXX_COMPILER /usr/bin/clang++)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
+# set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 if(MSVC)
     if(MSVC_VERSION VERSION_GREATER_EQUAL "1934")
@@ -42,11 +42,8 @@ if(NOT CATCH2_FOUND)
         Catch2
         URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.4.0.tar.gz
         URL_HASH MD5=2c802a4938ed842e2942c60d1d231bb7
-        FIND_PACKAGE_ARGS
     )
-
     FetchContent_MakeAvailable(Catch2)
-    find_package(Catch2 REQUIRED)
 endif()
 
 include(CTest)
