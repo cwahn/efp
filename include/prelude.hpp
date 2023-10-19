@@ -481,8 +481,8 @@ namespace efp
     template <typename A, bool is_const>
     using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
                                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                            IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                            IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
     // tail
     // ! Partial function. Application on empty list is abortion.
@@ -531,8 +531,8 @@ namespace efp
     template <typename A, bool is_const>
     using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
                                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                            IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                            IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
 
     // init
 
