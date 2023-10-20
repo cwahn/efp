@@ -182,7 +182,7 @@ namespace efp
         struct IsRelevantBranch
         {
             static constexpr bool value =
-                any_v(IsInvocable<F, As>::value...) || IsSame<std::tuple<>, Arguments<F>>::value;
+                any_v(IsInvocable<F, As>::value...) || IsSame<Tuple<>, Arguments<F>>::value;
         };
 
         template <typename... Fs>
@@ -192,7 +192,7 @@ namespace efp
         };
 
         template <typename F>
-        struct IsWildCard : IsSame<std::tuple<>, Arguments<F>>
+        struct IsWildCard : IsSame<Tuple<>, Arguments<F>>
         {
         };
 

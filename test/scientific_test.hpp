@@ -341,8 +341,9 @@ TEST_CASE("linear_regression")
 
         auto ys = map(f, xs);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
+        const auto tpl = linear_regression<double>(xs, ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -355,8 +356,9 @@ TEST_CASE("linear_regression")
 
         auto ys = map(f, xs);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
+        const auto tpl = linear_regression<double>(xs, ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -369,8 +371,9 @@ TEST_CASE("linear_regression")
 
         auto ys = map(f, xs);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
+        const auto tpl = linear_regression<double>(xs, ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -382,8 +385,9 @@ TEST_CASE("linear_regression")
 
         auto ys = map(f, xs);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression<double>(xs, ys);
+        const auto tpl = linear_regression<double>(xs, ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -409,8 +413,9 @@ TEST_CASE("linear_regression_with_index")
                              { x = f(i); },
                              ys);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression_with_index<double>(ys);
+        const auto tpl = linear_regression_with_index<double>(ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -420,8 +425,9 @@ TEST_CASE("linear_regression_with_index")
     {
         auto ys = from_function(IntegralConst<int, n>{}, f);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression_with_index<double>(ys);
+        const auto tpl = linear_regression_with_index<double>(ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -431,8 +437,9 @@ TEST_CASE("linear_regression_with_index")
     {
         auto ys = from_function(n, f);
 
-        double a_hat, b_hat;
-        std::tie(a_hat, b_hat) = linear_regression_with_index<double>(ys);
+        const auto tpl = linear_regression_with_index<double>(ys);
+        const auto a_hat = get<0>(tpl);
+        const auto b_hat = get<1>(tpl);
 
         CHECK(abs_error(a_hat, a) < 0.05);
         CHECK(abs_error(b_hat, b) < 0.05);
@@ -455,7 +462,7 @@ TEST_CASE("detrend")
     SECTION("Array")
     {
         const auto xs = from_function(n, id<int>);
-        
+
         const auto ys = map(f1, xs);
 
         const auto ys_ref = from_function(n, [](int _)

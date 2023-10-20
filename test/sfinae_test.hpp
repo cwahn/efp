@@ -128,59 +128,59 @@ TEST_CASE("Arguments")
     auto argument_t_lambda2 = []() {};
 
     CHECK(IsSame<
-              std::tuple<int, float>,
+              Tuple<int, float>,
               Arguments<decltype(&argument_t_function0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
-              std::tuple<int, float &&>,
+              Tuple<int, float &&>,
               Arguments<decltype(&argument_t_function0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
-              std::tuple<const int, float &>,
+              Tuple<const int, float &>,
               Arguments<decltype(&argument_t_function1)>>::value == false);
 
     // const quialifier will be removed at the result
     CHECK(IsSame<
-              std::tuple<int, float &>,
+              Tuple<int, float &>,
               Arguments<decltype(&argument_t_function1)>>::value == true);
 
     // Catching function not taking any argument with empty tuple
     CHECK(IsSame<
-              std::tuple<>,
+              Tuple<>,
               Arguments<decltype(&argument_t_function2)>>::value == true);
 
     CHECK(IsSame<
-              std::tuple<void>,
+              Tuple<void>,
               Arguments<decltype(&argument_t_function2)>>::value == false);
 
     // l-value reference will be preserved
     CHECK(IsSame<
-              std::tuple<int, float>,
+              Tuple<int, float>,
               Arguments<decltype(argument_t_lambda0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
-              std::tuple<int, float &&>,
+              Tuple<int, float &&>,
               Arguments<decltype(argument_t_lambda0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
-              std::tuple<const int, float &>,
+              Tuple<const int, float &>,
               Arguments<decltype(argument_t_lambda1)>>::value == false);
 
     CHECK(IsSame<
-              std::tuple<int, float &>,
+              Tuple<int, float &>,
               Arguments<decltype(argument_t_lambda1)>>::value == true);
 
     // Catching lambda not taking any argument with empty tuple
     CHECK(IsSame<
-              std::tuple<>,
+              Tuple<>,
               Arguments<decltype(argument_t_lambda2)>>::value == true);
 
     CHECK(IsSame<
-              std::tuple<void>,
+              Tuple<void>,
               Arguments<decltype(argument_t_lambda2)>>::value == false);
 }
 
