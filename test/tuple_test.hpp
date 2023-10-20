@@ -57,8 +57,14 @@ TEST_CASE("Tuple match")
     {
         const Tuple<> empty{};
         CHECK(empty.match([]()
-                        { return 42; }) == 42);
+                          { return 42; }) == 42);
     }
+}
+
+TEST_CASE("tuple")
+{
+    CHECK(Tuple<bool, int>{true, 42} == tuple(true, 42));
+    CHECK(Tuple<>{} == tuple());
 }
 
 #endif

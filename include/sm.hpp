@@ -59,8 +59,7 @@ namespace efp
     //     {
     //         const auto f_ = f(get<0>(s), i);
     //         const auto g_ = f(get<1>(s), get<1>(f_));
-
-
+    //         return Tuple<>
     //     }
 
     // private:

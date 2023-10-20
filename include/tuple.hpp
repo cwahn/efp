@@ -141,6 +141,59 @@ namespace efp
     {
         return tpl.template get<index>();
     }
+
+    template <typename... As>
+    auto tuple(const As &...as)
+        -> Tuple<As...>
+    {
+        return Tuple<As...>{as...};
+    }
+
+    template <int index>
+    struct TupleLeafComparator
+    {
+        template <typename... As>
+        static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+        {
+            if (lhs.template get<index>() != rhs.template get<index>())
+                return false;
+            return TupleLeafComparator<index - 1>::compare(lhs, rhs);
+        }
+    };
+
+    template <>
+    struct TupleLeafComparator<0>
+    {
+        template <typename... As>
+        static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+        {
+            return lhs.template get<0>() == rhs.template get<0>();
+        }
+    };
+
+    template <>
+    struct TupleLeafComparator<-1>
+    {
+        template <typename... As>
+        static bool compare(const Tuple<As...> &, const Tuple<As...> &)
+        {
+            return true;
+        }
+    };
+
+    // Equality operator for Tuple
+
+    template <typename... As>
+    bool operator==(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+    {
+        return TupleLeafComparator<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
+    }
+
+    template <typename... As>
+    bool operator!=(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+    {
+        return !(lhs == rhs);
+    }
 }
 
 #endif
