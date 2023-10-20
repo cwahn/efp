@@ -13,6 +13,16 @@ namespace efp
     {
     };
 
+    bool operator==(const Unit &, const Unit &)
+    {
+        return true;
+    }
+
+    bool operator!=(const Unit &, const Unit &)
+    {
+        return false;
+    }
+
     struct True
     {
         static constexpr bool value = true;
@@ -616,27 +626,20 @@ namespace efp
         return tpl.template get<index>();
     }
 
-    template <typename... As>
-    auto tuple(const As &...as)
-        -> Tuple<As...>
-    {
-        return Tuple<As...>{as...};
-    }
-
     template <int index>
-    struct TupleLeafComparator
+    struct TupleLeafComparatorImpl
     {
         template <typename... As>
         static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
         {
             if (lhs.template get<index>() != rhs.template get<index>())
                 return false;
-            return TupleLeafComparator<index - 1>::compare(lhs, rhs);
+            return TupleLeafComparatorImpl<index - 1>::compare(lhs, rhs);
         }
     };
 
     template <>
-    struct TupleLeafComparator<0>
+    struct TupleLeafComparatorImpl<0>
     {
         template <typename... As>
         static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
@@ -646,7 +649,7 @@ namespace efp
     };
 
     template <>
-    struct TupleLeafComparator<-1>
+    struct TupleLeafComparatorImpl<-1>
     {
         template <typename... As>
         static bool compare(const Tuple<As...> &, const Tuple<As...> &)
@@ -660,13 +663,22 @@ namespace efp
     template <typename... As>
     bool operator==(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
     {
-        return TupleLeafComparator<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
+        return TupleLeafComparatorImpl<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
     }
 
     template <typename... As>
     bool operator!=(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
     {
         return !(lhs == rhs);
+    }
+
+    // tuple
+
+    template <typename... As>
+    auto tuple(const As &...as)
+        -> Tuple<As...>
+    {
+        return Tuple<As...>{as...};
     }
 
     // ArgumentsImpl
@@ -723,6 +735,20 @@ namespace efp
 
     template <typename F>
     using Return = typename ReturnImpl<F, Arguments<F>>::Type;
+
+    // apply
+
+    template <typename F, typename... As, int... indices>
+    auto apply_impl(const F &f, const Tuple<As...> &tpl, IndexSequence<indices...>)
+    {
+        return f(get<indices>(tpl)...);
+    }
+
+    template <typename F, typename... As, typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
+    auto apply(const F &f, const Tuple<As...> &tpl)
+    {
+        return apply_impl(f, tpl, IndexSequenceFor<As...>{});
+    }
 
     // ReferenceRemovedImpl
 

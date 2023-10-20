@@ -152,19 +152,19 @@ namespace efp
 //     }
 
 //     template <int index>
-//     struct TupleLeafComparator
+//     struct TupleLeafComparatorImpl
 //     {
 //         template <typename... As>
 //         static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
 //         {
 //             if (lhs.template get<index>() != rhs.template get<index>())
 //                 return false;
-//             return TupleLeafComparator<index - 1>::compare(lhs, rhs);
+//             return TupleLeafComparatorImpl<index - 1>::compare(lhs, rhs);
 //         }
 //     };
 
 //     template <>
-//     struct TupleLeafComparator<0>
+//     struct TupleLeafComparatorImpl<0>
 //     {
 //         template <typename... As>
 //         static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
@@ -174,7 +174,7 @@ namespace efp
 //     };
 
 //     template <>
-//     struct TupleLeafComparator<-1>
+//     struct TupleLeafComparatorImpl<-1>
 //     {
 //         template <typename... As>
 //         static bool compare(const Tuple<As...> &, const Tuple<As...> &)
@@ -188,7 +188,7 @@ namespace efp
 //     template <typename... As>
 //     bool operator==(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
 //     {
-//         return TupleLeafComparator<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
+//         return TupleLeafComparatorImpl<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
 //     }
 
 //     template <typename... As>
