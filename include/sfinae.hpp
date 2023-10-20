@@ -739,13 +739,13 @@ namespace efp
     // apply
 
     template <typename F, typename... As, int... indices>
-    auto apply_impl(const F &f, const Tuple<As...> &tpl, IndexSequence<indices...>)
+    Return<F> apply_impl(const F &f, const Tuple<As...> &tpl, IndexSequence<indices...>)
     {
         return f(get<indices>(tpl)...);
     }
 
     template <typename F, typename... As, typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
-    auto apply(const F &f, const Tuple<As...> &tpl)
+    Return<F> apply(const F &f, const Tuple<As...> &tpl)
     {
         return apply_impl(f, tpl, IndexSequenceFor<As...>{});
     }
@@ -868,6 +868,19 @@ namespace efp
         static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
         return static_cast<A &&>(a);
     }
+
+    // IsDefaultConstructible
+
+    template <typename A, typename = void>
+    struct IsDefaultConstructible : False
+    {
+    };
+
+    template <typename A>
+    struct IsDefaultConstructible<A, decltype(A())> : True
+    {
+    };
+
 }
 
 #endif

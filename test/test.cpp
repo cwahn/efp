@@ -7,4 +7,4 @@
 #include "scientific_test.hpp"
 #include "cyclic_test.hpp"
 #include "c_utility_test.hpp"
-#include "tuple_test.hpp"
+#include "sm_test.hpp"
