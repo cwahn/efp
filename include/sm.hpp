@@ -120,45 +120,49 @@ namespace efp
         return Pure<F>{f};
     }
 
-    // template <typename G, typename F>
-    // class Compose : public Sm<Compose<G, F>>
-    // {
-    //     // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
+    template <typename G, typename F, typename I = typename SmTrait<F>::I>
+    class Compose
+    {
+    };
 
-    // public:
-    //     using I = Arguments<F>;
-    //     using O = Return<G>;
+    template <typename G, typename F, typename... Is>
+    class Compose<G, F, Tuple<Is...>> : public Sm<Compose<G, F, Tuple<Is...>>>
+    {
+        // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
 
-    //     Compose(const Sm<G> &g, const Sm<F> &f)
-    //         : f_{f}, g_{g}
-    //     {
-    //     }
+    public:
+        using I = Arguments<F>;
+        using O = Return<G>;
 
-    //     O operator()(const FIs &...fis)
-    //     {
-    //         return g_(f_(fis...));
-    //     }
+        Compose(const Sm<G> &g, const Sm<F> &f)
+            : f_{f}, g_{g}
+        {
+        }
 
-    // private:
-    //     Sm<F> f_;
-    //     Sm<G> g_;
-    // };
+        O operator()(const Is &...is)
+        {
+            return g_(f_(is...));
+        }
 
-    // template <typename G, typename F>
-    // class SmTrait<Compose<G, F>>
-    // {
-    // public:
-    //     using I = Arguments<F>;
-    //     using O = Return<G>;
-    // };
+    private:
+        Sm<F> f_;
+        Sm<G> g_;
+    };
 
-    // // typename = EnableIf<IsSm<F>::value && IsSm<G>::value, void>
-    // template <typename G, typename F>
-    // Compose<G, F>
-    // sm_compose(const Sm<G> &g, const Sm<F> &f)
-    // {
-    //     return Compose<G, F>{g, f};
-    // }
+    template <typename G, typename F, typename _>
+    class SmTrait<Compose<G, F, _>>
+    {
+    public:
+        using I = Arguments<F>;
+        using O = Return<G>;
+    };
+
+    // typename = EnableIf<IsSm<F>::value && IsSm<G>::value, void>
+    template <typename G, typename F>
+    Compose<G, F> sm_compose(const Sm<G> &g, const Sm<F> &f)
+    {
+        return Compose<G, F, typename F::I>{g, f};
+    }
 
     template <typename F, typename G>
     class Concat : public Sm<Concat<F, G>>
