@@ -22,9 +22,10 @@ namespace efp
         using I = typename Trait::I;
         using O = typename Trait::O;
 
-                inline O operator()(const I &i)
+        template <typename... Is>
+        inline O operator()(const Is &...is)
         {
-            return derived()(i);
+            return derived()(is...);
         }
 
     private:
@@ -41,22 +42,21 @@ namespace efp
     template <typename Derived>
     using Sm = SmBase<Derived>;
 
+    // IsSm
+
     template <typename>
     struct IsSm : False
     {
     };
 
-    template <typename Derived>
-    struct IsSm<Sm<Derived>> : True
-    {
-    };
+    // Pure
 
     template <typename F>
     class Pure;
 
     // Specialization for regular function pointers
     template <typename Ret, typename... Args>
-    class Pure<Ret (*)(Args...)>
+    class Pure<Ret (*)(Args...)> : public Sm<Pure<Ret (*)(Args...)>>
     {
     public:
         using I = Tuple<Args...>; // Assuming Args... are the arguments of the function F.
@@ -73,9 +73,17 @@ namespace efp
         Ret (*f_)(Args...);
     };
 
+    template <typename Ret, typename... Args>
+    class SmTrait<Pure<Ret (*)(Args...)>>
+    {
+    public:
+        using I = Tuple<Args...>;
+        using O = Ret;
+    };
+
     // Specialization for lambdas and other callables
     template <typename F>
-    class Pure
+    class Pure : public Sm<Pure<F>>
     {
     public:
         using I = Arguments<F>;
@@ -83,12 +91,14 @@ namespace efp
 
         Pure(const F &f) : f_{f}
         {
-            static_assert(IsDefaultConstructible<F>::value, "Lambda must be stateless");
+            // static_assert(IsDefaultConstructible<F>::value, "Lambda must be stateless");
+            // todo check if referentially transparent
         }
 
-        O operator()(const I &i)
+        template <typename... Is>
+        O operator()(const Is &...is)
         {
-            return f_(i);
+            return f_(is...);
         }
 
     private:
@@ -96,35 +106,60 @@ namespace efp
     };
 
     template <typename F>
-    auto pure_sm(F f)
+    class SmTrait<Pure<F>>
+    {
+    public:
+        using I = Arguments<F>;
+        using O = Return<F>;
+    };
+
+    template <typename F>
+    Pure<F> pure_sm(F f)
     {
         return Pure<F>{f};
     }
 
     template <typename G, typename F>
-    class Compose : Sm<Compose<G, F>>
+    class Compose : public Sm<Compose<G, F>>
     {
     public:
         using I = Arguments<F>;
         using O = Return<G>;
 
-        Compose(const G &g, const F &f)
+        Compose(const Sm<G> &g, const Sm<F> &f)
             : f_{f}, g_{g}
         {
         }
 
-        O operator()(const I &i)
+        template <typename... Is>
+        O operator()(const Is &...is)
         {
-            return g_(f_(i));
+            return g_(f_(is...));
         }
 
     private:
-        F f_;
-        G g_;
+        Sm<F> f_;
+        Sm<G> g_;
     };
 
+    template <typename G, typename F>
+    class SmTrait<Compose<G, F>>
+    {
+    public:
+        using I = Arguments<F>;
+        using O = Return<G>;
+    };
+
+    // typename = EnableIf<IsSm<F>::value && IsSm<G>::value, void>
+    template <typename G, typename F>
+    Compose<G, F>
+    sm_compose(const Sm<G> &g, const Sm<F> &f)
+    {
+        return Compose<G, F>{g, f};
+    }
+
     template <typename F, typename G>
-    class Concat : Sm<Concat<F, G>>
+    class Concat : public Sm<Concat<F, G>>
     {
     public:
         using I = Tuple<Arguments<F>, Arguments<G>>;
@@ -143,6 +178,41 @@ namespace efp
     private:
         F f_;
         G g_;
+    };
+
+    template <typename G, typename F>
+    class SmTrait<Concat<G, F>>
+    {
+    public:
+        using I = Tuple<Arguments<F>, Arguments<G>>;
+        using O = Tuple<Return<F>, Return<G>>;
+    };
+
+    // IsSm
+
+    // template <typename>
+    // struct IsSm : False
+    // {
+    // };
+
+    template <typename Derived>
+    struct IsSm<Sm<Derived>> : True
+    {
+    };
+
+    template <typename A>
+    struct IsSm<A &> : IsSm<A>
+    {
+    };
+
+    template <typename A>
+    struct IsSm<A &&> : IsSm<A>
+    {
+    };
+
+    template <typename A>
+    struct IsSm<const A> : IsSm<A>
+    {
     };
 
     // template <typename F>
