@@ -51,40 +51,42 @@ namespace efp
 
     // Pure
 
-    template <typename F>
+    template <typename F, typename I = Arguments<F>>
     class Pure;
 
-    // Specialization for regular function pointers
-    template <typename Ret, typename... Args>
-    class Pure<Ret (*)(Args...)> : public Sm<Pure<Ret (*)(Args...)>>
-    {
-    public:
-        using I = Tuple<Args...>; // Assuming Args... are the arguments of the function F.
-        using O = Ret;
+    // // Specialization for regular function pointers
+    // template <typename Ret, typename... Args>
+    // class Pure<Ret (*)(Args...)> : public Sm<Pure<Ret (*)(Args...)>>
+    // {
+    // public:
+    //     using I = Tuple<Args...>; // Assuming Args... are the arguments of the function F.
+    //     using O = Ret;
 
-        Pure(Ret (*f)(Args...)) : f_{f} {}
+    //     Pure(Ret (*f)(Args...)) : f_{f} {}
 
-        O operator()(Args... args)
-        {
-            return f_(args...);
-        }
+    //     O operator()(Args... args)
+    //     {
+    //         return f_(args...);
+    //     }
 
-    private:
-        Ret (*f_)(Args...);
-    };
+    // private:
+    //     Ret (*f_)(Args...);
+    // };
 
-    template <typename Ret, typename... Args>
-    class SmTrait<Pure<Ret (*)(Args...)>>
-    {
-    public:
-        using I = Tuple<Args...>;
-        using O = Ret;
-    };
+    // template <typename Ret, typename... Args>
+    // class SmTrait<Pure<Ret (*)(Args...)>>
+    // {
+    // public:
+    //     using I = Tuple<Args...>;
+    //     using O = Ret;
+    // };
 
     // Specialization for lambdas and other callables
-    template <typename F>
-    class Pure : public Sm<Pure<F>>
+    template <typename F, typename... Is>
+    class Pure<F, Tuple<Is...>> : public Sm<Pure<F, Tuple<Is...>>>
     {
+        // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
+
     public:
         using I = Arguments<F>;
         using O = Return<F>;
@@ -95,7 +97,6 @@ namespace efp
             // todo check if referentially transparent
         }
 
-        template <typename... Is>
         O operator()(const Is &...is)
         {
             return f_(is...);
@@ -119,44 +120,45 @@ namespace efp
         return Pure<F>{f};
     }
 
-    template <typename G, typename F>
-    class Compose : public Sm<Compose<G, F>>
-    {
-    public:
-        using I = Arguments<F>;
-        using O = Return<G>;
+    // template <typename G, typename F>
+    // class Compose : public Sm<Compose<G, F>>
+    // {
+    //     // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
 
-        Compose(const Sm<G> &g, const Sm<F> &f)
-            : f_{f}, g_{g}
-        {
-        }
+    // public:
+    //     using I = Arguments<F>;
+    //     using O = Return<G>;
 
-        template <typename... Is>
-        O operator()(const Is &...is)
-        {
-            return g_(f_(is...));
-        }
+    //     Compose(const Sm<G> &g, const Sm<F> &f)
+    //         : f_{f}, g_{g}
+    //     {
+    //     }
 
-    private:
-        Sm<F> f_;
-        Sm<G> g_;
-    };
+    //     O operator()(const FIs &...fis)
+    //     {
+    //         return g_(f_(fis...));
+    //     }
 
-    template <typename G, typename F>
-    class SmTrait<Compose<G, F>>
-    {
-    public:
-        using I = Arguments<F>;
-        using O = Return<G>;
-    };
+    // private:
+    //     Sm<F> f_;
+    //     Sm<G> g_;
+    // };
 
-    // typename = EnableIf<IsSm<F>::value && IsSm<G>::value, void>
-    template <typename G, typename F>
-    Compose<G, F>
-    sm_compose(const Sm<G> &g, const Sm<F> &f)
-    {
-        return Compose<G, F>{g, f};
-    }
+    // template <typename G, typename F>
+    // class SmTrait<Compose<G, F>>
+    // {
+    // public:
+    //     using I = Arguments<F>;
+    //     using O = Return<G>;
+    // };
+
+    // // typename = EnableIf<IsSm<F>::value && IsSm<G>::value, void>
+    // template <typename G, typename F>
+    // Compose<G, F>
+    // sm_compose(const Sm<G> &g, const Sm<F> &f)
+    // {
+    //     return Compose<G, F>{g, f};
+    // }
 
     template <typename F, typename G>
     class Concat : public Sm<Concat<F, G>>
