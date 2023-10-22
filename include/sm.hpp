@@ -12,17 +12,20 @@ namespace efp
     template <typename Derived>
     class SmTrait;
 
-    template <typename Derived>
+    template <typename Derived, typename I = typename SmTrait<Derived>::I>
     class SmBase
+    {
+    };
+
+    template <typename Derived, typename... Is>
+    class SmBase<Derived, Tuple<Is...>>
     {
     public:
         using Trait = SmTrait<Derived>;
 
-        // using S = Trait::S;
         using I = typename Trait::I;
         using O = typename Trait::O;
 
-        template <typename... Is>
         inline O operator()(const Is &...is)
         {
             return derived()(is...);
@@ -49,44 +52,62 @@ namespace efp
     {
     };
 
+    template <typename Derived>
+    struct IsSm<Sm<Derived>> : True
+    {
+    };
+
+    template <typename A>
+    struct IsSm<A &> : IsSm<A>
+    {
+    };
+
+    template <typename A>
+    struct IsSm<A &&> : IsSm<A>
+    {
+    };
+
+    template <typename A>
+    struct IsSm<const A> : IsSm<A>
+    {
+    };
+
     // Pure
 
     template <typename F, typename I = Arguments<F>>
     class Pure;
 
-    // // Specialization for regular function pointers
-    // template <typename Ret, typename... Args>
-    // class Pure<Ret (*)(Args...)> : public Sm<Pure<Ret (*)(Args...)>>
+    // Specialization for regular function pointers
+    // template <typename Ret, typename... Is>
+    // class Pure<Ret (*)(Is...)> : public Sm<Pure<Ret (*)(Is...)>>
     // {
     // public:
-    //     using I = Tuple<Args...>; // Assuming Args... are the arguments of the function F.
+    //     using I = Tuple<Is...>; // Assuming Is... are the arguments of the function F.
     //     using O = Ret;
 
-    //     Pure(Ret (*f)(Args...)) : f_{f} {}
+    //     Pure(Ret (*f)(Is...)) : f_{f} {}
 
-    //     O operator()(Args... args)
+    //     O operator()(Is... is)
     //     {
-    //         return f_(args...);
+    //         return f_(is...);
     //     }
 
     // private:
-    //     Ret (*f_)(Args...);
+    //     Ret (*f_)(Is...);
     // };
 
-    // template <typename Ret, typename... Args>
-    // class SmTrait<Pure<Ret (*)(Args...)>>
-    // {
-    // public:
-    //     using I = Tuple<Args...>;
-    //     using O = Ret;
-    // };
+    template <typename Ret, typename... Is>
+    class SmTrait<Pure<Ret (*)(Is...)>>
+    {
+    public:
+        using I = Tuple<Is...>;
+        using O = Ret;
+    };
 
     // Specialization for lambdas and other callables
     template <typename F, typename... Is>
     class Pure<F, Tuple<Is...>> : public Sm<Pure<F, Tuple<Is...>>>
     {
-        // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
-
     public:
         using I = Arguments<F>;
         using O = Return<F>;
@@ -120,7 +141,9 @@ namespace efp
         return Pure<F>{f};
     }
 
-    template <typename G, typename F, typename I = typename SmTrait<F>::I>
+    // Compose
+
+    template <typename G, typename F, typename I = typename F::I>
     class Compose
     {
     };
@@ -128,8 +151,6 @@ namespace efp
     template <typename G, typename F, typename... Is>
     class Compose<G, F, Tuple<Is...>> : public Sm<Compose<G, F, Tuple<Is...>>>
     {
-        // static_assert(IsSame<Arguments<F>, Tuple<FIs...>>::value, "");
-
     public:
         using I = Arguments<F>;
         using O = Return<G>;
@@ -149,8 +170,8 @@ namespace efp
         Sm<G> g_;
     };
 
-    template <typename G, typename F, typename _>
-    class SmTrait<Compose<G, F, _>>
+    template <typename G, typename F>
+    class SmTrait<Compose<G, F>>
     {
     public:
         using I = Arguments<F>;
@@ -161,29 +182,36 @@ namespace efp
     template <typename G, typename F>
     Compose<G, F> sm_compose(const Sm<G> &g, const Sm<F> &f)
     {
-        return Compose<G, F, typename F::I>{g, f};
+        return Compose<G, F>{g, f};
     }
 
-    template <typename F, typename G>
-    class Concat : public Sm<Concat<F, G>>
+    // Concat
+
+    template <typename F, typename G, typename FI = typename F::I, typename GI = typename G::I>
+    class Concat
+    {
+    };
+
+    template <typename F, typename G, typename... FIs, typename... GIs>
+    class Concat<F, G, Tuple<FIs...>, Tuple<GIs...>> : public Sm<Concat<F, G, Tuple<FIs...>, Tuple<GIs...>>>
     {
     public:
-        using I = Tuple<Arguments<F>, Arguments<G>>;
-        using O = Tuple<Return<F>, Return<G>>;
+        using I = Tuple<FIs..., GIs...>;
+        using O = Tuple<typename F::O, typename G::O>;
 
-        Concat(const G &g, const F &f)
+        Concat(const Sm<F> &f, const Sm<G> &g)
             : f_{f}, g_{g}
         {
         }
 
-        O operator()(const I &i)
+        O operator()(const FIs &...fis, const GIs &...gis)
         {
-            return tuple(f_(get<0>(i)), g_(get<1>(i)));
+            return tuple(f_(fis...), g_(gis...));
         }
 
     private:
-        F f_;
-        G g_;
+        Sm<F> f_;
+        Sm<G> g_;
     };
 
     template <typename G, typename F>
@@ -194,32 +222,11 @@ namespace efp
         using O = Tuple<Return<F>, Return<G>>;
     };
 
-    // IsSm
-
-    // template <typename>
-    // struct IsSm : False
-    // {
-    // };
-
-    template <typename Derived>
-    struct IsSm<Sm<Derived>> : True
+    template <typename F, typename G>
+    Concat<F, G> sm_concat(const Sm<F> &f, const Sm<G> &g)
     {
-    };
-
-    template <typename A>
-    struct IsSm<A &> : IsSm<A>
-    {
-    };
-
-    template <typename A>
-    struct IsSm<A &&> : IsSm<A>
-    {
-    };
-
-    template <typename A>
-    struct IsSm<const A> : IsSm<A>
-    {
-    };
+        return Concat<F, G>{f, g};
+    }
 
     // template <typename F>
     // class Pure : SmBase<Pure<F>>

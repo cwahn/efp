@@ -30,12 +30,23 @@ TEST_CASE("Sm compose")
         auto times_2_sm = pure_sm([](int x)
                                   { return 2 * x; });
 
-        // CHECK(IsSm<decltype(id_sm)>::value == true);
-        // CHECK(IsSm<Pure<decltype(id<int>)>>::value == true);
-        // CHECK(IsSm<decltype(times_2)>::value == true);
+        auto composed_sm = sm_compose(id_sm, times_2_sm);
+        CHECK(composed_sm(21) == 42);
+    }
+}
 
-        auto composed = sm_compose(id_sm, times_2_sm);
-        CHECK(composed(21) == 42);
+TEST_CASE("Sm concat")
+{
+    SECTION("0")
+    {
+        // auto id_sm = pure_sm(id<int>);
+        auto id_sm = pure_sm([](int x)
+                             { return x; });
+        auto times_2_sm = pure_sm([](int x)
+                                  { return 2 * x; });
+
+        auto concat_sm = sm_concat(id_sm, times_2_sm);
+        CHECK(concat_sm(42, 21) == tuple(42, 42));
     }
 }
 
