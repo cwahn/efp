@@ -262,6 +262,8 @@ TEST_CASE("Tuple")
         CHECK(tpl.template get<1>() == 42);
         CHECK(get<0>(tpl) == true);
         CHECK(get<1>(tpl) == 42);
+        CHECK(p<0>(tpl) == true);
+        CHECK(p<1>(tpl) == 42);
     }
 
     SECTION("non const")
@@ -271,6 +273,8 @@ TEST_CASE("Tuple")
         CHECK(tpl.template get<1>() == 42);
         CHECK(get<0>(tpl) == true);
         CHECK(get<1>(tpl) == 42);
+        CHECK(p<0>(tpl) == true);
+        CHECK(p<1>(tpl) == 42);
 
         tpl.template get<0>() = false;
         tpl.template get<1>() = 0;
@@ -279,6 +283,8 @@ TEST_CASE("Tuple")
         CHECK(tpl.template get<1>() == 0);
         CHECK(get<0>(tpl) == false);
         CHECK(get<1>(tpl) == 0);
+        CHECK(p<0>(tpl) == false);
+        CHECK(p<1>(tpl) == 0);
     }
 }
 

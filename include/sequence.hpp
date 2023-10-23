@@ -1169,12 +1169,6 @@ namespace efp
     {
         return as.end();
     }
-
-    // Int
-
-    template <int n>
-    using Int = IntegralConst<int, n>;
-
 };
 
 #endif

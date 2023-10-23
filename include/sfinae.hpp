@@ -368,6 +368,11 @@ namespace efp
     {
     };
 
+    // Int
+
+    template <int n>
+    using Int = IntegralConst<int, n>;
+
     // IsSame
 
     template <typename A, typename B>
@@ -621,6 +626,22 @@ namespace efp
 
     template <int index, typename... As>
     auto get(Tuple<As...> &tpl)
+        -> PackAt<index, As...> &
+    {
+        return tpl.template get<index>();
+    }
+
+    // Projection operator for the Tuple the same with get
+
+    template <int index, typename... As>
+    auto p(const Tuple<As...> &tpl)
+        -> const PackAt<index, As...> &
+    {
+        return tpl.template get<index>();
+    }
+
+    template <int index, typename... As>
+    auto p(Tuple<As...> &tpl)
         -> PackAt<index, As...> &
     {
         return tpl.template get<index>();
