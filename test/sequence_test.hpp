@@ -74,22 +74,24 @@ TEST_CASE("crtp sequence init")
 //         CHECK(b.capacity() == 3);
 //     }
 // }
+Array<int, 3> *array_nrvo_p = nullptr;
 
-// Array<int, 3> array_rvo()
-// {
-//     return Array<int, 3>{1, 2, 3};
-// };
+Array<int, 3> array_rvo()
+{
+    return Array<int, 3>{1, 2, 3};
+};
 
-// Array<int, 3> array_nrvo()
-// {
-//     Array<int, 3> result{0, 0, 0};
+Array<int, 3> array_nrvo()
+{
+    Array<int, 3> result{0, 0, 0};
 
-//     result[0] = 1;
-//     result[1] = 2;
-//     result[2] = 3;
+    result[0] = 1;
+    result[1] = 2;
+    result[2] = 3;
+    array_nrvo_p = &result;
 
-//     return result;
-// };
+    return result;
+};
 
 // ArrVec<int, 3> array_vector_rvo()
 // {
@@ -123,13 +125,15 @@ TEST_CASE("crtp sequence init")
 //     return result;
 // };
 
-// TEST_CASE("copy elision")
-// {
-//     SECTION("Array")
-//     {
-//         CHECK(Array<int, 3>{1, 2, 3} == array_rvo());
-//         CHECK(Array<int, 3>{1, 2, 3} == array_nrvo());
-//     }
+TEST_CASE("copy elision")
+{
+    SECTION("Array")
+    {
+        Array<int, 3> na = array_nrvo();
+
+        CHECK(Array<int, 3>{1, 2, 3} == array_rvo());
+        CHECK(&na == array_nrvo_p);
+    }
 
 //     SECTION("ArrVec")
 //     {
@@ -142,7 +146,7 @@ TEST_CASE("crtp sequence init")
 //         CHECK(Vector<int>{1, 2, 3} == vector_rvo());
 //         CHECK(Vector<int>{1, 2, 3} == vector_nrvo());
 //     }
-// }
+}
 
 // TEST_CASE("assignment")
 // {
