@@ -53,4 +53,8 @@ enable_testing()
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
+add_executable(asdw main.cpp)
+target_link_libraries(asdw INTERFACE efp)
+
+
 add_subdirectory("./test")
