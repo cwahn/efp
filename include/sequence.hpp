@@ -115,7 +115,13 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
-        Sequence(const Sequence &other) ;
+        Sequence(const Sequence &other) 
+        {std::cout << "Copy" << std::endl;
+            if (other.data())
+            {
+                memcpy(data_, other.data(), sizeof(A) * other.size());
+            }
+        }
         Sequence(Sequence &&other)
         {std::cout << "Move" << std::endl;
             if (other.data())
