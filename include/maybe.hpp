@@ -39,6 +39,10 @@ namespace efp
         {
             return Enum<Nothing, A>::template get<A>();
         }
+
+        explicit operator bool() const {
+            return has_value();
+        }
     };
 
     template <typename A>

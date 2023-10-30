@@ -15,6 +15,7 @@ TEST_CASE("maybe_construction")
         Maybe<int> a = Nothing{};
 
         CHECK(a.has_value() == false);
+        CHECK(!a);
     }
 
     SECTION("Just")
@@ -23,6 +24,25 @@ TEST_CASE("maybe_construction")
 
         CHECK(a.has_value() == true);
         CHECK(a.value() == 42);
+        CHECK(a);
+    }
+
+    SECTION("ternary")
+    {
+        Maybe<int> a = 42;
+        Maybe<int> b = Nothing{};
+
+        bool l = a ? true : false;
+        CHECK(l);
+
+        bool bis = false;
+        if(!b) {
+            bis = true;
+        }
+        CHECK(bis);
+        // catch2 error?
+        // CHECK(b ? false : true);
+ 
     }
 }
 
