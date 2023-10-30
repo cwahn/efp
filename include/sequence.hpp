@@ -118,20 +118,16 @@ namespace efp
 
         Sequence(const Sequence &other)
         {
-            if (other.data_)
-            {
-                memcpy(data_, other.data_, sizeof(A) * ct_len);
-            }
+
+            memcpy(data_, other.data_, sizeof(A) * ct_len);
+
         }
 
         Sequence(Sequence &&other)
         {
-            if (other.data_)
+            for (int i = 0; i < ct_len; ++i) 
             {
-                for (int i = 0; i < ct_len; ++i) 
-                {
-                    data_[i] = std::move(other.data_[i]);
-                }
+                data_[i] = std::move(other.data_[i]);
             }
         }       
 
@@ -266,22 +262,16 @@ namespace efp
 
         Sequence(const Sequence &other) : length_{other.length_}
         {
-            if (other.data_)
-            {
-                memcpy(data_, other.data_, sizeof(A) * length_);
-            }
+            memcpy(data_, other.data_, sizeof(A) * length_);
         }
 
         Sequence(Sequence &&other) : length_{0}
         {
-            if (other.data_)
-            {
-                length_ = other.length_;
+            length_ = other.length_;
 
-                for (int i = 0; i < length_; ++i) 
-                {
-                    data_[i] = std::move(other.data_[i]);
-                }
+            for (int i = 0; i < length_; ++i) 
+            {
+                data_[i] = std::move(other.data_[i]);
             }
         }     
         
