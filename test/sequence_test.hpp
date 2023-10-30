@@ -74,9 +74,16 @@ TEST_CASE("crtp sequence init")
 //         CHECK(b.capacity() == 3);
 //     }
 // }
+
+bool runtime_con = true;
+
 Array<int, 3> *array_nrvo_p = nullptr;
 ArrVec<int, 3> *arrvec_nrvo_p = nullptr;
 Vector<int> *vector_nrvo_p = nullptr;
+
+Array<int, 3> *n_array_nrvo_p = nullptr;
+ArrVec<int, 3> *n_arrvec_nrvo_p = nullptr;
+Vector<int> *n_vector_nrvo_p = nullptr;
 
 Array<int, 3> array_rvo()
 {
@@ -93,6 +100,19 @@ Array<int, 3> array_nrvo()
     array_nrvo_p = &result;
 
     return result;
+};
+
+Array<int, 3> n_array_nrvo()
+{
+    Array<int, 3> result{0, 0, 0};
+    Array<int, 3> n_result{1, 2, 3};
+
+    result[0] = 1;
+    result[1] = 2;
+    result[2] = 3;
+    n_array_nrvo_p = &result;
+
+    return runtime_con ? result : n_result;
 };
 
 ArrVec<int, 3> array_vector_rvo()
@@ -112,6 +132,19 @@ ArrVec<int, 3> array_vector_nrvo()
     return result;
 };
 
+ArrVec<int, 3> n_array_vector_nrvo()
+{
+    ArrVec<int, 3> result{0, 0, 0};
+    ArrVec<int, 3> n_result{1, 2, 3};
+
+    result[0] = 1;
+    result[1] = 2;
+    result[2] = 3;
+    n_arrvec_nrvo_p = &result;
+
+    return runtime_con ? result : n_result;
+};
+
 Vector<int> vector_rvo()
 {
     return Vector<int>{1, 2, 3};
@@ -129,30 +162,49 @@ Vector<int> vector_nrvo()
     return result;
 };
 
+Vector<int> n_vector_nrvo()
+{
+    Vector<int> result{0, 0, 0};
+    Vector<int> n_result{1, 2, 3};
+
+    result[0] = 1;
+    result[1] = 2;
+    result[2] = 3;
+    n_vector_nrvo_p = &result;
+
+    return runtime_con ? result : n_result;
+};
+
 TEST_CASE("copy elision")
 {
     SECTION("Array")
     {
         Array<int, 3> na = array_nrvo();
+        Array<int, 3> nna = n_array_nrvo();
 
         // CHECK(Array<int, 3>{1, 2, 3} == array_rvo());
         CHECK(&na == array_nrvo_p);
+        CHECK(&nna != n_array_nrvo_p);
     }
 
     SECTION("ArrVec")
     {
         ArrVec<int, 3> na = array_vector_nrvo();
+        ArrVec<int, 3> nna = n_array_vector_nrvo();
 
         // CHECK(ArrVec<int, 3>{1, 2, 3} == array_vector_rvo());
         CHECK(&na == arrvec_nrvo_p);
+        CHECK(&nna != n_arrvec_nrvo_p);
     }
 
     SECTION("Vector")
     {
         Vector<int> na = vector_nrvo();
+        Vector<int> nna = n_vector_nrvo();
 
         // CHECK(Vector<int>{1, 2, 3} == vector_rvo());
         CHECK(&na == vector_nrvo_p);
+        CHECK(&nna != n_vector_nrvo_p);
     }
 }
 

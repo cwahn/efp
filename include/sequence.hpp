@@ -115,20 +115,25 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() {}
-        Sequence(const Sequence &other) 
-        {std::cout << "Copy" << std::endl;
-            if (other.data())
+
+        Sequence(const Sequence &other)
+        {
+            if (other.data_)
             {
-                memcpy(data_, other.data(), sizeof(A) * other.size());
+                memcpy(data_, other.data_, sizeof(A) * ct_len);
             }
         }
+
         Sequence(Sequence &&other)
-        {std::cout << "Move" << std::endl;
-            if (other.data())
+        {
+            if (other.data_)
             {
-                memcpy(data_, other.data(), sizeof(A) * other.size());
+                for (int i = 0; i < ct_len; ++i) 
+                {
+                    data_[i] = std::move(other.data_[i]);
+                }
             }
-        }     
+        }       
 
         template <typename... Arg>
         Sequence(const Arg &...args)
@@ -258,8 +263,27 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : length_{0} {}
-        Sequence(const Sequence &) {}
-        Sequence(Sequence &&) {}
+
+        Sequence(const Sequence &other) : length_{other.length_}
+        {
+            if (other.data_)
+            {
+                memcpy(data_, other.data_, sizeof(A) * length_);
+            }
+        }
+
+        Sequence(Sequence &&other) : length_{0}
+        {
+            if (other.data_)
+            {
+                length_ = other.length_;
+
+                for (int i = 0; i < length_; ++i) 
+                {
+                    data_[i] = std::move(other.data_[i]);
+                }
+            }
+        }     
         
         template <typename... Arg>
         Sequence(const Arg &...args)
@@ -412,30 +436,33 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : data_{nullptr}, length_{0}, capacity_{0} {std::cout << "vec" << std::endl;}
-        // Sequence(const Sequence &) {}
-        // Sequence(Sequence &&) {}     
+        Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
 
         Sequence(const Sequence &other)
-            : data_{new A[other.capacity()]}, length_{other.size()}, capacity_{other.capacity()}
-        {std::cout << "fdgdfgwf" << std::endl;
-            if (other.data())
+            : data_{nullptr}, length_{0}, capacity_{0}
+        {
+            if (other.data_)
             {
-                memcpy(data_, other.data(), sizeof(A) * length_);
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+                data_ = new A[capacity_];
+                
+                memcpy(data_, other.data_, sizeof(A) * length_);
             }
-        };
+        }
 
-        Sequence(Sequence &&other) : data_{other.data()}, length_{other.size()}, capacity_{other.capacity()}
-        {std::cout << "Sequence &&other" << std::endl;
+        Sequence(Sequence &&other) 
+            : data_{other.data_}, length_{other.length_}, capacity_{other.capacity_}
+        {
             other.data_ = nullptr;
-        };
+        }
 
         template <typename... Args>
         Sequence(const Args &...args)
             : data_{new A[sizeof...(args)]},
               capacity_(sizeof...(args)),
               length_(sizeof...(args))
-        {std::cout << "vec" << std::endl;
+        {
             int i = 0;
             for (auto arg : std::initializer_list<Common<Args...>>{args...})
                 data_[i++] = arg;
