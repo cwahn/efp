@@ -36,7 +36,7 @@ endif()
 
 find_package(Catch2 3.4.0)
 
-if(NOT CATCH2_FOUND)
+if(NOT Catch2_FOUND)
     message("Catch2 not found on the system.\nBuild from source.")
     FetchContent_Declare(
         Catch2
