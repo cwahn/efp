@@ -15,6 +15,7 @@ TEST_CASE("maybe_construction")
         Maybe<int> a = Nothing{};
 
         CHECK(a.has_value() == false);
+        CHECK(!a);
     }
 
     SECTION("Just")
@@ -23,6 +24,7 @@ TEST_CASE("maybe_construction")
 
         CHECK(a.has_value() == true);
         CHECK(a.value() == 42);
+        CHECK(a);
     }
 }
 
