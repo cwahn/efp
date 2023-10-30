@@ -26,6 +26,24 @@ TEST_CASE("maybe_construction")
         CHECK(a.value() == 42);
         CHECK(a);
     }
+
+    SECTION("ternary")
+    {
+        Maybe<int> a = 42;
+        Maybe<int> b = Nothing{};
+
+        bool l = a ? true : false;
+        CHECK(l);
+
+        bool bis = false;
+        if(!b) {
+            bis = true;
+        }
+        CHECK(bis);
+        // catch2 error?
+        // CHECK(b ? false : true);
+ 
+    }
 }
 
 TEST_CASE("maybe_functor")
