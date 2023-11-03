@@ -64,21 +64,9 @@ namespace efp
     {
         using F::operator();
 
-        // template <typename G, EnableIf<!IsWildCard<G>::value, int> = 0>
-        // Overloaded(G &&g)
-        //     : F(forward<G>(g))
-        // {
-        // }
-
-        // template <typename G, EnableIf<IsWildCard<G>::value, int> = 0>
-        // Overloaded(G &&g)
-        //     : F(WildCardWrapper<G>(forward<G>(g)))
-        // {
-        // }
-
         template <typename G>
         Overloaded(const G &g)
-            : F(MatchBranch<G>{g})
+            : F{MatchBranch<G>{g}}
         {
         }
     };
@@ -89,23 +77,9 @@ namespace efp
         using F::operator();
         using Overloaded<Fs...>::operator();
 
-        // template <class G, class... Gs, EnableIf<!IsWildCard<G>::value, int> = 0>
-        // Overloaded(G &&g, Gs &&...gs)
-        //     : F(forward<G>(g)),
-        //       Overloaded<Fs...>(forward<Gs>(gs)...)
-        // {
-        // }
-
-        // template <class G, class... Gs, EnableIf<IsWildCard<G>::value, int> = 0>
-        // Overloaded(G &&g, Gs &&...gs)
-        //     : F(WildCardWrapper<G>(forward<G>(g))),
-        //       Overloaded<Fs...>(forward<Gs>(gs)...)
-        // {
-        // }
-
         template <class G, class... Gs>
         Overloaded(G &&g, Gs &&...gs)
-            : F(MatchBranch<G>{forward<G>(g)}),
+            : F{MatchBranch<G>{forward<G>(g)}},
               Overloaded<Fs...>(forward<Gs>(gs)...)
         {
         }

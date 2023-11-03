@@ -143,6 +143,20 @@ TEST_CASE("enum_match")
             [&]() {});
 
         CHECK(b == 0.);
+
+        // ! Compilation should fail
+        // a.match(
+        //     [&]()
+        //     { b += 1; },
+        //     [&]() {});
+    }
+
+    SECTION("wild_card1")
+    {
+        Enum<int, Unit> a = Unit{};
+
+        CHECK(a.match([]()
+                      { return 42; }) == 42);
     }
 }
 
