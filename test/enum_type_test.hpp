@@ -12,6 +12,32 @@ struct None
 {
 };
 
+TEST_CASE("WildCard")
+{
+    SECTION("Void return")
+    {
+        bool wild_card_work = false;
+
+        const auto wc = [&]()
+        { wild_card_work = true; };
+
+        const auto wrapped = WildCard<decltype(wc)>{wc};
+        wrapped(42);
+
+        CHECK(wild_card_work == true);
+    }
+
+    SECTION("Non-void return")
+    {
+        const auto wc = [&]()
+        { return 42; };
+
+        const auto wrapped = WildCard<decltype(wc)>{wc};
+
+        CHECK(wrapped(Unit{}) == 42);
+    }
+}
+
 TEST_CASE("enum_type")
 {
     CHECK(sizeof(Enum<int, double>) == 16);
@@ -105,6 +131,19 @@ TEST_CASE("enum_match")
 
         CHECK(b == 42);
     }
+
+    // SECTION("wild_card")
+    // {
+    //     Enum<int, Unit> a = Unit{};
+    //     double b = 0.;
+
+    //     a.match(
+    //         [&](int x)
+    //         { b += 1; },
+    //         [&]() {});
+
+    //     CHECK(b == 0.);
+    // }
 }
 
 #endif

@@ -5,6 +5,18 @@
 
 namespace efp
 {
+
+    template <typename F>
+    struct WildCard
+    {
+        F f;
+
+        Return<F> operator()(...) const
+        {
+            return f();
+        }
+    };
+
     template <typename... Fs>
     struct Overloaded;
 
