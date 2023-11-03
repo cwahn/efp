@@ -739,35 +739,84 @@ namespace efp
     template <typename F>
     using Arguments = typename ArgumentsImpl<F, IsCallOperator<F>::value>::Type;
 
-    // ReturnImpl
+    // ReturnFromArgumentImpl
 
     template <typename, typename>
-    struct ReturnImpl
+    struct ReturnFromArgumentImpl
     {
     };
 
     template <typename F, typename... Args>
-    struct ReturnImpl<F, Tuple<Args...>>
+    struct ReturnFromArgumentImpl<F, Tuple<Args...>>
     {
         using Type = CallReturn<F, Args...>;
     };
 
-    // template <typename R, typename... Args>
-    // struct ReturnImpl<R (*)(Args...)>
-    // {
-    //     using Type = R;
-    // };
-
-    // template <typename R, typename... Args>
-    // struct ReturnImpl<R (*)(Args..., ...)>
-    // {
-    //     using Type = R;
-    // };
-
-    // Return
+    // ReturnFromArgument
 
     template <typename F>
-    using Return = typename ReturnImpl<F, Arguments<F>>::Type;
+    using ReturnFromArgument = typename ReturnFromArgumentImpl<F, Arguments<F>>::Type;
+
+    // Primary template (left undefined)
+    template <typename F>
+    struct ReturnImpl
+    {
+        using Type = ReturnFromArgument<F>;
+    };
+
+    // Specialization for function pointers
+    template <typename R, typename... Args>
+    struct ReturnImpl<R (*)(Args...)>
+    {
+        using Type = R;
+    };
+
+    // Specialization for member function pointers
+    template <typename R, typename C, typename... Args>
+    struct ReturnImpl<R (C::*)(Args...)>
+    {
+        using Type = R;
+    };
+
+    // Specialization for member function pointers with const qualifier
+    template <typename R, typename C, typename... Args>
+    struct ReturnImpl<R (C::*)(Args...) const>
+    {
+        using Type = R;
+    };
+
+    // Specialization for member function pointers with volatile qualifier
+    template <typename R, typename C, typename... Args>
+    struct ReturnImpl<R (C::*)(Args...) volatile>
+    {
+        using Type = R;
+    };
+
+    // Specialization for member function pointers with const volatile qualifier
+    template <typename R, typename C, typename... Args>
+    struct ReturnImpl<R (C::*)(Args...) const volatile>
+    {
+        using Type = R;
+    };
+
+    // Specialization for classes with operator()
+    // We use decltype to deduce the return type of the call operator directly
+    // template <typename F>
+    // struct ReturnImpl<F>
+    // {
+    // private:
+    //     template <typename T>
+    //     static auto check(T *) -> decltype(std::declval<T>().operator());
+
+    //     static void check(...);
+
+    // public:
+    //     using Type = decltype(check(std::declval<F *>()));
+    // };
+
+    // Template alias for Return
+    template <typename F>
+    using Return = typename ReturnImpl<F>::Type;
 
     // apply
 

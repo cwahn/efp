@@ -5,7 +5,6 @@
 
 namespace efp
 {
-
     // Is WildCard
 
     template <typename F>
