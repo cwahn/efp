@@ -132,18 +132,18 @@ TEST_CASE("enum_match")
         CHECK(b == 42);
     }
 
-    // SECTION("wild_card")
-    // {
-    //     Enum<int, Unit> a = Unit{};
-    //     double b = 0.;
+    SECTION("wild_card0")
+    {
+        Enum<int, Unit> a = Unit{};
+        double b = 0.;
 
-    //     a.match(
-    //         [&](int x)
-    //         { b += 1; },
-    //         [&]() {});
+        a.match(
+            [&](int x)
+            { b += 1; },
+            [&]() {});
 
-    //     CHECK(b == 0.);
-    // }
+        CHECK(b == 0.);
+    }
 }
 
 #endif

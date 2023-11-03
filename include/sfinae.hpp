@@ -458,10 +458,10 @@ namespace efp
     template <typename F, typename... Args>
     using CallReturn = typename CallReturnImpl<F, Args...>::Type;
 
-    // IsCallOperator
+    // HasCallOperator
 
     template <typename A>
-    class IsCallOperator
+    class HasCallOperator
     {
         typedef char one;
         typedef long two;
@@ -737,7 +737,7 @@ namespace efp
     // l-value and r-value reference will preserved at the result, but const will be removed.
 
     template <typename F>
-    using Arguments = typename ArgumentsImpl<F, IsCallOperator<F>::value>::Type;
+    using Arguments = typename ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
 
     // ReturnFromArgumentImpl
 
@@ -759,62 +759,92 @@ namespace efp
 
     // Primary template (left undefined)
     template <typename F>
-    struct ReturnImpl
+    struct FunctionReturnImpl
     {
-        using Type = ReturnFromArgument<F>;
     };
 
     // Specialization for function pointers
     template <typename R, typename... Args>
-    struct ReturnImpl<R (*)(Args...)>
+    struct FunctionReturnImpl<R (*)(Args...)>
     {
         using Type = R;
     };
 
     // Specialization for member function pointers
     template <typename R, typename C, typename... Args>
-    struct ReturnImpl<R (C::*)(Args...)>
+    struct FunctionReturnImpl<R (C::*)(Args...)>
+    {
+        using Type = R;
+    };
+
+    template <typename R, typename C, typename... Args>
+    struct FunctionReturnImpl<R (C::*)(Args..., ...)>
     {
         using Type = R;
     };
 
     // Specialization for member function pointers with const qualifier
     template <typename R, typename C, typename... Args>
-    struct ReturnImpl<R (C::*)(Args...) const>
+    struct FunctionReturnImpl<R (C::*)(Args...) const>
+    {
+        using Type = R;
+    };
+
+    template <typename R, typename C, typename... Args>
+    struct FunctionReturnImpl<R (C::*)(Args..., ...) const>
     {
         using Type = R;
     };
 
     // Specialization for member function pointers with volatile qualifier
     template <typename R, typename C, typename... Args>
-    struct ReturnImpl<R (C::*)(Args...) volatile>
+    struct FunctionReturnImpl<R (C::*)(Args...) volatile>
+    {
+        using Type = R;
+    };
+
+    template <typename R, typename C, typename... Args>
+    struct FunctionReturnImpl<R (C::*)(Args..., ...) volatile>
     {
         using Type = R;
     };
 
     // Specialization for member function pointers with const volatile qualifier
     template <typename R, typename C, typename... Args>
-    struct ReturnImpl<R (C::*)(Args...) const volatile>
+    struct FunctionReturnImpl<R (C::*)(Args...) const volatile>
     {
         using Type = R;
     };
 
-    // Specialization for classes with operator()
-    // We use decltype to deduce the return type of the call operator directly
-    // template <typename F>
-    // struct ReturnImpl<F>
-    // {
-    // private:
-    //     template <typename T>
-    //     static auto check(T *) -> decltype(std::declval<T>().operator());
-
-    //     static void check(...);
-
-    // public:
-    //     using Type = decltype(check(std::declval<F *>()));
-    // };
+    template <typename R, typename C, typename... Args>
+    struct FunctionReturnImpl<R (C::*)(Args..., ...) const volatile>
+    {
+        using Type = R;
+    };
 
     // Template alias for Return
+    template <typename F>
+    using FunctionReturn = typename FunctionReturnImpl<F>::Type;
+
+    // ReturnImpl
+
+    template <typename F, typename Enable = void>
+    struct ReturnImpl
+    {
+    };
+
+    template <typename F>
+    struct ReturnImpl<F, EnableIf<!HasCallOperator<F>::value, void>> : FunctionReturnImpl<F>
+    {
+    };
+
+    template <typename F>
+    struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>> : FunctionReturnImpl<decltype(&F::operator())>
+    {
+    };
+
+    // Return
+
     template <typename F>
     using Return = typename ReturnImpl<F>::Type;
 

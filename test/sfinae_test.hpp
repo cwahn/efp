@@ -91,7 +91,7 @@ TEST_CASE("Find")
     CHECK(Find<IsInt, bool, float, int>::value == 2);
 }
 
-TEST_CASE("IsCallOperator")
+TEST_CASE("HasCallOperator")
 {
     struct No
     {
@@ -104,9 +104,9 @@ TEST_CASE("IsCallOperator")
 
     auto lambda = [](int x) {};
 
-    CHECK(IsCallOperator<No>::value == false);
-    CHECK(IsCallOperator<Yes>::value == true);
-    CHECK(IsCallOperator<decltype(lambda)>::value == true);
+    CHECK(HasCallOperator<No>::value == false);
+    CHECK(HasCallOperator<Yes>::value == true);
+    CHECK(HasCallOperator<decltype(lambda)>::value == true);
 }
 
 void argument_t_function0(int x0, float &&x1)

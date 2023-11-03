@@ -8,7 +8,7 @@ namespace efp
     // Is WildCard
 
     template <typename F>
-    struct IsWildCard : IsSame<Arguments<F>, std::tuple<>>
+    struct IsWildCard : IsSame<Arguments<F>, Tuple<>>
     {
     };
 
