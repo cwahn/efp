@@ -128,59 +128,59 @@ TEST_CASE("Arguments")
     auto argument_t_lambda2 = []() {};
 
     CHECK(IsSame<
-              std::tuple<int, float>,
+              Tuple<int, float>,
               Arguments<decltype(&argument_t_function0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
-              std::tuple<int, float &&>,
+              Tuple<int, float &&>,
               Arguments<decltype(&argument_t_function0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
-              std::tuple<const int, float &>,
+              Tuple<const int, float &>,
               Arguments<decltype(&argument_t_function1)>>::value == false);
 
     // const quialifier will be removed at the result
     CHECK(IsSame<
-              std::tuple<int, float &>,
+              Tuple<int, float &>,
               Arguments<decltype(&argument_t_function1)>>::value == true);
 
     // Catching function not taking any argument with empty tuple
     CHECK(IsSame<
-              std::tuple<>,
+              Tuple<>,
               Arguments<decltype(&argument_t_function2)>>::value == true);
 
     CHECK(IsSame<
-              std::tuple<void>,
+              Tuple<void>,
               Arguments<decltype(&argument_t_function2)>>::value == false);
 
     // l-value reference will be preserved
     CHECK(IsSame<
-              std::tuple<int, float>,
+              Tuple<int, float>,
               Arguments<decltype(argument_t_lambda0)>>::value == false);
 
     // Can catch l-value reference r-value reference
     CHECK(IsSame<
-              std::tuple<int, float &&>,
+              Tuple<int, float &&>,
               Arguments<decltype(argument_t_lambda0)>>::value == true);
 
     // Can't catch const qualifier
     CHECK(IsSame<
-              std::tuple<const int, float &>,
+              Tuple<const int, float &>,
               Arguments<decltype(argument_t_lambda1)>>::value == false);
 
     CHECK(IsSame<
-              std::tuple<int, float &>,
+              Tuple<int, float &>,
               Arguments<decltype(argument_t_lambda1)>>::value == true);
 
     // Catching lambda not taking any argument with empty tuple
     CHECK(IsSame<
-              std::tuple<>,
+              Tuple<>,
               Arguments<decltype(argument_t_lambda2)>>::value == true);
 
     CHECK(IsSame<
-              std::tuple<void>,
+              Tuple<void>,
               Arguments<decltype(argument_t_lambda2)>>::value == false);
 }
 
@@ -251,6 +251,101 @@ TEST_CASE("IsInvocable")
     CHECK(IsInvocable<decltype(&is_invocable_add), int, int>::value == true);
     CHECK(IsInvocable<decltype(&is_invocable_add), double, double>::value == true);
     CHECK(IsInvocable<decltype(&is_invocable_add), double, Unit>::value == false);
+}
+
+TEST_CASE("Tuple")
+{
+    SECTION("const")
+    {
+        const Tuple<bool, int> tpl{true, 42};
+        CHECK(tpl.template get<0>() == true);
+        CHECK(tpl.template get<1>() == 42);
+        CHECK(get<0>(tpl) == true);
+        CHECK(get<1>(tpl) == 42);
+        CHECK(p<0>(tpl) == true);
+        CHECK(p<1>(tpl) == 42);
+    }
+
+    SECTION("non const")
+    {
+        Tuple<bool, int> tpl{true, 42};
+        CHECK(tpl.template get<0>() == true);
+        CHECK(tpl.template get<1>() == 42);
+        CHECK(get<0>(tpl) == true);
+        CHECK(get<1>(tpl) == 42);
+        CHECK(p<0>(tpl) == true);
+        CHECK(p<1>(tpl) == 42);
+
+        tpl.template get<0>() = false;
+        tpl.template get<1>() = 0;
+
+        CHECK(tpl.template get<0>() == false);
+        CHECK(tpl.template get<1>() == 0);
+        CHECK(get<0>(tpl) == false);
+        CHECK(get<1>(tpl) == 0);
+        CHECK(p<0>(tpl) == false);
+        CHECK(p<1>(tpl) == 0);
+    }
+}
+
+TEST_CASE("Tuple match")
+{
+    SECTION("case 0")
+    {
+        const Tuple<bool, int> tpl{true, 42};
+        CHECK(tpl.match([](bool p, int x)
+                        { return p ? x : -x; }) == 42);
+    }
+
+    SECTION("case 1")
+    {
+        const Tuple<bool, int> tpl{false, 42};
+        CHECK(tpl.match([](bool p, int x)
+                        { return p ? x : -x; }) == -42);
+    }
+
+    SECTION("case empty")
+    {
+        const Tuple<> empty{};
+        CHECK(empty.match([]()
+                          { return 42; }) == 42);
+    }
+}
+
+TEST_CASE("tuple")
+{
+    CHECK(Tuple<bool, int>{true, 42} == tuple(true, 42));
+    CHECK(Tuple<>{} == tuple());
+}
+
+TEST_CASE("apply")
+{
+    SECTION("0")
+    {
+        const auto tpl = tuple();
+        const auto f = []()
+        { return Unit{}; };
+
+        CHECK(apply(f, tpl) == Unit{});
+    }
+
+    SECTION("1")
+    {
+        const auto tpl = tuple(true, 42);
+        const auto f = [](bool a, int b)
+        { return Unit{}; };
+
+        CHECK(apply(f, tpl) == Unit{});
+    }
+
+    SECTION("2")
+    {
+        const auto tpl = tuple(40, 2);
+        const auto add = [](int a, int b)
+        { return a + b; };
+
+        CHECK(apply(add, tpl) == 42);
+    }
 }
 
 #endif

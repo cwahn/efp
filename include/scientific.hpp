@@ -142,7 +142,7 @@ namespace efp
     }
 
     template <typename R, typename A, typename B>
-    std::tuple<R, R> linear_regression(const Seq<A> &as, const Seq<B> &bs)
+    Tuple<R, R> linear_regression(const Seq<A> &as, const Seq<B> &bs)
     {
         const auto as_mean = mean<R>(as);
         const auto bs_mean = mean<R>(bs);
@@ -161,11 +161,11 @@ namespace efp
         const auto beta_1 = ss_ab / ss_aa;
         const auto beta_2 = bs_mean - (beta_1 * as_mean);
 
-        return std::make_tuple(beta_1, beta_2);
+        return tuple(beta_1, beta_2);
     }
 
     template <typename R, typename A>
-    std::tuple<R, R> linear_regression_with_index(const Seq<A> &as)
+    Tuple<R, R> linear_regression_with_index(const Seq<A> &as)
     {
         const int n = length(as);
 
@@ -181,15 +181,15 @@ namespace efp
         const auto beta_1 = ss_ia / ss_ii;
         const auto beta_2 = as_mean - (beta_1 * mean_is);
 
-        return std::make_tuple(beta_1, beta_2);
+        return tuple(beta_1, beta_2);
     }
 
     template <typename R, typename A>
     NAryReturn<R, A> detrend(const Seq<A> &as)
     {
         const auto betas = linear_regression_with_index<R>(as);
-        const auto beta_1 = std::get<0>(betas);
-        const auto beta_2 = std::get<1>(betas);
+        const auto beta_1 = get<0>(betas);
+        const auto beta_2 = get<1>(betas);
 
         const auto detrend_elem = [&](const Element<A> &i, const Element<A> &x)
         { return (R)x - (beta_1 * (R)i + beta_2); };

@@ -13,7 +13,7 @@ namespace efp
     };
 
     template <typename F, typename... Args>
-    struct FunctionPointerType<F, std::tuple<Args...>>
+    struct FunctionPointerType<F, Tuple<Args...>>
     {
         using type = Return<F>(*)(Args...);
     };
@@ -34,7 +34,7 @@ namespace efp
         };
 
         template <typename... Args>
-        struct Helper<std::tuple<Args...>>
+        struct Helper<Tuple<Args...>>
         {
             static Return<F> call(Args... args)
             {
