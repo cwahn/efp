@@ -26,24 +26,6 @@ TEST_CASE("maybe_construction")
         CHECK(a.value() == 42);
         CHECK(a);
     }
-
-    SECTION("ternary")
-    {
-        Maybe<int> a = 42;
-        Maybe<int> b = Nothing{};
-
-        bool l = a ? true : false;
-        CHECK(l);
-
-        bool bis = false;
-        if(!b) {
-            bis = true;
-        }
-        CHECK(bis);
-        // catch2 error?
-        // CHECK(b ? false : true);
- 
-    }
 }
 
 TEST_CASE("maybe_functor")
@@ -143,6 +125,73 @@ TEST_CASE("maybe_monad")
 
         CHECK((mc >>= div_12_by).is_nothing() == true);
     }
+}
+
+// Maybe<Unit> success()
+// {
+//     return Unit{};
+// }
+
+// Maybe<Unit> maybe_fail(bool is_fail)
+// {
+//     return Nothing{};
+// }
+
+// // Maybe<Unit> combined(bool is_fail)
+// // {
+// //     return success()
+// //                ? maybe_fail(true)
+// //                      ? maybe_fail(is_fail)
+// //                      : Nothing{}
+// //                : Nothing{};
+// // }
+
+// Maybe<int> action_0(bool x)
+// {
+//     // if (x)
+//     //     return 42;
+//     // else
+//     //     return Nothing{};
+//     return x ? Maybe<int>{42} : Maybe<int>{Nothing{}};
+// }
+
+// Maybe<Unit> action_1(bool x)
+// {
+//     if (x)
+//         return Unit{};
+//     else
+//         return Nothing{};
+// }
+
+// Maybe<int> action_2(bool x, bool y)
+// {
+//     auto a = try_(action_0(x));
+//     // auto b = try_(action_1(y));
+//     return a;
+// }
+
+TEST_CASE("Maybe as bool")
+{
+    SECTION("0")
+    {
+        Maybe<int> a = 42;
+        Maybe<int> b = Nothing{};
+
+        bool l = a ? true : false;
+        CHECK(l);
+
+        bool bis = false;
+        if (!b)
+        {
+            bis = true;
+        }
+        CHECK(bis);
+    }
+
+    // SECTION("1")
+    // {
+    //     CHECK(action_2(true, true).value() == 42);
+    // }
 }
 
 #endif

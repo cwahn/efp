@@ -40,7 +40,8 @@ namespace efp
             return Enum<Nothing, A>::template get<A>();
         }
 
-        explicit operator bool() const {
+        explicit operator bool() const
+        {
             return has_value();
         }
     };
@@ -128,6 +129,15 @@ namespace efp
 
         return f(ma.value());
     }
+
+    // #define try_(expr) \
+//     ({ auto&& _tmp_##__COUNTER__ = (expr); _tmp_##__COUNTER__ ? _tmp_##__COUNTER__.value() : return Nothing{} })
+
+#define try_(expr)          \
+    auto &&_tmp_ = (expr);  \
+    if (!_tmp_.has_value()) \
+        return Nothing{};   \
+    _tmp_.value()
 
 }
 

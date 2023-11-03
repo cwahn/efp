@@ -6,16 +6,56 @@
 namespace efp
 {
 
+    // Is WildCard
+
     template <typename F>
-    struct WildCard
+    struct IsWildCard : IsSame<Arguments<F>, std::tuple<>>
     {
-        F f;
+    };
+
+    template <typename F>
+    struct IsWildCard<F &> : IsWildCard<F>
+    {
+    };
+
+    template <typename F>
+    struct IsWildCard<F &&> : IsWildCard<F>
+    {
+    };
+
+    // WildCardWrapper
+
+    template <typename F>
+    struct WildCardWrapper
+    {
+        const F &f;
 
         Return<F> operator()(...) const
         {
             return f();
         }
     };
+
+    // MatchBranchImpl
+
+    template <typename F, typename = void>
+    struct MatchBranchImpl
+    {
+        using Type = Cleaned<F>;
+    };
+
+    template <typename F>
+    struct MatchBranchImpl<F, EnableIf<IsWildCard<F>::value, void>>
+    {
+        using Type = WildCardWrapper<Cleaned<F>>;
+    };
+
+    // MatchBranch
+
+    template <typename F>
+    using MatchBranch = typename MatchBranchImpl<F>::Type;
+
+    // Overloaded
 
     template <typename... Fs>
     struct Overloaded;
@@ -25,9 +65,21 @@ namespace efp
     {
         using F::operator();
 
-        template <class G>
-        Overloaded(G &&g)
-            : F(forward<G>(g))
+        // template <typename G, EnableIf<!IsWildCard<G>::value, int> = 0>
+        // Overloaded(G &&g)
+        //     : F(forward<G>(g))
+        // {
+        // }
+
+        // template <typename G, EnableIf<IsWildCard<G>::value, int> = 0>
+        // Overloaded(G &&g)
+        //     : F(WildCardWrapper<G>(forward<G>(g)))
+        // {
+        // }
+
+        template <typename G>
+        Overloaded(const G &g)
+            : F(MatchBranch<G>{g})
         {
         }
     };
@@ -38,9 +90,23 @@ namespace efp
         using F::operator();
         using Overloaded<Fs...>::operator();
 
+        // template <class G, class... Gs, EnableIf<!IsWildCard<G>::value, int> = 0>
+        // Overloaded(G &&g, Gs &&...gs)
+        //     : F(forward<G>(g)),
+        //       Overloaded<Fs...>(forward<Gs>(gs)...)
+        // {
+        // }
+
+        // template <class G, class... Gs, EnableIf<IsWildCard<G>::value, int> = 0>
+        // Overloaded(G &&g, Gs &&...gs)
+        //     : F(WildCardWrapper<G>(forward<G>(g))),
+        //       Overloaded<Fs...>(forward<Gs>(gs)...)
+        // {
+        // }
+
         template <class G, class... Gs>
         Overloaded(G &&g, Gs &&...gs)
-            : F(forward<G>(g)),
+            : F(MatchBranch<G>{forward<G>(g)}),
               Overloaded<Fs...>(forward<Gs>(gs)...)
         {
         }
@@ -203,11 +269,6 @@ namespace efp
             static constexpr bool value = all_v(IsRelevantBranch<Fs>::value...);
         };
 
-        template <typename F>
-        struct IsWildCard : IsSame<std::tuple<>, Arguments<F>>
-        {
-        };
-
         template <typename A, typename... Fs>
         struct IsVariantCovered
         {
@@ -238,7 +299,7 @@ namespace efp
                     IsWellFormed<Fs...>::value,
                 Common<Return<Fs>...>>
         {
-            return Match<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<Fs...>{fs...}, this);
+            return Match<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
         }
 
     private:

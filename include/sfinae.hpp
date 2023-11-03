@@ -511,6 +511,18 @@ namespace efp
         using Type = CallReturn<F, Args...>;
     };
 
+    // template <typename R, typename... Args>
+    // struct ReturnImpl<R (*)(Args...)>
+    // {
+    //     using Type = R;
+    // };
+
+    // template <typename R, typename... Args>
+    // struct ReturnImpl<R (*)(Args..., ...)>
+    // {
+    //     using Type = R;
+    // };
+
     // Return
 
     template <typename F>
@@ -556,6 +568,38 @@ namespace efp
 
     template <typename A>
     using ReferenceRemoved = typename ReferenceRemovedImpl<A>::Type;
+
+    // ConstRemovedImpl
+
+    template <typename A>
+    struct ConstRemovedImpl
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct ConstRemovedImpl<const A>
+    {
+        using Type = A;
+    };
+
+    // ConstRemoved
+
+    template <typename A>
+    using ConstRemoved = typename ConstRemovedImpl<A>::Type;
+
+    // // CleanedImpl
+
+    // template <typename A>
+    // struct CleanedImpl
+    // {
+    //     using Type = ConstRemoved<ReferenceRemoved<A>>;
+    // };
+
+    // Cleaned
+
+    template <typename A>
+    using Cleaned = ConstRemoved<ReferenceRemoved<A>>;
 
     // Common
 
