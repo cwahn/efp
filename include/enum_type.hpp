@@ -270,7 +270,7 @@ namespace efp
         };
 
         template <typename... Fs>
-        auto match(const Fs &...fs)
+        auto match(const Fs &...fs) const
             -> EnableIf<
                 AreAllRelevantBranchs<Fs...>::value &&
                     IsExhaustive<Fs...>::value &&

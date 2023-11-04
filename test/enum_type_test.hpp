@@ -134,7 +134,7 @@ TEST_CASE("enum_match")
 
     SECTION("wild_card0")
     {
-        Enum<int, Unit> a = Unit{};
+        Enum<Unit, int, double> a = Unit{};
         double b = 0.;
 
         a.match(
@@ -153,7 +153,7 @@ TEST_CASE("enum_match")
 
     SECTION("wild_card1")
     {
-        Enum<int, Unit> a = Unit{};
+        Enum<Unit, int, double> a = Unit{};
 
         CHECK(a.match([]()
                       { return 42; }) == 42);

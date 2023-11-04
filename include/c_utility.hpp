@@ -5,23 +5,23 @@
 
 namespace efp
 {
-    // FunctionPointerType
+    // FunctionPointerTypeImpl
 
     template <typename, typename...>
-    struct FunctionPointerType
+    struct FunctionPointerTypeImpl
     {
     };
 
     template <typename F, typename... Args>
-    struct FunctionPointerType<F, Tuple<Args...>>
+    struct FunctionPointerTypeImpl<F, Tuple<Args...>>
     {
-        using type = Return<F>(*)(Args...);
+        using type = Return<F> (*)(Args...);
     };
 
-    // FunctionPointer_t
+    // FunctionPointerType
 
     template <typename F>
-    using FunctionPointer_t = typename FunctionPointerType<F, Arguments<F>>::type;
+    using FunctionPointerType = typename FunctionPointerTypeImpl<F, Arguments<F>>::type;
 
     // LambdaPointer
 
@@ -52,10 +52,10 @@ namespace efp
 
     template <typename F>
     // ! Take caution on the lifetime of the argument.
-    static FunctionPointer_t<F> to_function_pointer(F &f)
+    static FunctionPointerType<F> to_function_pointer(F &f)
     {
         LambdaPointer<F>::inner_ptr = (void *)&f;
-        return (FunctionPointer_t<F>)LambdaPointer<F>::template Helper<Arguments<F>>::call;
+        return (FunctionPointerType<F>)LambdaPointer<F>::template Helper<Arguments<F>>::call;
     }
 }
 
