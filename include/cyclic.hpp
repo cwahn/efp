@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <cstdint>
-#include <array>
 
 #include "sequence.hpp"
 
@@ -90,7 +89,7 @@ namespace efp
         }
 
     private:
-        std::array<A, ct_len * 2> buffer_;
+        Array<A, ct_len * 2> buffer_;
         A *middle_;
         A *data_;
     };
@@ -209,7 +208,7 @@ namespace efp
         }
 
     private:
-        Array<A, ct_cap * 2> buffer_ = {};
+        Array<A, ct_cap * 2> buffer_;
         int length_ = 0;
         A *read_;
         A *write_;
