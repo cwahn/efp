@@ -114,13 +114,11 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() {}
+        Sequence() : data_{} {}
 
         Sequence(const Sequence &other)
         {
-
             memcpy(data_, other.data_, sizeof(A) * ct_len);
-
         }
 
         Sequence(Sequence &&other)
