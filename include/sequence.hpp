@@ -114,11 +114,21 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() {}
-#ifdef __OPT_COPY__
-        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
-        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
-#endif
+        Sequence() : data_{} {}
+
+        Sequence(const Sequence &other)
+        {
+            memcpy(data_, other.data_, sizeof(A) * ct_len);
+        }
+
+        Sequence(Sequence &&other)
+        {
+            for (int i = 0; i < ct_len; ++i) 
+            {
+                data_[i] = std::move(other.data_[i]);
+            }
+        }       
+
         template <typename... Arg>
         Sequence(const Arg &...args)
             : data_{args...}
@@ -247,10 +257,22 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : length_{0} {}
-#ifdef __OPT_COPY__
-        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
-        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
-#endif
+
+        Sequence(const Sequence &other) : length_{other.length_}
+        {
+            memcpy(data_, other.data_, sizeof(A) * length_);
+        }
+
+        Sequence(Sequence &&other) : length_{0}
+        {
+            length_ = other.length_;
+
+            for (int i = 0; i < length_; ++i) 
+            {
+                data_[i] = std::move(other.data_[i]);
+            }
+        }     
+        
         template <typename... Arg>
         Sequence(const Arg &...args)
             : data_{args...},
@@ -403,24 +425,26 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
-#ifdef __OPT_COPY__
-        Sequence(const Sequence &); // Not emplemented by design for RVO, NRVO enforcement
-        Sequence(Sequence &&);      // Not emplemented by design for RVO, NRVO enforcement
-#else
-        Sequence(const Sequence &other)
-            : data_{new A[other.capacity()]}, length_{other.size()}, capacity_{other.capacity()}
-        {
-            if (other.data())
-            {
-                memcpy(data_, other.data(), sizeof(A) * length_);
-            }
-        };
 
-        Sequence(Sequence &&other) : data_{other.data()}, length_{other.size()}, capacity_{other.capacity()}
+        Sequence(const Sequence &other)
+            : data_{nullptr}, length_{0}, capacity_{0}
+        {
+            if (other.data_)
+            {
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+                data_ = new A[capacity_];
+                
+                memcpy(data_, other.data_, sizeof(A) * length_);
+            }
+        }
+
+        Sequence(Sequence &&other) 
+            : data_{other.data_}, length_{other.length_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
-        };
-#endif
+        }
+
         template <typename... Args>
         Sequence(const Args &...args)
             : data_{new A[sizeof...(args)]},
@@ -607,10 +631,9 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr} {}
-#ifdef __OPT_COPY__
-        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-#endif
+        // SequenceView(const SequenceView &) {}
+        // SequenceView(SequenceView &&) {}    
+        
         SequenceView(A *data)
             : data_{data}
         {
@@ -730,10 +753,9 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0} {}
-#ifdef __OPT_COPY__
-        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-#endif
+        // SequenceView(const SequenceView &) {}
+        // SequenceView(SequenceView &&) {}   
+        
         SequenceView(A *data) : data_{data}
         {
         }
@@ -862,10 +884,9 @@ namespace efp
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
-#ifdef __OPT_COPY__
-        SequenceView(const SequenceView &); // Not emplemented by design for RVO, NRVO enforcement
-        SequenceView(SequenceView &&);      // Not emplemented by design for RVO, NRVO enforcement
-#endif
+        // SequenceView(const SequenceView &) {}
+        // SequenceView(SequenceView &&) {}    
+        
         SequenceView(A *data) : data_{data}, length_{0}, capacity_{0}
         {
         }
