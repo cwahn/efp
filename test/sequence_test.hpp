@@ -208,62 +208,62 @@ TEST_CASE("copy elision")
     }
 }
 
-// TEST_CASE("assignment")
-// {
-//     SECTION("Array")
-//     {
-//         Array<double, 3> a{1., 2., 3.};
-//         Array<double, 3> b;
+TEST_CASE("assignment")
+{
+    SECTION("Array")
+    {
+        Array<double, 3> a{1., 2., 3.};
+        Array<double, 3> b;
 
-//         b = a;
-//         CHECK(a == b);
-//     }
+        b = a;
+        CHECK(a == b);
+    }
 
-//     SECTION("ArrVec")
-//     {
-//         ArrVec<double, 3> a{1., 2., 3.};
-//         ArrVec<double, 3> b;
+    SECTION("ArrVec")
+    {
+        ArrVec<double, 3> a{1., 2., 3.};
+        ArrVec<double, 3> b;
 
-//         b = a;
-//         CHECK(a == b);
-//     }
+        b = a;
+        CHECK(a == b);
+    }
 
-//     SECTION("Vector")
-//     {
-//         Vector<double> a{1., 2., 3.};
-//         Vector<double> b;
+    SECTION("Vector")
+    {
+        Vector<double> a{1., 2., 3.};
+        Vector<double> b;
 
-//         b = a;
-//         CHECK(a == b);
-//     }
-// }
+        b = a;
+        CHECK(a == b);
+    }
+}
 
-// TEST_CASE("ArrayView")
-// {
-//     SECTION("construction")
-//     {
-//         int a = 0;
-//         const int a_const = 0;
+TEST_CASE("ArrayView")
+{
+    SECTION("construction")
+    {
+        int a = 0;
+        const int a_const = 0;
 
-//         // const pointer will create read-only view.
+        // const pointer will create read-only view.
 
-//         ArrayView<int, 1> a_view0{&a};
-//         ArrayView<const int, 1> a_view1{&a_const};
-//         const ArrayView<int, 1> a_view2{&a};
-//         const ArrayView<const int, 1> a_view3{&a_const};
-//         // ArrayView<int, 1> a_view4{&a_const};
-//         ArrayView<const int, 1> a_view5{&a};
-//         // const ArrayView<int, 1> a_view6{&a_const};
-//         const ArrayView<const int, 1> a_view7{&a};
-//     }
+        ArrayView<int, 1> a_view0{&a};
+        ArrayView<const int, 1> a_view1{&a_const};
+        const ArrayView<int, 1> a_view2{&a};
+        const ArrayView<const int, 1> a_view3{&a_const};
+        // ArrayView<int, 1> a_view4{&a_const};
+        ArrayView<const int, 1> a_view5{&a};
+        // const ArrayView<int, 1> a_view6{&a_const};
+        const ArrayView<const int, 1> a_view7{&a};
+    }
 
-//     SECTION("copy construction")
-//     {
-//         ArrayView<const double, 3> view_1{data(array_3)};
-//         auto view_2 = view_1;
-//         CHECK(view_1 == view_2);
-//     }
-// }
+    SECTION("copy construction")
+    {
+        ArrayView<const double, 3> view_1{data(array_3)};
+        auto view_2 = view_1;
+        CHECK(view_1 == view_2);
+    }
+}
 
 TEST_CASE("VectorView")
 {
@@ -279,7 +279,7 @@ TEST_CASE("Vector Copy")
 {
     SECTION("Vector copy")
     {
-        Vector<double> view_1{3. ,3., 3.};
+        Vector<double> view_1{3., 3., 3.};
         auto view_2 = view_1;
         CHECK(view_1 == view_2);
     }
