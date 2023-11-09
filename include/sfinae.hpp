@@ -292,7 +292,7 @@ namespace efp
         return foldl_v(times_v<A>, a, as...);
     }
 
-    // RemoveReference
+    // RemoveReferenceImpl
 
     // ! Deprecated
 
@@ -966,25 +966,30 @@ namespace efp
     template <typename... Ts>
     using Void = typename VoidImpl<Ts...>::Type;
 
+    // RemoveReferenceImpl
+
+    template <typename A>
+    struct RemoveReferenceImpl
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct RemoveReferenceImpl<A &>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct RemoveReferenceImpl<A &&>
+    {
+        using Type = A;
+    };
+
     // RemoveReference
 
     template <typename A>
-    struct RemoveReference
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct RemoveReference<A &>
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct RemoveReference<A &&>
-    {
-        using Type = A;
-    };
+    using RemoveReference = typename RemoveReferenceImpl<A>::Type;
 
     // IsLvalueReference
 
@@ -1001,13 +1006,13 @@ namespace efp
     // Forward
 
     template <typename A>
-    A &&forward(typename RemoveReference<A>::Type &a) noexcept
+    A &&forward(RemoveReference<A> &a) noexcept
     {
         return static_cast<A &&>(a);
     }
 
     template <typename A>
-    A &&forward(typename RemoveReference<A>::Type &&a) noexcept
+    A &&forward(RemoveReference<A> &&a) noexcept
     {
         static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
         return static_cast<A &&>(a);
@@ -1024,6 +1029,14 @@ namespace efp
     struct IsDefaultConstructible<A, decltype(A())> : True
     {
     };
+
+    // move
+
+    template <typename A>
+    RemoveReference<A> &&move(A &&a)
+    {
+        return static_cast<RemoveReference<A> &&>(a);
+    }
 
 }
 
