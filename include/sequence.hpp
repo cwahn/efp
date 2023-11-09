@@ -123,11 +123,11 @@ namespace efp
 
         Sequence(Sequence &&other)
         {
-            for (int i = 0; i < ct_len; ++i) 
+            for (int i = 0; i < ct_len; ++i)
             {
                 data_[i] = std::move(other.data_[i]);
             }
-        }       
+        }
 
         template <typename... Arg>
         Sequence(const Arg &...args)
@@ -267,12 +267,12 @@ namespace efp
         {
             length_ = other.length_;
 
-            for (int i = 0; i < length_; ++i) 
+            for (int i = 0; i < length_; ++i)
             {
                 data_[i] = std::move(other.data_[i]);
             }
-        }     
-        
+        }
+
         template <typename... Arg>
         Sequence(const Arg &...args)
             : data_{args...},
@@ -434,12 +434,12 @@ namespace efp
                 length_ = other.length_;
                 capacity_ = other.capacity_;
                 data_ = new A[capacity_];
-                
+
                 memcpy(data_, other.data_, sizeof(A) * length_);
             }
         }
 
-        Sequence(Sequence &&other) 
+        Sequence(Sequence &&other)
             : data_{other.data_}, length_{other.length_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
@@ -559,6 +559,23 @@ namespace efp
             ++length_;
         }
 
+        void erase(int index)
+        {
+            if (index < 0 || index >= length_)
+            {
+                abort();
+            }
+
+            for (int i = index; i < length_ - 1; ++i)
+            {
+                data_[i] = std::move(data_[i + 1]);
+            }
+
+            data_[length_ - 1].~A();
+
+            --length_;
+        }
+
         const A *data() const
         {
             return data_;
@@ -632,8 +649,8 @@ namespace efp
 
         SequenceView() : data_{nullptr} {}
         // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}    
-        
+        // SequenceView(SequenceView &&) {}
+
         SequenceView(A *data)
             : data_{data}
         {
@@ -754,8 +771,8 @@ namespace efp
 
         SequenceView() : data_{nullptr}, length_{0} {}
         // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}   
-        
+        // SequenceView(SequenceView &&) {}
+
         SequenceView(A *data) : data_{data}
         {
         }
@@ -885,8 +902,8 @@ namespace efp
 
         SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
         // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}    
-        
+        // SequenceView(SequenceView &&) {}
+
         SequenceView(A *data) : data_{data}, length_{0}, capacity_{0}
         {
         }

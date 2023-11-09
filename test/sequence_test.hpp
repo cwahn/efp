@@ -238,6 +238,18 @@ TEST_CASE("assignment")
     }
 }
 
+TEST_CASE("Vector::erase")
+{
+    SECTION("single element erase")
+    {
+        Vector<int> vec{1, 2, 3, 4, 5};
+        vec.erase(2); // Erase the element at index 2, which is '3'
+
+        Vector<int> expected{1, 2, 4, 5};
+        CHECK(vec == expected);
+    }
+}
+
 TEST_CASE("ArrayView")
 {
     SECTION("construction")
