@@ -125,7 +125,7 @@ namespace efp
         {
             for (int i = 0; i < ct_len; ++i)
             {
-                data_[i] = std::move(other.data_[i]);
+                data_[i] = move(other.data_[i]);
             }
         }
 
@@ -269,7 +269,7 @@ namespace efp
 
             for (int i = 0; i < length_; ++i)
             {
-                data_[i] = std::move(other.data_[i]);
+                data_[i] = move(other.data_[i]);
             }
         }
 
@@ -568,7 +568,7 @@ namespace efp
 
             for (int i = index; i < length_ - 1; ++i)
             {
-                data_[i] = std::move(data_[i + 1]);
+                data_[i] = move(data_[i + 1]);
             }
 
             data_[length_ - 1].~A();
