@@ -238,9 +238,18 @@ TEST_CASE("assignment")
     }
 }
 
-TEST_CASE("Vector::erase")
+TEST_CASE("erase")
 {
-    SECTION("single element erase")
+    SECTION("ArrVec::erase")
+    {
+        ArrVec<int, 5> arrvec{1, 2, 3, 4, 5};
+        arrvec.erase(2); // Erase the element at index 2, which is '3'
+
+        ArrVec<int, 5> expected{1, 2, 4, 5};
+        CHECK(arrvec == expected);
+    }
+
+    SECTION("Vector::erase")
     {
         Vector<int> vec{1, 2, 3, 4, 5};
         vec.erase(2); // Erase the element at index 2, which is '3'

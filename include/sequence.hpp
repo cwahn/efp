@@ -369,6 +369,23 @@ namespace efp
             }
         }
 
+        void erase(int index)
+        {
+            if (index < 0 || index >= length_)
+            {
+                abort();
+            }
+
+            for (int i = index; i < length_ - 1; ++i)
+            {
+                data_[i] = move(data_[i + 1]);
+            }
+
+            data_[length_ - 1].~A();
+
+            --length_;
+        }
+
         const A *data() const
         {
             return data_;
