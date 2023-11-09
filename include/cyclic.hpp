@@ -1,9 +1,6 @@
 #ifndef CYCLIC_HPP_
 #define CYCLIC_HPP_
 
-#include <stdlib.h>
-#include <cstdint>
-
 #include "sequence.hpp"
 
 namespace efp
