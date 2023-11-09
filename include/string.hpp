@@ -5,26 +5,18 @@
 
 namespace efp
 {
-    class CStrPtr
+    class CString
     {
     private:
         const char *ptr_;
-        bool is_owning_;
 
     public:
-        // CStrPtr(char *ptr, bool is_owning = false)
-        //     : ptr_(ptr), is_owning_(is_owning) {}
+        CString(const char *ptr)
+            : ptr_(ptr) {}
 
-        CStrPtr(const char *ptr, bool is_owning = false)
-            : ptr_(ptr),
-              is_owning_(is_owning) {}
-
-        ~CStrPtr()
+        ~CString()
         {
-            if (is_owning_)
-            {
-                delete[] ptr_;
-            }
+            delete[] ptr_;
         }
 
         // Implicit conversion to const char*
@@ -33,39 +25,28 @@ namespace efp
             return ptr_;
         }
 
-        // Implicit conversion to char* (non-const)
-        // operator char *()
-        // {
-        //     return ptr_;
-        // }
-
         // Move constructor
-        CStrPtr(CStrPtr &&other) noexcept : ptr_(other.ptr_), is_owning_(other.is_owning_)
+        CString(CString &&other) noexcept : ptr_(other.ptr_)
         {
             other.ptr_ = nullptr;
-            other.is_owning_ = false;
         }
 
         // Move assignment operator
-        CStrPtr &operator=(CStrPtr &&other) noexcept
+        CString &operator=(CString &&other) noexcept
         {
             if (this != &other)
             {
-                if (is_owning_)
-                {
-                    delete[] ptr_;
-                }
+                delete[] ptr_;
+
                 ptr_ = other.ptr_;
-                is_owning_ = other.is_owning_;
                 other.ptr_ = nullptr;
-                other.is_owning_ = false;
             }
             return *this;
         }
 
         // Deleted copy constructor and copy assignment operator to prevent copying
-        CStrPtr(const CStrPtr &) = delete;
-        CStrPtr &operator=(const CStrPtr &) = delete;
+        CString(const CString &) = delete;
+        CString &operator=(const CString &) = delete;
     };
 
     class String : public Vector<char>
@@ -81,25 +62,7 @@ namespace efp
             }
         }
 
-        // String(const String &other) : Vector<char>(static_cast<const Vector<char> &>(other)) {}
-
-        // String(String &&other) : Vector<char>(move(other)) {}
-
-        // String(std::initializer_list<char> ilist) : Vector<char>(ilist) {}
-
         ~String() {}
-
-        // String &operator=(const String &other)
-        // {
-        //     Vector<char>::operator=(other);
-        //     return *this;
-        // }
-
-        // String &operator=(String &&other)
-        // {
-        //     Vector<char>::operator=(move(other));
-        //     return *this;
-        // }
 
         String &operator+=(const String &other)
         {
@@ -110,24 +73,15 @@ namespace efp
             return *this;
         }
 
-        const CStrPtr c_str() const
+        // Will return smart pointer of maybe owning the data if the buffer is full and can't append "/0" at the end
+        const CString c_str() const
         {
             const int size_ = size();
-            if (size_ < capacity())
-            {
-                // There's enough space to add a null terminator without extending the buffer.
-                Vector<char> &non_const_this = *const_cast<Vector<char> *>(static_cast<const Vector<char> *>(this));
-                non_const_this[size_] = '\0';
-                return CStrPtr(data(), false); // No need to delete, part of the Vector's data.
-            }
-            else
-            {
-                // The buffer is full or doesn't have a null terminator, need to extend.
-                char *extended_buffer = new char[size_ + 1];
-                memcpy(extended_buffer, data(), size_);
-                extended_buffer[size_] = '\0';
-                return CStrPtr(extended_buffer, true); // Mark for deletion.
-            }
+
+            char *extended_buffer = new char[size_ + 1];
+            memcpy(extended_buffer, data(), size_);
+            extended_buffer[size_] = '\0';
+            return CString(extended_buffer); // Mark for deletion.
         }
 
         bool operator==(const String &other) const

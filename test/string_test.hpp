@@ -31,22 +31,17 @@ TEST_CASE("String Assignment")
 
 TEST_CASE("String Concatenation")
 {
-    String str1("hello");
-    String str2(" world");
-    String str3("!");
-    // String result;
+    String str1 = "hello";
+    String str2 = " world";
+    String str3 = "!";
 
-    // Use the assumed append function for Seq<char>
-    const auto result = append(str1, str2, str3);
-
-    CHECK(result == String("hello world!"));
+    CHECK(append(str1, str2, str3) == String("hello world!"));
 }
 
 TEST_CASE("String c_str()")
 {
-    String str("hello");
-    const char *cstr = str.c_str();
-    CHECK(strcmp(cstr, "hello") == 0);
+    String str = "hello";
+    CHECK(strcmp(str.c_str(), "hello") == 0);
 }
 
 #endif
