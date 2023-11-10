@@ -159,17 +159,19 @@ namespace efp
     template <typename A>
     constexpr Maybe<A> real_from_complex(const Complex<A> &a)
     {
-        if (is_approx(abs(a.imag()), 0))
-        {
-            return a.real();
-        }
-        else
-        {
-            return Nothing{};
-        }
+        // if ()
+        // {
+        //     return a.real();
+        // }
+        // else
+        // {
+        //     return Nothing{};
+        // }
+
+        return is_approx(abs(a.imag()), 0) ? Maybe<A>{a.real()} : Maybe<A>{Nothing{}};
     }
 
-    // Reducing
+    // Reducings
 
     template <typename A>
     constexpr Element<A> maximum(const Seq<A> &as)

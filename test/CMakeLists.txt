@@ -1,7 +1,13 @@
-# add_executable(demo demo.cpp)
-# target_link_libraries(demo
-#     PRIVATE
-#     efp)
+add_executable(demo demo.cpp)
+target_link_libraries(demo
+    PRIVATE
+    efp)
+
+
+add_executable(format_demo format_demo.cpp)
+target_link_libraries(format_demo
+    PRIVATE
+    efp)
 
 # add_executable(loop_c loop_c.cpp)
 # target_link_libraries(loop_c

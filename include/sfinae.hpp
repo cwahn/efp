@@ -947,7 +947,7 @@ namespace efp
     // CVRemoved
 
     template <typename A>
-    using CVRemoved = typename VoletileRemoved<ConstRemoved<A>>;
+    using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
     // // CleanedImpl
 

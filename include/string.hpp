@@ -256,59 +256,59 @@ namespace efp
     template <char value>
     using Char = IntegralConst<char, value>;
 
-    // CharTypeSequence creates a type list of CharType types
+    // Chars creates a type list of CharType types
     template <char c, char... cs>
-    struct CharTypeSequence
+    struct Chars
     {
-        using Type = TypeSequence<Char<c>, typename CharTypeSequence<cs...>::Type>;
+        using Type = TypeSequence<Char<c>, typename Chars<cs...>::Type>;
     };
 
     template <char c>
-    struct CharTypeSequence<c>
+    struct Chars<c>
     {
         using Type = TypeSequence<Char<c>, Nil>;
     };
 
     template <char... cs>
-    using CharTypeSequenceType = typename CharTypeSequence<cs...>::Type;
+    using CharsType = typename Chars<cs...>::Type;
 
-    // StringToCharTypeSequenceImpl converts a compile-time string to a type list of CharType types
+    // StringToCharsImpl converts a compile-time string to a type list of CharType types
     template <typename Str, size_t pos, char c>
-    struct StringToCharTypeSequenceImpl
+    struct StringToCharsImpl
     {
-        using NextPiece = typename StringToCharTypeSequenceImpl<Str, pos + 1, Str::string()[pos + 1]>::Type;
+        using NextPiece = typename StringToCharsImpl<Str, pos + 1, Str::string()[pos + 1]>::Type;
         using Type = TypeSequence<Char<c>, NextPiece>;
     };
 
     template <typename Str, size_t pos>
-    struct StringToCharTypeSequenceImpl<Str, pos, '\0'>
+    struct StringToCharsImpl<Str, pos, '\0'>
     {
         using Type = Nil;
     };
 
     template <typename Str>
-    using StringToCharTypeSequence = typename StringToCharTypeSequenceImpl<Str, 0, Str::string()[0]>::Type;
+    using StringToChars = typename StringToCharsImpl<Str, 0, Str::string()[0]>::Type;
 
-    // CharTypeSequenceToString converts a type list of CharType types back to a runtime string
+    // CharsToString converts a type list of CharType types back to a runtime string
     template <typename TypeSequence, char... cs>
-    struct CharTypeSequenceToString;
+    struct CharsToString;
 
     template <char c, typename Rests, char... cs>
-    struct CharTypeSequenceToString<TypeSequence<Char<c>, Rests>, cs...>
-        : public CharTypeSequenceToString<Rests, cs..., c>
+    struct CharsToString<TypeSequence<Char<c>, Rests>, cs...>
+        : public CharsToString<Rests, cs..., c>
     {
     };
 
     template <>
-    struct CharTypeSequenceToString<Nil>
+    struct CharsToString<Nil>
     {
         static constexpr const char *string() { return ""; }
     };
 
     template <char... cs>
-    struct CharTypeSequenceToString<Nil, cs...>
+    struct CharsToString<Nil, cs...>
     {
-        using List = CharTypeSequenceType<cs...>;
+        using List = CharsType<cs...>;
 
         static const char *string()
         {
@@ -328,86 +328,86 @@ namespace efp
     template <>
     struct TypeToFormat<char>
     {
-        using Type = CharTypeSequence<'c'>;
+        using Type = Chars<'c'>;
     };
     template <>
     struct TypeToFormat<short>
     {
-        using Type = CharTypeSequence<'d'>;
+        using Type = Chars<'d'>;
     };
     template <>
     struct TypeToFormat<int>
     {
-        using Type = CharTypeSequence<'d'>;
+        using Type = Chars<'d'>;
     };
     template <>
     struct TypeToFormat<long int>
     {
-        using Type = CharTypeSequence<'l', 'd'>;
+        using Type = Chars<'l', 'd'>;
     };
     template <>
     struct TypeToFormat<long long int>
     {
-        using Type = CharTypeSequence<'l', 'l', 'd'>;
+        using Type = Chars<'l', 'l', 'd'>;
     };
     template <>
     struct TypeToFormat<signed char>
     {
-        using Type = CharTypeSequence<'h', 'h', 'd'>;
+        using Type = Chars<'h', 'h', 'd'>;
     };
     template <>
     struct TypeToFormat<unsigned char>
     {
-        using Type = CharTypeSequence<'u'>;
+        using Type = Chars<'u'>;
     };
     template <>
     struct TypeToFormat<unsigned short>
     {
-        using Type = CharTypeSequence<'u'>;
+        using Type = Chars<'u'>;
     };
     template <>
     struct TypeToFormat<unsigned>
     {
-        using Type = CharTypeSequence<'u'>;
+        using Type = Chars<'u'>;
     };
     template <>
     struct TypeToFormat<unsigned long>
     {
-        using Type = CharTypeSequence<'l', 'u'>;
+        using Type = Chars<'l', 'u'>;
     };
     template <>
     struct TypeToFormat<unsigned long long>
     {
-        using Type = CharTypeSequence<'l', 'l', 'u'>;
+        using Type = Chars<'l', 'l', 'u'>;
     };
 
     template <>
     struct TypeToFormat<bool>
     {
-        using Type = CharTypeSequence<'d'>;
+        using Type = Chars<'d'>;
     };
 
     template <>
     struct TypeToFormat<float>
     {
-        using Type = CharTypeSequence<'f'>;
+        using Type = Chars<'f'>;
     };
     template <>
     struct TypeToFormat<double>
     {
-        using Type = CharTypeSequence<'l', 'f'>;
+        using Type = Chars<'l', 'f'>;
     };
 
     template <>
     struct TypeToFormat<nullptr_t>
     {
-        using Type = CharTypeSequence<'p'>;
+        using Type = Chars<'p'>;
     };
 
     template <typename T>
     struct TypeToFormat<T *>
     {
-        using Type = CharTypeSequence<'p'>;
+        using Type = Chars<'p'>;
     };
 
     template <typename T, typename FL>
@@ -415,24 +415,24 @@ namespace efp
     {
         using RawType = CVRemoved<T>;
 
-        static constexpr bool IsFormatS = ContainsTypeSequence<FL, Char<'s'>>::value;
-        static constexpr bool IsString =
+        static constexpr bool is_format_s = ContainsTypeSequence<FL, Char<'s'>>::value;
+        static constexpr bool is_string =
             IsSame<char, CVRemoved<PointerRemoved<RawType>>>::value;
 
-        static constexpr bool IsInt = IsIntegeralType<RawType>::value;
-        static constexpr bool HasFormatX = ContainsTypeSequence<FL, Char<'x'>>::value;
+        static constexpr bool is_int = IsIntegeralType<RawType>::value;
+        static constexpr bool has_format_x = ContainsTypeSequence<FL, Char<'x'>>::value;
 
         using RawFormat = typename TypeToFormat<T>::Type;
 
         using UIntXFormat = Conditional<
-            IsInt && HasFormatX,
+            is_int && has_format_x,
             SubstituteTypeSequence<
                 SubstituteTypeSequence<RawFormat, Char<'d'>, Char<'x'>>,
                 Char<'u'>, Char<'x'>>,
             RawFormat>;
 
         using FormatType = Conditional<
-            IsFormatS && IsString,
+            is_format_s && is_string,
             SubstituteTypeSequence<RawFormat, Char<'p'>, Char<'s'>>,
             UIntXFormat>;
 
@@ -524,8 +524,8 @@ namespace efp
     };
 
     template <typename StringProvider, typename PtList>
-    using AutoFormatType = CharTypeSequenceToString<
-        typename AutoFormat<StringToCharTypeSequence<StringProvider>, PtList>::Type>;
+    using AutoFormatType = CharsToString<
+        typename AutoFormat<StringToChars<StringProvider>, PtList>::Type>;
 
     template <typename... Ts>
     MakeTypeSequence<Ts...> TieTypes(Ts...);
