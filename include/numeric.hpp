@@ -159,16 +159,9 @@ namespace efp
     template <typename A>
     constexpr Maybe<A> real_from_complex(const Complex<A> &a)
     {
-        // if ()
-        // {
-        //     return a.real();
-        // }
-        // else
-        // {
-        //     return Nothing{};
-        // }
-
-        return is_approx(abs(a.imag()), 0) ? Maybe<A>{a.real()} : Maybe<A>{Nothing{}};
+        return is_approx(abs(a.imag()), 0)
+                   ? Maybe<A>{a.real()}
+                   : Maybe<A>{Nothing{}};
     }
 
     // Reducings
