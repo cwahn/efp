@@ -136,7 +136,7 @@ namespace efp
         {
             for (int i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A(std::move(other.data_[i])); // Move-construct each element
+                new (&data_[i]) A(efp::move(other.data_[i])); // Move-construct each element
             }
         }
 
@@ -277,16 +277,18 @@ namespace efp
 
         Sequence(const Sequence &other) : length_{other.length_}
         {
-            memcpy(data_, other.data_, sizeof(A) * length_);
-        }
-
-        Sequence(Sequence &&other) : length_{0}
-        {
-            length_ = other.length_;
-
             for (int i = 0; i < length_; ++i)
             {
-                data_[i] = move(other.data_[i]);
+                new (&data_[i]) A(other.data_[i]);
+            }
+        }
+
+        Sequence(Sequence &&other) : length_{other.length_}
+        {
+            other.length_ = 0;
+            for (int i = 0; i < length_; ++i)
+            {
+                data_[i] = efp::move(other.data_[i]);
             }
         }
 
@@ -302,7 +304,10 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                memcpy(data_, other.data_, sizeof(A) * ct_cap);
+                for (int i = 0; i < length_; ++i)
+                {
+                    data_[i] = other.data_[i];
+                }
             }
             return *this;
         }
@@ -312,9 +317,20 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                memcpy(data_, other.data_, sizeof(A) * ct_cap);
+                for (int i = 0; i < length_; ++i)
+                {
+                    data_[i] = other.data_[i];
+                }
             }
             return *this;
+        }
+
+        ~Sequence()
+        {
+            for (int i = 0; i < length_; ++i)
+            {
+                data_[i].~A();
+            }
         }
 
         A &operator[](int index)
@@ -381,10 +397,27 @@ namespace efp
             }
             else
             {
-                data_[length_] = value;
+                new (&data_[length_]) A(value);
                 ++length_;
             }
         }
+
+        // void erase(int index)
+        // {
+        //     if (index < 0 || index >= length_)
+        //     {
+        //         abort();
+        //     }
+
+        //     for (int i = index; i < length_ - 1; ++i)
+        //     {
+        //         data_[i] = move(data_[i + 1]);
+        //     }
+
+        //     data_[length_ - 1].~A();
+
+        //     --length_;
+        // }
 
         void erase(int index)
         {
@@ -392,14 +425,12 @@ namespace efp
             {
                 abort();
             }
-
+            data_[index].~A();
             for (int i = index; i < length_ - 1; ++i)
             {
-                data_[i] = move(data_[i + 1]);
+                new (&data_[i]) A(efp::move(data_[i + 1]));
+                data_[i + 1].~A();
             }
-
-            data_[length_ - 1].~A();
-
             --length_;
         }
 
@@ -626,7 +657,7 @@ namespace efp
 
                 for (int i = 0; i < length_; ++i)
                 {
-                    new (&new_data[i]) A(std::move(data_[i]));
+                    new (&new_data[i]) A(efp::move(data_[i]));
                     data_[i].~A();
                 }
 
