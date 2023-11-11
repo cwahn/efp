@@ -17,7 +17,7 @@ namespace efp
             FILE *file = fopen(path, mode);
             if (file)
             {
-                return File{efp::move(file)};
+                return File{file, mode};
             }
             return Nothing{};
         }
@@ -29,7 +29,7 @@ namespace efp
             FILE *file = fopen(path.c_str(), mode);
             if (file)
             {
-                return File{efp::move(file)};
+                return File{file, mode};
             }
             return Nothing{};
         }
@@ -42,11 +42,9 @@ namespace efp
             }
         }
 
-        // Disable copy and assignment.
         File(const File &) = delete;
         File &operator=(const File &) = delete;
 
-        // Enable move semantics.
         File(File &&other) noexcept
             : file_(other.file_)
         {
@@ -57,37 +55,36 @@ namespace efp
         {
             if (this != &other)
             {
-                if (file_)
-                {
-                    fclose(file_);
-                }
                 file_ = other.file_;
                 other.file_ = nullptr;
             }
             return *this;
         }
 
-        // Reads a single line from the file
         Maybe<String> read_line()
         {
-            String buffer{};
-            int ch;
-
-            while ((ch = fgetc(file_)) != '\n' && ch != EOF)
+            if (file_)
             {
-                buffer.push_back(static_cast<char>(ch));
+                String buffer{};
+                int ch;
+
+                while ((ch = fgetc(file_)) != '\n' && ch != EOF)
+                {
+                    buffer.push_back(static_cast<char>(ch));
+                }
+
+                // Check for EOF condition
+                if (ch == EOF && buffer.is_empty())
+                {
+                    return Nothing{};
+                }
+
+                return buffer;
             }
 
-            // Check for EOF condition
-            if (ch == EOF && buffer.is_empty())
-            {
-                return Nothing{};
-            }
-
-            return buffer;
+            return Nothing{};
         }
 
-        // Reads all lines from the file into a Vector
         Vector<String> read_lines()
         {
             Vector<String> lines{};
@@ -106,41 +103,82 @@ namespace efp
             return lines;
         }
 
-        // Writes a string to the file
-        bool write(const char *data)
+        bool write(const char *data, int length = -1)
         {
-            if (fputs(data, file_) != EOF)
+            if (file_ == nullptr)
             {
+                return false;
+            }
+
+            if (strchr(mode_, 'b'))
+            {
+                // Write binary data
+                if (length == -1)
+                {
+                    length = strlen(data);
+                }
+                size_t written = fwrite(data, sizeof(char), length, file_);
+                return written == length;
+            }
+            else
+            {
+                // Write text data
+                if (length == -1)
+                {
+                    length = strlen(data);
+                }
+                for (size_t i = 0; i < length; ++i)
+                {
+                    if (fputc(data[i], file_) == EOF)
+                    {
+                        return false;
+                    }
+                }
                 return true;
             }
-            return false;
         }
 
         bool write(const String &data)
         {
-            if (fputs(data.c_str(), file_) != EOF)
+            if (file_ == nullptr)
             {
-                return true;
+                return false;
             }
-            return false;
+
+            if (strchr(mode_, 'b'))
+            {
+                // Write binary data
+                size_t written = fwrite(data.data(), sizeof(char), data.size(), file_);
+                return written == data.size();
+            }
+            else
+            {
+                if (fputs(data.c_str(), file_) != EOF)
+                {
+                    return true;
+                }
+                return false;
+            }
         }
 
-        // Seeks to a position in the file
+        int flush()
+        {
+            return fflush(file_);
+        }
+
         bool seek(long offset)
         {
             return fseek(file_, offset, SEEK_SET) == 0;
         }
 
-        // Returns the current position in the file
         int tell()
         {
             return ftell(file_);
         }
 
-        // Closes the file
         bool close()
         {
-            if (fclose(file_) != EOF)
+            if (file_ && fclose(file_) != EOF)
             {
                 file_ = nullptr;
                 return true;
@@ -149,9 +187,14 @@ namespace efp
         }
 
     private:
-        explicit File(FILE *file) : file_(file) {}
+        explicit File(FILE *file, const char *mode) : file_(file)
+        {
+            strncpy(mode_, mode, sizeof(mode_) - 1);
+            mode_[sizeof(mode_) - 1] = '\0';
+        }
 
         FILE *file_;
+        char mode_[8];
     };
 
 };

@@ -1,61 +1,74 @@
 #include "io.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace efp;
 
 int main()
 {
-    const char *filePath = "test.txt";
-    const char *testData = "Hello, world!\nThis is a test file.\nEnd of test.";
+    const char *path = "test.txt";
+    const char *test_data = "Hello, world!\nThis is a test file.\nEnd of test.";
+    String test_data_string = test_data;
 
-    // Open a file for writing
-    auto maybe_file = File::open(filePath, "w+");
+    auto maybe_file = File::open(path, "w+");
     if (!maybe_file)
     {
         std::cerr << "Failed to open file for writing." << std::endl;
-        return EXIT_FAILURE;
+        return 1;
     }
 
-    // Writing data to file
-    File file = maybe_file.move(); // Assuming we have an unwrap method
-    if (!file.write(testData))
+    File file = maybe_file.move();
+
+    if (!file.write(test_data))
     {
-        std::cerr << "Failed to write data to file." << std::endl;
-        return EXIT_FAILURE;
+        std::cerr << "Failed to write char* data to file." << std::endl;
+        return 1;
     }
 
-    // Flush the stream and seek to the beginning of the file to read from the beginning
-    // ! fflush(file.file_); // Assuming file_ is accessible, otherwise, you'd need a method to flush.
+    file.flush();
+
     if (!file.seek(0))
     {
         std::cerr << "Failed to seek to the beginning of the file." << std::endl;
-        return EXIT_FAILURE;
+        return 1;
     }
 
-    // Reading data from file line by line
-    // bool keep_read = true;
-    // while (keep_read)
-    // {
-    //     file.read_line().match(
-    //         [](const String &str)
-    //         { std::cout << "Read line: " << str << std::endl; },
-    //         [&]()
-    //         { keep_read = false; });
-    // }
+    auto lines = file.read_lines();
+    for (const auto &line : lines)
+    {
+        std::cout << "Read line: " << line << std::endl;
+    }
 
-    const auto lines = file.read_lines();
-    std::cout << "File lines: " << lines << std::endl;
-
-    // Check the current position in the file (should be at the end of file)
     long position = file.tell();
     std::cout << "Current file position: " << position << std::endl;
 
-    // Close the file
+    if (!file.write(test_data_string))
+    {
+        std::cerr << "Failed to write String data to file." << std::endl;
+        return 1;
+    }
+
+    maybe_file = File::open(path, "r");
+    if (!maybe_file)
+    {
+        std::cerr << "Failed to reopen file for reading." << std::endl;
+        return 1;
+    }
+
+    file = maybe_file.move();
+
+    lines = file.read_lines();
+    std::cout << "File content after writing String data:" << std::endl;
+    for (const auto &line : lines)
+    {
+        std::cout << line << std::endl;
+    }
+
     if (!file.close())
     {
         std::cerr << "Failed to close the file." << std::endl;
-        return EXIT_FAILURE;
+        return 1;
     }
 
     return 0;
