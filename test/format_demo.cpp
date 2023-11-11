@@ -62,14 +62,14 @@ int main()
 
     // puts("Green, green, green! All tests passed.\n");
 
-    // pprintf("{s} {} {1} {} {} {} {} {} {} {} {} {} {} {} {} {#x}\n", "1", 2u, 3.0,
+    // print("{s} {} {1} {} {} {} {} {} {} {} {} {} {} {} {} {#x}\n", "1", 2u, 3.0,
     //         4.0f, 5ull, '6', 7ul, 8, 9, 10, 11, 12, 13, 14, 15, 16u);
 
-    pprintf("Hello, world!\n");
+    print("Hello, world!\n");
     const int a = 42;
-    pprintf("a: {}\n", a);
+    print("a: {}\n", a);
     // ! String formating is not working correctly
-    pprintf("s: {s}\n", "This is string");
+    print("s: {s}\n", "This is string");
 
     const String str0 = "This is 42";
     std::cout << str0 << std::endl;

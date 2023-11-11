@@ -129,7 +129,7 @@ namespace efp
         Enum(A &&a)
             : index_(VariantIndex<A>::value)
         {
-            *(reinterpret_cast<A *>(storage_)) = a;
+            *(reinterpret_cast<A *>(storage_)) = efp::move(a);
         }
 
         ~Enum() {}
@@ -172,6 +172,54 @@ namespace efp
             }
 
             return *(reinterpret_cast<PackAt<n, As...> *>(storage_));
+        }
+
+        template <typename A>
+        auto move() const
+            -> EnableIf<any_v(IsSame<A, As>::value...), const A &&>
+        {
+            if (index_ != VariantIndex<A>::value)
+            {
+                abort();
+            }
+
+            return efp::move(*(reinterpret_cast<const A *>(storage_)));
+        }
+
+        template <typename A>
+        auto move()
+            -> EnableIf<any_v(IsSame<A, As>::value...), A &&>
+        {
+            if (index_ != VariantIndex<A>::value)
+            {
+                abort();
+            }
+
+            return efp::move(*(reinterpret_cast<A *>(storage_)));
+        }
+
+        template <uint8_t n>
+        auto move() const
+            -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...> const &&>
+        {
+            if (index_ != n)
+            {
+                abort();
+            }
+
+            return efp::move(*(reinterpret_cast<const PackAt<n, As...> *>(storage_)));
+        }
+
+        template <uint8_t n>
+        auto move()
+            -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...> &&>
+        {
+            if (index_ != n)
+            {
+                abort();
+            }
+
+            return efp::move(*(reinterpret_cast<PackAt<n, As...> *>(storage_)));
         }
 
         // * Test if all of the branchs have same return type by Common.

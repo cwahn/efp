@@ -20,7 +20,7 @@ namespace efp
         }
 
         template <typename T, typename = EnableIf<any_v(IsSame<T, Nothing>::value, IsSame<T, A>::value)>>
-        Maybe(T &&a) : Enum<Nothing, A>(a)
+        Maybe(T &&a) : Enum<Nothing, A>(efp::forward<T>(a))
         {
         }
 
@@ -38,6 +38,16 @@ namespace efp
         A value() const
         {
             return Enum<Nothing, A>::template get<A>();
+        }
+
+        A &&move()
+        {
+            return Enum<Nothing, A>::template move<A>();
+        }
+
+        const A &&move() const
+        {
+            return Enum<Nothing, A>::template move<A>();
         }
 
         explicit operator bool() const

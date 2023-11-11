@@ -578,7 +578,7 @@ namespace efp
         return CharsToString<CFmtStr>::string();                   \
     }()
 
-#define pprintf(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+#define print(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
 
     String format_(const char *format, ...)
     {

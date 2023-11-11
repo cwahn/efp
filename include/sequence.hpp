@@ -15,6 +15,8 @@
 
 #include "sfinae.hpp"
 
+// todo Move and copy assigment operator sort out
+
 namespace efp
 {
     constexpr int dyn = -1;
@@ -482,9 +484,37 @@ namespace efp
         {
             if (this != &other)
             {
-                const int other_length = other.size();
-                resize(other_length);
-                memcpy(data_, other.data_, sizeof(A) * other_length);
+                A *newData = nullptr;
+                if (other.length_ > 0)
+                {
+                    newData = new A[other.capacity_];
+
+                    for (int i = 0; i < other.length_; ++i)
+                    {
+                        newData[i] = other.data_[i];
+                    }
+                }
+
+                data_ = newData;
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+            }
+            return *this;
+        }
+
+        Sequence &operator=(Sequence &&other) noexcept
+        {
+            if (this != &other)
+            {
+                delete[] data_;
+
+                data_ = other.data_;
+                length_ = other.length_;
+                capacity_ = other.capacity_;
+
+                other.data_ = nullptr;
+                other.length_ = 0;
+                other.capacity_ = 0;
             }
             return *this;
         }
@@ -493,9 +523,20 @@ namespace efp
         {
             if (this != &other)
             {
-                const int other_length = other.size();
-                resize(other_length);
-                memcpy(data_, other.data_, sizeof(A) * other_length);
+                A *newData = nullptr;
+                if (other.length_ > 0)
+                {
+                    newData = new A[other.capacity_];
+
+                    for (int i = 0; i < other.length_; ++i)
+                    {
+                        newData[i] = other.data_[i];
+                    }
+                }
+
+                data_ = newData;
+                length_ = other.length_;
+                capacity_ = other.capacity_;
             }
             return *this;
         }
