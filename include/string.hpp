@@ -224,7 +224,7 @@ namespace efp
     using RemoveTypeSeq = typename RemoveTypeSeqImpl<TypeSeq, T>::Type;
 
     // SubstituteTypeSeqImpl substitutes one type for another in a type list
-    template <typename TypeSeq, typename T, typename Ts>
+    template <typename TypeSeq, typename Target, typename Alt>
     struct SubstituteTypeSeqImpl
     {
         using Type = TypeSeq;
@@ -431,24 +431,24 @@ namespace efp
     {
         using RawType = CVRemoved<T>;
 
-        static constexpr bool is_format_s = ContainsTypeSeq<FL, Char<'s'>>::value;
+        static constexpr bool is_s_fmt = ContainsTypeSeq<FL, Char<'s'>>::value;
         static constexpr bool is_string =
             IsSame<char, CVRemoved<PointerRemoved<RawType>>>::value;
 
         static constexpr bool is_int = IsIntegeralType<RawType>::value;
-        static constexpr bool has_format_x = ContainsTypeSeq<FL, Char<'x'>>::value;
+        static constexpr bool is_x_fmt = ContainsTypeSeq<FL, Char<'x'>>::value;
 
         using RawFormat = typename TypeToFormat<T>::Type;
 
         using UIntXFormat = Conditional<
-            is_int && has_format_x,
+            is_int && is_x_fmt,
             SubstituteTypeSeq<
                 SubstituteTypeSeq<RawFormat, Char<'d'>, Char<'x'>>,
                 Char<'u'>, Char<'x'>>,
             RawFormat>;
 
         using FormatType = Conditional<
-            is_format_s && is_string,
+            is_s_fmt && is_string,
             SubstituteTypeSeq<RawFormat, Char<'p'>, Char<'s'>>,
             UIntXFormat>;
 
@@ -569,6 +569,26 @@ namespace efp
     }()
 
 #define pprintf(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+
+    String format_(const char *format, ...)
+    {
+        va_list args;
+        va_start(args, format);
+
+        const int length = vsnprintf(nullptr, 0, format, args);
+
+        String buffer;
+        buffer.reserve(length + 1);
+
+        vsnprintf(buffer.data(), length + 1, format, args);
+        buffer.resize(length);
+
+        va_end(args);
+        return buffer;
+    }
+
+#define format(s, ...) format_(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+
 };
 
 #endif
