@@ -116,18 +116,27 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : data_{} {}
-
-        Sequence(const Sequence &other)
-        {
-            memcpy(data_, other.data_, sizeof(A) * ct_len);
-        }
-
-        Sequence(Sequence &&other)
+        Sequence()
         {
             for (int i = 0; i < ct_len; ++i)
             {
-                data_[i] = move(other.data_[i]);
+                new (&data_[i]) A();
+            }
+        }
+
+        Sequence(const Sequence &other)
+        {
+            for (int i = 0; i < ct_len; ++i)
+            {
+                new (&data_[i]) A(other.data_[i]);
+            }
+        }
+
+        Sequence(Sequence &&other) noexcept
+        {
+            for (int i = 0; i < ct_len; ++i)
+            {
+                new (&data_[i]) A(std::move(other.data_[i])); // Move-construct each element
             }
         }
 
@@ -141,7 +150,10 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, sizeof(A) * ct_cap);
+                for (int i = 0; i < ct_len; ++i)
+                {
+                    data_[i] = other.data_[i]; // Use assignment for each element
+                }
             }
             return *this;
         }
@@ -150,7 +162,10 @@ namespace efp
         {
             if (this != &other)
             {
-                memcpy(data_, other.data_, sizeof(A) * ct_cap);
+                for (int i = 0; i < ct_len; ++i)
+                {
+                    data_[i] = other.data_[i]; // Use assignment for each element
+                }
             }
             return *this;
         }
@@ -603,28 +618,15 @@ namespace efp
             length_ = length;
         }
 
-        // void reserve(int capacity)
-        // {
-        //     if (capacity > capacity_)
-        //     {
-        //         A *new_data = new A[capacity];
-        //         memcpy(new_data, data_, sizeof(A) * length_);
-        //         delete[] data_;
-        //         data_ = new_data;
-        //         capacity_ = capacity;
-        //     }
-        // }
-
         void reserve(int new_capacity)
         {
             if (new_capacity > capacity_)
             {
-                A *new_data = new A[new_capacity]; // Allocate new larger storage.
+                A *new_data = new A[new_capacity];
 
-                // Move each existing element to the new storage.
                 for (int i = 0; i < length_; ++i)
                 {
-                    new (&new_data[i]) A(std::move(data_[i])); // Use placement new for move.
+                    new (&new_data[i]) A(std::move(data_[i]));
                     data_[i].~A();
                 }
 
@@ -642,7 +644,6 @@ namespace efp
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
 
-            // data_[length_] = value;
             new (&data_[length_]) A{value};
             ++length_;
         }
@@ -654,10 +655,6 @@ namespace efp
                 abort();
             }
 
-            // for (int i = index; i < length_ - 1; ++i)
-            // {
-            //     data_[i] = move(data_[i + 1]);
-            // }
             data_[index].~A(); // Destruct the element being erased.
             for (int i = index; i < length_ - 1; ++i)
             {
