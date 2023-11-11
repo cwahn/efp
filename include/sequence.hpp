@@ -1055,8 +1055,7 @@ namespace efp
     // todo STL only
 
     template <typename A, int ct_length, int ct_capacity>
-    std::ostream &
-    operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
+    std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
         for (int i = 0; i < seq.size(); ++i)

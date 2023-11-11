@@ -92,6 +92,16 @@ namespace efp
         }
     };
 
+// todo STL only
+#include <iostream>
+    std::ostream &operator<<(std::ostream &os, const String &string)
+    {
+        for_each([&](char c)
+                 { os << c; },
+                 string);
+        return os;
+    }
+
     // CtListImpl
     // Inspired by printpp
 
