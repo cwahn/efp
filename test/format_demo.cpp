@@ -64,8 +64,9 @@ int main()
     // pprintf("{s} {} {1} {} {} {} {} {} {} {} {} {} {} {} {} {#x}\n", "1", 2u, 3.0,
     //         4.0f, 5ull, '6', 7ul, 8, 9, 10, 11, 12, 13, 14, 15, 16u);
 
-    pprintf("Hello, world!");
-    pprintf("42 {}", 42);
+    pprintf("Hello, world!\n");
+    const int a = 42;
+    pprintf("a: {}\n", a);
 
     return 0;
 }

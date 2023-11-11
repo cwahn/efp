@@ -98,15 +98,20 @@ namespace efp
     // Nil type represents the end of the type list
     struct Nil
     {
+        using Head = Nil;
+        using Tail = Nil;
     };
 
-    // TypeSequence is a template struct that holds a head type and a tail type
+    // TypeSeq is a template struct that holds a head type and a tail type
     template <typename H, typename T>
     struct TypeSequence
     {
         using Head = H;
         using Tail = T;
     };
+
+    template <typename H, typename T>
+    using TypeSeq = TypeSequence<H, T>;
 
     // Head type extraction
     template <typename TypeSeq>
@@ -122,121 +127,128 @@ namespace efp
         using Type = typename TypeSeq::Tail;
     };
 
-    // MakeTypeSequence creates a type list from a set of types
+    // MakeTypeSeq creates a type list from a set of types
     template <typename... As>
-    struct MakeTypeSequenceImpl
+    struct MakeTypeSeqImpl
     {
     };
 
     template <>
-    struct MakeTypeSequenceImpl<>
+    struct MakeTypeSeqImpl<>
     {
         using Type = Nil;
     };
 
     template <typename H, typename... Ts>
-    struct MakeTypeSequenceImpl<H, Ts...>
+    struct MakeTypeSeqImpl<H, Ts...>
     {
-        using Type = TypeSequence<H, typename MakeTypeSequenceImpl<Ts...>::Type>;
+        using Type = TypeSeq<H, typename MakeTypeSeqImpl<Ts...>::Type>;
     };
 
-    // Alias template for easier use of MakeTypeSequenceImpl
+    // Alias template for easier use of MakeTypeSeqImpl
     template <typename... As>
-    using MakeTypeSequence = typename MakeTypeSequenceImpl<As...>::Type;
+    using MakeTypeSeq = typename MakeTypeSeqImpl<As...>::Type;
 
-    // AppendTypeSequenceImpl appends a type to a type list
+    // AppendTypeSeqImpl appends a type to a type list
     template <typename As, typename A>
-    struct AppendTypeSequenceImpl
+    struct AppendTypeSeqImpl
     {
     };
 
     template <>
-    struct AppendTypeSequenceImpl<Nil, Nil>
+    struct AppendTypeSeqImpl<Nil, Nil>
     {
         using Type = Nil;
     };
 
     template <typename A>
-    struct AppendTypeSequenceImpl<Nil, A>
+    struct AppendTypeSeqImpl<Nil, A>
     {
-        using Type = MakeTypeSequence<A>;
+        using Type = MakeTypeSeq<A>;
+    };
+
+    template <typename H, typename T>
+    struct AppendTypeSeqImpl<Nil, TypeSeq<H, T>>
+    {
+        using Type = TypeSeq<H, T>;
     };
 
     template <typename H, typename T, typename A>
-    struct AppendTypeSequenceImpl<TypeSequence<H, T>, A>
+    struct AppendTypeSeqImpl<TypeSeq<H, T>, A>
     {
-        using Type = TypeSequence<H, typename AppendTypeSequenceImpl<T, A>::Type>;
+        using Type = TypeSeq<H, typename AppendTypeSeqImpl<T, A>::Type>;
     };
 
-    // Alias template for easier use of AppendTypeSequenceImpl
+    // Alias template for easier use of AppendTypeSeqImpl
     template <typename As, typename A>
-    using AppendTypeSequence = typename AppendTypeSequenceImpl<As, A>::Type;
+    using AppendTypeSeq = typename AppendTypeSeqImpl<As, A>::Type;
 
-    // ContainsTypeSequence checks if a type is contained sin a type list
+    // ContainsTypeSeq checks if a type is contained sin a type list
     template <typename TypeSeq, typename T>
-    struct ContainsTypeSequence : False
+    struct ContainsTypeSeq : False
     {
     };
 
     template <typename T, typename Tail>
-    struct ContainsTypeSequence<TypeSequence<T, Tail>, T> : False
+    struct ContainsTypeSeq<TypeSeq<T, Tail>, T> : False
     {
     };
 
     template <typename H, typename Tail, typename T>
-    struct ContainsTypeSequence<TypeSequence<H, Tail>, T>
+    struct ContainsTypeSeq<TypeSeq<H, Tail>, T>
     {
-        static constexpr bool value = ContainsTypeSequence<Tail, T>::value;
+        static constexpr bool value = ContainsTypeSeq<Tail, T>::value;
     };
 
-    // RemoveTypeSequenceImpl removes a type from a type list
+    // RemoveTypeSeqImpl removes a type from a type list
     template <typename TypeSeq, typename T>
-    struct RemoveTypeSequenceImpl
+    struct RemoveTypeSeqImpl
     {
         using Type = TypeSeq;
     };
 
     template <typename T, typename Tail>
-    struct RemoveTypeSequenceImpl<TypeSequence<T, Tail>, T>
+    struct RemoveTypeSeqImpl<TypeSeq<T, Tail>, T>
     {
-        using Type = typename RemoveTypeSequenceImpl<Tail, T>::Type;
+        using Type = typename RemoveTypeSeqImpl<Tail, T>::Type;
     };
 
     template <typename Head, typename Tail, typename T>
-    struct RemoveTypeSequenceImpl<TypeSequence<Head, Tail>, T>
+    struct RemoveTypeSeqImpl<TypeSeq<Head, Tail>, T>
     {
-        using Type = TypeSequence<Head, typename RemoveTypeSequenceImpl<Tail, T>::Type>;
+        using Type = TypeSeq<Head, typename RemoveTypeSeqImpl<Tail, T>::Type>;
     };
 
-    // Alias template for easier use of RemoveTypeSequenceImpl
+    // Alias template for easier use of RemoveTypeSeqImpl
     template <typename TypeSeq, typename T>
-    using RemoveTypeSequence = typename RemoveTypeSequenceImpl<TypeSeq, T>::Type;
+    using RemoveTypeSeq = typename RemoveTypeSeqImpl<TypeSeq, T>::Type;
 
-    // SubstituteTypeSequenceImpl substitutes one type for another in a type list
+    // SubstituteTypeSeqImpl substitutes one type for another in a type list
     template <typename TypeSeq, typename T, typename Ts>
-    struct SubstituteTypeSequenceImpl
+    struct SubstituteTypeSeqImpl
     {
         using Type = TypeSeq;
     };
 
+    // ! If Ts is a Chars, nested sequence could be made
     template <typename T, typename Tail, typename Ts>
-    struct SubstituteTypeSequenceImpl<TypeSequence<T, Tail>, T, Ts>
+    struct SubstituteTypeSeqImpl<TypeSeq<T, Tail>, T, Ts>
     {
-        using Type = TypeSequence<Ts, typename SubstituteTypeSequenceImpl<Tail, T, Ts>::Type>;
+        using Type = TypeSeq<Ts, typename SubstituteTypeSeqImpl<Tail, T, Ts>::Type>;
     };
 
     template <typename Head, typename Tail, typename T, typename Ts>
-    struct SubstituteTypeSequenceImpl<TypeSequence<Head, Tail>, T, Ts>
+    struct SubstituteTypeSeqImpl<TypeSeq<Head, Tail>, T, Ts>
     {
-        using Type = TypeSequence<Head, typename SubstituteTypeSequenceImpl<Tail, T, Ts>::Type>;
+        using Type = TypeSeq<Head, typename SubstituteTypeSeqImpl<Tail, T, Ts>::Type>;
     };
 
-    // Alias template for easier use of SubstituteTypeSequenceImpl
+    // Alias template for easier use of SubstituteTypeSeqImpl
     template <typename TypeSeq, typename T, typename Ts>
-    using SubstituteTypeSequence = typename SubstituteTypeSequenceImpl<TypeSeq, T, Ts>::Type;
+    using SubstituteTypeSeq = typename SubstituteTypeSeqImpl<TypeSeq, T, Ts>::Type;
 
     // Define a typelist of integer types
-    using IntegeralTypes = MakeTypeSequence<
+    using IntegeralTypes = MakeTypeSeq<
         char, signed char, int, long, long long,
         unsigned char, unsigned, unsigned long, unsigned long long>;
 
@@ -244,7 +256,7 @@ namespace efp
     template <typename T>
     struct IsIntegeralType
     {
-        static constexpr bool value = ContainsTypeSequence<IntegeralTypes, T>::value;
+        static constexpr bool value = ContainsTypeSeq<IntegeralTypes, T>::value;
     };
 
     // template <char val>
@@ -258,26 +270,28 @@ namespace efp
 
     // Chars creates a type list of CharType types
     template <char c, char... cs>
-    struct Chars
+    struct CharsImpl
     {
-        using Type = TypeSequence<Char<c>, typename Chars<cs...>::Type>;
+        using Type = TypeSeq<Char<c>, typename CharsImpl<cs...>::Type>;
     };
 
     template <char c>
-    struct Chars<c>
+    struct CharsImpl<c>
     {
-        using Type = TypeSequence<Char<c>, Nil>;
+        using Type = TypeSeq<Char<c>, Nil>;
     };
 
     template <char... cs>
-    using CharsType = typename Chars<cs...>::Type;
+    using Chars = typename CharsImpl<cs...>::Type;
 
-    // StringToCharsImpl converts a compile-time string to a type list of CharType types
+    //  StringToChars
+
+    // StringToCharsImpl converts a compile-time string to a type list of Char types
     template <typename Str, size_t pos, char c>
     struct StringToCharsImpl
     {
-        using NextPiece = typename StringToCharsImpl<Str, pos + 1, Str::string()[pos + 1]>::Type;
-        using Type = TypeSequence<Char<c>, NextPiece>;
+        using Tail = typename StringToCharsImpl<Str, pos + 1, Str::string()[pos + 1]>::Type;
+        using Type = TypeSeq<Char<c>, Tail>;
     };
 
     template <typename Str, size_t pos>
@@ -290,11 +304,13 @@ namespace efp
     using StringToChars = typename StringToCharsImpl<Str, 0, Str::string()[0]>::Type;
 
     // CharsToString converts a type list of CharType types back to a runtime string
-    template <typename TypeSequence, char... cs>
-    struct CharsToString;
+    template <typename TypeSeq, char... cs>
+    struct CharsToString
+    {
+    };
 
     template <char c, typename Rests, char... cs>
-    struct CharsToString<TypeSequence<Char<c>, Rests>, cs...>
+    struct CharsToString<TypeSeq<Char<c>, Rests>, cs...>
         : public CharsToString<Rests, cs..., c>
     {
     };
@@ -308,7 +324,7 @@ namespace efp
     template <char... cs>
     struct CharsToString<Nil, cs...>
     {
-        using List = CharsType<cs...>;
+        using List = Chars<cs...>;
 
         static const char *string()
         {
@@ -411,44 +427,47 @@ namespace efp
     };
 
     template <typename T, typename FL>
-    struct FormatString
+    struct FormatStringImpl
     {
         using RawType = CVRemoved<T>;
 
-        static constexpr bool is_format_s = ContainsTypeSequence<FL, Char<'s'>>::value;
+        static constexpr bool is_format_s = ContainsTypeSeq<FL, Char<'s'>>::value;
         static constexpr bool is_string =
             IsSame<char, CVRemoved<PointerRemoved<RawType>>>::value;
 
         static constexpr bool is_int = IsIntegeralType<RawType>::value;
-        static constexpr bool has_format_x = ContainsTypeSequence<FL, Char<'x'>>::value;
+        static constexpr bool has_format_x = ContainsTypeSeq<FL, Char<'x'>>::value;
 
         using RawFormat = typename TypeToFormat<T>::Type;
 
         using UIntXFormat = Conditional<
             is_int && has_format_x,
-            SubstituteTypeSequence<
-                SubstituteTypeSequence<RawFormat, Char<'d'>, Char<'x'>>,
+            SubstituteTypeSeq<
+                SubstituteTypeSeq<RawFormat, Char<'d'>, Char<'x'>>,
                 Char<'u'>, Char<'x'>>,
             RawFormat>;
 
         using FormatType = Conditional<
             is_format_s && is_string,
-            SubstituteTypeSequence<RawFormat, Char<'p'>, Char<'s'>>,
+            SubstituteTypeSeq<RawFormat, Char<'p'>, Char<'s'>>,
             UIntXFormat>;
 
-        using FilteredFL = RemoveTypeSequence<
-            RemoveTypeSequence<FL, Char<'x'>>,
+        using FilteredFL = RemoveTypeSeq<
+            RemoveTypeSeq<FL, Char<'x'>>,
             Char<'s'>>;
 
-        using Type = AppendTypeSequence<FilteredFL, FormatType>;
+        using Type = AppendTypeSeq<FilteredFL, FormatType>;
     };
+
+    template <typename T, typename FL>
+    using FormatString = typename FormatStringImpl<T, FL>::Type;
 
     template <class InList, class OutList, size_t Counter>
     struct FindBrace;
 
     // Specialization for finding the closing brace
     template <class InList, class OutList>
-    struct FindBrace<TypeSequence<Char<'}'>, InList>, OutList, 1>
+    struct FindBrace<TypeSeq<Char<'}'>, InList>, OutList, 1>
     {
         using Before = OutList;
         using After = InList;
@@ -456,8 +475,8 @@ namespace efp
 
     // General case: iterating through the list
     template <char C, class InList, class OutList, size_t N>
-    struct FindBrace<TypeSequence<Char<C>, InList>, OutList, N>
-        : public FindBrace<InList, AppendTypeSequence<OutList, Char<C>>, N>
+    struct FindBrace<TypeSeq<Char<C>, InList>, OutList, N>
+        : public FindBrace<InList, AppendTypeSeq<OutList, Char<C>>, N>
     {
         static_assert(C != '{', "Found nested braces: {...{...}...}! Maybe you want to mask the outer one?");
     };
@@ -469,83 +488,87 @@ namespace efp
         static_assert(N + 1 == N, "Missing } after {.");
     };
 
-    template <typename SL, typename TL>
-    struct AutoFormat;
+    // CFormatStringImpl
+
+    template <typename SL, typename Types>
+    struct CFormatStringImpl;
 
     template <>
-    struct AutoFormat<Nil, Nil>
+    struct CFormatStringImpl<Nil, Nil>
     {
         using Type = Nil;
     };
 
-    template <typename TL>
-    struct AutoFormat<Nil, TL>
+    template <typename Types>
+    struct CFormatStringImpl<Nil, Types>
     {
         using Type = Nil;
-        static_assert(AlwaysFalse<TL>::value, "There are more vars than format tokens!");
+        static_assert(AlwaysFalse<Types>::value, "There are more vars than format tokens!");
     };
 
-    template <typename SL, typename TL>
-    struct AutoFormat<TypeSequence<Char<'%'>, TypeSequence<Char<'%'>, SL>>, TL>
+    template <typename SL, typename Types>
+    struct CFormatStringImpl<TypeSeq<Char<'%'>, TypeSeq<Char<'%'>, SL>>, Types>
     {
-        using Type = TypeSequence<Char<'%'>, TypeSequence<Char<'%'>, typename AutoFormat<SL, TL>::Type>>;
+        using Type = TypeSeq<Char<'%'>, TypeSeq<Char<'%'>, typename CFormatStringImpl<SL, Types>::Type>>;
     };
 
-    template <typename SL, typename T, typename TL>
-    struct AutoFormat<TypeSequence<Char<'%'>, SL>, TypeSequence<T, TL>>
+    template <typename SL, typename T, typename Types>
+    struct CFormatStringImpl<TypeSeq<Char<'%'>, SL>, TypeSeq<T, Types>>
     {
-        using Type = TypeSequence<Char<'%'>, typename AutoFormat<SL, TL>::Type>;
+        using Type = TypeSeq<Char<'%'>, typename CFormatStringImpl<SL, Types>::Type>;
     };
 
-    template <typename SL, typename TL>
-    struct AutoFormat<TypeSequence<Char<'\\'>, TypeSequence<Char<'{'>, SL>>, TL>
+    template <typename SL, typename Types>
+    struct CFormatStringImpl<TypeSeq<Char<'\\'>, TypeSeq<Char<'{'>, SL>>, Types>
     {
-        using Type = TypeSequence<Char<'{'>, typename AutoFormat<SL, TL>::Type>;
+        using Type = TypeSeq<Char<'{'>, typename CFormatStringImpl<SL, Types>::Type>;
     };
 
-    template <typename SL, typename TL>
-    struct AutoFormat<TypeSequence<Char<'{'>, SL>, TL>
+    template <typename SL, typename Types>
+    struct CFormatStringImpl<TypeSeq<Char<'{'>, SL>, Types>
     {
         using OtherBrace = FindBrace<SL, Nil, 1>;
         using FormatBlock = typename OtherBrace::Before;
         using RestString = typename OtherBrace::After;
 
-        static_assert(!std::is_same<TL, Nil>::value, "There are more {} than arguments to print");
-        using T = typename TL::Head;
-        using FormatString = typename FormatString<T, FormatBlock>::Type;
+        static_assert(!IsSame<Types, Nil>::value, "There are more {} than arguments to print");
+        using T = typename Types::Head;
+        using FmtStr = FormatString<T, FormatBlock>;
 
-        using Type = TypeSequence<Char<'%'>, AppendTypeSequence<FormatString, typename AutoFormat<RestString, typename TL::Tail>::Type>>;
+        using Type = TypeSeq<Char<'%'>, AppendTypeSeq<FmtStr, typename CFormatStringImpl<RestString, typename Types::Tail>::Type>>;
     };
 
-    template <typename C, typename SL, typename TL>
-    struct AutoFormat<TypeSequence<C, SL>, TL>
+    template <typename C, typename SL, typename Types>
+    struct CFormatStringImpl<TypeSeq<C, SL>, Types>
     {
-        using Type = TypeSequence<C, typename AutoFormat<SL, TL>::Type>;
+        using Type = TypeSeq<C, typename CFormatStringImpl<SL, Types>::Type>;
     };
 
     template <typename StringProvider, typename PtList>
-    using AutoFormatType = CharsToString<
-        typename AutoFormat<StringToChars<StringProvider>, PtList>::Type>;
+    using CFormatString = typename CFormatStringImpl<StringToChars<StringProvider>, PtList>::Type;
 
     template <typename... Ts>
-    MakeTypeSequence<Ts...> TieTypes(Ts...);
+    MakeTypeSeq<Ts...> TieTypes(Ts...);
 
-#define AUTOFORMAT(s, ...)                                     \
-    [] {                                                       \
-        struct StringProvider                                  \
-        {                                                      \
-            static constexpr const char *string()              \
-            {                                                  \
-                return static_cast<const char *>(s);           \
-            }                                                  \
-        };                                                     \
-        using ParamTypes = decltype(TieTypes(__VA_ARGS__));    \
-        using AF = AutoFormatType<StringProvider, ParamTypes>; \
-        return AF::string();                                   \
+    // Format String :: char * goes in to the StringProvider
+    // CFormatString takes format_string :: char * as arguement
+    // CFormatString
+
+#define AUTOFORMAT(s, ...)                                         \
+    [] {                                                           \
+        struct StringProvider                                      \
+        {                                                          \
+            static constexpr const char *string()                  \
+            {                                                      \
+                return static_cast<const char *>(s);               \
+            }                                                      \
+        };                                                         \
+        using ParamTypes = decltype(TieTypes(__VA_ARGS__));        \
+        using CFmtStr = CFormatString<StringProvider, ParamTypes>; \
+        return CharsToString<CFmtStr>::string();                   \
     }()
 
 #define pprintf(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
-
 };
 
 #endif
