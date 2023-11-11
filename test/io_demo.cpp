@@ -10,15 +10,15 @@ int main()
     const char *testData = "Hello, world!\nThis is a test file.\nEnd of test.";
 
     // Open a file for writing
-    auto maybeFile = File::open(filePath, "w+");
-    if (!maybeFile)
+    auto maybe_file = File::open(filePath, "w+");
+    if (!maybe_file)
     {
         std::cerr << "Failed to open file for writing." << std::endl;
         return EXIT_FAILURE;
     }
 
     // Writing data to file
-    File file = maybeFile.move(); // Assuming we have an unwrap method
+    File file = maybe_file.move(); // Assuming we have an unwrap method
     if (!file.write(testData))
     {
         std::cerr << "Failed to write data to file." << std::endl;
@@ -34,15 +34,18 @@ int main()
     }
 
     // Reading data from file line by line
-    bool keep_read = true;
-    while (keep_read)
-    {
-        file.read_line().match(
-            [](const String &str)
-            { std::cout << "Read line: " << str << std::endl; },
-            [&]()
-            { keep_read = false; });
-    }
+    // bool keep_read = true;
+    // while (keep_read)
+    // {
+    //     file.read_line().match(
+    //         [](const String &str)
+    //         { std::cout << "Read line: " << str << std::endl; },
+    //         [&]()
+    //         { keep_read = false; });
+    // }
+
+    const auto lines = file.read_lines();
+    std::cout << "File lines: " << lines << std::endl;
 
     // Check the current position in the file (should be at the end of file)
     long position = file.tell();
@@ -55,5 +58,5 @@ int main()
         return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    return 0;
 }

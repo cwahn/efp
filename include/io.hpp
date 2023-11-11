@@ -87,6 +87,25 @@ namespace efp
             return buffer;
         }
 
+        // Reads all lines from the file into a Vector
+        Vector<String> read_lines()
+        {
+            Vector<String> lines{};
+
+            bool keep_read = true;
+            while (keep_read)
+            {
+                const auto maybe_line = read_line();
+
+                if (maybe_line)
+                    lines.push_back(maybe_line.value());
+                else
+                    keep_read = false;
+            }
+
+            return lines;
+        }
+
         // Writes a string to the file
         bool write(const char *data)
         {
@@ -113,7 +132,7 @@ namespace efp
         }
 
         // Returns the current position in the file
-        long tell()
+        int tell()
         {
             return ftell(file_);
         }
@@ -135,18 +154,6 @@ namespace efp
         FILE *file_;
     };
 
-    // Reads all lines from the file into a Vector
-    // Vector<String> *read_lines()
-    // {
-    //     auto *lines = new Vector<String>();
-    //     String *line;
-    //     while ((line = read_line()) != nullptr)
-    //     {
-    //         lines->push_back(*line);
-    //         delete line; // Clean up the line after adding it to the vector
-    //     }
-    //     return lines;
-    // }
 };
 
 #endif
