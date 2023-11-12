@@ -273,20 +273,20 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : length_{0} {}
+        Sequence() : size_{0} {}
 
-        Sequence(const Sequence &other) : length_{other.length_}
+        Sequence(const Sequence &other) : size_{other.size_}
         {
-            for (int i = 0; i < length_; ++i)
+            for (int i = 0; i < size_; ++i)
             {
                 new (&data_[i]) A(other.data_[i]);
             }
         }
 
-        Sequence(Sequence &&other) : length_{other.length_}
+        Sequence(Sequence &&other) : size_{other.size_}
         {
-            other.length_ = 0;
-            for (int i = 0; i < length_; ++i)
+            other.size_ = 0;
+            for (int i = 0; i < size_; ++i)
             {
                 data_[i] = efp::move(other.data_[i]);
             }
@@ -295,7 +295,7 @@ namespace efp
         template <typename... Arg>
         Sequence(const Arg &...args)
             : data_{args...},
-              length_(sizeof...(args))
+              size_(sizeof...(args))
         {
         }
 
@@ -304,7 +304,7 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                for (int i = 0; i < length_; ++i)
+                for (int i = 0; i < size_; ++i)
                 {
                     data_[i] = other.data_[i];
                 }
@@ -317,7 +317,7 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                for (int i = 0; i < length_; ++i)
+                for (int i = 0; i < size_; ++i)
                 {
                     data_[i] = other.data_[i];
                 }
@@ -327,7 +327,7 @@ namespace efp
 
         ~Sequence()
         {
-            for (int i = 0; i < length_; ++i)
+            for (int i = 0; i < size_; ++i)
             {
                 data_[i].~A();
             }
@@ -345,12 +345,12 @@ namespace efp
 
         bool operator==(const Sequence &other) const
         {
-            if (length_ != other.length_)
+            if (size_ != other.size_)
             {
                 return false;
             }
 
-            for (int i = 0; i < length_; ++i)
+            for (int i = 0; i < size_; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -363,7 +363,7 @@ namespace efp
 
         int size() const
         {
-            return length_;
+            return size_;
         }
 
         int capacity() const
@@ -378,7 +378,7 @@ namespace efp
                 abort();
             }
 
-            length_ = length;
+            size_ = length;
         }
 
         void reserve(int capacity)
@@ -391,47 +391,43 @@ namespace efp
 
         void push_back(const A &value)
         {
-            if (length_ >= ct_cap)
+            if (size_ >= ct_cap)
             {
                 abort();
             }
             else
             {
-                new (&data_[length_]) A(value);
-                ++length_;
+                new (&data_[size_]) A(value);
+                ++size_;
             }
         }
 
-        // void erase(int index)
-        // {
-        //     if (index < 0 || index >= length_)
-        //     {
-        //         abort();
-        //     }
-
-        //     for (int i = index; i < length_ - 1; ++i)
-        //     {
-        //         data_[i] = move(data_[i + 1]);
-        //     }
-
-        //     data_[length_ - 1].~A();
-
-        //     --length_;
-        // }
+        void push_back(A &&value)
+        {
+            if (size_ >= ct_cap)
+            {
+                abort();
+            }
+            else
+            {
+                new (&data_[size_]) A(efp::move(value));
+                ++size_;
+            }
+        }
 
         void erase(int index)
         {
-            if (index < 0 || index >= length_)
+            if (index < 0 || index >= size_)
             {
                 abort();
             }
             data_[index].~A();
-            for (int i = index; i < length_ - 1; ++i)
+            for (int i = index; i < size_ - 1; ++i)
             {
                 new (&data_[i]) A(efp::move(data_[i + 1]));
                 data_[i + 1].~A();
             }
-            --length_;
+            --size_;
         }
 
         const A *data() const
@@ -456,22 +452,22 @@ namespace efp
 
         A *end()
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         const A *end() const
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         bool is_empty() const
         {
-            return length_ == 0;
+            return size_ == 0;
         }
 
     private:
         A data_[ct_cap];
-        int length_;
+        int size_;
     };
 
     template <typename A, int ct_capacity>
@@ -489,19 +485,19 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : data_{nullptr}, length_{0}, capacity_{0} {}
+        Sequence() : data_{nullptr}, size_{0}, capacity_{0} {}
 
         Sequence(const Sequence &other)
-            : data_{nullptr}, length_{0}, capacity_{0}
+            : data_{nullptr}, size_{0}, capacity_{0}
         {
             if (other.data_)
             {
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
                 data_ = new A[capacity_];
 
-                // memcpy(data_, other.data_, sizeof(A) * length_);
-                for (int i = 0; i < other.length_; ++i)
+                // memcpy(data_, other.data_, sizeof(A) * size_);
+                for (int i = 0; i < other.size_; ++i)
                 {
                     new (&data_[i]) A(other.data_[i]);
                 }
@@ -509,7 +505,7 @@ namespace efp
         }
 
         Sequence(Sequence &&other)
-            : data_{other.data_}, length_{other.length_}, capacity_{other.capacity_}
+            : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
         }
@@ -518,7 +514,7 @@ namespace efp
         Sequence(const Args &...args)
             : data_{new A[sizeof...(args)]},
               capacity_(sizeof...(args)),
-              length_(sizeof...(args))
+              size_(sizeof...(args))
         {
             int i = 0;
             for (auto arg : std::initializer_list<Common<Args...>>{args...})
@@ -540,18 +536,18 @@ namespace efp
             if (this != &other)
             {
                 A *newData = nullptr;
-                if (other.length_ > 0)
+                if (other.size_ > 0)
                 {
                     newData = new A[other.capacity_];
 
-                    for (int i = 0; i < other.length_; ++i)
+                    for (int i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
                 }
 
                 data_ = newData;
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
             }
             return *this;
@@ -564,11 +560,11 @@ namespace efp
                 delete[] data_;
 
                 data_ = other.data_;
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
 
                 other.data_ = nullptr;
-                other.length_ = 0;
+                other.size_ = 0;
                 other.capacity_ = 0;
             }
             return *this;
@@ -579,18 +575,18 @@ namespace efp
             if (this != &other)
             {
                 A *newData = nullptr;
-                if (other.length_ > 0)
+                if (other.size_ > 0)
                 {
                     newData = new A[other.capacity_];
 
-                    for (int i = 0; i < other.length_; ++i)
+                    for (int i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
                 }
 
                 data_ = newData;
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
             }
             return *this;
@@ -608,12 +604,12 @@ namespace efp
 
         bool operator==(const Sequence &other) const
         {
-            if (length_ != other.length_)
+            if (size_ != other.size_)
             {
                 return false;
             }
 
-            for (int i = 0; i < length_; ++i)
+            for (int i = 0; i < size_; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -626,7 +622,7 @@ namespace efp
 
         int size() const
         {
-            return length_;
+            return size_;
         }
 
         int capacity() const
@@ -646,7 +642,7 @@ namespace efp
                 reserve(length);
             }
 
-            length_ = length;
+            size_ = length;
         }
 
         void reserve(int new_capacity)
@@ -655,7 +651,7 @@ namespace efp
             {
                 A *new_data = new A[new_capacity];
 
-                for (int i = 0; i < length_; ++i)
+                for (int i = 0; i < size_; ++i)
                 {
                     new (&new_data[i]) A(efp::move(data_[i]));
                     data_[i].~A();
@@ -670,50 +666,42 @@ namespace efp
 
         void push_back(const A &value)
         {
-            if (length_ >= capacity_)
+            if (size_ >= capacity_)
             {
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
 
-            new (&data_[length_]) A{value};
-            ++length_;
+            new (&data_[size_]) A{value};
+            ++size_;
+        }
+
+        void push_back(A &&value)
+        {
+            if (size_ >= capacity_)
+            {
+                reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+            }
+
+            new (&data_[size_]) A(efp::move(value));
+            ++size_;
         }
 
         void erase(int index)
         {
-            if (index < 0 || index >= length_)
+            if (index < 0 || index >= size_)
             {
                 abort();
             }
 
-            data_[index].~A(); // Destruct the element being erased.
-            for (int i = index; i < length_ - 1; ++i)
+            data_[index].~A();
+            for (int i = index; i < size_ - 1; ++i)
             {
-                new (&data_[i]) A(efp::move(data_[i + 1])); // Use placement new for move.
-                data_[i + 1].~A();                          // Destruct the moved-from element.
+                new (&data_[i]) A(efp::move(data_[i + 1]));
+                data_[i + 1].~A();
             }
 
-            // data_[length_ - 1].~A();
-
-            --length_;
+            --size_;
         }
-
-        // void erase(int index)
-        // {
-        //     if (index < 0 || index >= length_)
-        //     {
-        //         throw std::out_of_range("Index out of bounds");
-        //     }
-
-        //     data_[index].~A(); // Destruct the element being erased.
-        //     for (int i = index; i < length_ - 1; ++i)
-        //     {
-        //         new (&data_[i]) A(efp::move(data_[i + 1])); // Use placement new for move.
-        //         data_[i + 1].~A();                          // Destruct the moved-from element.
-        //     }
-
-        //     --length_;
-        // }
 
         const A *data() const
         {
@@ -737,22 +725,22 @@ namespace efp
 
         A *end()
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         const A *end() const
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         bool is_empty() const
         {
-            return length_ == 0;
+            return size_ == 0;
         }
 
     private:
         A *data_;
-        int length_;
+        int size_;
         int capacity_;
     };
 
@@ -908,7 +896,7 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : data_{nullptr}, length_{0} {}
+        SequenceView() : data_{nullptr}, size_{0} {}
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
@@ -916,7 +904,7 @@ namespace efp
         {
         }
         SequenceView(A *data, const int length)
-            : data_{data}, length_{length}
+            : data_{data}, size_{length}
         {
         }
 
@@ -925,7 +913,7 @@ namespace efp
             if (this != &other)
             {
                 data_ = other.data_;
-                length_ = other.length_;
+                size_ = other.size_;
             }
             return *this;
         }
@@ -935,7 +923,7 @@ namespace efp
             if (this != &other)
             {
                 data_ = other.data_;
-                length_ = other.length_;
+                size_ = other.size_;
             }
             return *this;
         }
@@ -953,12 +941,12 @@ namespace efp
         bool operator==(const SequenceView &other) const
         {
             return (data_ == other.data_) &&
-                   (length_ == other.length_);
+                   (size_ == other.size_);
         }
 
         int size() const
         {
-            return length_;
+            return size_;
         }
 
         int capacity() const
@@ -973,7 +961,7 @@ namespace efp
                 abort();
             }
 
-            length_ = length;
+            size_ = length;
         }
 
         void reserve(int capacity)
@@ -1006,22 +994,22 @@ namespace efp
 
         A *end()
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         const A *end() const
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         bool is_empty() const
         {
-            return length_ == 0;
+            return size_ == 0;
         }
 
     private:
         A *data_;
-        int length_;
+        int size_;
     };
 
     template <typename A, int ct_capacity>
@@ -1039,22 +1027,22 @@ namespace efp
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : data_{nullptr}, length_{0}, capacity_{0} {}
+        SequenceView() : data_{nullptr}, size_{0}, capacity_{0} {}
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
-        SequenceView(A *data) : data_{data}, length_{0}, capacity_{0}
+        SequenceView(A *data) : data_{data}, size_{0}, capacity_{0}
         {
         }
         SequenceView(A *data, const int length, const int capacity)
-            : data_{data}, length_{length}, capacity_{capacity} {}
+            : data_{data}, size_{length}, capacity_{capacity} {}
 
         SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
             {
                 data_ = other.data_;
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
             }
             return *this;
@@ -1065,7 +1053,7 @@ namespace efp
             if (this != &other)
             {
                 data_ = other.data_;
-                length_ = other.length_;
+                size_ = other.size_;
                 capacity_ = other.capacity_;
             }
             return *this;
@@ -1084,13 +1072,13 @@ namespace efp
         bool operator==(const SequenceView &other) const
         {
             return (data_ == other.data_) &&
-                   (length_ == other.length_) &&
+                   (size_ == other.size_) &&
                    (capacity_ == other.capacity_);
         }
 
         int size() const
         {
-            return length_;
+            return size_;
         }
 
         int capacity() const
@@ -1110,7 +1098,7 @@ namespace efp
                 reserve(length);
             }
 
-            length_ = length;
+            size_ = length;
         }
 
         void reserve(int capacity)
@@ -1143,22 +1131,22 @@ namespace efp
 
         A *end()
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         const A *end() const
         {
-            return data_ + length_;
+            return data_ + size_;
         }
 
         bool is_empty() const
         {
-            return length_ == 0;
+            return size_ == 0;
         }
 
     private:
         A *data_;
-        int length_;
+        int size_;
         int capacity_;
     };
 

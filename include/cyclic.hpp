@@ -145,9 +145,9 @@ namespace efp
             ++write_;
             write_ -= ct_cap * (write_ == middle_);
 
-            if (length_ < ct_cap)
+            if (size_ < ct_cap)
             {
-                ++length_;
+                ++size_;
             }
             else
             {
@@ -160,7 +160,7 @@ namespace efp
         A pop_front()
         {
             A value = *(read_);
-            length_--;
+            size_--;
 
             read_++;
             read_ -= ct_cap * (read_ == middle_);
@@ -170,12 +170,12 @@ namespace efp
 
         constexpr SizeType size() const
         {
-            return length_;
+            return size_;
         }
 
         bool is_empty() const
         {
-            return length_ == 0;
+            return size_ == 0;
         }
 
         A *data()
@@ -210,7 +210,7 @@ namespace efp
 
     private:
         Array<A, ct_cap * 2> buffer_ = {};
-        int length_ = 0;
+        int size_ = 0;
         A *read_;
         A *write_;
         A *middle_;
