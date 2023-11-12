@@ -40,6 +40,11 @@ One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extr
 ### Maybe
 EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad.  
 
+### String and formatting
+EFP provides a `String` class tailored for efficient manipulation, akin to a list of characters, supporting operations without explicit null-termination. The `format` function enables embedded variable formatting, harnessing the library's type-safe templates for concise and expressive string composition at compile-time. 
+
+### File IO
+
 WIP
 
 ## Examples
@@ -88,6 +93,16 @@ int c = a.match(
 
 CHECK(b == 42);
 ```
+
+### String and formatting
+```cpp
+String name = "Alice";
+String hobby = "coding";
+
+String result = join(", ", format("Name: {}", name), format("Hobby: {}", hobby));
+
+std::cout << result << std::endl; // Output: "Name: Alice, Hobby: coding"
+``` 
 
 ## Benchmarks
 WIP
