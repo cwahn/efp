@@ -13,6 +13,8 @@ namespace efp
     {
     };
 
+    constexpr Unit unit;
+
     bool operator==(const Unit &, const Unit &)
     {
         return true;

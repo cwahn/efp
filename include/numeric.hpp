@@ -161,7 +161,7 @@ namespace efp
     {
         return is_approx(abs(a.imag()), 0)
                    ? Maybe<A>{a.real()}
-                   : Maybe<A>{Nothing{}};
+                   : Maybe<A>{nothing};
     }
 
     // Reducings

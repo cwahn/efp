@@ -111,7 +111,7 @@ namespace efp
             idx++;
         }
 
-        return Unit{};
+        return unit;
     }
 
     template <typename H, typename... Ts>
@@ -806,7 +806,7 @@ namespace efp
             }
         }
 
-        return Nothing{};
+        return nothing;
     }
 
     // ElemIndicesReturn
@@ -871,7 +871,7 @@ namespace efp
             }
         }
 
-        return Nothing{};
+        return nothing;
     }
 
     // FindIndicesReturn

@@ -19,7 +19,7 @@ namespace efp
             {
                 return File{file, mode};
             }
-            return Nothing{};
+            return nothing;
         }
 
         // todo Support std::string path
@@ -31,7 +31,7 @@ namespace efp
             {
                 return File{file, mode};
             }
-            return Nothing{};
+            return nothing;
         }
 
         ~File()
@@ -76,13 +76,13 @@ namespace efp
                 // Check for EOF condition
                 if (ch == EOF && buffer.is_empty())
                 {
-                    return Nothing{};
+                    return nothing;
                 }
 
                 return buffer;
             }
 
-            return Nothing{};
+            return nothing;
         }
 
         Vector<String> read_lines()

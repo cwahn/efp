@@ -12,7 +12,7 @@ TEST_CASE("maybe_construction")
 {
     SECTION("Nothing")
     {
-        Maybe<int> a = Nothing{};
+        Maybe<int> a = nothing;
 
         CHECK(a.has_value() == false);
         CHECK(!a);
@@ -81,7 +81,7 @@ TEST_CASE("maybe_monad")
         {
             if (x == 0)
             {
-                return Nothing{};
+                return nothing;
             }
 
             return Maybe<double>{12. / x};
@@ -94,7 +94,7 @@ TEST_CASE("maybe_monad")
 
         CHECK(bind(mb, div_12_by).is_nothing() == true);
 
-        Maybe<int> mc = Nothing{};
+        Maybe<int> mc = nothing;
 
         CHECK(bind(mc, div_12_by).is_nothing() == true);
     }
@@ -108,7 +108,7 @@ TEST_CASE("maybe_monad")
         {
             if (x == 0)
             {
-                return Nothing{};
+                return nothing;
             }
 
             return Maybe<double>{12. / x};
@@ -121,7 +121,7 @@ TEST_CASE("maybe_monad")
 
         CHECK((mb >>= div_12_by).is_nothing() == true);
 
-        Maybe<int> mc = Nothing{};
+        Maybe<int> mc = nothing;
 
         CHECK((mc >>= div_12_by).is_nothing() == true);
     }
@@ -129,12 +129,12 @@ TEST_CASE("maybe_monad")
 
 // Maybe<Unit> success()
 // {
-//     return Unit{};
+//     return unit;
 // }
 
 // Maybe<Unit> maybe_fail(bool is_fail)
 // {
-//     return Nothing{};
+//     return nothing;
 // }
 
 // // Maybe<Unit> combined(bool is_fail)
@@ -142,8 +142,8 @@ TEST_CASE("maybe_monad")
 // //     return success()
 // //                ? maybe_fail(true)
 // //                      ? maybe_fail(is_fail)
-// //                      : Nothing{}
-// //                : Nothing{};
+// //                      : nothing
+// //                : nothing;
 // // }
 
 // Maybe<int> action_0(bool x)
@@ -151,16 +151,16 @@ TEST_CASE("maybe_monad")
 //     // if (x)
 //     //     return 42;
 //     // else
-//     //     return Nothing{};
-//     return x ? Maybe<int>{42} : Maybe<int>{Nothing{}};
+//     //     return nothing;
+//     return x ? Maybe<int>{42} : Maybe<int>{nothing};
 // }
 
 // Maybe<Unit> action_1(bool x)
 // {
 //     if (x)
-//         return Unit{};
+//         return unit;
 //     else
-//         return Nothing{};
+//         return nothing;
 // }
 
 // Maybe<int> action_2(bool x, bool y)
@@ -175,7 +175,7 @@ TEST_CASE("Maybe as bool")
     SECTION("0")
     {
         Maybe<int> a = 42;
-        Maybe<int> b = Nothing{};
+        Maybe<int> b = nothing;
 
         bool l = a ? true : false;
         CHECK(l);
