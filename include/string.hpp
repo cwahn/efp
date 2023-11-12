@@ -200,7 +200,7 @@ namespace efp
     };
 
     template <typename T, typename Tail>
-    struct ContainsTypeSeq<TypeSeq<T, Tail>, T> : False
+    struct ContainsTypeSeq<TypeSeq<T, Tail>, T> : True
     {
     };
 
@@ -598,6 +598,8 @@ namespace efp
     }
 
 #define format(s, ...) format_(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+
+#define auto_format(s, ...) AUTOFORMAT(s, ##__VA_ARGS__);
 
 };
 
