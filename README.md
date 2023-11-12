@@ -111,7 +111,7 @@ WIP
 EFP is tested with Catch2 with g++ and clang.
 ```
 ===============================================================================
-All tests passed (461 assertions in 94 test cases)
+All tests passed (466 assertions in 95 test cases)
 ```
 
 ## Requirements
