@@ -238,7 +238,7 @@ namespace efp
 
                 for (int i = 0; i < size_; ++i)
                 {
-                    new (&new_data[i]) char(efp::move(data_[i]));
+                    new_data[i] = data_[i];
                 }
 
                 delete[] data_;
