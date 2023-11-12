@@ -109,7 +109,53 @@ TEST_CASE("Type sequences are correctly manipulated", "[format-sfinae]")
         CHECK((std::is_same<TypeToFormat<int>::Type, Chars<'d'>>::value));
         CHECK((std::is_same<TypeToFormat<float>::Type, Chars<'f'>>::value));
     }
+}
 
-    // Additional tests should be written for other constructs...
+TEST_CASE("AUTOFORMAT works as expected", "[format-sfinae]")
+{
+
+    CHECK(strcmp(AUTOFORMAT(""), "") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("%%"), "%%") == 0);
+    CHECK(strcmp(AUTOFORMAT("{} %f", 123, 1.23f), "%d %f") == 0);
+    CHECK(strcmp(AUTOFORMAT("%f {}", 1.23f, 123), "%f %d") == 0);
+
+    CHECK(strcmp(AUTOFORMAT(" \\{ "), " { ") == 0);
+    CHECK(strcmp(AUTOFORMAT("\\{}"), "{}") == 0);
+    CHECK(strcmp(AUTOFORMAT(" \\{ {} } ", 123), " { %d } ") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", nullptr), "%p") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", reinterpret_cast<void *>(0)), "%p") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", "str"), "%p") == 0);
+    CHECK(strcmp(AUTOFORMAT("{s}", "str"), "%s") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", static_cast<char>(123)), "%c") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", static_cast<short>(123)), "%d") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 123), "%d") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 123l), "%ld") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 123ll), "%lld") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", 123u), "%u") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 123ul), "%lu") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 123ull), "%llu") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{x}", 123u), "%x") == 0);
+    CHECK(strcmp(AUTOFORMAT("{x}", 123ul), "%lx") == 0);
+    CHECK(strcmp(AUTOFORMAT("{x}", 123ull), "%llx") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", true), "%d") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{}", 1.0f), "%f") == 0);
+    CHECK(strcmp(AUTOFORMAT("{}", 1.0), "%lf") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{10}", 123), "%10d") == 0);
+    CHECK(strcmp(AUTOFORMAT("{10x}", 123u), "%10x") == 0);
+    CHECK(strcmp(AUTOFORMAT("{#10x}", 123u), "%#10x") == 0);
+
+    CHECK(strcmp(AUTOFORMAT("{x}", 123), "%x") == 0);
+    CHECK(strcmp(AUTOFORMAT("{x}", 123l), "%lx") == 0);
+    CHECK(strcmp(AUTOFORMAT("{x}", 123ll), "%llx") == 0);
 }
 #endif
