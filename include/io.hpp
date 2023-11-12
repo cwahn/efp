@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "prelude.hpp"
-#include "string.hpp"
+#include "format.hpp"
 
 namespace efp
 {

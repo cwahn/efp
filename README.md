@@ -96,13 +96,17 @@ WIP
 EFP is tested with Catch2 with g++ and clang.
 ```
 ===============================================================================
-All tests passed (344 assertions in 70 test cases)
+All tests passed (461 assertions in 94 test cases)
 ```
 
 ## Requirements
 
 Requires C++ 11 or later.
 
+## Acknowledgement
+- format
+  - The formatting functionality of the library is heavily influenced by [tfc/ppprint](https://github.com/tfc/pprintpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
+  - 
 ## License
 
 Drafting of this library is started in the July of 2023 by Ahn, Chanwoo for an embedded project. 
