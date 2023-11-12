@@ -122,14 +122,14 @@ namespace efp
         Enum(const A &a)
             : index_(VariantIndex<A>::value)
         {
-            *(reinterpret_cast<A *>(storage_)) = a;
+            new (reinterpret_cast<A *>(storage_)) A(a);
         }
 
         template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
         Enum(A &&a)
             : index_(VariantIndex<A>::value)
         {
-            *(reinterpret_cast<A *>(storage_)) = efp::move(a);
+            new (reinterpret_cast<A *>(storage_)) A(efp::move(a));
         }
 
         ~Enum() {}

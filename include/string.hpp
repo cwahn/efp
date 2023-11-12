@@ -22,19 +22,16 @@ namespace efp
             delete[] ptr_;
         }
 
-        // Implicit conversion to const char*
         operator const char *() const
         {
             return ptr_;
         }
 
-        // Move constructor
         CString(CString &&other) noexcept : ptr_(other.ptr_)
         {
             other.ptr_ = nullptr;
         }
 
-        // Move assignment operator
         CString &operator=(CString &&other) noexcept
         {
             if (this != &other)
@@ -47,7 +44,6 @@ namespace efp
             return *this;
         }
 
-        // Deleted copy constructor and copy assignment operator to prevent copying
         CString(const CString &) = delete;
         CString &operator=(const CString &) = delete;
     };
@@ -89,6 +85,7 @@ namespace efp
             other.data_ = nullptr;
         }
 
+        // ! Varadic constructor is not working for String
         // template <typename... Args>
         // Sequence(const Args &...args)
         //     : data_{new char[sizeof...(args)]},
