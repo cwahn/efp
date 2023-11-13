@@ -76,8 +76,8 @@ namespace efp
     {
         if (ma)
             return f(ma.value());
-
-        return nothing;
+        else
+            return nothing;
     }
 
     // applicative
@@ -94,12 +94,10 @@ namespace efp
     auto ap(const Maybe<F> &mf, const Maybe<A> &ma)
         -> Maybe<CallReturn<F, A>>
     {
-        if (mf.is_nothing() || ma.is_nothing())
-        {
+        if (mf && ma)
+            return mf.value()(ma.value());
+        else
             return nothing;
-        }
-
-        return mf.value()(ma.value());
     }
 
     // monad
@@ -111,12 +109,10 @@ namespace efp
             CallReturn<F, A>>
     // todo test if monadic action
     {
-        if (ma.is_nothing())
-        {
+        if (ma)
+            return f(ma.value());
+        else
             return nothing;
-        }
-
-        return f(ma.value());
     }
 
     template <typename A, typename F>
@@ -126,12 +122,10 @@ namespace efp
             CallReturn<F, A>>
     // todo test if monadic action
     {
-        if (ma.is_nothing())
-        {
+        if (ma)
+            return f(ma.value());
+        else
             return nothing;
-        }
-
-        return f(ma.value());
     }
 
     // #define try_(expr) \
