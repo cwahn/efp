@@ -10,6 +10,8 @@ namespace efp
     {
     };
 
+    constexpr Nothing nothing;
+
     template <typename A>
     class Maybe : public Enum<Nothing, A>
     {
@@ -20,7 +22,7 @@ namespace efp
         }
 
         template <typename T, typename = EnableIf<any_v(IsSame<T, Nothing>::value, IsSame<T, A>::value)>>
-        Maybe(T &&a) : Enum<Nothing, A>(a)
+        Maybe(T &&a) : Enum<Nothing, A>(efp::forward<T>(a))
         {
         }
 
@@ -38,6 +40,16 @@ namespace efp
         A value() const
         {
             return Enum<Nothing, A>::template get<A>();
+        }
+
+        A &&move()
+        {
+            return Enum<Nothing, A>::template move<A>();
+        }
+
+        const A &&move() const
+        {
+            return Enum<Nothing, A>::template move<A>();
         }
 
         explicit operator bool() const
@@ -62,18 +74,10 @@ namespace efp
     auto fmap(const F &f, const Maybe<A> &ma)
         -> Maybe<CallReturn<F, A>>
     {
-        if (ma.is_nothing())
-        {
-            return Nothing{};
-        }
+        if (ma)
+            return f(ma.value());
 
-        return f(ma.value());
-
-        // return ma.match(
-        //     [](Nothing)
-        //     { return Nothing{}; },
-        //     [&](A a)
-        //     { return f(a); });
+        return nothing;
     }
 
     // applicative
@@ -92,7 +96,7 @@ namespace efp
     {
         if (mf.is_nothing() || ma.is_nothing())
         {
-            return Nothing{};
+            return nothing;
         }
 
         return mf.value()(ma.value());
@@ -109,7 +113,7 @@ namespace efp
     {
         if (ma.is_nothing())
         {
-            return Nothing{};
+            return nothing;
         }
 
         return f(ma.value());
@@ -124,19 +128,19 @@ namespace efp
     {
         if (ma.is_nothing())
         {
-            return Nothing{};
+            return nothing;
         }
 
         return f(ma.value());
     }
 
     // #define try_(expr) \
-//     ({ auto&& _tmp_##__COUNTER__ = (expr); _tmp_##__COUNTER__ ? _tmp_##__COUNTER__.value() : return Nothing{} })
+//     ({ auto&& _tmp_##__COUNTER__ = (expr); _tmp_##__COUNTER__ ? _tmp_##__COUNTER__.value() : return nothing })
 
 #define try_(expr)          \
     auto &&_tmp_ = (expr);  \
     if (!_tmp_.has_value()) \
-        return Nothing{};   \
+        return nothing;     \
     _tmp_.value()
 
 }

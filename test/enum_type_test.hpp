@@ -34,7 +34,7 @@ TEST_CASE("WildCard")
 
         const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
 
-        CHECK(wrapped(Unit{}) == 42);
+        CHECK(wrapped(unit) == 42);
     }
 }
 
@@ -92,7 +92,7 @@ TEST_CASE("enum_match")
 
     SECTION("non-void0")
     {
-        Enum<Unit, int> a = Unit{};
+        Enum<Unit, int> a = unit;
 
         int b = a.match(
             [&](Unit x)
@@ -134,7 +134,7 @@ TEST_CASE("enum_match")
 
     SECTION("wild_card0")
     {
-        Enum<Unit, int, double> a = Unit{};
+        Enum<Unit, int, double> a = unit;
         double b = 0.;
 
         a.match(
@@ -153,7 +153,7 @@ TEST_CASE("enum_match")
 
     SECTION("wild_card1")
     {
-        Enum<Unit, int, double> a = Unit{};
+        Enum<Unit, int, double> a = unit;
 
         CHECK(a.match([]()
                       { return 42; }) == 42);

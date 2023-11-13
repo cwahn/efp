@@ -8,3 +8,5 @@
 #include "cyclic_test.hpp"
 #include "c_utility_test.hpp"
 #include "sm_test.hpp"
+#include "string_test.hpp"
+#include "format_test.hpp"

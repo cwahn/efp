@@ -324,18 +324,18 @@ TEST_CASE("apply")
     {
         const auto tpl = tuple();
         const auto f = []()
-        { return Unit{}; };
+        { return unit; };
 
-        CHECK(apply(f, tpl) == Unit{});
+        CHECK(apply(f, tpl) == unit);
     }
 
     SECTION("1")
     {
         const auto tpl = tuple(true, 42);
         const auto f = [](bool a, int b)
-        { return Unit{}; };
+        { return unit; };
 
-        CHECK(apply(f, tpl) == Unit{});
+        CHECK(apply(f, tpl) == unit);
     }
 
     SECTION("2")

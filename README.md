@@ -40,6 +40,11 @@ One drawback of `efp::Enum` is memory usage. Like `std::variant` Enum needs extr
 ### Maybe
 EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad.  
 
+### String and formatting
+EFP provides a `String` class tailored for efficient manipulation, akin to a list of characters, supporting operations without explicit null-termination. The `format` function enables embedded variable formatting, harnessing the library's type-safe templates for concise and expressive string composition at compile-time. 
+
+### File IO
+
 WIP
 
 ## Examples
@@ -89,6 +94,16 @@ int c = a.match(
 CHECK(b == 42);
 ```
 
+### String and formatting
+```cpp
+String name = "Alice";
+String hobby = "coding";
+
+String result = join(", ", format("Name: {}", name), format("Hobby: {}", hobby));
+
+std::cout << result << std::endl; // Output: "Name: Alice, Hobby: coding"
+``` 
+
 ## Benchmarks
 WIP
 
@@ -96,13 +111,17 @@ WIP
 EFP is tested with Catch2 with g++ and clang.
 ```
 ===============================================================================
-All tests passed (344 assertions in 70 test cases)
+All tests passed (466 assertions in 95 test cases)
 ```
 
 ## Requirements
 
 Requires C++ 11 or later.
 
+## Acknowledgement
+- format
+  - The formatting functionality of the library is heavily influenced by [tfc/ppprint](https://github.com/tfc/pprintpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
+  - 
 ## License
 
 Drafting of this library is started in the July of 2023 by Ahn, Chanwoo for an embedded project. 

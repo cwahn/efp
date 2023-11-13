@@ -13,6 +13,8 @@ namespace efp
     {
     };
 
+    constexpr Unit unit;
+
     bool operator==(const Unit &, const Unit &)
     {
         return true;
@@ -862,6 +864,25 @@ namespace efp
         return apply_impl(f, tpl, IndexSequenceFor<As...>{});
     }
 
+    // PointerRemovedImpl
+
+    template <typename A>
+    struct PointerRemovedImpl
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct PointerRemovedImpl<A *>
+    {
+        using Type = A;
+    };
+
+    // PointerRemoved
+
+    template <typename A>
+    using PointerRemoved = typename PointerRemovedImpl<A>::Type;
+
     // ReferenceRemovedImpl
 
     template <typename A>
@@ -905,6 +926,30 @@ namespace efp
 
     template <typename A>
     using ConstRemoved = typename ConstRemovedImpl<A>::Type;
+
+    // VoletileRemovedImpl
+
+    template <typename A>
+    struct VoletileRemovedImpl
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct VoletileRemovedImpl<const A>
+    {
+        using Type = A;
+    };
+
+    // VoletileRemoved
+
+    template <typename A>
+    using VoletileRemoved = typename VoletileRemovedImpl<A>::Type;
+
+    // CVRemoved
+
+    template <typename A>
+    using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
     // // CleanedImpl
 

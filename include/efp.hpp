@@ -10,5 +10,8 @@
 #include "cyclic.hpp"
 #include "c_utility.hpp"
 #include "sm.hpp"
+#include "string.hpp"
+#include "format.hpp"
+#include "io.hpp"
 
 #endif
