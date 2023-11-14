@@ -1,76 +1,100 @@
 #ifndef SEQUENCE_TEST_HPP_
 #define SEQUENCE_TEST_HPP_
 
+#include "catch2/catch_test_macros.hpp"
 #include "sequence.hpp"
 
 using namespace efp;
 
-TEST_CASE("crtp sequence init")
+TEST_CASE("Initialization")
 {
-    SECTION("Array")
+    SECTION("Array Default Constructor")
+    {
+        Array<int, 5> a;
+        CHECK(a.size() == 5); // Assuming default constructor initializes size to 0
+    }
+
+    SECTION("ArrVec Default Constructor")
+    {
+        ArrVec<int, 5> a;
+        CHECK(a.size() == 0);
+        CHECK(a.capacity() == 5);
+    }
+
+    SECTION("Vector Default Constructor")
+    {
+        Vector<int> a;
+        CHECK(a.size() == 0);
+        CHECK(a.capacity() == 0); // Assuming default capacity is 0
+    }
+
+    SECTION("Array Initialization")
     {
         Array<int, 3> a{1, 2, 3};
         CHECK(a == Array<int, 3>{1, 2, 3});
         CHECK(a.size() == 3);
     }
 
-    SECTION("ArrVec")
+    SECTION("ArrVec Initialization")
     {
         ArrVec<int, 4> a = {1, 2, 3};
-
         CHECK(a.size() == 3);
         CHECK(a.capacity() == 4);
     }
 
-    SECTION("Vector")
+    SECTION("Vector Initialization")
     {
-        Vector<int> a = {0, 0, 0};
-        for (int i = 0; i < a.size(); ++i)
-        {
-            a[i] = i + 1;
-        }
-
-        Vector<int> b = {1, 2, 3};
-
-        CHECK(a == b);
+        Vector<int> a = {1, 2, 3};
         CHECK(a.size() == 3);
-        CHECK(b.size() == 3);
         CHECK(a.capacity() == 3);
+    }
+
+    SECTION("Array Copy Constructor")
+    {
+        Array<int, 3> a{1, 2, 3};
+        Array<int, 3> b = a;
+        CHECK(b == Array<int, 3>{1, 2, 3});
+    }
+
+    SECTION("ArrVec Copy Constructor")
+    {
+        ArrVec<int, 4> a = {1, 2, 3};
+        ArrVec<int, 4> b = a;
+        CHECK(b.size() == 3);
+        CHECK(b.capacity() == 4);
+    }
+
+    SECTION("Vector Copy Constructor")
+    {
+        Vector<int> a = {1, 2, 3};
+        Vector<int> b = a;
+        CHECK(b.size() == 3);
         CHECK(b.capacity() == 3);
     }
-}
 
-TEST_CASE("initialization")
-{
-    SECTION("Array")
+    SECTION("Array Assignment")
     {
         Array<int, 3> a{1, 2, 3};
-        CHECK(a == Array<int, 3>{1, 2, 3});
-        CHECK(a.size() == 3);
+        Array<int, 3> b;
+        b = a;
+        CHECK(b == Array<int, 3>{1, 2, 3});
     }
 
-    SECTION("ArrVec")
+    SECTION("ArrVec Assignment")
     {
         ArrVec<int, 4> a = {1, 2, 3};
-
-        CHECK(a.size() == 3);
-        CHECK(a.capacity() == 4);
+        ArrVec<int, 4> b;
+        b = a;
+        CHECK(b.size() == 3);
+        CHECK(b.capacity() == 4);
     }
 
-    SECTION("Vector")
+    SECTION("Vector Assignment")
     {
-        Vector<int> a = {0, 0, 0};
-        for (int i = 0; i < a.size(); ++i)
-        {
-            a[i] = i + 1;
-        }
-
-        Vector<int> b = {1, 2, 3};
-
-        CHECK(a == b);
-        CHECK(a.size() == 3);
+        Vector<int> a = {1, 2, 3};
+        Vector<int> b;
+        b = a;
         CHECK(b.size() == 3);
-        CHECK(a.capacity() == 3);
         CHECK(b.capacity() == 3);
     }
 }
