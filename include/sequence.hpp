@@ -847,34 +847,53 @@ namespace efp
         static constexpr int ct_cap = ct_length;
 
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : data_{nullptr} {}
-        // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}
+        // SequenceView() : data_{nullptr} {}
+        // // SequenceView(const SequenceView &) {}
+        // // SequenceView(SequenceView &&) {}
 
-        SequenceView(A *data)
-            : data_{data}
+        // SequenceView(A *data)
+        //     : data_{data}
+        // {
+        // }
+
+        // SequenceView &operator=(const SequenceView &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         data_ = other.data_;
+        //     }
+        //     return *this;
+        // }
+
+        // SequenceView assign_impl(const SequenceView &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         data_ = other.data_;
+        //     }
+        //     return *this;
+        // }
+
+        explicit SequenceView(A *data)
+            : data_(data)
         {
-        }
-
-        SequenceView &operator=(const SequenceView &other)
-        {
-            if (this != &other)
+            // Ensure that data is not nullptr for a non-empty view.
+            if (ct_len > 0 && data_ == nullptr)
             {
-                data_ = other.data_;
+                abort();
             }
-            return *this;
         }
 
-        SequenceView assign_impl(const SequenceView &other)
-        {
-            if (this != &other)
-            {
-                data_ = other.data_;
-            }
-            return *this;
-        }
+        // Rule of five: if you define one of the destructor, copy constructor,
+        // copy assignment operator, move constructor, or move assignment operator,
+        // you should define all of them. Here, the default behavior is intended.
+
+        SequenceView(const SequenceView &) = default;
+        SequenceView(SequenceView &&) noexcept = default;
+        SequenceView &operator=(const SequenceView &) = default;
+        SequenceView &operator=(SequenceView &&) noexcept = default;
+        ~SequenceView() = default;
 
         A &operator[](int index)
         {
