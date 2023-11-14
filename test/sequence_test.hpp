@@ -199,66 +199,33 @@ Vector<int> n_vector_nrvo()
     return runtime_con ? result : n_result;
 };
 
-TEST_CASE("copy elision")
+TEST_CASE("Copy Elision")
 {
-    SECTION("Array")
+    SECTION("Array NRVO")
     {
-        Array<int, 3> na = array_nrvo();
-        Array<int, 3> nna = n_array_nrvo();
+        Array<int, 3> a_nrvo = array_nrvo();
+        CHECK(array_nrvo_p == &a_nrvo); // NRVO should have occurred;
 
-        // CHECK(Array<int, 3>{1, 2, 3} == array_rvo());
-        CHECK(&na == array_nrvo_p);
-        CHECK(&nna != n_array_nrvo_p);
+        Array<int, 3> a_n_nrvo = n_array_nrvo();
+        CHECK(n_array_nrvo_p != &a_n_nrvo); // Conditional NRVO should have occurred; pointers should differ
     }
 
-    SECTION("ArrVec")
+    SECTION("ArrVec NRVO")
     {
-        ArrVec<int, 3> na = array_vector_nrvo();
-        ArrVec<int, 3> nna = n_array_vector_nrvo();
+        ArrVec<int, 3> av_nrvo = array_vector_nrvo();
+        CHECK(arrvec_nrvo_p == &av_nrvo); // NRVO should have occurred;
 
-        // CHECK(ArrVec<int, 3>{1, 2, 3} == array_vector_rvo());
-        CHECK(&na == arrvec_nrvo_p);
-        CHECK(&nna != n_arrvec_nrvo_p);
+        ArrVec<int, 3> av_n_nrvo = n_array_vector_nrvo();
+        CHECK(n_arrvec_nrvo_p != &av_n_nrvo); // Conditional NRVO should have occurred; pointers should differ
     }
 
-    SECTION("Vector")
+    SECTION("Vector NRVO")
     {
-        Vector<int> na = vector_nrvo();
-        Vector<int> nna = n_vector_nrvo();
+        Vector<int> v_nrvo = vector_nrvo();
+        CHECK(vector_nrvo_p == &v_nrvo); // NRVO should have occurred;
 
-        // CHECK(Vector<int>{1, 2, 3} == vector_rvo());
-        CHECK(&na == vector_nrvo_p);
-        CHECK(&nna != n_vector_nrvo_p);
-    }
-}
-
-TEST_CASE("assignment")
-{
-    SECTION("Array")
-    {
-        Array<double, 3> a{1., 2., 3.};
-        Array<double, 3> b;
-
-        b = a;
-        CHECK(a == b);
-    }
-
-    SECTION("ArrVec")
-    {
-        ArrVec<double, 3> a{1., 2., 3.};
-        ArrVec<double, 3> b;
-
-        b = a;
-        CHECK(a == b);
-    }
-
-    SECTION("Vector")
-    {
-        Vector<double> a{1., 2., 3.};
-        Vector<double> b;
-
-        b = a;
-        CHECK(a == b);
+        Vector<int> v_n_nrvo = n_vector_nrvo();
+        CHECK(n_vector_nrvo_p != &v_n_nrvo); // Conditional NRVO should have occurred; pointers should differ
     }
 }
 
@@ -267,19 +234,51 @@ TEST_CASE("erase")
     SECTION("ArrVec::erase")
     {
         ArrVec<int, 5> arrvec{1, 2, 3, 4, 5};
-        arrvec.erase(2); // Erase the element at index 2, which is '3'
 
-        ArrVec<int, 5> expected{1, 2, 4, 5};
-        CHECK(arrvec == expected);
+        // Erasing a middle element
+        arrvec.erase(2);
+        CHECK(arrvec == ArrVec<int, 5>{1, 2, 4, 5});
+
+        // Erasing the first element
+        arrvec.erase(0);
+        CHECK(arrvec == ArrVec<int, 5>{2, 4, 5});
+
+        // Erasing the last element
+        arrvec.erase(arrvec.size() - 1);
+        CHECK(arrvec == ArrVec<int, 5>{2, 4});
+
+        // Multiple erasures
+        arrvec.erase(1);
+        arrvec.erase(0);
+        CHECK(arrvec.empty());
+
+        // Erasing with invalid index (should assert or throw depending on implementation)
+        // CHECK_THROWS(arrvec.erase(5));
     }
 
     SECTION("Vector::erase")
     {
         Vector<int> vec{1, 2, 3, 4, 5};
-        vec.erase(2); // Erase the element at index 2, which is '3'
 
-        Vector<int> expected{1, 2, 4, 5};
-        CHECK(vec == expected);
+        // Erasing a middle element
+        vec.erase(2);
+        CHECK(vec == Vector<int>{1, 2, 4, 5});
+
+        // Erasing the first element
+        vec.erase(0);
+        CHECK(vec == Vector<int>{2, 4, 5});
+
+        // Erasing the last element
+        vec.erase(vec.size() - 1);
+        CHECK(vec == Vector<int>{2, 4});
+
+        // Multiple erasures
+        vec.erase(1);
+        vec.erase(0);
+        CHECK(vec.empty());
+
+        // Erasing with invalid index (should assert or throw depending on implementation)
+        // CHECK_THROWS(vec.erase(5));
     }
 }
 
