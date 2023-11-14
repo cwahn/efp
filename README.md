@@ -86,10 +86,8 @@ int b = 42;
 int c = a.match(
     [&](bool x)
     { return b * 0; },
-    [&](int x)
-    { return b * 1; },
-    [&](double x)
-    { return b * 2; });
+    [&]()                       
+    { return b * 1; }); // Empty branch indicates wildcard
 
 CHECK(b == 42);
 ```
