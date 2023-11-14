@@ -249,7 +249,7 @@ namespace efp
             return data_ + ct_len;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return ct_len == 0;
         }
@@ -415,6 +415,44 @@ namespace efp
             }
         }
 
+        void insert(int index, const A &value)
+        {
+            if (index < 0 || index > size_ || size_ == ct_capacity)
+            {
+                abort();
+            }
+
+            for (int i = size_; i > index; --i)
+            {
+                new (&data_[i]) A(std::move(data_[i - 1]));
+                data_[i - 1].~A();
+            }
+
+            new (&data_[index]) A(value);
+
+            ++size_;
+        }
+
+        void pop_back()
+        {
+            if (size_ == 0)
+            {
+                abort();
+            }
+
+            data_[size_ - 1].~A();
+            --size_;
+        }
+
+        void clear()
+        {
+            for (int i = 0; i < size_; ++i)
+            {
+                data_[i].~A();
+            }
+            size_ = 0;
+        }
+
         void erase(int index)
         {
             if (index < 0 || index >= size_)
@@ -460,7 +498,7 @@ namespace efp
             return data_ + size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }
@@ -686,6 +724,24 @@ namespace efp
             ++size_;
         }
 
+        void insert(int index, const A &value)
+        {
+            if (index < 0 || index > size_)
+            {
+                abort();
+            }
+            if (size_ >= capacity_)
+            {
+                reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+            }
+            for (int i = size_; i > index; --i)
+            {
+                data_[i] = efp::move(data_[i - 1]);
+            }
+            new (&data_[index]) A(value);
+            ++size_;
+        }
+
         void erase(int index)
         {
             if (index < 0 || index >= size_)
@@ -700,6 +756,25 @@ namespace efp
                 data_[i + 1].~A();
             }
 
+            --size_;
+        }
+
+        void clear()
+        {
+            for (int i = 0; i < size_; ++i)
+            {
+                data_[i].~A();
+            }
+            size_ = 0;
+        }
+
+        void pop_back()
+        {
+            if (size_ == 0)
+            {
+                abort();
+            }
+            data_[size_ - 1].~A();
             --size_;
         }
 
@@ -733,7 +808,7 @@ namespace efp
             return data_ + size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }
@@ -872,7 +947,7 @@ namespace efp
             return data_ + ct_len;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return ct_len == 0;
         }
@@ -1002,7 +1077,7 @@ namespace efp
             return data_ + size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }
@@ -1139,7 +1214,7 @@ namespace efp
             return data_ + size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }

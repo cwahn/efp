@@ -64,7 +64,7 @@ namespace efp
             return data_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return false;
         }
@@ -173,7 +173,7 @@ namespace efp
             return size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }
@@ -278,7 +278,7 @@ namespace efp
 //         return data_;
 //     }
 
-//     bool is_empty()
+//     bool empty()
 //     {
 //         return false;
 //     }

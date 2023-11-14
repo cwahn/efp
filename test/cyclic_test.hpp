@@ -14,7 +14,7 @@ TEST_CASE("Vcb")
         CHECK(vcb.size() == 3);
         CHECK(length(vcb) == 3);
         CHECK(IsIntegralConst<decltype(length(vcb))>::value == true);
-        CHECK(vcb.is_empty() == false);
+        CHECK(vcb.empty() == false);
 
         vcb.push_back(1);
         vcb.push_back(2);
@@ -34,14 +34,14 @@ TEST_CASE("Vcq")
         Vcq<int, 3> vcq;
         CHECK(IsSame<Element<decltype(vcq)>, int>::value == true);
         CHECK(vcq.size() == 0);
-        CHECK(vcq.is_empty() == true);
+        CHECK(vcq.empty() == true);
         CHECK(length(vcq) == 0);
         CHECK(IsIntegralConst<decltype(length(vcq))>::value == false);
 
         vcq.push_back(1);
 
         CHECK(vcq.size() == 1);
-        CHECK(vcq.is_empty() == false);
+        CHECK(vcq.empty() == false);
         CHECK(vcq.pop_front() == 1);
 
         vcq.push_back(2);
@@ -77,7 +77,7 @@ TEST_CASE("Vcq")
 //         CHECK(as.size() == 0);
 //         CHECK(length(as) == 0);
 //         CHECK(IsIntegralConst<decltype(length(as))>::value == false);
-//         CHECK(as.is_empty() == false);
+//         CHECK(as.empty() == false);
 
 //         as.push_back(1);
 //         CHECK(as[2] == 1);

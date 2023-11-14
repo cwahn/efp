@@ -74,7 +74,7 @@ namespace efp
                 }
 
                 // Check for EOF condition
-                if (ch == EOF && buffer.is_empty())
+                if (ch == EOF && buffer.empty())
                 {
                     return nothing;
                 }

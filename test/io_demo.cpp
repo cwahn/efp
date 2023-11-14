@@ -71,5 +71,9 @@ int main()
         return 1;
     }
 
+    // file = File::open("test", "w+").move();
+    // file.write("Hello, world!\nThis is a test file.\nEnd of test.");
+    // file.close();
+
     return 0;
 }

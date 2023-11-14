@@ -336,7 +336,7 @@ namespace efp
             return data_ + size_;
         }
 
-        bool is_empty() const
+        bool empty() const
         {
             return size_ == 0;
         }
