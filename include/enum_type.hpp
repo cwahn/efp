@@ -236,46 +236,7 @@ namespace efp
         // * Need type level find (Type -> bool) -> Types -> int
         // * Need type level indexing
 
-        // Arguments implementation will auto matically remove the const qualifier if there is.
-
-#define CASE(i)                                                                            \
-    case i:                                                                                \
-    {                                                                                      \
-        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
-        break;                                                                             \
-    }
-
-#define STAMP2(n, x) \
-    x(n)             \
-        x(n + 1)
-
-#define STAMP4(n, x) \
-    STAMP2(n, x)     \
-    STAMP2(n + 2, x)
-
-#define STAMP8(n, x) \
-    STAMP4(n, x)     \
-    STAMP4(n + 4, x)
-
-#define STAMP16(n, x) \
-    STAMP8(n, x)      \
-    STAMP8(n + 8, x)
-
-#define STAMP32(n, x) \
-    STAMP16(n, x)     \
-    STAMP16(n + 16, x)
-
-#define STAMP64(n, x) \
-    STAMP32(n, x)     \
-    STAMP32(n + 32, x)
-
-#define STAMP128(n, x) \
-    STAMP64(n, x)      \
-    STAMP64(n + 64, x)
-
-#define STAMP256(n, x) \
-    STAMP128(n, x)     \
-    STAMP128(n + 128, x)
+        // Arguments implementation will automatically remove the const qualifier if there is.
 
         template <typename F>
         struct IsRelevantBranch
@@ -336,6 +297,45 @@ namespace efp
         alignas(maximum_v(alignof(As)...)) uint8_t storage_[maximum_v(sizeof(As)...)];
         uint8_t index_;
     };
+
+#define CASE(i)                                                                            \
+    case i:                                                                                \
+    {                                                                                      \
+        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
+        break;                                                                             \
+    }
+
+#define STAMP2(n, x) \
+    x(n)             \
+        x(n + 1)
+
+#define STAMP4(n, x) \
+    STAMP2(n, x)     \
+    STAMP2(n + 2, x)
+
+#define STAMP8(n, x) \
+    STAMP4(n, x)     \
+    STAMP4(n + 4, x)
+
+#define STAMP16(n, x) \
+    STAMP8(n, x)      \
+    STAMP8(n + 8, x)
+
+#define STAMP32(n, x) \
+    STAMP16(n, x)     \
+    STAMP16(n + 16, x)
+
+#define STAMP64(n, x) \
+    STAMP32(n, x)     \
+    STAMP32(n + 32, x)
+
+#define STAMP128(n, x) \
+    STAMP64(n, x)      \
+    STAMP64(n + 64, x)
+
+#define STAMP256(n, x) \
+    STAMP128(n, x)     \
+    STAMP128(n + 128, x)
 
     template <typename... As>
     struct Match<2, As...>
@@ -496,6 +496,16 @@ namespace efp
             }
         }
     };
+
+#undef CASE
+#undef STAMP2
+#undef STAMP4
+#undef STAMP8
+#undef STAMP16
+#undef STAMP32
+#undef STAMP64
+#undef STAMP128
+#undef STAMP256
 
     template <typename... As, typename... Fs>
     auto match(const Enum<As...> &x, const Fs &...fs)
