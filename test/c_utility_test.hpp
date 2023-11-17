@@ -83,7 +83,7 @@ static void register_callback(double (*fptr)(int, float))
     inner_function2 = fptr;
 }
 
-TEST_CASE("to_function_pointer")
+TEST_CASE("func_ptr")
 {
     SECTION("no_argument")
     {
@@ -91,14 +91,14 @@ TEST_CASE("to_function_pointer")
         auto b = [&]()
         { ++a; };
 
-        void (*f1)() = to_function_pointer(b);
+        void (*f1)() = func_ptr(b);
         f1();
         CHECK(a == 101);
 
         outer_function1();
         CHECK(a == 101);
 
-        inner_function1 = to_function_pointer(b);
+        inner_function1 = func_ptr(b);
 
         outer_function1();
         CHECK(a == 102);
@@ -123,7 +123,7 @@ TEST_CASE("to_function_pointer")
         // inner_function2(1, 2.);
         // CHECK(a == 0.);
 
-        register_callback(to_function_pointer(b));
+        register_callback(func_ptr(b));
 
         CHECK(inner_function2(1, 2.) == 6.);
         CHECK(a == 3.);

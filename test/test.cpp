@@ -10,3 +10,4 @@
 #include "sm_test.hpp"
 #include "string_test.hpp"
 #include "format_test.hpp"
+#include "sort_test.hpp"
