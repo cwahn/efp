@@ -6,7 +6,7 @@
 #include <stdlib.h> // Standard utility functions (e.g., malloc, free, atoi, itoa).
 #include <stdio.h>  // Input and output utilities (e.g., sprintf, snprintf).
 #include <string.h> // String handling functions (e.g., strcpy, strlen, strcat).
-#include <float.h>
+#include <float.h>  // Macros for numeric limits
 #include <math.h>   // Common mathematical functions (e.g., sin, cos, abs).
 
 #include <cstddef> // Defines size_t, ptrdiff_t, and nullptr_t
