@@ -1,8 +1,7 @@
 #ifndef NUMERTIC_LIMIT_HPP
 #define NUMERTIC_LIMIT_HPP
 
-#include <float.h>
-#include <climits>
+#include "cpp_core.hpp"
 
 namespace efp
 {

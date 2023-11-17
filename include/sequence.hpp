@@ -9,8 +9,6 @@
 
 // todo STL only
 #include <iostream>
-#include <vector>
-#include <array>
 #include <cstring>
 
 #include "sfinae.hpp"
@@ -424,7 +422,7 @@ namespace efp
 
             for (int i = size_; i > index; --i)
             {
-                new (&data_[i]) A(std::move(data_[i - 1]));
+                new (&data_[i]) A(efp::move(data_[i - 1]));
                 data_[i - 1].~A();
             }
 

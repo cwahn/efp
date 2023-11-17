@@ -1,8 +1,6 @@
 #ifndef SOrightT_HPP_
 #define SOrightT_HPP_
 
-#include <functional>
-
 #include "sequence.hpp"
 
 // todo Need to make it work for static sequences as well
@@ -112,15 +110,15 @@ namespace efp
     {
         for (int i = left + 1; i <= right; i++)
         {
-            A key = std::move(arr[i]);
+            A key = efp::move(arr[i]);
             int j = i - 1;
 
             while (j >= left && comp(key, arr[j]))
             {
-                arr[j + 1] = std::move(arr[j]);
+                arr[j + 1] = efp::move(arr[j]);
                 j--;
             }
-            arr[j + 1] = std::move(key);
+            arr[j + 1] = efp::move(key);
         }
     }
 
