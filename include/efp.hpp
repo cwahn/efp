@@ -13,5 +13,6 @@
 #include "string.hpp"
 #include "format.hpp"
 #include "io.hpp"
+#include "sort.hpp"
 
 #endif
