@@ -48,11 +48,11 @@ namespace efp
     template <typename F>
     void *LambdaPointer<F>::inner_ptr = nullptr;
 
-    // to_function_pointer
+    // func_ptr
 
     template <typename F>
     // ! Take caution on the lifetime of the argument.
-    static FunctionPointerType<F> to_function_pointer(F &f)
+    static FunctionPointerType<F> func_ptr(F &f)
     {
         LambdaPointer<F>::inner_ptr = (void *)&f;
         return (FunctionPointerType<F>)LambdaPointer<F>::template Helper<Arguments<F>>::call;
