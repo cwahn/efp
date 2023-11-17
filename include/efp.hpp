@@ -1,6 +1,7 @@
 #ifndef EFP_HPP_
 #define EFP_HPP_
 
+#include "cpp_core.hpp"
 #include "sequence.hpp"
 #include "enum_type.hpp"
 #include "maybe.hpp"

@@ -1,8 +1,9 @@
 #ifndef NUMERIC_HPP_
 #define NUMERIC_HPP_
 
-#include <cmath>
+// todo remove STL
 #include <complex>
+
 #ifdef _MSC_VER
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
