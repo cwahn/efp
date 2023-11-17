@@ -10,75 +10,67 @@ using namespace efp;
 
 TEST_CASE("Sorting algorithms sort correctly", "[sort]")
 {
-    const Vector<int> expected = {1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9};
-
-    SECTION("quicksort sorts a vector")
-    {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        quicksort(values);
-        CHECK(values == expected);
-    }
-
-    SECTION("quicksort_by sorts a vector with custom comparison")
-    {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        quicksort_by(values, 0, values.size() - 1, efp::lt_v<int>);
-        CHECK(values == expected);
-    }
-
-    SECTION("heapsort sorts a vector")
-    {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        heapsort(values);
-        CHECK(values == expected);
-    }
-
-    SECTION("heapsort_by sorts a vector with custom comparison")
-    {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        heapsort_by(values, efp::lt_v<int>);
-        CHECK(values == expected);
-    }
-
-    SECTION("insertion_sort sorts a vector")
-    {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        insertion_sort(values);
-        CHECK(values == expected);
-    }
-
+    Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
+    Vector<int> expectedAscending = {1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9};
+    Vector<int> expectedDescending = {9, 6, 5, 5, 5, 4, 3, 3, 2, 1, 1};
+    bool (*less_than)(const int &, const int &) = efp::lt_v<int>;
     auto greater_than = [](int a, int b)
     { return a > b; };
 
-    // Expected result for descending order
-    Vector<int> expected_descending = {9, 6, 5, 5, 5, 4, 3, 3, 2, 1, 1};
-
-    SECTION("quicksort_by sorts a vector with custom comparison")
+    SECTION("quicksort sorts a vector in ascending order")
     {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        quicksort_by(values, 0, values.size() - 1, greater_than);
-        CHECK(values == expected_descending);
+        Vector<int> testValues = values;
+        quicksort(testValues);
+        CHECK(testValues == expectedAscending);
     }
 
-    SECTION("heapsort_by sorts a vector with custom comparison")
+    SECTION("heapsort sorts a vector in ascending order")
     {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        heapsort_by(values, greater_than);
-        CHECK(values == expected_descending);
+        Vector<int> testValues = values;
+        heapsort(testValues);
+        CHECK(testValues == expectedAscending);
     }
 
-    SECTION("insertion_sort_by sorts a vector with custom comparison")
+    SECTION("insertion_sort sorts a vector in ascending order")
     {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        insertion_sort_by(values, greater_than);
-        CHECK(values == expected_descending);
+        Vector<int> testValues = values;
+        insertion_sort(testValues);
+        CHECK(testValues == expectedAscending);
     }
 
-    SECTION("introsort_by sorts a vector with custom comparison")
+    SECTION("timsort sorts a vector in ascending order")
     {
-        Vector<int> values = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5};
-        introsort_by(values, greater_than);
-        CHECK(values == expected_descending);
+        Vector<int> testValues = values;
+        timsort(testValues);
+        CHECK(testValues == expectedAscending);
+    }
+
+    SECTION("quicksort_by sorts a vector in descending order with custom comparison")
+    {
+        Vector<int> testValues = values;
+        quicksort_by(testValues, 0, testValues.size() - 1, greater_than);
+        CHECK(testValues == expectedDescending);
+    }
+
+    SECTION("heapsort_by sorts a vector in descending order with custom comparison")
+    {
+        Vector<int> testValues = values;
+        heapsort_by(testValues, greater_than);
+        CHECK(testValues == expectedDescending);
+    }
+
+    SECTION("insertion_sort_by sorts a vector in descending order with custom comparison")
+    {
+        Vector<int> testValues = values;
+        insertion_sort_by(testValues, greater_than);
+        CHECK(testValues == expectedDescending);
+    }
+
+    SECTION("introsort_by sorts a vector in descending order with custom comparison")
+    {
+        Vector<int> testValues = values;
+        introsort_by(testValues, greater_than);
+        CHECK(testValues == expectedDescending);
     }
 }
 
