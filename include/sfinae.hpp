@@ -35,6 +35,11 @@ namespace efp
         static constexpr bool value = false;
     };
 
+    template <typename T>
+    struct AlwaysFalse : False
+    {
+    };
+
     // EnableIfImpl
 
     template <bool cond, typename A = void>
@@ -446,6 +451,47 @@ namespace efp
     {
     };
 
+    namespace detail
+    {
+        template <class T>
+        struct TypeIdentity
+        {
+            using Type = T;
+        }; // or use std::TypeIdentity (since C++20)
+
+        template <class T> // Note that `cv void&` is a substitution failure
+        auto TryAddLvalueReference(int) -> TypeIdentity<T &>;
+        template <class T> // Handle T = cv void case
+        auto TryAddLvalueReference(...) -> TypeIdentity<T>;
+
+        template <class T>
+        auto TryAddRvalueReference(int) -> TypeIdentity<T &&>;
+        template <class T>
+        auto TryAddRvalueReference(...) -> TypeIdentity<T>;
+    } // namespace detail
+
+    // AddLvalueReference
+
+    template <class T>
+    struct AddLvalueReference
+        : decltype(detail::TryAddLvalueReference<T>(0))
+    {
+    };
+
+    // AddRvalueReference
+
+    template <class T>
+    struct AddRvalueReference
+        : decltype(detail::TryAddRvalueReference<T>(0))
+    {
+    };
+
+    template <typename T>
+    typename AddRvalueReference<T>::Type declval() noexcept
+    {
+        static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
+    }
+
     // CallReturnImpl;
 
     template <typename, typename...>
@@ -454,7 +500,7 @@ namespace efp
     template <typename F, typename... Args>
     struct CallReturnImpl
     {
-        using Type = decltype(std::declval<F>()(std::declval<Args>()...));
+        using Type = decltype(declval<F>()(declval<Args>()...));
     };
 
     template <typename F, typename... Args>
@@ -485,7 +531,7 @@ namespace efp
     {
     private:
         template <typename A>
-        static auto check(int) -> decltype(std::declval<A>()(std::declval<Args>()...), True());
+        static auto check(int) -> decltype(declval<A>()(declval<Args>()...), True());
 
         template <typename>
         static auto check(...) -> False;

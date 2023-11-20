@@ -245,11 +245,6 @@ namespace efp
     };
 
     template <typename T>
-    struct AlwaysFalse : False
-    {
-    };
-
-    template <typename T>
     struct TypeToFormat;
 
     template <>
