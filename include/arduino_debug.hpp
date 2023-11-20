@@ -4,31 +4,31 @@
 #include "prelude.hpp"
 
 template <typename A>
-void sprsize_tln(A &&x)
+void sprintln(A &&x)
 {
-    Serial.prsize_t(x);
-    Serial.prsize_tln();
+    Serial.print(x);
+    Serial.println();
 }
 
 template <typename A, typename... Args>
-void sprsize_tln(A &&h, Args &&...t)
+void sprintln(A &&h, Args &&...t)
 {
-    Serial.prsize_t(h);
-    Serial.prsize_t(" ");
-    sprsize_tln(t...);
+    Serial.print(h);
+    Serial.print(" ");
+    sprintln(t...);
 }
 
 template <typename A>
-void sprsize_tln_seq(A &&seq)
+void sprintln_seq(A &&seq)
 {
-    auto sprsize_tln_element = [](Element_t<A> x)
+    auto sprintln_element = [](Element_t<A> x)
     {
-        Serial.prsize_t(x);
-        Serial.prsize_t(" ");
+        Serial.print(x);
+        Serial.print(" ");
     };
 
-    for_each(sprsize_tln_element, seq);
-    Serial.prsize_tln();
+    for_each(sprintln_element, seq);
+    Serial.println();
 }
 
 #endif

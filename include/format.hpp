@@ -437,7 +437,7 @@ namespace efp
         using FormatBlock = typename OtherBrace::Before;
         using RestString = typename OtherBrace::After;
 
-        static_assert(!IsSame<Types, Nil>::value, "There are more {} than arguments to prsize_t");
+        static_assert(!IsSame<Types, Nil>::value, "There are more {} than arguments to print");
         using T = typename Types::Head;
         using FmtStr = FormatString<T, FormatBlock>;
 
@@ -474,7 +474,7 @@ namespace efp
         return CharsToString<CFmtStr>::string();                   \
     }()
 
-#define prsize_t(s, ...) prsize_tf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+#define print(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
 
     String format_(const char *format, ...)
     {
