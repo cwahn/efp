@@ -298,11 +298,11 @@ namespace efp
         uint8_t index_;
     };
 
-#define CASE(i)                                                                               \
-    case i:                                                                                   \
-    {                                                                                         \
+#define CASE(i)                                                                            \
+    case i:                                                                                \
+    {                                                                                      \
         return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
-        break;                                                                                \
+        break;                                                                             \
     }
 
 #define STAMP2(n, x) \
@@ -351,7 +351,6 @@ namespace efp
                 STAMP2(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -371,7 +370,6 @@ namespace efp
                 STAMP4(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -391,7 +389,6 @@ namespace efp
                 STAMP8(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -411,7 +408,6 @@ namespace efp
                 STAMP16(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -431,7 +427,6 @@ namespace efp
                 STAMP32(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -451,7 +446,6 @@ namespace efp
                 STAMP64(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -471,7 +465,6 @@ namespace efp
                 STAMP128(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -491,7 +484,6 @@ namespace efp
                 STAMP256(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
