@@ -20,8 +20,6 @@ namespace efp
             return nothing;
         }
 
-        // todo Support std::string path
-
         static Maybe<File> open(const String &path, const char *mode)
         {
             FILE *file = fopen(path.c_str(), mode);
@@ -151,11 +149,7 @@ namespace efp
             }
             else
             {
-                if (fputs(data.c_str(), file_) != EOF)
-                {
-                    return true;
-                }
-                return false;
+                return fputs(data.c_str(), file_) != EOF;
             }
         }
 
