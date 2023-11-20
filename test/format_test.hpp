@@ -55,27 +55,27 @@ TEST_CASE("Type sequences are correctly manipulated", "[format-sfinae]")
     SECTION("MakeTypeSeq creates correct type sequences")
     {
         using TestSeq = MakeTypeSeq<int, char, double>;
-        CHECK((std::is_same<TestSeq, TypeSeq<int, TypeSeq<char, TypeSeq<double, Nil>>>>::value));
+        CHECK((IsSame<TestSeq, TypeSeq<int, TypeSeq<char, TypeSeq<double, Nil>>>>::value));
     }
 
     SECTION("AppendTypeSeq appends types correctly")
     {
         using InitialSeq = MakeTypeSeq<int, char>;
         using AppendedSeq = AppendTypeSeq<InitialSeq, double>;
-        CHECK((std::is_same<AppendedSeq, TypeSeq<int, TypeSeq<char, TypeSeq<double, Nil>>>>::value));
+        CHECK((IsSame<AppendedSeq, TypeSeq<int, TypeSeq<char, TypeSeq<double, Nil>>>>::value));
     }
 
     SECTION("TypeSeqHead extracts the correct head type")
     {
         using Seq = MakeTypeSeq<int, char, double>;
-        CHECK((std::is_same<TypeSeqHead<Seq>::Type, int>::value));
+        CHECK((IsSame<TypeSeqHead<Seq>::Type, int>::value));
     }
 
     SECTION("TypeSeqTail extracts the correct tail type")
     {
         using Seq = MakeTypeSeq<int, char, double>;
         using Tail = TypeSeqTail<Seq>::Type;
-        CHECK((std::is_same<Tail, TypeSeq<char, TypeSeq<double, Nil>>>::value));
+        CHECK((IsSame<Tail, TypeSeq<char, TypeSeq<double, Nil>>>::value));
     }
 
     SECTION("ContainsTypeSeq checks for type containment")
@@ -89,10 +89,10 @@ TEST_CASE("Type sequences are correctly manipulated", "[format-sfinae]")
     {
         using Seq = MakeTypeSeq<int, char, double>;
         using RemovedSeq = RemoveTypeSeq<Seq, char>;
-        CHECK((std::is_same<RemovedSeq, TypeSeq<int, TypeSeq<double, Nil>>>::value));
+        CHECK((IsSame<RemovedSeq, TypeSeq<int, TypeSeq<double, Nil>>>::value));
     }
 
-    SECTION("IsIntegralType identifies integral types")
+    SECTION("IsIntegralType identifies size_tegral types")
     {
         CHECK(IsIntegeralType<int>::value);
         CHECK_FALSE(IsIntegeralType<float>::value);
@@ -106,8 +106,8 @@ TEST_CASE("Type sequences are correctly manipulated", "[format-sfinae]")
 
     SECTION("TypeToFormat maps types to format specifiers")
     {
-        CHECK((std::is_same<TypeToFormat<int>::Type, Chars<'d'>>::value));
-        CHECK((std::is_same<TypeToFormat<float>::Type, Chars<'f'>>::value));
+        CHECK((IsSame<TypeToFormat<int>::Type, Chars<'d'>>::value));
+        CHECK((IsSame<TypeToFormat<float>::Type, Chars<'f'>>::value));
     }
 }
 

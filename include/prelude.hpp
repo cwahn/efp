@@ -97,11 +97,11 @@ namespace efp
     // append
 
     template <typename A, typename B>
-    Unit append_impl(int &idx, Seq<A> &result, const Seq<B> &seq)
+    Unit append_impl(size_t &idx, Seq<A> &result, const Seq<B> &seq)
     {
         const auto seq_length = length(seq);
 
-        for (int i = 0; i < seq_length; ++i)
+        for (size_t i = 0; i < seq_length; ++i)
         {
             result[idx] = seq[i];
             idx++;
@@ -121,7 +121,7 @@ namespace efp
             result.resize(sum_v(static_cast<int>(length(head)), length(tail)...));
         }
 
-        int idx{0};
+        size_t idx{0};
         execute_pack(append_impl(idx, result, head),
                      append_impl(idx, result, tail)...);
 
@@ -131,7 +131,7 @@ namespace efp
     // min_length
 
     template <typename A, typename... Ts>
-    int min_length(const Seq<A> &as, const Seq<Ts> &...seqs)
+    size_t min_length(const Seq<A> &as, const Seq<Ts> &...seqs)
     {
         return minimum_v(static_cast<int>(length(as)), length(seqs)...);
     }
@@ -141,9 +141,9 @@ namespace efp
     template <typename... As, typename F = void (*)(const Element<As> &...)>
     void for_each(const F &f, const Seq<As> &...seqs)
     {
-        const int seq_length = min_length(seqs...);
+        const size_t seq_length = min_length(seqs...);
 
-        for (int i = 0; i < seq_length; ++i)
+        for (size_t i = 0; i < seq_length; ++i)
         {
             f(seqs[i]...);
         }
@@ -154,9 +154,9 @@ namespace efp
     template <typename... As, typename F = void (*)(Element<As> &...)>
     void for_eachi(const F &f, Seq<As> &...seqs)
     {
-        const int seq_length = min_length(seqs...);
+        const size_t seq_length = min_length(seqs...);
 
-        for (int i = 0; i < seq_length; ++i)
+        for (size_t i = 0; i < seq_length; ++i)
         {
             f(seqs[i]...);
         }
@@ -182,13 +182,13 @@ namespace efp
         -> MapReturn<F, As...>
     {
         MapReturn<F, As...> result{};
-        const int bounded_n = min_length(seqs...);
+        const size_t bounded_n = min_length(seqs...);
         if (MapReturn<F, As...>::ct_len == dyn)
         {
             result.resize(bounded_n);
         }
 
-        for (int i = 0; i < bounded_n; ++i)
+        for (size_t i = 0; i < bounded_n; ++i)
         {
             result[i] = f(seqs[i]...);
         }
@@ -210,7 +210,7 @@ namespace efp
         FilterReturn<F, A> result{};
         const auto input_length = length(as);
 
-        for (int i = 0; i < input_length; ++i)
+        for (size_t i = 0; i < input_length; ++i)
         {
             const auto a = as[i];
             if (f(a))
@@ -229,7 +229,7 @@ namespace efp
     {
         R result = init;
 
-        for (int i = 0; i < length(as); ++i)
+        for (size_t i = 0; i < length(as); ++i)
         {
             result = f(result, as[i]);
         }
@@ -244,7 +244,7 @@ namespace efp
     {
         R result = init;
 
-        for (int i = length(as) - 1; i > -1; --i)
+        for (size_t i = length(as) - 1; i != -1; --i)
         {
             result = f(as[i], result);
         }
@@ -288,7 +288,7 @@ namespace efp
             result.resize(length);
         }
 
-        for (int i = 0; i < length; ++i)
+        for (size_t i = 0; i < length; ++i)
         {
             result[i] = f(i);
         }
@@ -298,10 +298,10 @@ namespace efp
 
     // for_index
 
-    template <typename F = void (*)(const int &)>
-    void for_index(const F &f, const int i)
+    template <typename F = void (*)(const size_t &)>
+    void for_index(const F &f, const size_t i)
     {
-        for (int j = 0; j < i; ++j)
+        for (size_t j = 0; j < i; ++j)
         {
             f(j);
         }
@@ -309,12 +309,12 @@ namespace efp
 
     // for_each_with_index
 
-    template <typename... Ts, typename F = void (*)(const int &, const Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(const size_t &, const Element<Ts> &...)>
     void for_each_with_index(const F &f, const Seq<Ts> &...seqs)
     {
         const auto min_length_ = min_length(seqs...);
 
-        for (int i = 0; i < min_length_; ++i)
+        for (size_t i = 0; i < min_length_; ++i)
         {
             f(i, seqs[i]...);
         }
@@ -322,12 +322,12 @@ namespace efp
 
     // for_each_with_indexi
 
-    template <typename... Ts, typename F = void (*)(const int &, Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(const size_t &, Element<Ts> &...)>
     void for_each_with_indexi(const F &f, Seq<Ts> &...seqs)
     {
-        const int min_length_ = min_length(seqs...);
+        const size_t min_length_ = min_length(seqs...);
 
-        for (int i = 0; i < min_length_; ++i)
+        for (size_t i = 0; i < min_length_; ++i)
         {
             f(i, seqs[i]...);
         }
@@ -346,7 +346,7 @@ namespace efp
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             const auto a = as[i];
             const auto inner = [&](Element<Ts>... xs)
@@ -369,7 +369,7 @@ namespace efp
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             const auto a = as[i];
             const auto inner = [&](Element<Ts>... xs)
@@ -389,7 +389,7 @@ namespace efp
 
     // map_with_index
 
-    template <typename... Ts, typename F = void (*)(const int &, const Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(const size_t &, const Element<Ts> &...)>
     auto map_with_index(const F &f, const Seq<Ts> &...seqs)
         -> MapWithIndexRetrun<F, Ts...>
     {
@@ -401,7 +401,7 @@ namespace efp
             result.resize(bounded_n);
         }
 
-        for (int i = 0; i < bounded_n; ++i)
+        for (size_t i = 0; i < bounded_n; ++i)
         {
             result[i] = f(i, seqs[i]...);
         }
@@ -430,7 +430,7 @@ namespace efp
             result.resize(product_v(static_cast<int>(length(seqs))...));
         }
 
-        int i = 0;
+        size_t i = 0;
         const auto inner = [&](Element<Ts>... xs)
         { result[i++] = f(xs...); };
 
@@ -441,16 +441,16 @@ namespace efp
 
     // cartesian_for_index
 
-    template <typename F = void (*)(const int &)>
-    void cartesian_for_index(const F &f, const int &i)
+    template <typename F = void (*)(const size_t &)>
+    void cartesian_for_index(const F &f, const size_t &i)
     {
         for_index(f, i);
     }
 
-    template <typename... Ints, typename F = void (*)(const int &)>
-    void cartesian_for_index(const F &f, const int &i, const Ints &...is)
+    template <typename... Ints, typename F = void (*)(const size_t &)>
+    void cartesian_for_index(const F &f, const size_t &i, const Ints &...is)
     {
-        for (int i_ = 0; i_ < i; ++i_)
+        for (size_t i_ = 0; i_ < i; ++i_)
         {
             const auto inner = [&](const Ints &...is)
             { f(i_, is...); };
@@ -776,7 +776,7 @@ namespace efp
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (as[i] == a)
             {
@@ -790,11 +790,11 @@ namespace efp
     // elem_index
 
     template <typename A>
-    Maybe<int> elem_index(const Element<A> &a, const Seq<A> &as)
+    Maybe<size_t> elem_index(const Element<A> &a, const Seq<A> &as)
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (as[i] == a)
             {
@@ -822,7 +822,7 @@ namespace efp
         ElemIndicesReturn<A> result{};
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (a == as[i])
             {
@@ -840,7 +840,7 @@ namespace efp
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
             {
@@ -855,11 +855,11 @@ namespace efp
 
     template <typename A, typename F = void (*)(const Element<A> &)>
     auto find_index(const F &f, const Seq<A> &as)
-        -> Maybe<int>
+        -> Maybe<size_t>
     {
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
             {
@@ -887,7 +887,7 @@ namespace efp
         FindIndicesReturn<A> result{};
         const auto as_length = length(as);
 
-        for (int i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
             {

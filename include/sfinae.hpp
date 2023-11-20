@@ -35,6 +35,11 @@ namespace efp
         static constexpr bool value = false;
     };
 
+    template <typename T>
+    struct AlwaysFalse : False
+    {
+    };
+
     // EnableIfImpl
 
     template <bool cond, typename A = void>
@@ -81,7 +86,7 @@ namespace efp
     constexpr auto size_of_ptr_v = sizeof(void *);
 
     // ConstParam_t
-    // Pass by value if the size of type is leq to machine pointer size.
+    // Pass by value if the size of type is leq to machine posize_ter size.
 
     // template <typename A>
     // using ConstParam_t = Conditional<
@@ -425,12 +430,12 @@ namespace efp
 
     // FindHelper
 
-    template <size_t n, template <class> class P, typename... Args>
+    template <int n, template <class> class P, typename... Args>
     struct FindHelper
     {
     };
 
-    template <size_t n, template <class> class P, typename Head, typename... Tail>
+    template <int n, template <class> class P, typename Head, typename... Tail>
     struct FindHelper<n, P, Head, Tail...>
         : Conditional<
               P<Head>::value,
@@ -446,6 +451,47 @@ namespace efp
     {
     };
 
+    namespace detail
+    {
+        template <class T>
+        struct TypeIdentity
+        {
+            using Type = T;
+        }; // or use std::TypeIdentity (since C++20)
+
+        template <class T> // Note that `cv void&` is a substitution failure
+        auto TryAddLvalueReference(int) -> TypeIdentity<T &>;
+        template <class T> // Handle T = cv void case
+        auto TryAddLvalueReference(...) -> TypeIdentity<T>;
+
+        template <class T>
+        auto TryAddRvalueReference(int) -> TypeIdentity<T &&>;
+        template <class T>
+        auto TryAddRvalueReference(...) -> TypeIdentity<T>;
+    } // namespace detail
+
+    // AddLvalueReference
+
+    template <class T>
+    struct AddLvalueReference
+        : decltype(detail::TryAddLvalueReference<T>(0))
+    {
+    };
+
+    // AddRvalueReference
+
+    template <class T>
+    struct AddRvalueReference
+        : decltype(detail::TryAddRvalueReference<T>(0))
+    {
+    };
+
+    template <typename T>
+    typename AddRvalueReference<T>::Type declval() noexcept
+    {
+        static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
+    }
+
     // CallReturnImpl;
 
     template <typename, typename...>
@@ -454,7 +500,7 @@ namespace efp
     template <typename F, typename... Args>
     struct CallReturnImpl
     {
-        using Type = decltype(std::declval<F>()(std::declval<Args>()...));
+        using Type = decltype(declval<F>()(declval<Args>()...));
     };
 
     template <typename F, typename... Args>
@@ -485,7 +531,7 @@ namespace efp
     {
     private:
         template <typename A>
-        static auto check(int) -> decltype(std::declval<A>()(std::declval<Args>()...), True());
+        static auto check(int) -> decltype(declval<A>()(declval<Args>()...), True());
 
         template <typename>
         static auto check(...) -> False;
@@ -765,14 +811,14 @@ namespace efp
     {
     };
 
-    // Specialization for function pointers
+    // Specialization for function posize_ters
     template <typename R, typename... Args>
     struct FunctionReturnImpl<R (*)(Args...)>
     {
         using Type = R;
     };
 
-    // Specialization for member function pointers
+    // Specialization for member function posize_ters
     template <typename R, typename C, typename... Args>
     struct FunctionReturnImpl<R (C::*)(Args...)>
     {
@@ -785,7 +831,7 @@ namespace efp
         using Type = R;
     };
 
-    // Specialization for member function pointers with const qualifier
+    // Specialization for member function posize_ters with const qualifier
     template <typename R, typename C, typename... Args>
     struct FunctionReturnImpl<R (C::*)(Args...) const>
     {
@@ -798,7 +844,7 @@ namespace efp
         using Type = R;
     };
 
-    // Specialization for member function pointers with volatile qualifier
+    // Specialization for member function posize_ters with volatile qualifier
     template <typename R, typename C, typename... Args>
     struct FunctionReturnImpl<R (C::*)(Args...) volatile>
     {
@@ -811,7 +857,7 @@ namespace efp
         using Type = R;
     };
 
-    // Specialization for member function pointers with const volatile qualifier
+    // Specialization for member function posize_ters with const volatile qualifier
     template <typename R, typename C, typename... Args>
     struct FunctionReturnImpl<R (C::*)(Args...) const volatile>
     {
@@ -864,24 +910,24 @@ namespace efp
         return apply_impl(f, tpl, IndexSequenceFor<As...>{});
     }
 
-    // PointerRemovedImpl
+    // Posize_terRemovedImpl
 
     template <typename A>
-    struct PointerRemovedImpl
+    struct Posize_terRemovedImpl
     {
         using Type = A;
     };
 
     template <typename A>
-    struct PointerRemovedImpl<A *>
+    struct Posize_terRemovedImpl<A *>
     {
         using Type = A;
     };
 
-    // PointerRemoved
+    // Posize_terRemoved
 
     template <typename A>
-    using PointerRemoved = typename PointerRemovedImpl<A>::Type;
+    using Posize_terRemoved = typename Posize_terRemovedImpl<A>::Type;
 
     // ReferenceRemovedImpl
 

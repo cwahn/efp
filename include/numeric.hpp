@@ -123,25 +123,25 @@ namespace efp
     template <typename A>
     constexpr A sqrt(const A &a)
     {
-        return std::sqrt(a);
+        return ::sqrt(a);
     }
 
     template <typename A>
     constexpr A sin(const A &a)
     {
-        return std::sin(a);
+        return ::sin(a);
     }
 
     template <typename A>
     constexpr A cos(const A &a)
     {
-        return std::cos(a);
+        return ::cos(a);
     }
 
     template <typename A>
     constexpr A tan(const A &a)
     {
-        return std::tan(a);
+        return ::tan(a);
     }
 
     template <typename A>

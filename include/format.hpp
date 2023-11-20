@@ -158,12 +158,12 @@ namespace efp
     template <typename TypeSeq, typename T, typename Ts>
     using SubstituteTypeSeq = typename SubstituteTypeSeqImpl<TypeSeq, T, Ts>::Type;
 
-    // Define a typelist of integer types
+    // Define a typelist of size_teger types
     using IntegeralTypes = MakeTypeSeq<
         char, signed char, int, long, long long,
         unsigned char, unsigned, unsigned long, unsigned long long>;
 
-    // IsIntegeralType checks if a type T is in the list of integer types
+    // IsIntegeralType checks if a type T is in the list of size_teger types
     template <typename T>
     struct IsIntegeralType
     {
@@ -198,14 +198,14 @@ namespace efp
     //  StringToChars
 
     // StringToCharsImpl converts a compile-time string to a type list of Char types
-    template <typename Str, size_t pos, char c>
+    template <typename Str, int pos, char c>
     struct StringToCharsImpl
     {
         using Tail = typename StringToCharsImpl<Str, pos + 1, Str::string()[pos + 1]>::Type;
         using Type = TypeSeq<Char<c>, Tail>;
     };
 
-    template <typename Str, size_t pos>
+    template <typename Str, int pos>
     struct StringToCharsImpl<Str, pos, '\0'>
     {
         using Type = Nil;
@@ -242,11 +242,6 @@ namespace efp
             static const char string[] = {cs..., '\0'};
             return string;
         }
-    };
-
-    template <typename T>
-    struct AlwaysFalse : False
-    {
     };
 
     template <typename T>
@@ -344,15 +339,15 @@ namespace efp
 
         static constexpr bool is_s_fmt = ContainsTypeSeq<FL, Char<'s'>>::value;
         static constexpr bool is_string =
-            IsSame<char, CVRemoved<PointerRemoved<RawType>>>::value;
+            IsSame<char, CVRemoved<Posize_terRemoved<RawType>>>::value;
 
-        static constexpr bool is_int = IsIntegeralType<RawType>::value;
+        static constexpr bool is_size_t = IsIntegeralType<RawType>::value;
         static constexpr bool is_x_fmt = ContainsTypeSeq<FL, Char<'x'>>::value;
 
         using RawFormat = typename TypeToFormat<T>::Type;
 
         using UIntXFormat = Conditional<
-            is_int && is_x_fmt,
+            is_size_t && is_x_fmt,
             SubstituteTypeSeq<
                 SubstituteTypeSeq<RawFormat, Char<'d'>, Char<'x'>>,
                 Char<'u'>, Char<'x'>>,
@@ -373,7 +368,7 @@ namespace efp
     template <typename T, typename FL>
     using FormatString = typename FormatStringImpl<T, FL>::Type;
 
-    template <class InList, class OutList, size_t Counter>
+    template <class InList, class OutList, int Counter>
     struct FindBrace;
 
     // Specialization for finding the closing brace
@@ -385,7 +380,7 @@ namespace efp
     };
 
     // General case: iterating through the list
-    template <char C, class InList, class OutList, size_t N>
+    template <char C, class InList, class OutList, int N>
     struct FindBrace<TypeSeq<Char<C>, InList>, OutList, N>
         : public FindBrace<InList, AppendTypeSeq<OutList, Char<C>>, N>
     {
@@ -393,7 +388,7 @@ namespace efp
     };
 
     // Error case: missing closing brace
-    template <class OutList, size_t N>
+    template <class OutList, int N>
     struct FindBrace<Nil, OutList, N>
     {
         static_assert(N + 1 == N, "Missing } after {.");

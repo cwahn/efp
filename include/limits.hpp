@@ -2,6 +2,7 @@
 #define NUMERTIC_LIMIT_HPP
 
 #include "cpp_core.hpp"
+#include <limits.h>
 
 namespace efp
 {
@@ -47,13 +48,13 @@ namespace efp
         static constexpr unsigned char epsilon() { return 0; };
     };
 
-    template <>
-    struct NumericLimits<wchar_t>
-    {
-        static constexpr wchar_t min() { return WCHAR_MIN; };
-        static constexpr wchar_t max() { return WCHAR_MAX; };
-        static constexpr wchar_t epsilon() { return 0; };
-    };
+    // template <>
+    // struct NumericLimits<wchar_t>
+    // {
+    //     static constexpr wchar_t min() { return WCHAR_MIN; };
+    //     static constexpr wchar_t max() { return WCHAR_MAX; };
+    //     static constexpr wchar_t epsilon() { return 0; };
+    // };
 
     // template <>
     // struct NumericLimits<char8_t>
@@ -63,21 +64,21 @@ namespace efp
     //     static constexpr char8_t epsilon() { return 0; };
     // };
 
-    template <>
-    struct NumericLimits<char16_t>
-    {
-        static constexpr char16_t min() { return 0; };
-        static constexpr char16_t max() { return UINT_LEAST16_MAX; };
-        static constexpr char16_t epsilon() { return 0; };
-    };
+    // template <>
+    // struct NumericLimits<char16_t>
+    // {
+    //     static constexpr char16_t min() { return 0; };
+    //     static constexpr char16_t max() { return UINT_LEAST16_MAX; };
+    //     static constexpr char16_t epsilon() { return 0; };
+    // };
 
-    template <>
-    struct NumericLimits<char32_t>
-    {
-        static constexpr char32_t min() { return 0; };
-        static constexpr char32_t max() { return UINT_LEAST32_MAX; };
-        static constexpr char32_t epsilon() { return 0; };
-    };
+    // template <>
+    // struct NumericLimits<char32_t>
+    // {
+    //     static constexpr char32_t min() { return 0; };
+    //     static constexpr char32_t max() { return UINT_LEAST32_MAX; };
+    //     static constexpr char32_t epsilon() { return 0; };
+    // };
 
     template <>
     struct NumericLimits<short>

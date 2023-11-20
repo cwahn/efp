@@ -182,8 +182,10 @@ TEST_CASE("for_index")
     CHECK(res == 0);
     for_index(add_to_res, 3);
     CHECK(res == 3);
-    for_index(add_to_res, -1);
-    CHECK(res == 3);
+
+    // ! Should not do this
+    // for_index(add_to_res, );
+    // CHECK(res == 3);
 }
 
 TEST_CASE("for_each_with_index")

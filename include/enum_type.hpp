@@ -108,7 +108,7 @@ namespace efp
             template <typename B>
             struct Binded
             {
-                static const bool value = std::is_same<A, B>::value;
+                static const bool value = IsSame<A, B>::value;
             };
         };
 
@@ -351,7 +351,6 @@ namespace efp
                 STAMP2(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -371,7 +370,6 @@ namespace efp
                 STAMP4(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -391,7 +389,6 @@ namespace efp
                 STAMP8(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -411,7 +408,6 @@ namespace efp
                 STAMP16(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -431,7 +427,6 @@ namespace efp
                 STAMP32(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -451,7 +446,6 @@ namespace efp
                 STAMP64(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -471,7 +465,6 @@ namespace efp
                 STAMP128(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }
@@ -491,7 +484,6 @@ namespace efp
                 STAMP256(0, CASE)
 
             default:
-                // assert(0);
                 abort();
             }
         }

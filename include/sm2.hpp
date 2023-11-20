@@ -6,7 +6,7 @@
 namespace efp
 {
     // I found no good reason to make state external.
-    // Make state internal and think state machine as state with extra function.
+    // Make state size_ternal and think state machine as state with extra function.
     // State machine will holds sub-state machine as member variable.
 
     template <typename Derived>
@@ -77,7 +77,7 @@ namespace efp
     template <typename F, typename I = Arguments<F>>
     class Pure;
 
-    // Specialization for regular function pointers
+    // Specialization for regular function posize_ters
     // template <typename Ret, typename... Is>
     // class Pure<Ret (*)(Is...)> : public Sm<Pure<Ret (*)(Is...)>>
     // {
@@ -143,10 +143,10 @@ namespace efp
 
     // Compose
 
-    // ? Does it needs to have input pointer? No it doesn't have to
-    // ? What should be in the update function? Nothing if the f and g already have pointers of there sources.
+    // ? Does it needs to have input posize_ter? No it doesn't have to
+    // ? What should be in the update function? Nothing if the f and g already have posize_ters of there sources.
     // Which means it does not need to do anything on update but calling update of _f and _g
-    // Why don't we just make it to hold the pointers of input sms so that it can use it any time.
+    // Why don't we just make it to hold the posize_ters of input sms so that it can use it any time.
     // So what should unit sm should holds?
     //
 

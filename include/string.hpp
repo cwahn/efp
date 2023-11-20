@@ -72,7 +72,7 @@ namespace efp
                 data_ = new char[capacity_];
 
                 // memcpy(data_, other.data_, sizeof(char) * size_);
-                for (int i = 0; i < other.size_; ++i)
+                for (size_t i = 0; i < other.size_; ++i)
                 {
                     new (&data_[i]) char(other.data_[i]);
                 }
@@ -125,7 +125,7 @@ namespace efp
                 {
                     newData = new char[other.capacity_];
 
-                    for (int i = 0; i < other.size_; ++i)
+                    for (size_t i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
@@ -164,7 +164,7 @@ namespace efp
                 {
                     newData = new char[other.capacity_];
 
-                    for (int i = 0; i < other.size_; ++i)
+                    for (size_t i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
@@ -194,7 +194,7 @@ namespace efp
                 return false;
             }
 
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -236,7 +236,7 @@ namespace efp
             {
                 char *new_data = new char[new_capacity];
 
-                for (int i = 0; i < size_; ++i)
+                for (size_t i = 0; i < size_; ++i)
                 {
                     new_data[i] = data_[i];
                 }
@@ -277,7 +277,7 @@ namespace efp
                 abort();
             }
 
-            for (int i = index; i < size_ - 1; ++i)
+            for (size_t i = index; i < size_ - 1; ++i)
             {
                 new (&data_[i]) char(efp::move(data_[i + 1]));
             }

@@ -18,44 +18,44 @@ double *fpt_function1(const int x0, float &x1)
     return nullptr;
 }
 
-TEST_CASE("FunctionPointerType")
+TEST_CASE("FunctionPosize_terType")
 {
     auto fpt_lambda0 = [](int x0, float x1)
     { return x1 + x0; };
     auto fpt_lambda1 = [](const int x0, float &x1)
     { return x0 + x1; };
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float &&),
-              FunctionPointerType<decltype(&fpt_function0)>>::value == true);
+              FunctionPosize_terType<decltype(&fpt_function0)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float),
-              FunctionPointerType<decltype(&fpt_function0)>>::value == false);
+              FunctionPosize_terType<decltype(&fpt_function0)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double *(*)(int, float &),
-              FunctionPointerType<decltype(&fpt_function1)>>::value == true);
+              FunctionPosize_terType<decltype(&fpt_function1)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double *(*)(int, float),
-              FunctionPointerType<decltype(&fpt_function1)>>::value == false);
+              FunctionPosize_terType<decltype(&fpt_function1)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float),
-              FunctionPointerType<decltype(fpt_lambda0)>>::value == true);
+              FunctionPosize_terType<decltype(fpt_lambda0)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float),
-              FunctionPointerType<decltype(fpt_lambda0)>>::value == false);
+              FunctionPosize_terType<decltype(fpt_lambda0)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float &),
-              FunctionPointerType<decltype(fpt_lambda1)>>::value == true);
+              FunctionPosize_terType<decltype(fpt_lambda1)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float),
-              FunctionPointerType<decltype(fpt_lambda1)>>::value == false);
+              FunctionPosize_terType<decltype(fpt_lambda1)>>::value == false);
 }
 
 static void (*inner_function1)() = nullptr;
