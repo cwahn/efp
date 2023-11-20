@@ -111,12 +111,12 @@ namespace efp
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_length;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence()
         {
-            for (int i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_len; ++i)
             {
                 new (&data_[i]) A();
             }
@@ -124,7 +124,7 @@ namespace efp
 
         Sequence(const Sequence &other)
         {
-            for (int i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_len; ++i)
             {
                 new (&data_[i]) A(other.data_[i]);
             }
@@ -132,7 +132,7 @@ namespace efp
 
         Sequence(Sequence &&other) noexcept
         {
-            for (int i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_len; ++i)
             {
                 new (&data_[i]) A(efp::move(other.data_[i])); // Move-construct each element
             }
@@ -148,7 +148,7 @@ namespace efp
         {
             if (this != &other)
             {
-                for (int i = 0; i < ct_len; ++i)
+                for (size_t i = 0; i < ct_len; ++i)
                 {
                     data_[i] = other.data_[i]; // Use assignment for each element
                 }
@@ -160,7 +160,7 @@ namespace efp
         {
             if (this != &other)
             {
-                for (int i = 0; i < ct_len; ++i)
+                for (size_t i = 0; i < ct_len; ++i)
                 {
                     data_[i] = other.data_[i]; // Use assignment for each element
                 }
@@ -180,7 +180,7 @@ namespace efp
 
         bool operator==(const Sequence &other) const
         {
-            for (int i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_len; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -268,14 +268,14 @@ namespace efp
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = ct_capacity;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : size_{0} {}
 
         Sequence(const Sequence &other) : size_{other.size_}
         {
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 new (&data_[i]) A(other.data_[i]);
             }
@@ -284,7 +284,7 @@ namespace efp
         Sequence(Sequence &&other) : size_{other.size_}
         {
             other.size_ = 0;
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 data_[i] = efp::move(other.data_[i]);
             }
@@ -302,7 +302,7 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                for (int i = 0; i < size_; ++i)
+                for (size_t i = 0; i < size_; ++i)
                 {
                     data_[i] = other.data_[i];
                 }
@@ -315,7 +315,7 @@ namespace efp
             if (this != &other)
             {
                 resize(other.size());
-                for (int i = 0; i < size_; ++i)
+                for (size_t i = 0; i < size_; ++i)
                 {
                     data_[i] = other.data_[i];
                 }
@@ -325,7 +325,7 @@ namespace efp
 
         ~Sequence()
         {
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 data_[i].~A();
             }
@@ -348,7 +348,7 @@ namespace efp
                 return false;
             }
 
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -420,7 +420,7 @@ namespace efp
                 abort();
             }
 
-            for (int i = size_; i > index; --i)
+            for (size_t i = size_; i > index; --i)
             {
                 new (&data_[i]) A(efp::move(data_[i - 1]));
                 data_[i - 1].~A();
@@ -444,7 +444,7 @@ namespace efp
 
         void clear()
         {
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 data_[i].~A();
             }
@@ -458,7 +458,7 @@ namespace efp
                 abort();
             }
             data_[index].~A();
-            for (int i = index; i < size_ - 1; ++i)
+            for (size_t i = index; i < size_ - 1; ++i)
             {
                 new (&data_[i]) A(efp::move(data_[i + 1]));
                 data_[i + 1].~A();
@@ -533,7 +533,7 @@ namespace efp
                 data_ = new A[capacity_];
 
                 // memcpy(data_, other.data_, sizeof(A) * size_);
-                for (int i = 0; i < other.size_; ++i)
+                for (size_t i = 0; i < other.size_; ++i)
                 {
                     new (&data_[i]) A(other.data_[i]);
                 }
@@ -576,7 +576,7 @@ namespace efp
                 {
                     newData = new A[other.capacity_];
 
-                    for (int i = 0; i < other.size_; ++i)
+                    for (size_t i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
@@ -615,7 +615,7 @@ namespace efp
                 {
                     newData = new A[other.capacity_];
 
-                    for (int i = 0; i < other.size_; ++i)
+                    for (size_t i = 0; i < other.size_; ++i)
                     {
                         newData[i] = other.data_[i];
                     }
@@ -645,7 +645,7 @@ namespace efp
                 return false;
             }
 
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -687,7 +687,7 @@ namespace efp
             {
                 A *new_data = new A[new_capacity];
 
-                for (int i = 0; i < size_; ++i)
+                for (size_t i = 0; i < size_; ++i)
                 {
                     new (&new_data[i]) A(efp::move(data_[i]));
                     data_[i].~A();
@@ -732,7 +732,7 @@ namespace efp
             {
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
-            for (int i = size_; i > index; --i)
+            for (size_t i = size_; i > index; --i)
             {
                 data_[i] = efp::move(data_[i - 1]);
             }
@@ -748,7 +748,7 @@ namespace efp
             }
 
             data_[index].~A();
-            for (int i = index; i < size_ - 1; ++i)
+            for (size_t i = index; i < size_ - 1; ++i)
             {
                 new (&data_[i]) A(efp::move(data_[i + 1]));
                 data_[i + 1].~A();
@@ -759,7 +759,7 @@ namespace efp
 
         void clear()
         {
-            for (int i = 0; i < size_; ++i)
+            for (size_t i = 0; i < size_; ++i)
             {
                 data_[i].~A();
             }
@@ -844,7 +844,7 @@ namespace efp
         static constexpr int ct_len = ct_length;
         static constexpr int ct_cap = ct_length;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
         // SequenceView() : data_{nullptr} {}
         // // SequenceView(const SequenceView &) {}
@@ -885,7 +885,7 @@ namespace efp
 
         // Rule of five: if you define one of the destructor, copy constructor,
         // copy assignment operator, move constructor, or move assignment operator,
-        // you should define all of them. Here, the default behavior is intended.
+        // you should define all of them. Here, the default behavior is size_tended.
 
         SequenceView(const SequenceView &) = default;
         SequenceView(SequenceView &&) noexcept = default;
@@ -985,8 +985,8 @@ namespace efp
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = ct_capacity;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         SequenceView() : data_{nullptr}, size_{0} {}
         // SequenceView(const SequenceView &) {}
@@ -1260,7 +1260,7 @@ namespace efp
     std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
-        for (int i = 0; i < seq.size(); ++i)
+        for (size_t i = 0; i < seq.size(); ++i)
         {
             os << seq[i];
             if (i != seq.size() - 1)
@@ -1276,7 +1276,7 @@ namespace efp
     std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
     {
         os << "{ ";
-        for (int i = 0; i < seq.size(); ++i)
+        for (size_t i = 0; i < seq.size(); ++i)
         {
             os << seq[i];
             if (i != seq.size() - 1)

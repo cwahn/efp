@@ -298,11 +298,11 @@ namespace efp
         uint8_t index_;
     };
 
-#define CASE(i)                                                                            \
-    case i:                                                                                \
-    {                                                                                      \
+#define CASE(i)                                                                               \
+    case i:                                                                                   \
+    {                                                                                         \
         return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
-        break;                                                                             \
+        break;                                                                                \
     }
 
 #define STAMP2(n, x) \

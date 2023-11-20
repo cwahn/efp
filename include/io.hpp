@@ -115,7 +115,7 @@ namespace efp
                 {
                     length = strlen(data);
                 }
-                size_t written = fwrite(data, sizeof(char), length, file_);
+                int written = fwrite(data, sizeof(char), length, file_);
                 return written == length;
             }
             else
@@ -146,7 +146,7 @@ namespace efp
             if (strchr(mode_, 'b'))
             {
                 // Write binary data
-                size_t written = fwrite(data.data(), sizeof(char), data.size(), file_);
+                int written = fwrite(data.data(), sizeof(char), data.size(), file_);
                 return written == data.size();
             }
             else

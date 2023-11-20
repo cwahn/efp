@@ -9,10 +9,10 @@ using namespace efp;
 
 int main()
 {
-    print("Hello, world!\n");
+    prsize_t("Hello, world!\n");
     const int a = 42;
-    print("a: {}\n", a);
-    print("s: {s}\n", "This is string");
+    prsize_t("a: {}\n", a);
+    prsize_t("s: {s}\n", "This is string");
 
     const String str0 = "This is 42";
     std::cout << str0 << std::endl;

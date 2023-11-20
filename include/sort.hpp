@@ -18,20 +18,20 @@ namespace efp
 
     // Merge function for merge sort
     template <typename A, typename F>
-    void merge(Vector<A> &arr, int left, int middle, int right, const F &comp)
+    void merge(Vector<A> &arr, size_t left, size_t middle, size_t right, const F &comp)
     {
-        int n1 = middle - left + 1;
-        int n2 = right - middle;
+        size_t n1 = middle - left + 1;
+        size_t n2 = right - middle;
 
         Vector<A> lefts, rights;
 
-        for (int i = 0; i < n1; i++)
+        for (size_t i = 0; i < n1; i++)
             lefts.push_back(arr[left + i]);
 
-        for (int j = 0; j < n2; j++)
+        for (size_t j = 0; j < n2; j++)
             rights.push_back(arr[middle + 1 + j]);
 
-        int i = 0, j = 0, k = left;
+        size_t i = 0, j = 0, k = left;
         while (i < n1 && j < n2)
         {
             if (comp(lefts[i], rights[j]))
@@ -54,11 +54,11 @@ namespace efp
 
     // Merge sort using a comparison function
     template <typename A, typename F>
-    void merge_sort_by(Vector<A> &arr, int left, int right, const F &comp)
+    void merge_sort_by(Vector<A> &arr, size_t left, size_t right, const F &comp)
     {
         if (left < right)
         {
-            int middle = left + (right - left) / 2;
+            size_t middle = left + (right - left) / 2;
             merge_sort_by(arr, left, middle, comp);
             merge_sort_by(arr, middle + 1, right, comp);
             merge(arr, left, middle, right, comp);
@@ -68,11 +68,11 @@ namespace efp
     // Function to create a max heap using a comparison function
 
     template <typename A, typename F = bool (*)(const A &, const A &)>
-    void max_heapify_by(Vector<A> &arr, int n, int i, const F &comp)
+    void max_heapify_by(Vector<A> &arr, size_t n, size_t i, const F &comp)
     {
-        int largest = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
+        size_t largest = i;
+        size_t left = 2 * i + 1;
+        size_t right = 2 * i + 2;
 
         if (left < n && comp(arr[largest], arr[left]))
             largest = left;
@@ -92,33 +92,33 @@ namespace efp
     template <typename A, typename F = bool (*)(const A &, const A &)>
     void heapsort_by(Vector<A> &arr, const F &comp)
     {
-        int n = arr.size();
-        for (int i = n / 2 - 1; i >= 0; i--)
+        size_t n = arr.size();
+        for (size_t i = n / 2 - 1; i != -1; i--)
         {
             max_heapify_by(arr, n, i, comp);
         }
-        for (int i = n - 1; i >= 0; i--)
+        for (size_t i = n - 1; i != -1; i--)
         {
             swap(arr[0], arr[i]);
             max_heapify_by(arr, i, 0, comp);
         }
     }
 
-    // More specific insertion sort that sorts part of the vector from `left` to `right`
     template <typename A, typename F>
-    void insertion_sort_by_(Vector<A> &arr, int left, int right, const F &comp)
+    void insertion_sort_by_(Vector<A> &arr, size_t left, size_t right, const F &comp)
     {
-        for (int i = left + 1; i <= right; i++)
+        for (size_t i = left + 1; i <= right; i++)
         {
             A key = efp::move(arr[i]);
-            int j = i - 1;
+            size_t j = i;
 
-            while (j >= left && comp(key, arr[j]))
+            while (j > left && comp(key, arr[j - 1]))
             {
-                arr[j + 1] = efp::move(arr[j]);
+                arr[j] = efp::move(arr[j - 1]);
                 j--;
             }
-            arr[j + 1] = efp::move(key);
+
+            arr[j] = efp::move(key);
         }
     }
 
@@ -127,18 +127,19 @@ namespace efp
     void insertion_sort_by(Vector<A> &arr, const F &comp)
     {
         // Call the more specific insertion sort for the entire range of the vector
-        insertion_sort_by_(arr, 0, arr.size() - 1, comp);
+        if (arr.size() != 0)
+            insertion_sort_by_(arr, 0, arr.size() - 1, comp);
     }
 
     // Quicksort using a comparison function
 
     template <typename A, typename F = bool (*)(const A &, const A &)>
-    int partition_by(Vector<A> &arr, int low, int high, const F &comp)
+    size_t partition_by(Vector<A> &arr, size_t low, size_t high, const F &comp)
     {
         A pivot = arr[high];
-        int i = (low - 1);
+        size_t i = (low - 1);
 
-        for (int j = low; j < high; j++)
+        for (size_t j = low; j < high; j++)
         {
             if (comp(arr[j], pivot))
             {
@@ -152,12 +153,13 @@ namespace efp
 
     template <typename A, typename F = bool (*)(const A &, const A &)>
 
-    void quicksort_by(Vector<A> &arr, int low, int high, const F &comp)
+    void quicksort_by(Vector<A> &arr, size_t low, size_t high, const F &comp)
     {
         if (low < high)
         {
-            int pi = partition_by(arr, low, high, comp);
-            quicksort_by(arr, low, pi - 1, comp);
+            size_t pi = partition_by(arr, low, high, comp);
+            if (pi != 0)
+                quicksort_by(arr, low, pi - 1, comp);
             quicksort_by(arr, pi + 1, high, comp);
         }
     }
@@ -165,7 +167,7 @@ namespace efp
     // Introsort using a comparison function
 
     template <typename A, typename F = bool (*)(const A &, const A &)>
-    void introsort_by(Vector<A> &arr, const F &comp)
+    void size_trosort_by(Vector<A> &arr, const F &comp)
     {
         if (arr.size() <= 1)
             return;
@@ -175,15 +177,15 @@ namespace efp
 
     // Function to merge two sorted sub-vectors
     template <typename A, typename F>
-    void timsort_merge(Vector<A> &arr, int start, int mid, int end, const F &comp)
+    void timsort_merge(Vector<A> &arr, size_t start, size_t mid, size_t end, const F &comp)
     {
-        int start2 = mid + 1;
+        size_t start2 = mid + 1;
 
         // If the direct merge is already sorted
         if (!comp(arr[mid], arr[start2]))
             return;
 
-        // Two pointers to maintain start of both arrays to merge
+        // Two posize_ters to masize_tain start of both arrays to merge
         while (start <= mid && start2 <= end)
         {
             // If element 1 is in right place
@@ -194,7 +196,7 @@ namespace efp
             else
             {
                 A value = arr[start2];
-                int index = start2;
+                size_t index = start2;
 
                 // Shift all the elements between element 1 and element 2, right by 1.
                 while (index != start)
@@ -204,7 +206,7 @@ namespace efp
                 }
                 arr[start] = value;
 
-                // Update all the pointers
+                // Update all the posize_ters
                 start++;
                 mid++;
                 start2++;
@@ -216,23 +218,23 @@ namespace efp
     template <typename A, typename F = bool (*)(const A &, const A &)>
     void timsort_by(Vector<A> &arr, const F &comp)
     {
-        int n = arr.size();
-        const int RUN = 32; // This is a chosen run size.
+        size_t n = arr.size();
+        const size_t RUN = 32; // This is a chosen run size.
 
         // Sort individual sub-arrays of size RUN
-        for (int i = 0; i < n; i += RUN)
+        for (size_t i = 0; i < n; i += RUN)
             insertion_sort_by_(arr, i, min((i + 31), (n - 1)), comp);
 
         // Start merging from size RUN. It will merge to form size 64, then 128, 256 and so on...
-        for (int size = RUN; size < n; size = 2 * size)
+        for (size_t size = RUN; size < n; size = 2 * size)
         {
-            // Pick starting point of left sub array. We are going to merge arr[left..left+size-1]
+            // Pick starting posize_t of left sub array. We are going to merge arr[left..left+size-1]
             // and arr[left+size, left+2*size-1]. After every merge, we increase left by 2*size
-            for (int left = 0; left < n; left += 2 * size)
+            for (size_t left = 0; left < n; left += 2 * size)
             {
-                // Find ending point of left sub array. mid+1 is starting point of right sub array
-                int mid = left + size - 1;
-                int right = min((left + 2 * size - 1), (n - 1));
+                // Find ending posize_t of left sub array. mid+1 is starting posize_t of right sub array
+                size_t mid = left + size - 1;
+                size_t right = min((left + 2 * size - 1), (n - 1));
 
                 // Merge sub array arr[left.....mid] & arr[mid+1....right]
                 if (mid < right)
@@ -248,7 +250,8 @@ namespace efp
     template <typename A>
     void quicksort(Vector<A> &arr)
     {
-        quicksort_by(arr, 0, arr.size() - 1, efp::lt_v<A>);
+        if (arr.size() != 0)
+            quicksort_by(arr, 0, arr.size() - 1, efp::lt_v<A>);
     }
 
     template <typename A>
@@ -264,9 +267,9 @@ namespace efp
     }
 
     template <typename A>
-    void introsort(Vector<A> &arr)
+    void size_trosort(Vector<A> &arr)
     {
-        introsort_by(arr, efp::lt_v<A>);
+        size_trosort_by(arr, efp::lt_v<A>);
     }
 
     template <typename A>
@@ -286,7 +289,7 @@ namespace efp
     template <typename A, typename F>
     void sort_unstable_by(Vector<A> &arr, const F &comp)
     {
-        introsort_by(arr, comp);
+        size_trosort_by(arr, comp);
     }
 
     template <typename A>
@@ -298,7 +301,7 @@ namespace efp
     template <typename A>
     void sort_unstable(Vector<A> &arr)
     {
-        introsort_by(arr, efp::lt_v<A>);
+        size_trosort_by(arr, efp::lt_v<A>);
     }
 
 }

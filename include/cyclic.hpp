@@ -9,19 +9,19 @@
 
 namespace efp
 {
-    template <typename A, int n>
+    template <typename A, size_t n>
     class Vcb
         : public SequenceBase<Vcb<A, n>>
     {
     public:
         using Element = A;
-        using SizeType = int;
+        using SizeType = size_t;
 
-        static constexpr int ct_len = n;
-        static constexpr int ct_cap = n;
+        static constexpr size_t ct_len = n;
+        static constexpr size_t ct_cap = n;
 
-        static_assert(ct_len >= 0, "ct_length must greater or equal than 0.");
-        static_assert(ct_cap >= 0, "ct_capacity must greater or equal than 0.");
+        // static_assert(ct_len >= 0, "ct_length must greater or equal than 0.");
+        // static_assert(ct_cap >= 0, "ct_capacity must greater or equal than 0.");
 
         Vcb()
             : buffer_{}
@@ -95,28 +95,28 @@ namespace efp
         A *data_;
     };
 
-    template <typename A, int n>
+    template <typename A, size_t n>
     class SequenceTrait<Vcb<A, n>>
     {
     public:
         using Element = A;
-        static constexpr int ct_len = n;
-        static constexpr int ct_cap = n;
+        static constexpr size_t ct_len = n;
+        static constexpr size_t ct_cap = n;
     };
 
-    template <typename A, int n>
+    template <typename A, size_t n>
     class Vcq
         : public SequenceBase<Vcq<A, n>>
     {
     public:
         using Element = A;
-        using SizeType = int;
+        using SizeType = size_t;
 
-        static constexpr int ct_len = dyn;
-        static constexpr int ct_cap = n;
+        static constexpr size_t ct_len = dyn;
+        static constexpr size_t ct_cap = n;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
         Vcq()
             : buffer_{}
@@ -210,19 +210,19 @@ namespace efp
 
     private:
         Array<A, ct_cap * 2> buffer_ = {};
-        int size_ = 0;
+        size_t size_ = 0;
         A *read_;
         A *write_;
         A *middle_;
     };
 
-    template <typename A, int n>
+    template <typename A, size_t n>
     class SequenceTrait<Vcq<A, n>>
     {
     public:
         using Element = A;
-        static constexpr int ct_len = dyn;
-        static constexpr int ct_cap = n;
+        static constexpr size_t ct_len = dyn;
+        static constexpr size_t ct_cap = n;
     };
 
 }
@@ -349,7 +349,7 @@ namespace efp
 //         A *in_data = in_buffer->data;
 //         size_t in_length = in_buffer->len;
 
-//         // for (int i = 0; i < in_length; i++)
+//         // for (size_t i = 0; i < in_length; i++)
 //         // {
 //         //     out_buffer.push_back(in_data[i]);
 //         // }

@@ -92,7 +92,7 @@ TEST_CASE("Type sequences are correctly manipulated", "[format-sfinae]")
         CHECK((std::is_same<RemovedSeq, TypeSeq<int, TypeSeq<double, Nil>>>::value));
     }
 
-    SECTION("IsIntegralType identifies integral types")
+    SECTION("IsIntegralType identifies size_tegral types")
     {
         CHECK(IsIntegeralType<int>::value);
         CHECK_FALSE(IsIntegeralType<float>::value);

@@ -8,7 +8,7 @@
 
 using namespace efp;
 
-constexpr size_t n = 10000;
+constexpr int n = 10000;
 
 int main(int argc, char const *argv[])
 {
@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
 
     std::iota(std::begin(xs), std::end(xs), 0);
 
-    // for (int i = 0; i < n; ++i)
+    // for (size_t i = 0; i < n; ++i)
     // {
     //     xs[i] = std::rand();
     // }

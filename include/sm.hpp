@@ -6,7 +6,7 @@
 namespace efp
 {
     // I found no good reason to make state external.
-    // Make state internal and think state machine as state with extra function.
+    // Make state size_ternal and think state machine as state with extra function.
     // State machine will holds sub-state machine as member variable.
 
     template <typename Derived>
@@ -77,7 +77,7 @@ namespace efp
     template <typename F, typename I = Arguments<F>>
     class Pure;
 
-    // Specialization for regular function pointers
+    // Specialization for regular function posize_ters
     // template <typename Ret, typename... Is>
     // class Pure<Ret (*)(Is...)> : public Sm<Pure<Ret (*)(Is...)>>
     // {

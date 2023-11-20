@@ -68,10 +68,10 @@ TEST_CASE("Sorting algorithms sort correctly", "[sort]")
         CHECK(test_values == expected_descending);
     }
 
-    SECTION("introsort_by sorts a vector in descending order with custom comparison")
+    SECTION("size_trosort_by sorts a vector in descending order with custom comparison")
     {
         Vector<int> test_values = values;
-        introsort_by(test_values, greater_than);
+        size_trosort_by(test_values, greater_than);
         CHECK(test_values == expected_descending);
     }
 }

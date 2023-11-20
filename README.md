@@ -11,7 +11,7 @@ It is a general-purpose library. The usage of no-STL, resource-tight embedded ap
 EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_index`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` and many more.
 
 ### Zero-Copy Sequence Types
-Copying sequence is often an expensive operation yet does not necessary. Move semantic, introduced in C++ 11 somewhat eases the problem. However, the move helps little about stack sequence types like `std::array`, since moving such types is essentially a series of element-wise moves which is often no better than an element-wise copy.
+Copying sequence is often an expensive operation yet does not necessary. Move semantic, size_troduced in C++ 11 somewhat eases the problem. However, the move helps little about stack sequence types like `std::array`, since moving such types is essentially a series of element-wise moves which is often no better than an element-wise copy.
 
 There is a better option, copy-elision (Return Value Optimization and Named Return Value Optimization). It makes returning heavy data free. Unfortunately, copy-elision is not guaranteed but at the compiler's discretion. (Since, C++ 17 some of them are guaranteed.)
 
@@ -55,7 +55,7 @@ WIP
 
 using namespace efp;
 
-constexpr size_t n = 10;
+constexpr int n = 10;
 
 int main()
 {
@@ -118,7 +118,7 @@ Requires C++ 11 or later.
 
 ## Acknowledgement
 - format
-  - The formatting functionality of the library is heavily influenced by [tfc/ppprint](https://github.com/tfc/pprintpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
+  - The formatting functionality of the library is heavily influenced by [tfc/ppprsize_t](https://github.com/tfc/pprsize_tpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
   - 
 ## License
 

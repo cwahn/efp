@@ -5,28 +5,28 @@
 
 namespace efp
 {
-    // FunctionPointerTypeImpl
+    // FunctionPosize_terTypeImpl
 
     template <typename, typename...>
-    struct FunctionPointerTypeImpl
+    struct FunctionPosize_terTypeImpl
     {
     };
 
     template <typename F, typename... Args>
-    struct FunctionPointerTypeImpl<F, Tuple<Args...>>
+    struct FunctionPosize_terTypeImpl<F, Tuple<Args...>>
     {
         using type = Return<F> (*)(Args...);
     };
 
-    // FunctionPointerType
+    // FunctionPosize_terType
 
     template <typename F>
-    using FunctionPointerType = typename FunctionPointerTypeImpl<F, Arguments<F>>::type;
+    using FunctionPosize_terType = typename FunctionPosize_terTypeImpl<F, Arguments<F>>::type;
 
-    // LambdaPointer
+    // LambdaPosize_ter
 
     template <typename F>
-    struct LambdaPointer
+    struct LambdaPosize_ter
     {
         template <typename Tpl>
         struct Helper
@@ -46,16 +46,16 @@ namespace efp
     };
 
     template <typename F>
-    void *LambdaPointer<F>::inner_ptr = nullptr;
+    void *LambdaPosize_ter<F>::inner_ptr = nullptr;
 
     // func_ptr
 
     template <typename F>
     // ! Take caution on the lifetime of the argument.
-    static FunctionPointerType<F> func_ptr(F &f)
+    static FunctionPosize_terType<F> func_ptr(F &f)
     {
-        LambdaPointer<F>::inner_ptr = (void *)&f;
-        return (FunctionPointerType<F>)LambdaPointer<F>::template Helper<Arguments<F>>::call;
+        LambdaPosize_ter<F>::inner_ptr = (void *)&f;
+        return (FunctionPosize_terType<F>)LambdaPosize_ter<F>::template Helper<Arguments<F>>::call;
     }
 }
 
