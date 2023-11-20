@@ -118,7 +118,7 @@ Requires C++ 11 or later.
 
 ## Acknowledgement
 - format
-  - The formatting functionality of the library is heavily influenced by [tfc/ppprsize_t](https://github.com/tfc/pprsize_tpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
+  - The formatting functionality of the library is heavily influenced by [tfc/ppprint](https://github.com/tfc/pprintpp.git). The great idea of compile-time formatting with C++11 has an excellent fit with SFINAE tools of EFP and rewritten in favor of EFP's language and some additional support for EFP String.
   - 
 ## License
 
