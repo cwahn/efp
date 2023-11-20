@@ -25,35 +25,35 @@ TEST_CASE("FunctionPosize_terType")
     auto fpt_lambda1 = [](const int x0, float &x1)
     { return x0 + x1; };
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float &&),
               FunctionPosize_terType<decltype(&fpt_function0)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float),
               FunctionPosize_terType<decltype(&fpt_function0)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double *(*)(int, float &),
               FunctionPosize_terType<decltype(&fpt_function1)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double *(*)(int, float),
               FunctionPosize_terType<decltype(&fpt_function1)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float),
               FunctionPosize_terType<decltype(fpt_lambda0)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               double (*)(int, float),
               FunctionPosize_terType<decltype(fpt_lambda0)>>::value == false);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float &),
               FunctionPosize_terType<decltype(fpt_lambda1)>>::value == true);
 
-    CHECK(std::is_same<
+    CHECK(IsSame<
               float (*)(int, float),
               FunctionPosize_terType<decltype(fpt_lambda1)>>::value == false);
 }

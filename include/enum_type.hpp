@@ -108,7 +108,7 @@ namespace efp
             template <typename B>
             struct Binded
             {
-                static const bool value = std::is_same<A, B>::value;
+                static const bool value = IsSame<A, B>::value;
             };
         };
 
