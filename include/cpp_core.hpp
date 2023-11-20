@@ -13,7 +13,6 @@
 
 // C++
 #include <cstddef> // Defines int, ptrdiff_t, and nullptr_t
-// #include <cstdsize_t> // Defines fixed width size_teger types like size_t32_t, uint8_t, etc.
 #include <new>     // Defines operator new and operator delete, which can be overridden for custom memory management.
 
 #endif
