@@ -291,7 +291,7 @@ TEST_CASE("remove_dc")
 
     SECTION("Array")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -302,7 +302,7 @@ TEST_CASE("remove_dc")
 
     SECTION("std::array")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -313,7 +313,7 @@ TEST_CASE("remove_dc")
 
     SECTION("std::vector")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
         auto ys_ref = map(f_ref, xs);
@@ -337,7 +337,7 @@ TEST_CASE("linear_regression")
 
     SECTION("Array")
     {
-        auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -352,7 +352,7 @@ TEST_CASE("linear_regression")
     SECTION("Array")
     {
 
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -367,7 +367,7 @@ TEST_CASE("linear_regression")
     SECTION("std::array")
     {
 
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -381,7 +381,7 @@ TEST_CASE("linear_regression")
 
     SECTION("std::vector")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         auto ys = map(f, xs);
 
@@ -423,7 +423,7 @@ TEST_CASE("linear_regression_with_index")
 
     SECTION("std::array")
     {
-        auto ys = from_function(IntegralConst<int, n>{}, f);
+        auto ys = from_function(Size<n>{}, f);
 
         const auto tpl = linear_regression_with_index<double>(ys);
         const auto a_hat = get<0>(tpl);
@@ -475,7 +475,7 @@ TEST_CASE("detrend")
 
     SECTION("std::array")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         const auto ys1 = map(f1, xs);
         const auto ys2 = map(f2, xs);
@@ -492,7 +492,7 @@ TEST_CASE("detrend")
 
     SECTION("Vector")
     {
-        const auto xs = from_function(IntegralConst<int, n>{}, id<int>);
+        const auto xs = from_function(Size<n>{}, id<int>);
 
         const auto ys1 = map(f1, xs);
         const auto ys2 = map(f2, xs);

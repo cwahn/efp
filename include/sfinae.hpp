@@ -380,6 +380,11 @@ namespace efp
     template <int n>
     using Int = IntegralConst<int, n>;
 
+    // Size
+
+    template <int n>
+    using Size = IntegralConst<size_t, n>;
+
     // IsSame
 
     template <typename A, typename B>
@@ -430,12 +435,12 @@ namespace efp
 
     // FindHelper
 
-    template <int n, template <class> class P, typename... Args>
+    template <size_t n, template <class> class P, typename... Args>
     struct FindHelper
     {
     };
 
-    template <int n, template <class> class P, typename Head, typename... Tail>
+    template <size_t n, template <class> class P, typename Head, typename... Tail>
     struct FindHelper<n, P, Head, Tail...>
         : Conditional<
               P<Head>::value,
@@ -578,7 +583,7 @@ namespace efp
 
     // MakeIndexSequenceImpl
 
-    template <int n, int... ns>
+    template <size_t n, int... ns>
     struct MakeIndexSequenceImpl
         : MakeIndexSequenceImpl<n - 1, n - 1, ns...>
     {

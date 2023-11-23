@@ -90,7 +90,7 @@ namespace efp
         return (power >= n) ? power : power_2_ceiling(n, power * 2);
     }
 
-    template <int n, typename... As>
+    template <size_t n, typename... As>
     struct Match
     {
     };
@@ -99,7 +99,7 @@ namespace efp
     class Enum
     {
     public:
-        template <int n, typename... Bs>
+        template <size_t n, typename... Bs>
         friend struct Match;
 
         template <typename A>

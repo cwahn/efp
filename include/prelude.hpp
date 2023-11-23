@@ -260,8 +260,8 @@ namespace efp
     {
     };
 
-    template <int n, typename F>
-    struct FromFunctionReturnImpl<Int<n>, F>
+    template <size_t n, typename F>
+    struct FromFunctionReturnImpl<Size<n>, F>
     {
         using Type = Sequence<CallReturn<F, int>, n, n>;
     };
@@ -599,8 +599,8 @@ namespace efp
     {
     };
 
-    template <int n, typename A, bool is_const>
-    struct TakeReturnImpl<Int<n>, A, is_const>
+    template <size_t n, typename A, bool is_const>
+    struct TakeReturnImpl<Size<n>, A, is_const>
     {
         using Type = Conditional<
             IsStaticLength<A>::value,
@@ -662,8 +662,8 @@ namespace efp
     {
     };
 
-    template <int n, typename A, bool is_const>
-    struct DropReturnImpl<Int<n>, A, is_const>
+    template <size_t n, typename A, bool is_const>
+    struct DropReturnImpl<Size<n>, A, is_const>
     {
         using Type = Conditional<
             IsStaticLength<A>::value,

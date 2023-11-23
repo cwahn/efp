@@ -157,7 +157,7 @@ TEST_CASE("from_function")
 
     SECTION("Array")
     {
-        CHECK(from_function(IntegralConst<int, 3>{}, plus_one) == Array<int, 3>{1, 2, 3});
+        CHECK(from_function(Size<3>{}, plus_one) == Array<int, 3>{1, 2, 3});
     }
 
     SECTION("Vector")
@@ -167,7 +167,7 @@ TEST_CASE("from_function")
 
     SECTION("template")
     {
-        CHECK(from_function(IntegralConst<int, 3>{}, id<int>) == Array<int, 3>{0, 1, 2});
+        CHECK(from_function(Size<3>{}, id<int>) == Array<int, 3>{0, 1, 2});
     }
 }
 
@@ -378,7 +378,7 @@ TEST_CASE("slice")
 {
     SECTION("static")
     {
-        const auto slice_ = slice(Int<1>{}, Int<3>{}, array_5);
+        const auto slice_ = slice(Size<1>{}, Size<3>{}, array_5);
         CHECK(length(slice_) == 2);
         CHECK(IsStaticLength<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
