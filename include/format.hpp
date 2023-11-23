@@ -460,42 +460,82 @@ namespace efp
     // CFormatString takes format_string :: char * as arguement
     // CFormatString
 
-#define AUTOFORMAT(s, ...)                                         \
-    [] {                                                           \
-        struct StringProvider                                      \
-        {                                                          \
-            static constexpr const char *string()                  \
-            {                                                      \
-                return static_cast<const char *>(s);               \
-            }                                                      \
-        };                                                         \
-        using ParamTypes = decltype(TieTypes(__VA_ARGS__));        \
-        using CFmtStr = CFormatString<StringProvider, ParamTypes>; \
-        return CharsToString<CFmtStr>::string();                   \
-    }()
+    // #define AUTOFORMAT(s, ...)                                         \
+//     [] {                                                           \
+//         struct StringProvider                                      \
+//         {                                                          \
+//             static constexpr const char *string()                  \
+//             {                                                      \
+//                 return static_cast<const char *>(s);               \
+//             }                                                      \
+//         };                                                         \
+//         using ParamTypes = decltype(TieTypes(__VA_ARGS__));        \
+//         using CFmtStr = CFormatString<StringProvider, ParamTypes>; \
+//         return CharsToString<CFmtStr>::string();                   \
+//     }()
 
-#define print(s, ...) printf(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+    // #define print(s, ...) printf(auto_format(s, ##__VA_ARGS__), ##__VA_ARGS__);
 
-    String format_(const char *format, ...)
+    // String format(const char *format, ...)
+    // {
+    //     va_list args;
+    //     va_start(args, format);
+
+    //     const int length = vsnprintf(nullptr, 0, format, args);
+
+    //     String buffer;
+    //     buffer.reserve(length + 1);
+
+    //     vsnprintf(buffer.data(), length + 1, format, args);
+    //     buffer.resize(length);
+
+    //     va_end(args);
+    //     return buffer;
+    // }
+
+    // #define format(s, ...) format_(auto_format(s, ##__VA_ARGS__), ##__VA_ARGS__);
+
+    // #define auto_format(s, ...) auto_format(s, ##__VA_ARGS__);
+
+    template <typename... Args>
+    const char *auto_format(const char *s, const Args &...args)
     {
-        va_list args;
-        va_start(args, format);
-
-        const int length = vsnprintf(nullptr, 0, format, args);
-
-        String buffer;
-        buffer.reserve(length + 1);
-
-        vsnprintf(buffer.data(), length + 1, format, args);
-        buffer.resize(length);
-
-        va_end(args);
-        return buffer;
+        return [=]
+        {
+            struct StringProvider
+            {
+                static constexpr const char *string()
+                {
+                    return static_cast<const char *>(s);
+                }
+            };
+            // using ParamTypes = decltype(TieTypes(__VA_ARGS__));
+            using ParamTypes = MakeTypeSeq<Args...>;
+            using CFmtStr = CFormatString<StringProvider, ParamTypes>;
+            return CharsToString<CFmtStr>::string();
+        }();
     }
 
-#define format(s, ...) format_(AUTOFORMAT(s, ##__VA_ARGS__), ##__VA_ARGS__);
+    template <typename... Args>
+    void print(const char *fmt, const Args &...args)
+    {
+        printf(auto_format(fmt, args...));
+    }
 
-#define auto_format(s, ...) AUTOFORMAT(s, ##__VA_ARGS__);
+    template <typename... Arg>
+    String format(const char *fmt, const Arg &...args)
+    {
+        const auto c_fmt = auto_format(fmt, args...);
+        const size_t result_length = vsnprintf(nullptr, 0, c_fmt, args...);
+
+        String buffer;
+        buffer.reserve(result_length + 1);
+
+        vsnprintf(buffer.data(), result_length + 1, format, args...);
+        buffer.resize(result_length);
+
+        return buffer;
+    }
 
 };
 
