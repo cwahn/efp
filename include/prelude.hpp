@@ -6,6 +6,7 @@
 #include "maybe.hpp"
 #include "sequence.hpp"
 
+
 // Trust compiler for length calculation
 
 namespace efp
