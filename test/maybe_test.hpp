@@ -182,9 +182,8 @@ TEST_CASE("Maybe as bool")
 
         bool bis = false;
         if (!b)
-        {
             bis = true;
-        }
+
         CHECK(bis);
     }
 

@@ -847,7 +847,7 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
         // ! length will not be used
-        explicit SequenceView(A *data, size_t length)
+        explicit SequenceView(A *data, Size<ct_len> length = Size<ct_len>{})
             : data_(data)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -857,15 +857,16 @@ namespace efp
             }
         }
 
-        explicit SequenceView(A *data)
-            : data_(data)
-        {
-            // Ensure that data is not nullptr for a non-empty view.
-            if (ct_len > 0 && data_ == nullptr)
-            {
-                abort();
-            }
-        }
+        // ! No need of constructor taking only the pointer
+        // explicit SequenceView(A *data)
+        //     : data_(data)
+        // {
+        //     // Ensure that data is not nullptr for a non-empty view.
+        //     if (ct_len > 0 && data_ == nullptr)
+        //     {
+        //         abort();
+        //     }
+        // }
 
         // Rule of five: if you define one of the destructor, copy constructor,
         // copy assignment operator, move constructor, or move assignment operator,
