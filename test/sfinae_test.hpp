@@ -10,13 +10,13 @@ using namespace efp;
 
 // TEST_CASE("bound_v")
 // {
-//     CHECK(bound_v(0, 2, IntegralConst<int, -1>{}) == 0);
-//     CHECK(bound_v(0, 2, IntegralConst<int, 1>{}) == 1);
-//     CHECK(bound_v(0, 2, IntegralConst<int, 3>{}) == 2);
-//     CHECK(bound_v(0, IntegralConst<int, 3>{}, -1) == 0);
+//     CHECK(bound_v(0, 2, IntegralConst<size_t, -1>{}) == 0);
+//     CHECK(bound_v(0, 2, IntegralConst<size_t, 1>{}) == 1);
+//     CHECK(bound_v(0, 2, IntegralConst<size_t, 3>{}) == 2);
+//     CHECK(bound_v(0, IntegralConst<size_t, 3>{}, -1) == 0);
 //     // ! issue
-//     // CHECK((-1 > IntegralConst<int, 3>{}) == true);
-//     // CHECK((-1 > IntegralConst<int, 3>{}) ? (IntegralConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
+//     // CHECK((-1 > IntegralConst<size_t, 3>{}) == true);
+//     // CHECK((-1 > IntegralConst<size_t, 3>{}) ? (IntegralConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
 // }
 
 TEST_CASE("all_v")

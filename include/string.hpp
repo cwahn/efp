@@ -54,8 +54,8 @@ namespace efp
     {
     public:
         using Element = char;
-        static constexpr int ct_len = dyn;
-        static constexpr int ct_cap = dyn;
+        static constexpr size_t ct_len = dyn;
+        static constexpr size_t ct_cap = dyn;
 
         static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
@@ -92,7 +92,7 @@ namespace efp
         //       capacity_(sizeof...(args)),
         //       size_(sizeof...(args))
         // {
-        //     int i = 0;
+        //     size_t i = 0;
         //     for (auto arg : std::initializer_list<char>{args...})
         //         data_[i++] = arg;
         // }
@@ -205,12 +205,12 @@ namespace efp
             return true;
         }
 
-        int size() const
+        size_t size() const
         {
             return size_;
         }
 
-        int capacity() const
+        size_t capacity() const
         {
             return capacity_;
         }
@@ -287,7 +287,7 @@ namespace efp
 
         const CString c_str() const
         {
-            const int size_ = size();
+            const size_t size_ = size();
             char *extended_buffer = new char[size_ + 1];
             memcpy(extended_buffer, data(), size_);
             extended_buffer[size_] = '\0';
@@ -343,8 +343,8 @@ namespace efp
 
     private:
         char *data_;
-        int size_;
-        int capacity_;
+        size_t size_;
+        size_t capacity_;
     };
 
     using String = Sequence<char, dyn, dyn>;
@@ -353,7 +353,7 @@ namespace efp
     {
         String result{};
 
-        const int string_num = length(strings);
+        const size_t string_num = length(strings);
         const auto join_ = [&](int i, const String &s)
         {
             result.append_mut(s);

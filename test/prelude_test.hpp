@@ -157,7 +157,7 @@ TEST_CASE("from_function")
 
     SECTION("Array")
     {
-        CHECK(from_function(IntegralConst<int, 3>{}, plus_one) == Array<int, 3>{1, 2, 3});
+        CHECK(from_function(Size<3>{}, plus_one) == Array<int, 3>{1, 2, 3});
     }
 
     SECTION("Vector")
@@ -167,7 +167,7 @@ TEST_CASE("from_function")
 
     SECTION("template")
     {
-        CHECK(from_function(IntegralConst<int, 3>{}, id<int>) == Array<int, 3>{0, 1, 2});
+        CHECK(from_function(Size<3>{}, id<int>) == Array<int, 3>{0, 1, 2});
     }
 }
 
@@ -274,7 +274,7 @@ TEST_CASE("tail")
     {
         CHECK(tail(array_3) == ArrayView<const double, 2>{data(array_3) + 1});
         CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3) + 1, 2});
-        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2, 2});
+        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2});
     }
 
     SECTION("non const")
@@ -285,7 +285,7 @@ TEST_CASE("tail")
 
         CHECK(tail(array) == ArrayView<double, 2>{data(array) + 1});
         CHECK(tail(arrvec) == ArrVecView<double, 2>{data(arrvec) + 1, 2});
-        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2, 2});
+        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2});
     }
 }
 
@@ -295,7 +295,7 @@ TEST_CASE("init")
     {
         CHECK(init(array_3) == ArrayView<const double, 2>{data(array_3)});
         CHECK(init(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3), 2});
-        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2, 2});
+        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2});
     }
 
     SECTION("non const")
@@ -306,7 +306,7 @@ TEST_CASE("init")
 
         CHECK(init(array) == ArrayView<double, 2>{data(array)});
         CHECK(init(arrvec) == ArrVecView<double, 2>{data(arrvec), 2});
-        CHECK(init(vector) == VectorView<double>{data(vector), 2, 2});
+        CHECK(init(vector) == VectorView<double>{data(vector), 2});
     }
 }
 
@@ -330,16 +330,17 @@ TEST_CASE("take")
 
     SECTION("array 1")
     {
-        const auto res = take(-1, array_3);
+        const auto res = take(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
 
     SECTION("array 2")
     {
+        // ! Should not put n longer than the length. Check should be done by the caller
         const auto res = take(9, array_3);
         CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 3);
+        CHECK_FALSE(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
         CHECK(res[2] == 3.);
@@ -358,7 +359,8 @@ TEST_CASE("drop")
 
     SECTION("array 1")
     {
-        const auto res = drop(-1, array_3);
+        // ! do not put negative values
+        const auto res = drop(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
@@ -368,9 +370,10 @@ TEST_CASE("drop")
 
     SECTION("array 2")
     {
+        // ! Not supposed to put any n longer then the length. Check sould be done by the caller
         const auto res = drop(9, array_3);
-        CHECK(data(res) == data(array_3) + 3);
-        CHECK(length(res) == 0);
+        CHECK_FALSE(data(res) == data(array_3) + 3);
+        CHECK_FALSE(length(res) == 0);
     }
 }
 
@@ -378,7 +381,7 @@ TEST_CASE("slice")
 {
     SECTION("static")
     {
-        const auto slice_ = slice(Int<1>{}, Int<3>{}, array_5);
+        const auto slice_ = slice(Size<1>{}, Size<3>{}, array_5);
         CHECK(length(slice_) == 2);
         CHECK(IsStaticLength<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
@@ -388,7 +391,7 @@ TEST_CASE("slice")
     SECTION("dynamic")
     {
         const auto slice_ = slice(1, 3, array_5);
-        CHECK(IsSame<decltype(length(slice_)), int>::value);
+        CHECK(IsSame<decltype(length(slice_)), size_t>::value);
         CHECK(!IsStaticLength<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
         CHECK(slice_[1] == 3.);
@@ -442,22 +445,22 @@ TEST_CASE("elem_indices")
     SECTION("Array")
     {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., array_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(elem_indices(9., array_3_) == ArrVec<int, 3>{});
+        CHECK(elem_indices(2., array_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(elem_indices(9., array_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("ArrVec")
     {
         const ArrVec<double, 3> arrvec_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., arrvec_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(elem_indices(9., arrvec_3_) == ArrVec<int, 3>{});
+        CHECK(elem_indices(2., arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(elem_indices(9., arrvec_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("Vector")
     {
         Vector<double> vector_3_ = {1, 2, 2};
-        CHECK(elem_indices(2., vector_3_) == Vector<int>{1, 2});
-        CHECK(elem_indices(9., vector_3_) == Vector<int>{});
+        CHECK(elem_indices(2., vector_3_) == Vector<size_t>{1u, 2u});
+        CHECK(elem_indices(9., vector_3_) == Vector<size_t>{});
     }
 }
 
@@ -526,22 +529,22 @@ TEST_CASE("find_indices")
     SECTION("Array")
     {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(find_indices(is_two, array_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(find_indices(is_nine, array_3_) == ArrVec<int, 3>{});
+        CHECK(find_indices(is_two, array_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(find_indices(is_nine, array_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("ArrVec")
     {
         const ArrVec<double, 3> arrvec_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<int, 3>{});
+        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("Vector")
     {
         const Vector<double> vector_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, vector_3_) == Vector<int>{1, 2});
-        CHECK(find_indices(is_nine, vector_3_) == Vector<int>{});
+        CHECK(find_indices(is_two, vector_3_) == Vector<size_t>{1u, 2u});
+        CHECK(find_indices(is_nine, vector_3_) == Vector<size_t>{});
     }
 }
 

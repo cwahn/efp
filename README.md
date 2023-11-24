@@ -10,12 +10,8 @@ It is a general-purpose library. The usage of no-STL, resource-tight embedded ap
 ### Higher-Order Functions
 EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_index`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` and many more.
 
-### Zero-Copy Sequence Types
-Copying sequence is often an expensive operation yet does not necessary. Move semantic, size_troduced in C++ 11 somewhat eases the problem. However, the move helps little about stack sequence types like `std::array`, since moving such types is essentially a series of element-wise moves which is often no better than an element-wise copy.
-
-There is a better option, copy-elision (Return Value Optimization and Named Return Value Optimization). It makes returning heavy data free. Unfortunately, copy-elision is not guaranteed but at the compiler's discretion. (Since, C++ 17 some of them are guaranteed.)
-
-EFP offers zero-copy, guaranteed copy-elision (RVO, NRVO) sequence type as solutions to the issue; `efp::Sequence`, or `efp::Array`, `efp::ArrVec`, `efp::Vector` as aliased name. Copy-elision of these types is guaranteed regardless of compiler and C++ standards. To be exact, these types could be copy-assigned but not copy-constructed. These types are also used as the default output types of mixed-type, n-ary operations.
+### Contegious Sequence Types
+EFP offeres no-STL contegious sequence type `efp::Sequence` and `efp::SequenceView`, an immutable conteguous view of a sequence.
 
 ### Compile-Time Polymorphism
 HOFs of EFP accept `efp::Sequence` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  

@@ -377,8 +377,13 @@ namespace efp
 
     // Int
 
-    template <int n>
+    template <size_t n>
     using Int = IntegralConst<int, n>;
+
+    // Size
+
+    template <size_t n>
+    using Size = IntegralConst<size_t, n>;
 
     // IsSame
 
@@ -430,12 +435,12 @@ namespace efp
 
     // FindHelper
 
-    template <int n, template <class> class P, typename... Args>
+    template <size_t n, template <class> class P, typename... Args>
     struct FindHelper
     {
     };
 
-    template <int n, template <class> class P, typename Head, typename... Tail>
+    template <size_t n, template <class> class P, typename Head, typename... Tail>
     struct FindHelper<n, P, Head, Tail...>
         : Conditional<
               P<Head>::value,
@@ -542,12 +547,12 @@ namespace efp
 
     // TupleLeaf
 
-    template <int index, typename A>
+    template <size_t index, typename A>
     class TupleLeaf
     {
     public:
         using Element = A;
-        static constexpr int idx = index;
+        static constexpr size_t idx = index;
 
         TupleLeaf() {}
         TupleLeaf(const A &value) : value_{value} {}
@@ -578,7 +583,7 @@ namespace efp
 
     // MakeIndexSequenceImpl
 
-    template <int n, int... ns>
+    template <size_t n, int... ns>
     struct MakeIndexSequenceImpl
         : MakeIndexSequenceImpl<n - 1, n - 1, ns...>
     {
@@ -592,7 +597,7 @@ namespace efp
 
     // MakeIndexSequence
 
-    template <int n>
+    template <size_t n>
     using MakeIndexSequence = typename MakeIndexSequenceImpl<n>::Type;
 
     // IndexSequenceFor
@@ -639,14 +644,14 @@ namespace efp
         {
         }
 
-        template <int idx>
+        template <size_t idx>
         auto get() const
             -> const PackAt<idx, As...> &
         {
             return TupleLeaf<idx, PackAt<idx, As...>>::get();
         }
 
-        template <int idx>
+        template <size_t idx>
         auto get()
             -> PackAt<idx, As...> &
         {
@@ -665,14 +670,14 @@ namespace efp
     private:
     };
 
-    template <int index, typename... As>
+    template <size_t index, typename... As>
     auto get(const Tuple<As...> &tpl)
         -> const PackAt<index, As...> &
     {
         return tpl.template get<index>();
     }
 
-    template <int index, typename... As>
+    template <size_t index, typename... As>
     auto get(Tuple<As...> &tpl)
         -> PackAt<index, As...> &
     {
@@ -681,21 +686,21 @@ namespace efp
 
     // Projection operator for the Tuple the same with get
 
-    template <int index, typename... As>
+    template <size_t index, typename... As>
     auto p(const Tuple<As...> &tpl)
         -> const PackAt<index, As...> &
     {
         return tpl.template get<index>();
     }
 
-    template <int index, typename... As>
+    template <size_t index, typename... As>
     auto p(Tuple<As...> &tpl)
         -> PackAt<index, As...> &
     {
         return tpl.template get<index>();
     }
 
-    template <int index>
+    template <size_t index>
     struct TupleLeafComparatorImpl
     {
         template <typename... As>
@@ -718,7 +723,7 @@ namespace efp
     };
 
     template <>
-    struct TupleLeafComparatorImpl<-1>
+    struct TupleLeafComparatorImpl<static_cast<size_t>(-1)>
     {
         template <typename... As>
         static bool compare(const Tuple<As...> &, const Tuple<As...> &)
@@ -732,7 +737,7 @@ namespace efp
     template <typename... As>
     bool operator==(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
     {
-        return TupleLeafComparatorImpl<(int)(sizeof...(As)) - 1>::compare(lhs, rhs);
+        return TupleLeafComparatorImpl<sizeof...(As) - 1>::compare(lhs, rhs);
     }
 
     template <typename... As>
@@ -1128,6 +1133,40 @@ namespace efp
     {
         return static_cast<RemoveReference<A> &&>(a);
     }
+
+    // InitializerList
+
+    template <class A>
+    class InitializerList
+    {
+    public:
+        using value_type = A;
+        using reference = const A &;
+        using const_reference = const A &;
+        using size_type = size_t;
+
+        using iterator = const A *;
+        using const_iterator = const A *;
+
+        constexpr InitializerList() noexcept : array(nullptr), len(0) {}
+
+        // Number of elements
+        constexpr size_type size() const noexcept { return len; }
+
+        // First element
+        constexpr const_iterator begin() const noexcept { return array; }
+
+        // One past the last element
+        constexpr const_iterator end() const noexcept { return array + len; }
+
+    private:
+        iterator array;
+        size_type len;
+
+        // The constructor is private and can only be called by the compiler
+        // which will create an InitializerList using an array temporary.
+        constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
+    };
 
 }
 
