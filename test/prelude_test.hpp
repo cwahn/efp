@@ -337,9 +337,10 @@ TEST_CASE("take")
 
     SECTION("array 2")
     {
+        // ! Should not put n longer than the length. Check should be done by the caller
         const auto res = take(9, array_3);
         CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 3);
+        CHECK_FALSE(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
         CHECK(res[2] == 3.);
@@ -369,9 +370,10 @@ TEST_CASE("drop")
 
     SECTION("array 2")
     {
+        // ! Not supposed to put any n longer then the length. Check sould be done by the caller
         const auto res = drop(9, array_3);
-        CHECK(data(res) == data(array_3) + 3);
-        CHECK(length(res) == 0);
+        CHECK_FALSE(data(res) == data(array_3) + 3);
+        CHECK_FALSE(length(res) == 0);
     }
 }
 
@@ -443,22 +445,22 @@ TEST_CASE("elem_indices")
     SECTION("Array")
     {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., array_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(elem_indices(9., array_3_) == ArrVec<int, 3>{});
+        CHECK(elem_indices(2., array_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(elem_indices(9., array_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("ArrVec")
     {
         const ArrVec<double, 3> arrvec_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., arrvec_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(elem_indices(9., arrvec_3_) == ArrVec<int, 3>{});
+        CHECK(elem_indices(2., arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(elem_indices(9., arrvec_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("Vector")
     {
         Vector<double> vector_3_ = {1, 2, 2};
-        CHECK(elem_indices(2., vector_3_) == Vector<int>{1, 2});
-        CHECK(elem_indices(9., vector_3_) == Vector<int>{});
+        CHECK(elem_indices(2., vector_3_) == Vector<size_t>{1u, 2u});
+        CHECK(elem_indices(9., vector_3_) == Vector<size_t>{});
     }
 }
 
@@ -527,22 +529,22 @@ TEST_CASE("find_indices")
     SECTION("Array")
     {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(find_indices(is_two, array_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(find_indices(is_nine, array_3_) == ArrVec<int, 3>{});
+        CHECK(find_indices(is_two, array_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(find_indices(is_nine, array_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("ArrVec")
     {
         const ArrVec<double, 3> arrvec_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<int, 3>{1, 2});
-        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<int, 3>{});
+        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
+        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<size_t, 3>{});
     }
 
     SECTION("Vector")
     {
         const Vector<double> vector_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, vector_3_) == Vector<int>{1, 2});
-        CHECK(find_indices(is_nine, vector_3_) == Vector<int>{});
+        CHECK(find_indices(is_two, vector_3_) == Vector<size_t>{1u, 2u});
+        CHECK(find_indices(is_nine, vector_3_) == Vector<size_t>{});
     }
 }
 

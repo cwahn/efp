@@ -278,7 +278,7 @@ TEST_CASE("autocorrelation")
 TEST_CASE("remove_dc")
 {
 
-    constexpr int n = 100;
+    constexpr size_t n = 100;
 
     double a = 2;
     double b = 100;
@@ -325,7 +325,7 @@ TEST_CASE("remove_dc")
 
 TEST_CASE("linear_regression")
 {
-    constexpr int n = 100;
+    constexpr size_t n = 100;
 
     double a = 2;
     double b = 100;
@@ -396,12 +396,12 @@ TEST_CASE("linear_regression")
 
 TEST_CASE("linear_regression_with_index")
 {
-    constexpr int n = 100;
+    constexpr size_t n = 100;
 
     double a = 2;
     double b = 100;
 
-    auto f = [&](double x)
+    auto f = [&](size_t x)
     {
         return sin(x * 2 * M_PI / n) + a * x + b;
     };
@@ -448,7 +448,7 @@ TEST_CASE("linear_regression_with_index")
 
 TEST_CASE("detrend")
 {
-    constexpr int n = 100;
+    constexpr size_t n = 100;
 
     double a = 2;
     double b = 100;
