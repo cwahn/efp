@@ -484,42 +484,12 @@ namespace efp
 
     // tail
     // ! Partial function. Application on empty list is abortion.
-    // template <typename A>
-    // auto tail(const Seq<A> &as)
-    //     -> TailReturn<A, true>
-    // {
-    //     TailReturn<A, true> result{data(as) + 1};
-
-    //     if (A::ct_len == dyn)
-    //     {
-    //         const auto as_length = length(as);
-    //         if (as_length == 0)
-    //         {
-    //             abort();
-    //         }
-
-    //         result.resize(as_length - 1);
-    //     }
-
-    //     return result;
-    // }
 
     template <typename A>
     auto tail(const Seq<A> &as)
         -> TailReturn<A, true>
     {
         TailReturn<A, true> result{data(as) + 1, length(as) - Size<1>{}};
-
-        // if (A::ct_len == dyn)
-        // {
-        //     const auto as_length = length(as);
-        //     if (as_length == 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     result.resize(as_length - 1);
-        // }
 
         return result;
     }
@@ -529,17 +499,6 @@ namespace efp
         -> TailReturn<A, false>
     {
         TailReturn<A, false> result{data(as) + 1, length(as) - Size<1>{}};
-
-        // if (A::ct_len == dyn)
-        // {
-        //     const auto as_length = length(as);
-        //     if (as_length == 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     result.resize(as_length - 1);
-        // }
 
         return result;
     }
@@ -561,17 +520,6 @@ namespace efp
     {
         InitReturn<A, true> result{data(as), length(as) - Size<1>{}};
 
-        // if (A::ct_len == dyn)
-        // {
-        //     const auto as_length = length(as);
-        //     if (as_length == 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     result.resize(as_length - 1);
-        // }
-
         return result;
     }
 
@@ -581,17 +529,6 @@ namespace efp
         -> InitReturn<A, false>
     {
         InitReturn<A, false> result{data(as), length(as) - Size<1>{}};
-
-        // if (A::ct_len == dyn)
-        // {
-        //     const auto as_length = length(as);
-        //     if (as_length == 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     result.resize(as_length - 1);
-        // }
 
         return result;
     }
@@ -636,15 +573,6 @@ namespace efp
                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
-    // template <typename A, bool is_const>
-    // struct TakeReturnImpl<size_t, A, is_const>
-    // {
-    //     using Type = Conditional<
-    //         IsStaticCapacity<A>::value,
-    //         SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-    //         SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
-    // };
-
     // TakeReturn
 
     template <typename N, typename A, bool is_const>
@@ -656,29 +584,15 @@ namespace efp
     auto take(const N &n, const Seq<A> &as)
         -> TakeReturn<N, A, true>
     {
-        TakeReturn<N, A, true> result(data(as), n);
-        // TakeReturn<N, A, true> result(data(as), bound_v(Size<0>{}, length(as), n));
-
-        // if (TakeReturn<N, A, true>::ct_len == dyn)
-        // {
-        //     result.resize(bound_v(0, length(as), n));
-        // }
-
-        return result;
+        return TakeReturn<N, A, true>(data(as), n);
     }
 
     template <typename N, typename A>
     auto take(const N &n, Seq<A> &as)
         -> TakeReturn<N, A, false>
     {
-        TakeReturn<N, A, false> result{data(as), n};
 
-        // if (TakeReturn<N, A, false>::ct_len == dyn)
-        // {
-        //     result.resize(bound_v(0, length(as), n));
-        // }
-
-        return result;
+        return TakeReturn<N, A, true>(data(as), n);
     }
 
     // DropReturnImpl
@@ -704,15 +618,6 @@ namespace efp
                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
-    // template <typename A, bool is_const>
-    // struct DropReturnImpl<size_t, A, is_const>
-    // {
-    //     using Type = Conditional<
-    //         IsStaticCapacity<A>::value,
-    //         SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-    //         SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
-    // };
-
     // DropReturn
 
     template <typename N, typename A, bool is_const>
@@ -724,32 +629,14 @@ namespace efp
     auto drop(N n, const Seq<A> &as)
         -> DropReturn<N, A, true>
     {
-        // const auto as_length = length(as);
-        // const auto bounded_n = bound_v(Size<0>{}, as_length, n);
-        DropReturn<N, A, true> result{data(as) + n, length(as) - n};
-
-        // if (DropReturn<N, A, true>::ct_len == dyn)
-        // {
-        //     result.resize(as_length - bounded_n);
-        // }
-
-        return result;
+        return DropReturn<N, A, true>(data(as) + n, length(as) - n);
     }
 
     template <typename N, typename A>
     auto drop(N n, Seq<A> &as)
         -> DropReturn<N, A, false>
     {
-        // const auto as_length = length(as);
-        // const auto bounded_n = bound_v(Size<0>{}, as_length, n);
-        DropReturn<N, A, false> result{data(as) + n, length(as) - n};
-
-        // if (DropReturn<N, A, false>::ct_len == dyn)
-        // {
-        //     result.resize(as_length - bounded_n);
-        // }
-
-        return result;
+        return DropReturn<N, A, false>(data(as) + n, length(as) - n);
     }
 
     // SliceReturn
@@ -764,30 +651,14 @@ namespace efp
     auto slice(S start, E end, const Seq<A> &as)
         -> SliceReturn<S, E, A, true>
     {
-        // return take(end - start, drop(start, as));
-
-        // const auto as_length = length(as);
-        // const auto bounded_start = bound_v(Size<0>{}, as_length, start);
-        // const auto bounded_end = bound_v(Size<0>{}, as_length, end);
-
-        SliceReturn<S, E, A, true> result(data(as) + start, end - start);
-
-        return result;
+        return SliceReturn<S, E, A, true>(data(as) + start, end - start);
     }
 
     template <typename S, typename E, typename A>
     auto slice(S start, E end, Seq<A> &as)
         -> SliceReturn<S, E, A, false>
     {
-        // return take(end - start, drop(start, as));
-
-        // const auto as_length = length(as);
-        // const auto bounded_start = bound_v(Size<0>{}, as_length, start);
-        // const auto bounded_end = bound_v(Size<0>{}, as_length, end);
-
-        SliceReturn<S, E, A, false> result(data(as) + start, end - start);
-
-        return result;
+        return SliceReturn<S, E, A, false>(data(as) + start, end - start);
     }
 
     // elem
@@ -800,9 +671,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (as[i] == a)
-            {
                 return true;
-            }
         }
 
         return false;
@@ -818,9 +687,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (as[i] == a)
-            {
                 return i;
-            }
         }
 
         return nothing;
@@ -846,9 +713,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (a == as[i])
-            {
                 result.push_back(i);
-            }
         }
 
         return result;
@@ -864,9 +729,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
-            {
                 return true;
-            }
         }
 
         return false;
@@ -883,9 +746,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
-            {
                 return i;
-            }
         }
 
         return nothing;
@@ -911,9 +772,7 @@ namespace efp
         for (size_t i = 0; i < as_length; ++i)
         {
             if (f(as[i]))
-            {
                 result.push_back(i);
-            }
         }
 
         return result;
