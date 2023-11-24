@@ -846,32 +846,16 @@ namespace efp
 
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
-        // SequenceView() : data_{nullptr} {}
-        // // SequenceView(const SequenceView &) {}
-        // // SequenceView(SequenceView &&) {}
-
-        // SequenceView(A *data)
-        //     : data_{data}
-        // {
-        // }
-
-        // SequenceView &operator=(const SequenceView &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         data_ = other.data_;
-        //     }
-        //     return *this;
-        // }
-
-        // SequenceView assign_impl(const SequenceView &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         data_ = other.data_;
-        //     }
-        //     return *this;
-        // }
+        // ! length will not be used
+        explicit SequenceView(A *data, size_t length)
+            : data_(data)
+        {
+            // Ensure that data is not nullptr for a non-empty view.
+            if (ct_len > 0 && data_ == nullptr)
+            {
+                abort();
+            }
+        }
 
         explicit SequenceView(A *data)
             : data_(data)
@@ -887,11 +871,11 @@ namespace efp
         // copy assignment operator, move constructor, or move assignment operator,
         // you should define all of them. Here, the default behavior is size_tended.
 
-        SequenceView(const SequenceView &) = default;
-        SequenceView(SequenceView &&) noexcept = default;
-        SequenceView &operator=(const SequenceView &) = default;
-        SequenceView &operator=(SequenceView &&) noexcept = default;
-        ~SequenceView() = default;
+        // SequenceView(const SequenceView &) = default;
+        // SequenceView(SequenceView &&) noexcept = default;
+        // SequenceView &operator=(const SequenceView &) = default;
+        // SequenceView &operator=(SequenceView &&) noexcept = default;
+        // ~SequenceView() = default;
 
         A &operator[](int index)
         {
@@ -988,17 +972,27 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : data_{nullptr}, size_{0} {}
+        // SequenceView() : data_{nullptr}, size_{0} {}
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
+
+        explicit SequenceView(A *data, size_t size)
+            : data_(data), size_(size)
+        {
+            // Ensure that data is not nullptr for a non-empty view.
+            if (size > 0 && data_ == nullptr)
+            {
+                abort();
+            }
+        }
 
         SequenceView(A *data) : data_{data}
         {
         }
-        SequenceView(A *data, const int length)
-            : data_{data}, size_{length}
-        {
-        }
+        // SequenceView(A *data, const int length)
+        //     : data_{data}, size_{length}
+        // {
+        // }
 
         SequenceView &operator=(const SequenceView &other)
         {
@@ -1010,15 +1004,15 @@ namespace efp
             return *this;
         }
 
-        SequenceView assign_impl(const SequenceView &other)
-        {
-            if (this != &other)
-            {
-                data_ = other.data_;
-                size_ = other.size_;
-            }
-            return *this;
-        }
+        // SequenceView assign_impl(const SequenceView &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         data_ = other.data_;
+        //         size_ = other.size_;
+        //     }
+        //     return *this;
+        // }
 
         A &operator[](int index)
         {
@@ -1116,18 +1110,29 @@ namespace efp
         static constexpr int ct_len = dyn;
         static constexpr int ct_cap = dyn;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
+        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        SequenceView() : data_{nullptr}, size_{0}, capacity_{0} {}
+        // SequenceView() : data_{nullptr}, size_{0}, capacity_{0} {}
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
-        SequenceView(A *data) : data_{data}, size_{0}, capacity_{0}
+        explicit SequenceView(A *data, size_t size)
+            : data_(data), size_(size), capacity_(size)
         {
+            // Ensure that data is not nullptr for a non-empty view.
+            if (size > 0 && data_ == nullptr)
+            {
+                abort();
+            }
         }
-        SequenceView(A *data, const int length, const int capacity)
-            : data_{data}, size_{length}, capacity_{capacity} {}
+
+        // SequenceView(A *data) : data_{data}, size_{0}, capacity_{0}
+        // {
+        // }
+
+        // SequenceView(A *data, const int length, const int capacity)
+        //     : data_{data}, size_{length}, capacity_{capacity} {}
 
         SequenceView &operator=(const SequenceView &other)
         {
@@ -1140,16 +1145,16 @@ namespace efp
             return *this;
         }
 
-        SequenceView assign_impl(const SequenceView &other)
-        {
-            if (this != &other)
-            {
-                data_ = other.data_;
-                size_ = other.size_;
-                capacity_ = other.capacity_;
-            }
-            return *this;
-        }
+        // SequenceView assign_impl(const SequenceView &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         data_ = other.data_;
+        //         size_ = other.size_;
+        //         capacity_ = other.capacity_;
+        //     }
+        //     return *this;
+        // }
 
         A &operator[](int index)
         {
@@ -1368,14 +1373,14 @@ namespace efp
 
     template <typename A>
     constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_len != dyn, IntegralConst<int, A::ct_len>>
+        -> EnableIf<A::ct_len != dyn, IntegralConst<size_t, A::ct_len>>
     {
-        return IntegralConst<int, A::ct_len>{};
+        return IntegralConst<size_t, A::ct_len>{};
     }
 
     template <typename A>
     constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_len == dyn, int>
+        -> EnableIf<A::ct_len == dyn, size_t>
     {
         return as.size();
     }

@@ -483,22 +483,42 @@ namespace efp
 
     // tail
     // ! Partial function. Application on empty list is abortion.
+    // template <typename A>
+    // auto tail(const Seq<A> &as)
+    //     -> TailReturn<A, true>
+    // {
+    //     TailReturn<A, true> result{data(as) + 1};
+
+    //     if (A::ct_len == dyn)
+    //     {
+    //         const auto as_length = length(as);
+    //         if (as_length == 0)
+    //         {
+    //             abort();
+    //         }
+
+    //         result.resize(as_length - 1);
+    //     }
+
+    //     return result;
+    // }
+
     template <typename A>
     auto tail(const Seq<A> &as)
         -> TailReturn<A, true>
     {
-        TailReturn<A, true> result{data(as) + 1};
+        TailReturn<A, true> result{data(as) + 1, length(as) - Size<1>{}};
 
-        if (A::ct_len == dyn)
-        {
-            const auto as_length = length(as);
-            if (as_length == 0)
-            {
-                abort();
-            }
+        // if (A::ct_len == dyn)
+        // {
+        //     const auto as_length = length(as);
+        //     if (as_length == 0)
+        //     {
+        //         abort();
+        //     }
 
-            result.resize(as_length - 1);
-        }
+        //     result.resize(as_length - 1);
+        // }
 
         return result;
     }
@@ -507,18 +527,18 @@ namespace efp
     auto tail(Seq<A> &as)
         -> TailReturn<A, false>
     {
-        TailReturn<A, false> result{data(as) + 1};
+        TailReturn<A, false> result{data(as) + 1, length(as) - Size<1>{}};
 
-        if (A::ct_len == dyn)
-        {
-            const auto as_length = length(as);
-            if (as_length == 0)
-            {
-                abort();
-            }
+        // if (A::ct_len == dyn)
+        // {
+        //     const auto as_length = length(as);
+        //     if (as_length == 0)
+        //     {
+        //         abort();
+        //     }
 
-            result.resize(as_length - 1);
-        }
+        //     result.resize(as_length - 1);
+        // }
 
         return result;
     }
@@ -538,18 +558,18 @@ namespace efp
     auto init(const Seq<A> &as)
         -> InitReturn<A, true>
     {
-        InitReturn<A, true> result{data(as)};
+        InitReturn<A, true> result{data(as), length(as) - Size<1>{}};
 
-        if (A::ct_len == dyn)
-        {
-            const auto as_length = length(as);
-            if (as_length == 0)
-            {
-                abort();
-            }
+        // if (A::ct_len == dyn)
+        // {
+        //     const auto as_length = length(as);
+        //     if (as_length == 0)
+        //     {
+        //         abort();
+        //     }
 
-            result.resize(as_length - 1);
-        }
+        //     result.resize(as_length - 1);
+        // }
 
         return result;
     }
@@ -559,18 +579,18 @@ namespace efp
     auto init(Seq<A> &as)
         -> InitReturn<A, false>
     {
-        InitReturn<A, false> result{data(as)};
+        InitReturn<A, false> result{data(as), length(as) - Size<1>{}};
 
-        if (A::ct_len == dyn)
-        {
-            const auto as_length = length(as);
-            if (as_length == 0)
-            {
-                abort();
-            }
+        // if (A::ct_len == dyn)
+        // {
+        //     const auto as_length = length(as);
+        //     if (as_length == 0)
+        //     {
+        //         abort();
+        //     }
 
-            result.resize(as_length - 1);
-        }
+        //     result.resize(as_length - 1);
+        // }
 
         return result;
     }

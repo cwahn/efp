@@ -274,7 +274,7 @@ TEST_CASE("tail")
     {
         CHECK(tail(array_3) == ArrayView<const double, 2>{data(array_3) + 1});
         CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3) + 1, 2});
-        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2, 2});
+        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2});
     }
 
     SECTION("non const")
@@ -285,7 +285,7 @@ TEST_CASE("tail")
 
         CHECK(tail(array) == ArrayView<double, 2>{data(array) + 1});
         CHECK(tail(arrvec) == ArrVecView<double, 2>{data(arrvec) + 1, 2});
-        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2, 2});
+        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2});
     }
 }
 
@@ -295,7 +295,7 @@ TEST_CASE("init")
     {
         CHECK(init(array_3) == ArrayView<const double, 2>{data(array_3)});
         CHECK(init(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3), 2});
-        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2, 2});
+        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2});
     }
 
     SECTION("non const")
@@ -306,7 +306,7 @@ TEST_CASE("init")
 
         CHECK(init(array) == ArrayView<double, 2>{data(array)});
         CHECK(init(arrvec) == ArrVecView<double, 2>{data(arrvec), 2});
-        CHECK(init(vector) == VectorView<double>{data(vector), 2, 2});
+        CHECK(init(vector) == VectorView<double>{data(vector), 2});
     }
 }
 
@@ -330,7 +330,7 @@ TEST_CASE("take")
 
     SECTION("array 1")
     {
-        const auto res = take(-1, array_3);
+        const auto res = take(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
@@ -358,7 +358,8 @@ TEST_CASE("drop")
 
     SECTION("array 1")
     {
-        const auto res = drop(-1, array_3);
+        // ! do not put negative values
+        const auto res = drop(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
@@ -388,7 +389,7 @@ TEST_CASE("slice")
     SECTION("dynamic")
     {
         const auto slice_ = slice(1, 3, array_5);
-        CHECK(IsSame<decltype(length(slice_)), int>::value);
+        CHECK(IsSame<decltype(length(slice_)), size_t>::value);
         CHECK(!IsStaticLength<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
         CHECK(slice_[1] == 3.);
