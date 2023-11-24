@@ -300,7 +300,7 @@ namespace efp
 
     // for_index
 
-    template <typename F = void (*)(const size_t &)>
+    template <typename F = void (*)(size_t)>
     void for_index(const F &f, const size_t i)
     {
         for (size_t j = 0; j < i; ++j)
@@ -311,7 +311,7 @@ namespace efp
 
     // for_each_with_index
 
-    template <typename... Ts, typename F = void (*)(const size_t &, const Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(size_t, const Element<Ts> &...)>
     void for_each_with_index(const F &f, const Seq<Ts> &...seqs)
     {
         const auto min_length_ = min_length(seqs...);
@@ -324,7 +324,7 @@ namespace efp
 
     // for_each_with_indexi
 
-    template <typename... Ts, typename F = void (*)(const size_t &, Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(size_t, Element<Ts> &...)>
     void for_each_with_indexi(const F &f, Seq<Ts> &...seqs)
     {
         const size_t min_length_ = min_length(seqs...);
@@ -391,7 +391,7 @@ namespace efp
 
     // map_with_index
 
-    template <typename... Ts, typename F = void (*)(const size_t &, const Element<Ts> &...)>
+    template <typename... Ts, typename F = void (*)(size_t, const Element<Ts> &...)>
     auto map_with_index(const F &f, const Seq<Ts> &...seqs)
         -> MapWithIndexRetrun<F, Ts...>
     {
@@ -443,14 +443,14 @@ namespace efp
 
     // cartesian_for_index
 
-    template <typename F = void (*)(const size_t &)>
-    void cartesian_for_index(const F &f, const size_t &i)
+    template <typename F = void (*)(size_t)>
+    void cartesian_for_index(const F &f, size_t i)
     {
         for_index(f, i);
     }
 
-    template <typename... Ints, typename F = void (*)(const size_t &)>
-    void cartesian_for_index(const F &f, const size_t &i, const Ints &...is)
+    template <typename... Ints, typename F = void (*)(size_t)>
+    void cartesian_for_index(const F &f, size_t i, const Ints &...is)
     {
         for (size_t i_ = 0; i_ < i; ++i_)
         {
@@ -581,14 +581,14 @@ namespace efp
     // take
 
     template <typename N = size_t, typename A>
-    auto take(const N &n, const Seq<A> &as)
+    auto take(N n, const Seq<A> &as)
         -> TakeReturn<N, A, true>
     {
         return TakeReturn<N, A, true>(data(as), n);
     }
 
     template <typename N, typename A>
-    auto take(const N &n, Seq<A> &as)
+    auto take(N n, Seq<A> &as)
         -> TakeReturn<N, A, false>
     {
 
