@@ -168,13 +168,13 @@ namespace efp
     // Reducings
 
     template <typename A>
-    constexpr Element<A> maximum(const Seq<A> &as)
+    constexpr Element<A> max_elem(const Seq<A> &as)
     {
         return foldl(max, NumericLimits<Element<A>>::min(), as);
     }
 
     template <typename A>
-    constexpr Element<A> minimum(const Seq<A> &as)
+    constexpr Element<A> min_elem(const Seq<A> &as)
     {
         return foldl(min, NumericLimits<Element<A>>::max(), as);
     }
@@ -182,7 +182,7 @@ namespace efp
     template <typename A>
     constexpr Element<A> max_min(const Seq<A> &as)
     {
-        return maximum(as) - minimum(as);
+        return max_elem(as) - min_elem(as);
     }
 
     template <typename A>

@@ -40,39 +40,39 @@ TEST_CASE("complex_cast")
     CHECK(complex_cast<false>(complex_a) == real_a);
 }
 
-TEST_CASE("maximum")
+TEST_CASE("max_elem")
 {
     SECTION("c style ")
     {
-        CHECK(maximum(array_5) == 5);
+        CHECK(max_elem(array_5) == 5);
     }
 
     SECTION("std::array ")
     {
-        CHECK(maximum(array_5) == 5.);
+        CHECK(max_elem(array_5) == 5.);
     }
 
     SECTION("std::vectors")
     {
-        CHECK(maximum(vector_5) == 5.);
+        CHECK(max_elem(vector_5) == 5.);
     }
 }
 
-TEST_CASE("minimum")
+TEST_CASE("min_elem")
 {
     SECTION("c style ")
     {
-        CHECK(minimum(array_5) == 1);
+        CHECK(min_elem(array_5) == 1);
     }
 
     SECTION("std::array ")
     {
-        CHECK(minimum(array_5) == 1.);
+        CHECK(min_elem(array_5) == 1.);
     }
 
     SECTION("std::vectors")
     {
-        CHECK(minimum(vector_5) == 1.);
+        CHECK(min_elem(vector_5) == 1.);
     }
 }
 
