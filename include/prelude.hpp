@@ -489,18 +489,14 @@ namespace efp
     auto tail(const Seq<A> &as)
         -> TailReturn<A, true>
     {
-        TailReturn<A, true> result{data(as) + 1, length(as) - Size<1>{}};
-
-        return result;
+        return TailReturn<A, true>{data(as) + 1, length(as) - Size<1>{}};
     }
 
     template <typename A>
     auto tail(Seq<A> &as)
         -> TailReturn<A, false>
     {
-        TailReturn<A, false> result{data(as) + 1, length(as) - Size<1>{}};
-
-        return result;
+        return TailReturn<A, false>{data(as) + 1, length(as) - Size<1>{}};
     }
 
     // InitReturn
@@ -518,9 +514,7 @@ namespace efp
     auto init(const Seq<A> &as)
         -> InitReturn<A, true>
     {
-        InitReturn<A, true> result{data(as), length(as) - Size<1>{}};
-
-        return result;
+        return InitReturn<A, true>{data(as), length(as) - Size<1>{}};
     }
 
     // ! Partial function. Make sure non empty
@@ -528,9 +522,7 @@ namespace efp
     auto init(Seq<A> &as)
         -> InitReturn<A, false>
     {
-        InitReturn<A, false> result{data(as), length(as) - Size<1>{}};
-
-        return result;
+        return InitReturn<A, false>{data(as), length(as) - Size<1>{}};
     }
 
     // last
