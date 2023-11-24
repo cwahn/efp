@@ -85,14 +85,14 @@ namespace efp
 
     // AppendReturn
 
-    template <typename... Ts>
+    template <typename... As>
     using AppendReturn = Conditional<
-        AreAllStaticLength<Ts...>::value,
-        Sequence<Common<Element<Ts>...>, sum_v(Ts::ct_len...), sum_v(Ts::ct_len...)>,
+        AreAllStaticLength<As...>::value,
+        Sequence<Common<Element<As>...>, sum_v(As::ct_len...), sum_v(As::ct_len...)>,
         Conditional<
-            AreAllStaticCapacity<Ts...>::value,
-            Sequence<Common<Element<Ts>...>, dyn, sum_v(Ts::ct_cap...)>,
-            Sequence<Common<Element<Ts>...>, dyn, dyn>>>;
+            AreAllStaticCapacity<As...>::value,
+            Sequence<Common<Element<As>...>, dyn, sum_v(As::ct_cap...)>,
+            Sequence<Common<Element<As>...>, dyn, dyn>>>;
 
     // append
 
@@ -110,13 +110,13 @@ namespace efp
         return unit;
     }
 
-    template <typename H, typename... Ts>
-    auto append(const Seq<H> &head, const Seq<Ts> &...tail)
-        -> AppendReturn<H, Ts...>
+    template <typename H, typename... As>
+    auto append(const Seq<H> &head, const Seq<As> &...tail)
+        -> AppendReturn<H, As...>
     {
-        AppendReturn<H, Ts...> result{};
+        AppendReturn<H, As...> result{};
 
-        if (AppendReturn<H, Ts...>::ct_len == dyn)
+        if (AppendReturn<H, As...>::ct_len == dyn)
         {
             result.resize(sum_v(static_cast<size_t>(length(head)), length(tail)...));
         }
@@ -130,8 +130,8 @@ namespace efp
 
     // min_length
 
-    template <typename A, typename... Ts>
-    size_t min_length(const Seq<A> &as, const Seq<Ts> &...seqs)
+    template <typename A, typename... As>
+    size_t min_length(const Seq<A> &as, const Seq<As> &...seqs)
     {
         return minimum_v(static_cast<size_t>(length(as)), length(seqs)...);
     }
@@ -311,8 +311,8 @@ namespace efp
 
     // for_each_with_index
 
-    template <typename... Ts, typename F = void (*)(size_t, const Element<Ts> &...)>
-    void for_each_with_index(const F &f, const Seq<Ts> &...seqs)
+    template <typename... As, typename F = void (*)(size_t, const Element<As> &...)>
+    void for_each_with_index(const F &f, const Seq<As> &...seqs)
     {
         const auto min_length_ = min_length(seqs...);
 
@@ -324,8 +324,8 @@ namespace efp
 
     // for_each_with_indexi
 
-    template <typename... Ts, typename F = void (*)(size_t, Element<Ts> &...)>
-    void for_each_with_indexi(const F &f, Seq<Ts> &...seqs)
+    template <typename... As, typename F = void (*)(size_t, Element<As> &...)>
+    void for_each_with_indexi(const F &f, Seq<As> &...seqs)
     {
         const size_t min_length_ = min_length(seqs...);
 
@@ -343,18 +343,18 @@ namespace efp
         for_each(f, as);
     }
 
-    template <typename A, typename... Ts, typename F = void (*)(const Element<A> &, const Element<Ts> &...)>
-    void cartesian_for_each(const F &f, const Seq<A> &as, const Seq<Ts> &...seqs)
+    template <typename A, typename... As, typename F = void (*)(const Element<A> &, const Element<As> &...)>
+    void cartesian_for_each(const F &f, const Seq<A> &as, const Seq<As> &...seqs)
     {
         const auto as_length = length(as);
 
         for (size_t i = 0; i < as_length; ++i)
         {
             const auto a = as[i];
-            const auto inner = [&](Element<Ts>... xs)
+            const auto inner = [&](Element<As>... xs)
             { f(a, xs...); };
 
-            cartesian_for_each<Ts..., decltype(inner)>(inner, seqs...);
+            cartesian_for_each<As..., decltype(inner)>(inner, seqs...);
         }
     }
 
@@ -366,39 +366,39 @@ namespace efp
         for_eachi(f, as);
     }
 
-    template <typename A, typename... Ts, typename F = void (*)(const Element<A> &, const Element<Ts> &...)>
-    void cartesian_for_eachi(const F &f, Seq<A> &as, Seq<Ts> &...seqs)
+    template <typename A, typename... As, typename F = void (*)(const Element<A> &, const Element<As> &...)>
+    void cartesian_for_eachi(const F &f, Seq<A> &as, Seq<As> &...seqs)
     {
         const auto as_length = length(as);
 
         for (size_t i = 0; i < as_length; ++i)
         {
             const auto a = as[i];
-            const auto inner = [&](Element<Ts>... xs)
+            const auto inner = [&](Element<As>... xs)
             { f(a, xs...); };
 
-            cartesian_for_eachi<Ts..., decltype(inner)>(inner, seqs...);
+            cartesian_for_eachi<As..., decltype(inner)>(inner, seqs...);
         }
     }
 
     // MapWithIndexRetrun
 
-    template <typename F, typename... Ts>
+    template <typename F, typename... As>
     using MapWithIndexRetrun = Sequence<
-        CallReturn<F, size_t, Element<Ts>...>,
-        AreAllStaticCapacity<Ts...>::value ? MinStaticCapacity<Ts...>::value : dyn,
-        AreAllStaticLength<Ts...>::value ? MinStaticLength<Ts...>::value : dyn>;
+        CallReturn<F, size_t, Element<As>...>,
+        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
+        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
 
     // map_with_index
 
-    template <typename... Ts, typename F = void (*)(size_t, const Element<Ts> &...)>
-    auto map_with_index(const F &f, const Seq<Ts> &...seqs)
-        -> MapWithIndexRetrun<F, Ts...>
+    template <typename... As, typename F = void (*)(size_t, const Element<As> &...)>
+    auto map_with_index(const F &f, const Seq<As> &...seqs)
+        -> MapWithIndexRetrun<F, As...>
     {
-        MapWithIndexRetrun<F, Ts...> result;
+        MapWithIndexRetrun<F, As...> result;
         const auto bounded_n = min_length(seqs...);
 
-        if (MapWithIndexRetrun<F, Ts...>::ct_len == dyn)
+        if (MapWithIndexRetrun<F, As...>::ct_len == dyn)
         {
             result.resize(bounded_n);
         }
@@ -413,27 +413,27 @@ namespace efp
 
     // CartesianMapReturn
 
-    template <typename F, typename... Ts>
+    template <typename F, typename... As>
     using CartesianMapReturn = Sequence<
-        CallReturn<F, Element<Ts>...>,
-        AreAllStaticLength<Ts...>::value ? product_v(StaticLength<Ts>::value...) : dyn,
-        AreAllStaticCapacity<Ts...>::value ? product_v(StaticCapacity<Ts>::value...) : dyn>;
+        CallReturn<F, Element<As>...>,
+        AreAllStaticLength<As...>::value ? product_v(StaticLength<As>::value...) : dyn,
+        AreAllStaticCapacity<As...>::value ? product_v(StaticCapacity<As>::value...) : dyn>;
 
     // cartesian_map
 
     // ! Maybe need to bechmark and optimize
-    template <typename... Ts, typename F = void (*)(const Element<Ts> &...)>
-    auto cartesian_map(const F &f, const Seq<Ts> &...seqs)
-        -> CartesianMapReturn<F, Ts...>
+    template <typename... As, typename F = void (*)(const Element<As> &...)>
+    auto cartesian_map(const F &f, const Seq<As> &...seqs)
+        -> CartesianMapReturn<F, As...>
     {
-        CartesianMapReturn<F, Ts...> result;
-        if (CartesianMapReturn<F, Ts...>::ct_len == dyn)
+        CartesianMapReturn<F, As...> result;
+        if (CartesianMapReturn<F, As...>::ct_len == dyn)
         {
             result.resize(product_v(static_cast<size_t>(length(seqs))...));
         }
 
         size_t i = 0;
-        const auto inner = [&](Element<Ts>... xs)
+        const auto inner = [&](Element<As>... xs)
         { result[i++] = f(xs...); };
 
         cartesian_for_each(inner, seqs...);
