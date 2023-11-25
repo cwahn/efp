@@ -11,10 +11,9 @@ namespace efp
         template <typename In, typename T>
         bool start_with(const Seq<In> &in, const Seq<T> &t)
         {
-            const auto in_length = length(in);
             const auto t_length = length(t);
 
-            if (in_length >= t_length)
+            if (length(in) >= t_length)
             {
                 for (size_t i = 0; i < t_length; ++i)
                 {
@@ -27,6 +26,8 @@ namespace efp
 
             return false;
         }
+
+        // Ch
 
         struct Ch
         {
@@ -51,6 +52,107 @@ namespace efp
             return Ch{t};
         }
 
+        // alpha
+
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> alpha0(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isalpha(in[i]))
+            {
+                ++i;
+            }
+
+            // Return the consumed characters and the rest of the input
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                // Return the whole input and an empty string since no characters were consumed
+                return tuple(drop(0, in), StringView{in.data(), 0});
+        }
+
+        // alpha1 will parse one or more alphabetic characters
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> alpha1(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isalpha(in[i]))
+            {
+                ++i;
+            }
+
+            // Must have consumed at least one character to succeed
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                // If no characters were consumed, return nothing to indicate failure
+                return nothing;
+        }
+
+        // numeric0 will parse zero or more numeric characters
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> numeric0(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isdigit(in[i]))
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // numeric1 will parse one or more numeric characters
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> numeric1(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isdigit(in[i]))
+            {
+                ++i;
+            }
+            if (i > 0)
+            {
+                return tuple(drop(i, in), take(i, in));
+            }
+            else
+            {
+                return nothing;
+            }
+        }
+
+        // alphanum0 will parse zero or more alphanumeric characters
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> alphanum0(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isalnum(in[i]))
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // alphanum1 will parse one or more alphanumeric characters
+        template <typename In>
+        Maybe<Pair<StringView, StringView>> alphanum1(const Seq<In> &in)
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isalnum(in[i]))
+            {
+                ++i;
+            }
+            if (i > 0)
+            {
+                return tuple(drop(i, in), take(i, in));
+            }
+            else
+            {
+                return nothing;
+            }
+        }
+
+        // Tag
+
         struct Tag
         {
             StringView t;
@@ -69,6 +171,8 @@ namespace efp
         {
             return Tag{StringView{str, strlen(str)}};
         }
+
+        // Alt
 
         template <typename... Ps>
         struct Alt
