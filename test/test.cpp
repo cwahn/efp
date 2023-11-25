@@ -11,3 +11,4 @@
 #include "string_test.hpp"
 // #include "format_test.hpp"
 #include "sort_test.hpp"
+#include "parser_test.hpp"

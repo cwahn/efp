@@ -118,7 +118,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A();
+                new (&data_[i]) Element();
             }
         }
 
@@ -126,7 +126,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A(other.data_[i]);
+                new (&data_[i]) Element(other.data_[i]);
             }
         }
 
@@ -134,7 +134,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A(efp::move(other.data_[i])); // Move-construct each element
+                new (&data_[i]) Element(efp::move(other.data_[i])); // Move-construct each element
             }
         }
 
@@ -168,12 +168,12 @@ namespace efp
             return *this;
         }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -222,27 +222,27 @@ namespace efp
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + ct_len;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + ct_len;
         }
@@ -253,7 +253,7 @@ namespace efp
         }
 
     private:
-        A data_[ct_cap];
+        Element data_[ct_cap];
     };
 
     template <typename A, size_t ct_length>
@@ -853,7 +853,7 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
         // ! length will not be used
-        SequenceView(A *data, Size<ct_len> length = Size<ct_len>{})
+        constexpr SequenceView(A *data, Size<ct_len> length = Size<ct_len>{})
             : data_(data)
         {
             // Ensure that data is not nullptr for a non-empty view.

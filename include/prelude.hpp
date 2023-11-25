@@ -6,7 +6,6 @@
 #include "maybe.hpp"
 #include "sequence.hpp"
 
-
 // Trust compiler for length calculation
 
 namespace efp
@@ -136,6 +135,24 @@ namespace efp
     {
         return minimum_v(static_cast<size_t>(length(as)), length(seqs)...);
     }
+
+    // // Zip
+
+    // template <typename... As>
+    // struct Zip
+    // {
+    //     Tuple<As &...> seqs;
+    //     size_t length_;
+    // };
+
+    // // zip
+
+    // template <typename... As>
+    // auto zip(const Seq<As> &...seqs) -> Zip<As...>
+    // {
+    //     const auto len = min_length(seqs...);
+    //     return
+    // }
 
     // for_each
 

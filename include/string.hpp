@@ -349,6 +349,8 @@ namespace efp
 
     using String = Sequence<char, dyn, dyn>;
 
+    using StringView = SequenceView<const char, dyn, dyn>;
+
     String join(const String &delimeter, const Vector<String> &strings)
     {
         String result{};
