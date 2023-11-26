@@ -118,6 +118,10 @@ namespace efp
         {
         };
 
+        Enum()
+        {
+        }
+
         template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
         Enum(const A &a)
             : index_(VariantIndex<A>::value)
@@ -290,10 +294,6 @@ namespace efp
         }
 
     private:
-        Enum()
-        {
-        }
-
         alignas(maximum_v(alignof(As)...)) uint8_t storage_[maximum_v(sizeof(As)...)];
         uint8_t index_;
     };
