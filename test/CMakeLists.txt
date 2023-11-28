@@ -25,7 +25,6 @@ target_link_libraries(io_demo
 #     efp)
 
 add_executable(all_test test.cpp)
-
 target_link_libraries(all_test
     PRIVATE
     Catch2::Catch2WithMain
@@ -33,10 +32,3 @@ target_link_libraries(all_test
 
 catch_discover_tests(all_test)
 
-# add_custom_command(
-#     TARGET all_test
-#     COMMENT "Run tests"
-#     POST_BUILD
-#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#     COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> "all_test" --output-on-failure
-# )

@@ -14,25 +14,26 @@ project(
     DESCRIPTION "Eager functional programming library for C++ 11"
     LANGUAGES CXX)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-    message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
-
-    if(MSVC_VERSION VERSION_LESS "1934")
-        message(WARNING "NVRO is not encouraged. Zc:NRVO not supported under MSVC 17.4.")
-    endif()
-endif()
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 # set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 # set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+    message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
+    if(MSVC_VERSION VERSION_LESS "1934")
+        message(WARNING "NVRO is not encouraged. Zc:NRVO not supported under MSVC 17.4.")
+    endif()
+endif()
+
 if(MSVC)
     if(MSVC_VERSION VERSION_GREATER_EQUAL "1934")
         string(APPEND CMAKE_CXX_FLAGS " /Zc:nrvo")
     endif()
 endif()
+
+include(CTest)
 
 find_package(Catch2 3)
 
@@ -46,7 +47,6 @@ if(NOT Catch2_FOUND)
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-include(CTest)
 include(Catch)
 enable_testing()
 

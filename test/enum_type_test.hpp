@@ -158,6 +158,21 @@ TEST_CASE("enum_match")
         CHECK(a.match([]()
                       { return 42; }) == 42);
     }
+
+    SECTION("non-trivial0")
+    {
+#include <string>
+        Enum<bool, std::string> a = std::string("Hello");
+        int b = 42;
+
+        int c = a.match(
+            [&](bool x)
+            { return b * 0; },
+            [&](std::string x)
+            { return 42; });
+
+        CHECK(b == 42);
+    }
 }
 
 #endif
