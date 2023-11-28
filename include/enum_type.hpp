@@ -29,10 +29,18 @@ namespace efp
     {
         const F &f;
 
-        Return<F> operator()(...) const
+        template <typename... Args>
+        auto operator()(const Args &...) const
+            -> decltype(declval<F>()())
         {
             return f();
         }
+    };
+
+    template <typename F>
+    struct ReturnImpl<WildCardWrapper<F>>
+    {
+        using Type = decltype(declval<F>()());
     };
 
     // MatchBranchImpl

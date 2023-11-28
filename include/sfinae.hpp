@@ -882,14 +882,14 @@ namespace efp
     // ReturnImpl
 
     template <typename F, typename Enable = void>
-    struct ReturnImpl
+    struct ReturnImpl : FunctionReturnImpl<F>
     {
     };
 
-    template <typename F>
-    struct ReturnImpl<F, EnableIf<!HasCallOperator<F>::value, void>> : FunctionReturnImpl<F>
-    {
-    };
+    // template <typename F>
+    // struct ReturnImpl<F, EnableIf<!HasCallOperator<F>::value, void>> : FunctionReturnImpl<F>
+    // {
+    // };
 
     template <typename F>
     struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>> : FunctionReturnImpl<decltype(&F::operator())>
