@@ -349,7 +349,7 @@ namespace efp
 
     using String = Sequence<char, dyn, dyn>;
 
-    String join(const String &delimeter, const Vector<String> &strings)
+    inline String join(const String &delimeter, const Vector<String> &strings)
     {
         String result{};
 
@@ -368,7 +368,7 @@ namespace efp
 
 // todo STL only
 #include <iostream>
-    std::ostream &operator<<(std::ostream &os, const String &string)
+    inline std::ostream &operator<<(std::ostream &os, const String &string)
     {
         for_each([&](char c)
                  { os << c; },
