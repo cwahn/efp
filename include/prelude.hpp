@@ -6,7 +6,6 @@
 #include "maybe.hpp"
 #include "sequence.hpp"
 
-
 // Trust compiler for length calculation
 
 namespace efp
@@ -573,7 +572,7 @@ namespace efp
 
     // take
 
-    template <typename N = size_t, typename A>
+    // !Should not put n longer than the length. Check should be done by the caller
     auto take(N n, const Seq<A> &as)
         -> TakeReturn<N, A, true>
     {
