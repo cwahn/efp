@@ -670,6 +670,11 @@ namespace efp
     private:
     };
 
+    // Pair
+
+    template <typename A, typename B>
+    using Pair = Tuple<A, B>;
+
     template <size_t index, typename... As>
     auto get(const Tuple<As...> &tpl)
         -> const PackAt<index, As...> &
