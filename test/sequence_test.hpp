@@ -458,6 +458,15 @@ TEST_CASE("ArrayView")
 
 TEST_CASE("VectorView")
 {
+    // ! constexpr ArrayView does not works
+    // SECTION("constexpr construction")
+    // {
+    //     constexpr double ct_data[3] = {1., 2., 3.};
+    //     constexpr VectorView<const double> view_1{ct_data, 3};
+    //     auto view_2 = view_1;
+    //     CHECK(view_1 == view_2);
+    // }
+
     SECTION("copy construction")
     {
         VectorView<const double> view_1{data(array_3), 3};
