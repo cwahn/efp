@@ -7,6 +7,16 @@
 
 using namespace efp;
 
+int add3(int x)
+{
+    return x + 3;
+}
+
+double half(double x)
+{
+    return x / 2.0;
+}
+
 TEST_CASE("compose")
 {
     SECTION("pure0")
@@ -65,6 +75,26 @@ TEST_CASE("compose")
 
         const auto composed = compose(devide_2, add_1, square);
         CHECK(composed(2) == 2.5);
+    }
+
+    SECTION("with normal functions")
+    {
+        auto composed = compose(half, add3);
+
+        CHECK(composed(4) == 3.5); // (4 + 3) / 2.0 = 7 / 2.0 = 3.5
+    }
+
+    SECTION("with mixed normal and lambda functions")
+    {
+        auto multiply_by_2 = [](int x)
+        { return x * 2; };
+
+        auto subtract_1 = [](int x)
+        { return x - 1; };
+
+        auto composed = compose(subtract_1, add3, multiply_by_2);
+
+        CHECK(composed(5) == 12); // ((5 * 2) + 3) - 1 = 10 + 3 - 1 = 12
     }
 }
 
