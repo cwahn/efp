@@ -573,6 +573,7 @@ namespace efp
     // take
 
     // !Should not put n longer than the length. Check should be done by the caller
+    template <typename N, typename A>
     auto take(N n, const Seq<A> &as)
         -> TakeReturn<N, A, true>
     {
