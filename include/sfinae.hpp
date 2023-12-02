@@ -705,6 +705,38 @@ namespace efp
         return tpl.template get<index>();
     }
 
+    // fst
+
+    template <typename... As>
+    auto fst(const Tuple<As...> &tpl)
+        -> const PackAt<0, As...> &
+    {
+        return tpl.template get<0>();
+    }
+
+    template <typename... As>
+    auto fst(Tuple<As...> &tpl)
+        -> PackAt<0, As...> &
+    {
+        return tpl.template get<0>();
+    }
+
+    // snd
+
+    template <typename... As>
+    auto snd(const Tuple<As...> &tpl)
+        -> const PackAt<1, As...> &
+    {
+        return tpl.template get<1>();
+    }
+
+    template <typename... As>
+    auto snd(Tuple<As...> &tpl)
+        -> PackAt<1, As...> &
+    {
+        return tpl.template get<1>();
+    }
+
     template <size_t index>
     struct TupleLeafComparatorImpl
     {
