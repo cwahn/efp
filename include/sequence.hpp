@@ -118,7 +118,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A();
+                new (&data_[i]) Element();
             }
         }
 
@@ -126,7 +126,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A(other.data_[i]);
+                new (&data_[i]) Element(other.data_[i]);
             }
         }
 
@@ -134,7 +134,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len; ++i)
             {
-                new (&data_[i]) A(efp::move(other.data_[i])); // Move-construct each element
+                new (&data_[i]) Element(efp::move(other.data_[i])); // Move-construct each element
             }
         }
 
@@ -168,12 +168,12 @@ namespace efp
             return *this;
         }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -217,32 +217,32 @@ namespace efp
             }
         }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + ct_len;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + ct_len;
         }
@@ -277,7 +277,7 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                new (&data_[i]) A(other.data_[i]);
+                new (&data_[i]) Element(other.data_[i]);
             }
         }
 
@@ -333,16 +333,16 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                data_[i].~A();
+                data_[i].~Element();
             }
         }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -393,7 +393,7 @@ namespace efp
             }
         }
 
-        void push_back(const A &value)
+        void push_back(const Element &value)
         {
             if (size_ >= ct_cap)
             {
@@ -401,12 +401,12 @@ namespace efp
             }
             else
             {
-                new (&data_[size_]) A(value);
+                new (&data_[size_]) Element(value);
                 ++size_;
             }
         }
 
-        void push_back(A &&value)
+        void push_back(Element &&value)
         {
             if (size_ >= ct_cap)
             {
@@ -414,12 +414,12 @@ namespace efp
             }
             else
             {
-                new (&data_[size_]) A(efp::move(value));
+                new (&data_[size_]) Element(efp::move(value));
                 ++size_;
             }
         }
 
-        void insert(size_t index, const A &value)
+        void insert(size_t index, const Element &value)
         {
             if (index < 0 || index > size_ || size_ == ct_capacity)
             {
@@ -428,11 +428,11 @@ namespace efp
 
             for (size_t i = size_; i > index; --i)
             {
-                new (&data_[i]) A(efp::move(data_[i - 1]));
-                data_[i - 1].~A();
+                new (&data_[i]) Element(efp::move(data_[i - 1]));
+                data_[i - 1].~Element();
             }
 
-            new (&data_[index]) A(value);
+            new (&data_[index]) Element(value);
 
             ++size_;
         }
@@ -444,7 +444,7 @@ namespace efp
                 abort();
             }
 
-            data_[size_ - 1].~A();
+            data_[size_ - 1].~Element();
             --size_;
         }
 
@@ -452,7 +452,7 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                data_[i].~A();
+                data_[i].~Element();
             }
             size_ = 0;
         }
@@ -463,41 +463,41 @@ namespace efp
             {
                 abort();
             }
-            data_[index].~A();
+            data_[index].~Element();
             for (size_t i = index; i < size_ - 1; ++i)
             {
-                new (&data_[i]) A(efp::move(data_[i + 1]));
-                data_[i + 1].~A();
+                new (&data_[i]) Element(efp::move(data_[i + 1]));
+                data_[i + 1].~Element();
             }
             --size_;
         }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + size_;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + size_;
         }
@@ -508,7 +508,7 @@ namespace efp
         }
 
     private:
-        A data_[ct_cap];
+        Element data_[ct_cap];
         size_t size_;
     };
 
@@ -536,12 +536,12 @@ namespace efp
             {
                 size_ = other.size_;
                 capacity_ = other.capacity_;
-                data_ = new A[capacity_];
+                data_ = new Element[capacity_];
 
                 // memcpy(data_, other.data_, sizeof(A) * size_);
                 for (size_t i = 0; i < other.size_; ++i)
                 {
-                    new (&data_[i]) A(other.data_[i]);
+                    new (&data_[i]) Element(other.data_[i]);
                 }
             }
         }
@@ -554,7 +554,7 @@ namespace efp
 
         template <typename... Args>
         Sequence(const Args &...args)
-            : data_{new A[sizeof...(args)]},
+            : data_{new Element[sizeof...(args)]},
               capacity_(sizeof...(args)),
               size_(sizeof...(args))
         {
@@ -577,10 +577,10 @@ namespace efp
         {
             if (this != &other)
             {
-                A *newData = nullptr;
+                Element *newData = nullptr;
                 if (other.size_ > 0)
                 {
-                    newData = new A[other.capacity_];
+                    newData = new Element[other.capacity_];
 
                     for (size_t i = 0; i < other.size_; ++i)
                     {
@@ -616,10 +616,10 @@ namespace efp
         {
             if (this != &other)
             {
-                A *newData = nullptr;
+                Element *newData = nullptr;
                 if (other.size_ > 0)
                 {
-                    newData = new A[other.capacity_];
+                    newData = new Element[other.capacity_];
 
                     for (size_t i = 0; i < other.size_; ++i)
                     {
@@ -634,12 +634,12 @@ namespace efp
             return *this;
         }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -691,12 +691,12 @@ namespace efp
         {
             if (new_capacity > capacity_)
             {
-                A *new_data = new A[new_capacity];
+                Element *new_data = new Element[new_capacity];
 
                 for (size_t i = 0; i < size_; ++i)
                 {
-                    new (&new_data[i]) A(efp::move(data_[i]));
-                    data_[i].~A();
+                    new (&new_data[i]) Element(efp::move(data_[i]));
+                    data_[i].~Element();
                 }
 
                 delete[] data_;
@@ -706,29 +706,29 @@ namespace efp
             }
         }
 
-        void push_back(const A &value)
+        void push_back(const Element &value)
         {
             if (size_ >= capacity_)
             {
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
 
-            new (&data_[size_]) A{value};
+            new (&data_[size_]) Element(value);
             ++size_;
         }
 
-        void push_back(A &&value)
+        void push_back(Element &&value)
         {
             if (size_ >= capacity_)
             {
                 reserve(capacity_ == 0 ? 1 : 2 * capacity_);
             }
 
-            new (&data_[size_]) A(efp::move(value));
+            new (&data_[size_]) Element(efp::move(value));
             ++size_;
         }
 
-        void insert(size_t index, const A &value)
+        void insert(size_t index, const Element &value)
         {
             if (index < 0 || index > size_)
             {
@@ -742,7 +742,7 @@ namespace efp
             {
                 data_[i] = efp::move(data_[i - 1]);
             }
-            new (&data_[index]) A(value);
+            new (&data_[index]) Element(value);
             ++size_;
         }
 
@@ -753,11 +753,11 @@ namespace efp
                 abort();
             }
 
-            data_[index].~A();
+            data_[index].~Element();
             for (size_t i = index; i < size_ - 1; ++i)
             {
-                new (&data_[i]) A(efp::move(data_[i + 1]));
-                data_[i + 1].~A();
+                new (&data_[i]) Element(efp::move(data_[i + 1]));
+                data_[i + 1].~Element();
             }
 
             --size_;
@@ -767,7 +767,7 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                data_[i].~A();
+                data_[i].~Element();
             }
             size_ = 0;
         }
@@ -778,36 +778,36 @@ namespace efp
             {
                 abort();
             }
-            data_[size_ - 1].~A();
+            data_[size_ - 1].~Element();
             --size_;
         }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + size_;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + size_;
         }
@@ -818,7 +818,7 @@ namespace efp
         }
 
     private:
-        A *data_;
+        Element *data_;
         size_t size_;
         size_t capacity_;
     };
@@ -853,7 +853,7 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
         // ! length will not be used
-        SequenceView(A *data, Size<ct_len> length = Size<ct_len>{})
+        SequenceView(Element *data, Size<ct_len> length = Size<ct_len>{})
             : data_(data)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -864,7 +864,7 @@ namespace efp
         }
 
         // ! No need of constructor taking only the pointer
-        // explicit SequenceView(A *data)
+        // explicit SequenceView(Element *data)
         //     : data_(data)
         // {
         //     // Ensure that data is not nullptr for a non-empty view.
@@ -884,12 +884,12 @@ namespace efp
         // SequenceView &operator=(SequenceView &&) noexcept = default;
         // ~SequenceView() = default;
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -925,32 +925,32 @@ namespace efp
             }
         }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + ct_len;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + ct_len;
         }
@@ -961,7 +961,7 @@ namespace efp
         }
 
     private:
-        A *data_;
+        Element *data_;
     };
 
     template <typename A, size_t ct_length>
@@ -983,7 +983,7 @@ namespace efp
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
-        SequenceView(A *data, size_t size)
+        SequenceView(Element *data, size_t size)
             : data_(data), size_(size)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -993,10 +993,10 @@ namespace efp
             }
         }
 
-        SequenceView(A *data) : data_{data}
+        SequenceView(Element *data) : data_{data}
         {
         }
-        // SequenceView(A *data, const size_t length)
+        // SequenceView(Element *data, const size_t length)
         //     : data_{data}, size_{length}
         // {
         // }
@@ -1021,12 +1021,12 @@ namespace efp
         //     return *this;
         // }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -1065,32 +1065,32 @@ namespace efp
         //     }
         // }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + size_;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + size_;
         }
@@ -1101,7 +1101,7 @@ namespace efp
         }
 
     private:
-        A *data_;
+        Element *data_;
         size_t size_;
     };
 
@@ -1124,7 +1124,7 @@ namespace efp
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
-        SequenceView(A *data, size_t size)
+        SequenceView(Element *data, size_t size)
             : data_(data), size_(size), capacity_(size)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -1134,11 +1134,11 @@ namespace efp
             }
         }
 
-        // SequenceView(A *data) : data_{data}, size_{0}, capacity_{0}
+        // SequenceView(Element *data) : data_{data}, size_{0}, capacity_{0}
         // {
         // }
 
-        // SequenceView(A *data, const size_t length, const size_t capacity)
+        // SequenceView(Element *data, const size_t length, const size_t capacity)
         //     : data_{data}, size_{length}, capacity_{capacity} {}
 
         SequenceView &operator=(const SequenceView &other)
@@ -1163,12 +1163,12 @@ namespace efp
         //     return *this;
         // }
 
-        A &operator[](size_t index)
+        Element &operator[](size_t index)
         {
             return data_[index];
         }
 
-        const A &operator[](size_t index) const
+        const Element &operator[](size_t index) const
         {
             return data_[index];
         }
@@ -1213,32 +1213,32 @@ namespace efp
         //     }
         // }
 
-        const A *data() const
+        const Element *data() const
         {
             return data_;
         }
 
-        A *data()
+        Element *data()
         {
             return data_;
         }
 
-        A *begin()
+        Element *begin()
         {
             return data_;
         }
 
-        const A *begin() const
+        const Element *begin() const
         {
             return data_;
         }
 
-        A *end()
+        Element *end()
         {
             return data_ + size_;
         }
 
-        const A *end() const
+        const Element *end() const
         {
             return data_ + size_;
         }
@@ -1249,7 +1249,7 @@ namespace efp
         }
 
     private:
-        A *data_;
+        Element *data_;
         size_t size_;
         size_t capacity_;
     };
