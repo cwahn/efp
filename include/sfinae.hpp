@@ -792,6 +792,25 @@ namespace efp
         return Tuple<As...>{as...};
     }
 
+    // TupleAt
+    
+    namespace detail
+    {
+        template <size_t n, typename Tpl>
+        struct TupleAtImpl
+        {
+        };
+
+        template <size_t n, typename... As>
+        struct TupleAtImpl<n, Tuple<As...>>
+        {
+            using Type = PackAt<n, As...>;
+        };
+    }
+
+    template <size_t n, typename Tpl>
+    using TupleAt = typename detail::TupleAtImpl<n, Tpl>::Type;
+
     // ArgumentsImpl
 
     template <typename, bool>
