@@ -545,6 +545,86 @@ namespace efp
         static constexpr bool value = decltype(check<F>(0))::value;
     };
 
+    // IsFunction
+    // Base template
+    template <typename T>
+    struct IsFunction : False
+    {
+    };
+
+    // Specializations for all kinds of function types
+    template <typename Ret, typename... Args>
+    struct IsFunction<Ret(Args...)> : True
+    {
+    };
+
+    // Add specializations for const, volatile, and const volatile member functions if needed
+    template <typename Ret, typename... Args>
+    struct IsFunction<Ret(Args...) const> : True
+    {
+    };
+
+    template <typename Ret, typename... Args>
+    struct IsFunction<Ret(Args...) volatile> : True
+    {
+    };
+
+    template <typename Ret, typename... Args>
+    struct IsFunction<Ret(Args...) const volatile> : True
+    {
+    };
+
+    // FuncToFuncPtr
+
+    namespace detail
+    {
+
+        // Base template
+        template <typename A>
+        struct FuncToFuncPtrImpl
+        {
+            using Type = A; // Leave non-function types unchanged
+        };
+
+        // Specialization for regular and constexpr free functions
+        template <typename Ret, typename... Args>
+        struct FuncToFuncPtrImpl<Ret(Args...)>
+        {
+            using Type = Ret (*)(Args...);
+        };
+
+        // Specializations for member functions
+        template <typename Ret, typename ClassType, typename... Args>
+        struct FuncToFuncPtrImpl<Ret (ClassType::*)(Args...)>
+        {
+            using Type = Ret (ClassType::*)(Args...);
+        };
+
+        template <typename Ret, typename ClassType, typename... Args>
+        struct FuncToFuncPtrImpl<Ret (ClassType::*)(Args...) const>
+        {
+            using Type = Ret (ClassType::*)(Args...) const;
+        };
+
+        template <typename Ret, typename ClassType, typename... Args>
+        struct FuncToFuncPtrImpl<Ret (ClassType::*)(Args...) volatile>
+        {
+            using Type = Ret (ClassType::*)(Args...) volatile;
+        };
+
+        template <typename Ret, typename ClassType, typename... Args>
+        struct FuncToFuncPtrImpl<Ret (ClassType::*)(Args...) const volatile>
+        {
+            using Type = Ret (ClassType::*)(Args...) const volatile;
+        };
+
+    } // namespace detail
+
+    template <typename A>
+    using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
+
+    // IndexSequence
+
     // TupleLeaf
 
     template <size_t index, typename A>
@@ -573,28 +653,6 @@ namespace efp
     private:
         A value_;
     };
-
-    // FuncToFuncPtr
-    namespace detail
-    {
-        template <typename A>
-        struct FuncToFuncPtrImpl
-        {
-            using Type = A; // Default case: leave the type unchanged
-        };
-
-        // Specialization for regular and constexpr free functions
-        template <typename Ret, typename... Args>
-        struct FuncToFuncPtrImpl<Ret(Args...)>
-        {
-            using Type = Ret (*)(Args...);
-        };
-    }
-
-    template <typename A>
-    using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
-
-    // IndexSequence
 
     template <int... ns>
     struct IndexSequence
