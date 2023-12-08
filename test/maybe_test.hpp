@@ -193,4 +193,10 @@ TEST_CASE("Maybe as bool")
     // }
 }
 
+TEST_CASE("EnumAt on Maybe")
+{
+    CHECK(IsSame<EnumAt<0, Maybe<int>>, Nothing>::value);
+    CHECK(IsSame<EnumAt<1, Maybe<int>>, int>::value);
+}
+
 #endif

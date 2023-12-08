@@ -971,24 +971,24 @@ namespace efp
         return apply_impl(f, tpl, IndexSequenceFor<As...>{});
     }
 
-    // Posize_terRemovedImpl
+    // PointerRemovedImpl
 
     template <typename A>
-    struct Posize_terRemovedImpl
+    struct PointerRemovedImpl
     {
         using Type = A;
     };
 
     template <typename A>
-    struct Posize_terRemovedImpl<A *>
+    struct PointerRemovedImpl<A *>
     {
         using Type = A;
     };
 
-    // Posize_terRemoved
+    // PointerRemoved
 
     template <typename A>
-    using Posize_terRemoved = typename Posize_terRemovedImpl<A>::Type;
+    using PointerRemoved = typename PointerRemovedImpl<A>::Type;
 
     // ReferenceRemovedImpl
 

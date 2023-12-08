@@ -339,7 +339,7 @@ namespace efp
 
         static constexpr bool is_s_fmt = ContainsTypeSeq<FL, Char<'s'>>::value;
         static constexpr bool is_string =
-            IsSame<char, CVRemoved<Posize_terRemoved<RawType>>>::value;
+            IsSame<char, CVRemoved<PointerRemoved<RawType>>>::value;
 
         static constexpr bool is_size_t = IsIntegeralType<RawType>::value;
         static constexpr bool is_x_fmt = ContainsTypeSeq<FL, Char<'x'>>::value;
