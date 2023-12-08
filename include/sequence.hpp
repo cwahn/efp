@@ -156,17 +156,18 @@ namespace efp
             return *this;
         }
 
-        Sequence assign_impl(const Sequence &other)
-        {
-            if (this != &other)
-            {
-                for (size_t i = 0; i < ct_len; ++i)
-                {
-                    data_[i] = other.data_[i]; // Use assignment for each element
-                }
-            }
-            return *this;
-        }
+        // todo Remove
+        // Sequence assign_impl(const Sequence &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         for (size_t i = 0; i < ct_len; ++i)
+        //         {
+        //             data_[i] = other.data_[i]; // Use assignment for each element
+        //         }
+        //     }
+        //     return *this;
+        // }
 
         Element &operator[](size_t index)
         {
@@ -316,18 +317,19 @@ namespace efp
             return *this;
         }
 
-        Sequence assign_impl(const Sequence &other)
-        {
-            if (this != &other)
-            {
-                resize(other.size());
-                for (size_t i = 0; i < size_; ++i)
-                {
-                    data_[i] = other.data_[i];
-                }
-            }
-            return *this;
-        }
+        // todo Remove
+        // Sequence assign_impl(const Sequence &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         resize(other.size());
+        //         for (size_t i = 0; i < size_; ++i)
+        //         {
+        //             data_[i] = other.data_[i];
+        //         }
+        //     }
+        //     return *this;
+        // }
 
         ~Sequence()
         {
@@ -612,27 +614,28 @@ namespace efp
             return *this;
         }
 
-        Sequence assign_impl(const Sequence &other)
-        {
-            if (this != &other)
-            {
-                Element *newData = nullptr;
-                if (other.size_ > 0)
-                {
-                    newData = new Element[other.capacity_];
+        // todo Remove
+        // Sequence assign_impl(const Sequence &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         Element *newData = nullptr;
+        //         if (other.size_ > 0)
+        //         {
+        //             newData = new Element[other.capacity_];
 
-                    for (size_t i = 0; i < other.size_; ++i)
-                    {
-                        newData[i] = other.data_[i];
-                    }
-                }
+        //             for (size_t i = 0; i < other.size_; ++i)
+        //             {
+        //                 newData[i] = other.data_[i];
+        //             }
+        //         }
 
-                data_ = newData;
-                size_ = other.size_;
-                capacity_ = other.capacity_;
-            }
-            return *this;
-        }
+        //         data_ = newData;
+        //         size_ = other.size_;
+        //         capacity_ = other.capacity_;
+        //     }
+        //     return *this;
+        // }
 
         Element &operator[](size_t index)
         {
@@ -852,6 +855,11 @@ namespace efp
 
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
 
+        SequenceView()
+            : data_(nullptr)
+        {
+        }
+
         // ! length will not be used
         SequenceView(Element *data, Size<ct_len> length = Size<ct_len>{})
             : data_(data)
@@ -983,6 +991,11 @@ namespace efp
         // SequenceView(const SequenceView &) {}
         // SequenceView(SequenceView &&) {}
 
+        SequenceView()
+            : data_(nullptr), size_(0)
+        {
+        }
+
         SequenceView(Element *data, size_t size)
             : data_(data), size_(size)
         {
@@ -993,11 +1006,7 @@ namespace efp
             }
         }
 
-        SequenceView(Element *data) : data_{data}
-        {
-        }
-        // SequenceView(Element *data, const size_t length)
-        //     : data_{data}, size_{length}
+        // SequenceView(Element *data) : data_{data}
         // {
         // }
 
@@ -1011,6 +1020,7 @@ namespace efp
             return *this;
         }
 
+        // todo Remove
         // SequenceView assign_impl(const SequenceView &other)
         // {
         //     if (this != &other)
@@ -1120,9 +1130,10 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        // SequenceView() : data_{nullptr}, size_{0}, capacity_{0} {}
-        // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}
+        SequenceView()
+            : data_{nullptr}, size_{0}, capacity_{0}
+        {
+        }
 
         SequenceView(Element *data, size_t size)
             : data_(data), size_(size), capacity_(size)
@@ -1133,10 +1144,6 @@ namespace efp
                 abort();
             }
         }
-
-        // SequenceView(Element *data) : data_{data}, size_{0}, capacity_{0}
-        // {
-        // }
 
         // SequenceView(Element *data, const size_t length, const size_t capacity)
         //     : data_{data}, size_{length}, capacity_{capacity} {}
@@ -1152,6 +1159,7 @@ namespace efp
             return *this;
         }
 
+        // todo Remove
         // SequenceView assign_impl(const SequenceView &other)
         // {
         //     if (this != &other)

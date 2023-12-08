@@ -7,25 +7,20 @@
 namespace efp
 {
     // CString
-
+    // Owned C-style null operator including const char*
+    // Not safe to build from regular const char *
     class CString
     {
     private:
         const char *ptr_;
 
     public:
+        // const char pointer with nullptr.
         CString(const char *ptr)
             : ptr_(ptr) {}
 
-        ~CString()
-        {
-            delete[] ptr_;
-        }
-
-        operator const char *() const
-        {
-            return ptr_;
-        }
+        CString(const CString &) = delete;
+        CString &operator=(const CString &) = delete;
 
         CString(CString &&other) noexcept : ptr_(other.ptr_)
         {
@@ -44,8 +39,45 @@ namespace efp
             return *this;
         }
 
-        CString(const CString &) = delete;
-        CString &operator=(const CString &) = delete;
+        ~CString()
+        {
+            delete[] ptr_;
+        }
+
+        operator const char *() const
+        {
+            return ptr_;
+        }
+
+        // Equality operator for comparing with another CString
+        bool operator==(const CString &other) const
+        {
+            // If both are null, they are considered equal
+            if (ptr_ == nullptr && other.ptr_ == nullptr)
+                return true;
+
+            // If one is null and the other is not, they can't be equal
+            if (ptr_ == nullptr || other.ptr_ == nullptr)
+                return false;
+
+            // Use strcmp to compare the strings
+            return strcmp(ptr_, other.ptr_) == 0;
+        }
+
+        // Equality operator for comparing with a C-style string
+        bool operator==(const char *c_str) const
+        {
+            // If both are null, they are considered equal
+            if (ptr_ == nullptr && c_str == nullptr)
+                return true;
+
+            // If one is null and the other is not, they can't be equal
+            if (ptr_ == nullptr || c_str == nullptr)
+                return false;
+
+            // Use strcmp to compare the strings
+            return strcmp(ptr_, c_str) == 0;
+        }
     };
 
     template <>
@@ -83,6 +115,8 @@ namespace efp
             : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
+            other.size_ = 0;
+            other.capacity_ = 0;
         }
 
         // ! Varadic constructor is not working for String
@@ -205,6 +239,25 @@ namespace efp
             return true;
         }
 
+        // Specialized equality comparison operator with const char *
+        bool operator==(const char *c_str) const
+        {
+            // Check if both are null pointers
+            if (data_ == nullptr && c_str == nullptr)
+                return true;
+
+            // If one is null and the other is not, they can't be equal
+            if (data_ == nullptr || c_str == nullptr)
+                return false;
+
+            // Compare the contents up to the size of the SequenceView
+            if (strncmp(data_, c_str, size_) != 0)
+                return false;
+
+            // Check if the character at the position size_ in c_str is the null character
+            return c_str[size_] == '\0';
+        }
+
         size_t size() const
         {
             return size_;
@@ -299,6 +352,8 @@ namespace efp
         //     return efp::append(*this, string);
         // }
 
+        // todo Interface with StringView
+
         void append_mut(const Sequence &string)
         {
             for_each([&](char c)
@@ -348,6 +403,144 @@ namespace efp
     };
 
     using String = Sequence<char, dyn, dyn>;
+
+    // VectorView<const char> specialization for StringView
+    template <>
+    class SequenceView<const char, dyn, dyn>
+        : public SequenceBase<SequenceView<const char, dyn, dyn>>
+    {
+    public:
+        using Element = const char;
+        static constexpr size_t ct_len = dyn;
+        static constexpr size_t ct_cap = dyn;
+
+        SequenceView()
+            : data_(nullptr), size_(0), capacity_(0) {}
+
+        SequenceView(Element *data, size_t size)
+            : data_(data), size_(size), capacity_(size)
+        {
+            // Ensure that data is not nullptr for a non-empty view.
+            if (size > 0 && data_ == nullptr)
+            {
+                abort();
+            }
+        }
+
+        // StringView could be constructed from string literal
+        SequenceView(Element *data)
+            : data_(data), size_(strlen(data)), capacity_(size_)
+        {
+            // Ensure that data is not nullptr for a non-empty view.
+        }
+
+        SequenceView &operator=(const SequenceView &other)
+        {
+            if (this != &other)
+            {
+                data_ = other.data_;
+                size_ = other.size_;
+                capacity_ = other.capacity_;
+            }
+            return *this;
+        }
+
+        Element &operator[](size_t index)
+        {
+            return data_[index];
+        }
+
+        const Element &operator[](size_t index) const
+        {
+            return data_[index];
+        }
+
+        bool operator==(const SequenceView &other) const
+        {
+            return (data_ == other.data_) &&
+                   (size_ == other.size_) &&
+                   (capacity_ == other.capacity_);
+        }
+
+        // Specialized equality comparison operator with const char *
+        bool operator==(const char *c_str) const
+        {
+            // Check if both are null pointers
+            if (data_ == nullptr && c_str == nullptr)
+                return true;
+
+            // If one is null and the other is not, they can't be equal
+            if (data_ == nullptr || c_str == nullptr)
+                return false;
+
+            // Compare the contents up to the size of the SequenceView
+            if (strncmp(data_, c_str, size_) != 0)
+                return false;
+
+            // Check if the character at the position size_ in c_str is the null character
+            return c_str[size_] == '\0';
+        }
+
+        const CString c_str() const
+        {
+            const size_t size_ = size();
+            char *extended_buffer = new char[size_ + 1];
+            memcpy(extended_buffer, data_, size_);
+            extended_buffer[size_] = '\0';
+            return CString(extended_buffer);
+        }
+
+        size_t size() const
+        {
+            return size_;
+        }
+
+        size_t capacity() const
+        {
+            return capacity_;
+        }
+
+        const Element *data() const
+        {
+            return data_;
+        }
+
+        Element *data()
+        {
+            return data_;
+        }
+
+        Element *begin()
+        {
+            return data_;
+        }
+
+        const Element *begin() const
+        {
+            return data_;
+        }
+
+        Element *end()
+        {
+            return data_ + size_;
+        }
+
+        const Element *end() const
+        {
+            return data_ + size_;
+        }
+
+        bool empty() const
+        {
+            return size_ == 0;
+        }
+
+    private:
+        Element *data_;
+        size_t size_;
+        size_t capacity_;
+    };
+
     using StringView = SequenceView<const char, dyn, dyn>;
 
     inline String join(const String &delimeter, const Vector<String> &strings)
