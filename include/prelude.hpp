@@ -659,7 +659,7 @@ namespace efp
     // take_while
 
     template <typename A>
-    using TakeWhileReturn = FilterReturn<A>;
+    using TakeWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
     auto take_while(const F &f, const A &as)
@@ -680,7 +680,7 @@ namespace efp
     // drop_while
 
     template <typename A>
-    using DropWhileReturn = FilterReturn<A>;
+    using DropWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
     auto drop_while(const F &f, const A &as)
