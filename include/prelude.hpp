@@ -198,16 +198,16 @@ namespace efp
 
     // FilterReturn
 
-    template <typename F, typename A>
+    template <typename A>
     using FilterReturn = Sequence<Element<A>, dyn, A::ct_cap>;
 
     // filter
 
     template <typename A, typename F = bool (*)(Element<A> &)>
     auto filter(const F &f, const Seq<A> &as)
-        -> FilterReturn<F, A>
+        -> FilterReturn<A>
     {
-        FilterReturn<F, A> result{};
+        FilterReturn<A> result{};
         const auto input_length = length(as);
 
         for (size_t i = 0; i < input_length; ++i)
@@ -652,6 +652,46 @@ namespace efp
         -> SliceReturn<S, E, A, false>
     {
         return SliceReturn<S, E, A, false>(data(as) + start, end - start);
+    }
+
+    // take_while
+
+    template <typename A>
+    using TakeWhileReturn = FilterReturn<A>;
+
+    template <typename A, typename F = bool (*)(const Element<A> &)>
+    auto drop_while(const F &f, cosnt A &as)
+    {
+        TakeWhileReturn<A> result{};
+        const auto input_length = length(as);
+
+        size_t i = 0;
+        while (i < input_length && f(as[i]))
+        {
+            ++i;
+        }
+
+        return take(i, as);
+    }
+
+    // drop_while
+
+    template <typename A>
+    using DropWhileReturn = FilterReturn<A>;
+
+    template <typename A, typename F = bool (*)(const Element<A> &)>
+    auto drop_while(const F &f, cosnt A &as)
+    {
+        DropWhileReturn<A> result{};
+        const auto input_length = length(as);
+
+        size_t i = 0;
+        while (i < input_length && f(as[i]))
+        {
+            ++i;
+        }
+
+        return drop(i, as);
     }
 
     // elem
