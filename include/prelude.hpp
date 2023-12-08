@@ -654,13 +654,16 @@ namespace efp
         return SliceReturn<S, E, A, false>(data(as) + start, end - start);
     }
 
+    // todo Add test for take_while and drop_while
+
     // take_while
 
     template <typename A>
     using TakeWhileReturn = FilterReturn<A>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
-    auto drop_while(const F &f, cosnt A &as)
+    auto take_while(const F &f, const A &as)
+        -> TakeWhileReturn<A>
     {
         TakeWhileReturn<A> result{};
         const auto input_length = length(as);
@@ -680,7 +683,8 @@ namespace efp
     using DropWhileReturn = FilterReturn<A>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
-    auto drop_while(const F &f, cosnt A &as)
+    auto drop_while(const F &f, const A &as)
+        -> DropWhileReturn<A>
     {
         DropWhileReturn<A> result{};
         const auto input_length = length(as);
