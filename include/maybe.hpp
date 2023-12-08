@@ -132,7 +132,7 @@ namespace efp
             return *(reinterpret_cast<PackAt<n, Nothing, T> *>(storage_));
         }
 
-        template <typename A>
+        template <typename A = T>
         auto move() const
             -> EnableIf<any_v(IsSame<A, Nothing>::value, IsSame<A, T>::value), const A &&>
         {
@@ -144,7 +144,7 @@ namespace efp
             return efp::move(*(reinterpret_cast<const A *>(storage_)));
         }
 
-        template <typename A>
+        template <typename A = T>
         auto move()
             -> EnableIf<any_v(IsSame<A, Nothing>::value, IsSame<A, T>::value), A &&>
         {
