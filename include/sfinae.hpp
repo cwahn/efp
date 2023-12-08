@@ -637,9 +637,8 @@ namespace efp
     {
     public:
         // Function name or function type will be automatically converted to function pointer type
-        template <typename... Args>
-        TupleImpl(const Args &...as)
-            : TupleLeaf<idxs, FuncToFuncPtr<Args>>{as}...
+        TupleImpl(const As &...as)
+            : TupleLeaf<idxs, As>{as}...
         {
         }
 
@@ -661,8 +660,11 @@ namespace efp
         : public TupleImpl<IndexSequenceFor<As...>, As...>
     {
     public:
-        Tuple(const As &...as)
-            : TupleImpl<IndexSequenceFor<As...>, As...>{as...}
+        template <typename... Args>
+        Tuple(const Args &...args)
+            : TupleImpl<
+                  IndexSequenceFor<FuncToFuncPtr<Args>...>,
+                  FuncToFuncPtr<Args>...>{args...}
         {
         }
 
