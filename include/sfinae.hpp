@@ -718,11 +718,10 @@ namespace efp
         : public TupleImpl<IndexSequenceFor<As...>, As...>
     {
     public:
-        template <typename... Args>
-        Tuple(const Args &...args)
+        Tuple(const As &...as)
             : TupleImpl<
-                  IndexSequenceFor<FuncToFuncPtr<Args>...>,
-                  FuncToFuncPtr<Args>...>{args...}
+                  IndexSequenceFor<As...>,
+                  As...>{as...}
         {
         }
 
@@ -869,9 +868,9 @@ namespace efp
 
     template <typename... As>
     auto tuple(const As &...as)
-        -> Tuple<As...>
+        -> Tuple<FuncToFuncPtr<As>...>
     {
-        return Tuple<As...>{as...};
+        return Tuple<FuncToFuncPtr<As>...>{as...};
     }
 
     // TupleAt
