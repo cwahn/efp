@@ -519,16 +519,23 @@ namespace efp
     }
 
     // EnumAt
-    template <size_t n, typename A>
-    struct EnumAt
-    {
-    };
 
-    template <size_t n, typename... As>
-    struct EnumAt<n, Enum<As...>>
+    namespace detail
     {
-        using Type = PackAt<n, As...>;
-    };
+        template <size_t n, typename A>
+        struct EnumAtImpl
+        {
+        };
+
+        template <size_t n, typename... As>
+        struct EnumAtImpl<n, Enum<As...>>
+        {
+            using Type = PackAt<n, As...>;
+        };
+    }
+
+    template <size_t n, typename A>
+    using EnumAt = typename detail::EnumAtImpl<n, A>::Type;
 
 }
 

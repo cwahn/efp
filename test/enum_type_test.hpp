@@ -183,11 +183,17 @@ TEST_CASE("enum_match")
         int c = a.match(
             [&](bool x)
             { return b * 0; },
-            [&](const std::string& x)
+            [&](const std::string &x)
             { return 42; });
 
         CHECK(b == 42);
     }
+}
+
+TEST_CASE("EnumAt")
+{
+    CHECK(IsSame<EnumAt<0, Enum<int, double>>, int>::value);
+    CHECK(IsSame<EnumAt<1, Enum<int, double>>, double>::value);
 }
 
 #endif
