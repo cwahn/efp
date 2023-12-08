@@ -518,6 +518,18 @@ namespace efp
         return Enum<As...>::template Match<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, &x);
     }
 
+    // EnumAt
+    template <size_t n, typename A>
+    struct EnumAt
+    {
+    };
+
+    template <size_t n, typename... As>
+    struct EnumAt<n, Enum<As...>>
+    {
+        using Type = PackAt<n, As...>;
+    };
+
 }
 
 #endif
