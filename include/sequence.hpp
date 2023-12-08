@@ -285,6 +285,25 @@ namespace efp
         {
         }
 
+        // Constructor from array
+        template <size_t ct_len_, typename = EnableIf<ct_cap >= ct_len_, void>>
+        Sequence(const Sequence<Element, ct_len_, ct_len_> &as)
+            : size_(ct_len_)
+        {
+            for (size_t i = 0; i < ct_len_; ++i)
+            {
+                new (&data[i]) Element(as[i]);
+            }
+        }
+
+        ~Sequence()
+        {
+            for (size_t i = 0; i < size_; ++i)
+            {
+                data_[i].~Element();
+            }
+        }
+
         Sequence &operator=(const Sequence &other)
         {
             if (this != &other)
@@ -298,12 +317,27 @@ namespace efp
             return *this;
         }
 
-        ~Sequence()
+        Sequence &operator=(Sequence &&other) noexcept
         {
-            for (size_t i = 0; i < size_; ++i)
+            if (this != &other)
             {
-                data_[i].~Element();
+                // Destroy existing elements
+                for (size_t i = 0; i < size_; ++i)
+                {
+                    data_[i].~Element();
+                }
+
+                // Move data from the source object
+                size_ = other.size_;
+                for (size_t i = 0; i < size_; ++i)
+                {
+                    new (&data_[i]) Element(std::move(other.data_[i]));
+                }
+
+                // Reset the source object
+                other.size_ = 0;
             }
+            return *this;
         }
 
         Element &operator[](size_t index)
@@ -530,6 +564,32 @@ namespace efp
             size_t i = 0;
             for (auto arg : std::initializer_list<Common<Args...>>{args...})
                 data_[i++] = arg;
+        }
+
+        // Constructor from Array
+        template <size_t ct_len_>
+        Sequence(const Sequence<Element, ct_len_, ct_len_> &as)
+            : data_(new Element[ct_len_]),
+              size_(ct_len_),
+              capacity_(ct_len_)
+        {
+            for (size_t i = 0; i < size_; ++i)
+            {
+                new (&data[i]) Element(as[i]);
+            }
+        }
+
+        // Constructor from ArrVec
+        template <size_t ct_cap_>
+        Sequence(const Sequence<Element, dyn, ct_cap_> &as)
+            : data_(new Element[as.size()]),
+              size_(as.size()),
+              capacity_(ct_cap_)
+        {
+            for (size_t i = 0; i < size_; ++i)
+            {
+                new (&data[i]) Element(as[i]);
+            }
         }
 
         ~Sequence()
@@ -925,7 +985,15 @@ namespace efp
             }
         }
 
-        SequenceView &operator=(const SequenceView &other)
+        // Constructor from ArrayView
+        template <size_t ct_len_>
+        SequenceView(const SequenceView<Element, ct_len_, ct_len_> &as)
+            : data_(as.data()), size_(as.size())
+        {
+        }
+
+        SequenceView &
+        operator=(const SequenceView &other)
         {
             if (this != &other)
             {
@@ -1029,6 +1097,20 @@ namespace efp
             {
                 abort();
             }
+        }
+
+        // Constructor from ArrayView
+        template <size_t ct_len_>
+        SequenceView(const SequenceView<Element, ct_len_, ct_len_> &as)
+            : data_(as.data()), size_(as.size())
+        {
+        }
+
+        // Constructor from ArrVecView
+        template <size_t ct_cap_>
+        SequenceView(const SequenceView<Element, dyn, ct_cap_> &as)
+            : data_(as.data()), size_(as.size())
+        {
         }
 
         SequenceView &operator=(const SequenceView &other)
