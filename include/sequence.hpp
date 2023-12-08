@@ -292,7 +292,7 @@ namespace efp
         {
             for (size_t i = 0; i < ct_len_; ++i)
             {
-                new (&data[i]) Element(as[i]);
+                new (&data_[i]) Element(as[i]);
             }
         }
 
@@ -575,7 +575,7 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                new (&data[i]) Element(as[i]);
+                new (&data_[i]) Element(as[i]);
             }
         }
 
@@ -588,7 +588,7 @@ namespace efp
         {
             for (size_t i = 0; i < size_; ++i)
             {
-                new (&data[i]) Element(as[i]);
+                new (&data_[i]) Element(as[i]);
             }
         }
 
