@@ -156,19 +156,6 @@ namespace efp
             return *this;
         }
 
-        // todo Remove
-        // Sequence assign_impl(const Sequence &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         for (size_t i = 0; i < ct_len; ++i)
-        //         {
-        //             data_[i] = other.data_[i]; // Use assignment for each element
-        //         }
-        //     }
-        //     return *this;
-        // }
-
         Element &operator[](size_t index)
         {
             return data_[index];
@@ -298,12 +285,6 @@ namespace efp
         {
         }
 
-        // Sequence(InitializerList<A> init)
-        //     : data_{init},
-        //       size_(init.size())
-        // {
-        // }
-
         Sequence &operator=(const Sequence &other)
         {
             if (this != &other)
@@ -316,20 +297,6 @@ namespace efp
             }
             return *this;
         }
-
-        // todo Remove
-        // Sequence assign_impl(const Sequence &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         resize(other.size());
-        //         for (size_t i = 0; i < size_; ++i)
-        //         {
-        //             data_[i] = other.data_[i];
-        //         }
-        //     }
-        //     return *this;
-        // }
 
         ~Sequence()
         {
@@ -614,29 +581,6 @@ namespace efp
             return *this;
         }
 
-        // todo Remove
-        // Sequence assign_impl(const Sequence &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         Element *newData = nullptr;
-        //         if (other.size_ > 0)
-        //         {
-        //             newData = new Element[other.capacity_];
-
-        //             for (size_t i = 0; i < other.size_; ++i)
-        //             {
-        //                 newData[i] = other.data_[i];
-        //             }
-        //         }
-
-        //         data_ = newData;
-        //         size_ = other.size_;
-        //         capacity_ = other.capacity_;
-        //     }
-        //     return *this;
-        // }
-
         Element &operator[](size_t index)
         {
             return data_[index];
@@ -871,27 +815,6 @@ namespace efp
             }
         }
 
-        // ! No need of constructor taking only the pointer
-        // explicit SequenceView(Element *data)
-        //     : data_(data)
-        // {
-        //     // Ensure that data is not nullptr for a non-empty view.
-        //     if (ct_len > 0 && data_ == nullptr)
-        //     {
-        //         abort();
-        //     }
-        // }
-
-        // Rule of five: if you define one of the destructor, copy constructor,
-        // copy assignment operator, move constructor, or move assignment operator,
-        // you should define all of them. Here, the default behavior is size_tended.
-
-        // SequenceView(const SequenceView &) = default;
-        // SequenceView(SequenceView &&) noexcept = default;
-        // SequenceView &operator=(const SequenceView &) = default;
-        // SequenceView &operator=(SequenceView &&) noexcept = default;
-        // ~SequenceView() = default;
-
         Element &operator[](size_t index)
         {
             return data_[index];
@@ -987,10 +910,6 @@ namespace efp
         // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
         // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
 
-        // SequenceView() : data_{nullptr}, size_{0} {}
-        // SequenceView(const SequenceView &) {}
-        // SequenceView(SequenceView &&) {}
-
         SequenceView()
             : data_(nullptr), size_(0)
         {
@@ -1006,10 +925,6 @@ namespace efp
             }
         }
 
-        // SequenceView(Element *data) : data_{data}
-        // {
-        // }
-
         SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
@@ -1019,17 +934,6 @@ namespace efp
             }
             return *this;
         }
-
-        // todo Remove
-        // SequenceView assign_impl(const SequenceView &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         data_ = other.data_;
-        //         size_ = other.size_;
-        //     }
-        //     return *this;
-        // }
 
         Element &operator[](size_t index)
         {
@@ -1056,24 +960,6 @@ namespace efp
         {
             return ct_cap;
         }
-
-        // void resize(size_t length)
-        // {
-        //     if (length > ct_cap || length < 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     size_ = length;
-        // }
-
-        // void reserve(size_t capacity)
-        // {
-        //     if (capacity > ct_cap)
-        //     {
-        //         abort();
-        //     }
-        // }
 
         const Element *data() const
         {
@@ -1145,9 +1031,6 @@ namespace efp
             }
         }
 
-        // SequenceView(Element *data, const size_t length, const size_t capacity)
-        //     : data_{data}, size_{length}, capacity_{capacity} {}
-
         SequenceView &operator=(const SequenceView &other)
         {
             if (this != &other)
@@ -1158,18 +1041,6 @@ namespace efp
             }
             return *this;
         }
-
-        // todo Remove
-        // SequenceView assign_impl(const SequenceView &other)
-        // {
-        //     if (this != &other)
-        //     {
-        //         data_ = other.data_;
-        //         size_ = other.size_;
-        //         capacity_ = other.capacity_;
-        //     }
-        //     return *this;
-        // }
 
         Element &operator[](size_t index)
         {
@@ -1197,29 +1068,6 @@ namespace efp
         {
             return capacity_;
         }
-
-        // void resize(size_t length)
-        // {
-        //     if (length < 0)
-        //     {
-        //         abort();
-        //     }
-
-        //     if (length > capacity_)
-        //     {
-        //         reserve(length);
-        //     }
-
-        //     size_ = length;
-        // }
-
-        // void reserve(size_t capacity)
-        // {
-        //     if (capacity > capacity_)
-        //     {
-        //         capacity_ = capacity;
-        //     }
-        // }
 
         const Element *data() const
         {
