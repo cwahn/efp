@@ -190,6 +190,57 @@ TEST_CASE("enum_match")
     }
 }
 
+// A test function to be pointed to
+int enum_test_function()
+{
+    return 42;
+}
+
+TEST_CASE("Function Pointer in Enum")
+{
+    SECTION("Storing and retrieving function pointer")
+    {
+        // Create an Enum instance holding a function pointer
+        Enum<int (*)()> my_enum_func_ptr = enum_test_function;
+
+        // Retrieve the function pointer and store it in a variable
+        int (*retrieved_func_ptr)() = my_enum_func_ptr.get<int (*)()>();
+
+        // Test if the retrieved function pointer is equal to the original one
+        CHECK(retrieved_func_ptr == &enum_test_function);
+    }
+
+    SECTION("Storing and retrieving lambda")
+    {
+        // ! For some reason this does not work with const qualifier
+        auto enum_test_lambda = [&]()
+        { return 84; };
+
+        // Create an Enum instance holding a lambda
+        Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);
+
+        // Retrieve the lambda and store it in a variable
+        auto retrieved_lambda = my_enum_lambda.get<decltype(enum_test_lambda)>();
+
+        // Test if the retrieved lambda is equal to the original one
+        // This check confirms that the lambda is stored and retrieved correctly.
+        // Note: Direct lambda comparison might not be feasible; instead, test the behavior.
+        CHECK(retrieved_lambda() == enum_test_lambda());
+    }
+
+    SECTION("Using function name directly")
+    {
+        // Create an Enum instance using the function name directly
+        Enum<int (*)()> my_enum_func_name = enum_test_function;
+
+        // Retrieve the function pointer and store it in a variable
+        int (*retrieved_func_name)() = my_enum_func_name.get<int (*)()>();
+
+        // Test if the retrieved function pointer is equal to the original one
+        CHECK(retrieved_func_name == &enum_test_function);
+    }
+}
+
 TEST_CASE("EnumAt")
 {
     CHECK(IsSame<EnumAt<0, Enum<int, double>>, int>::value);

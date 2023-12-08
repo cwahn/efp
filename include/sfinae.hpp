@@ -574,6 +574,26 @@ namespace efp
         A value_;
     };
 
+    // FuncToFuncPtr
+    namespace detail
+    {
+        template <typename A>
+        struct FuncToFuncPtrImpl
+        {
+            using Type = A; // Default case: leave the type unchanged
+        };
+
+        // Specialization for regular and constexpr free functions
+        template <typename Ret, typename... Args>
+        struct FuncToFuncPtrImpl<Ret(Args...)>
+        {
+            using Type = Ret (*)(Args...);
+        };
+    }
+
+    template <typename A>
+    using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
+
     // IndexSequence
 
     template <int... ns>
@@ -616,8 +636,10 @@ namespace efp
         : public TupleLeaf<idxs, As>...
     {
     public:
-        TupleImpl(const As &...as)
-            : TupleLeaf<idxs, As>{as}...
+        // Function name or function type will be automatically converted to function pointer type
+        template <typename... Args>
+        TupleImpl(const Args &...as)
+            : TupleLeaf<idxs, FuncToFuncPtr<Args>>{as}...
         {
         }
 

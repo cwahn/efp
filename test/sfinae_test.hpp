@@ -288,6 +288,31 @@ TEST_CASE("Tuple")
     }
 }
 
+// Define a function pointer type
+using FuncPtrType = int (*)();
+
+// A test function for the function pointer
+int test_function()
+{
+    return 42;
+}
+
+TEST_CASE("Tuple with Function Pointer and Lambda")
+{
+    SECTION("Storing and retrieving function pointer and lambda")
+    {
+        auto test_lambda = []()
+        { return 42; };
+
+        // Create a tuple with a function pointer and a lambda
+        Tuple<FuncPtrType, decltype(test_lambda)> my_tuple = {&test_function, test_lambda};
+
+        // Retrieve and test the function pointer
+        CHECK(my_tuple.get<0>()() == 42);
+        CHECK(my_tuple.get<1>()() == 42);
+    }
+}
+
 TEST_CASE("Tuple match")
 {
     SECTION("case 0")

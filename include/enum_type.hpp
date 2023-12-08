@@ -130,18 +130,20 @@ namespace efp
         {
         }
 
-        template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
+        // Function name or function type will be automatically converted to function pointer type
+        template <typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As > ::value...)>>
         Enum(const A &a)
-            : index_(VariantIndex<A>::value)
+            : index_(VariantIndex<FuncToFuncPtr<A>>::value)
         {
-            new (reinterpret_cast<A *>(storage_)) A(a);
+            new (reinterpret_cast<FuncToFuncPtr<A> *>(storage_)) FuncToFuncPtr<A>(a);
         }
 
-        template <typename A, typename = EnableIf<any_v(IsSame<A, As>::value...)>>
+        // Function name or function type will be automatically converted to function pointer type
+        template <typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As>::value...)>>
         Enum(A &&a)
-            : index_(VariantIndex<A>::value)
+            : index_(VariantIndex<FuncToFuncPtr<A>>::value)
         {
-            new (reinterpret_cast<A *>(storage_)) A(efp::move(a));
+            new (reinterpret_cast<FuncToFuncPtr<A> *>(storage_)) FuncToFuncPtr<A>(efp::move(a));
         }
 
         ~Enum() {}
