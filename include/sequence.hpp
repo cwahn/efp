@@ -98,13 +98,14 @@ namespace efp
     // template <typename Derived>
     // using Seq = SequenceBase<Derived>;
 
-    template <typename A, size_t ct_size, size_t ct_capacity>
-    class Sequence
-    {
-    };
+    // template <typename A, size_t ct_size, size_t ct_capacity>
+    // class Sequence
+    // {
+    // };
 
     template <typename A, size_t ct_size>
-    class Sequence<A, ct_size, ct_size>
+    // class Sequence<A, ct_size, ct_size>
+    class Array
     // : public SequenceBase<Sequence<A, ct_size, ct_size>>
     {
     public:
@@ -247,11 +248,12 @@ namespace efp
         A data_[ct_size];
     };
 
-    template <typename A, size_t ct_size>
-    using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
+    // template <typename A, size_t ct_size>
+    // using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
 
     template <typename A, size_t ct_capacity>
-    class Sequence<A, dyn, ct_capacity>
+    // class Sequence<A, dyn, ct_capacity>
+    class ArrVec
     // : public SequenceBase<Sequence<A, dyn, ct_capacity>>
     {
     public:
@@ -521,11 +523,12 @@ namespace efp
         size_t size_;
     };
 
-    template <typename A, size_t ct_capacity>
-    using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
+    // template <typename A, size_t ct_capacity>
+    // using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
 
     template <typename A>
-    class Sequence<A, dyn, dyn>
+    // class Sequence<A, dyn, dyn>
+    class Vector
     // : public SequenceBase<Sequence<A, dyn, dyn>>
     {
     public:
@@ -839,8 +842,8 @@ namespace efp
         size_t capacity_;
     };
 
-    template <typename A>
-    using Vector = Sequence<A, dyn, dyn>;
+    // template <typename A>
+    // using Vector = Sequence<A, dyn, dyn>;
 
     // template <typename A, size_t ct_size, size_t ct_capacity>
     // class SequenceTrait<Sequence<A, ct_size, ct_capacity>>
@@ -852,13 +855,14 @@ namespace efp
     // };
 
     // Should have all these three template parameter not to break static link
-    template <typename A, size_t ct_size, size_t ct_capacity>
-    class SequenceView
-    {
-    };
+    // template <typename A, size_t ct_size, size_t ct_capacity>
+    // class SequenceView
+    // {
+    // };
 
     template <typename A, size_t ct_size>
-    class SequenceView<A, ct_size, ct_size>
+    // class SequenceView<A, ct_size, ct_size>
+    class ArrayView
     // : public SequenceBase<SequenceView<A, ct_size, ct_size>>
     {
     public:
@@ -966,11 +970,12 @@ namespace efp
         Element *data_;
     };
 
-    template <typename A, size_t ct_size>
-    using ArrayView = EnableIf<ct_size != dyn, SequenceView<A, ct_size, ct_size>>;
+    // template <typename A, size_t ct_size>
+    // using ArrayView = EnableIf<ct_size != dyn, SequenceView<A, ct_size, ct_size>>;
 
     template <typename A, size_t ct_capacity>
-    class SequenceView<A, dyn, ct_capacity>
+    // class SequenceView<A, dyn, ct_capacity>
+    class ArrVecView
     // : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
     {
     public:
@@ -1083,11 +1088,12 @@ namespace efp
         size_t size_;
     };
 
-    template <typename A, size_t ct_capacity>
-    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
+    // template <typename A, size_t ct_capacity>
+    // using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
 
     template <typename A>
-    class SequenceView<A, dyn, dyn>
+    // class SequenceView<A, dyn, dyn>
+    class VectorView
     // : public SequenceBase<SequenceView<A, dyn, dyn>>
     {
     public:

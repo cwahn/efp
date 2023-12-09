@@ -15,6 +15,8 @@ namespace efp
     {
     public:
         using Element = A;
+        using CtSize = Size<n>;
+        using CtCapcity = Size<n>;
         using SizeType = size_t;
 
         static constexpr size_t ct_size = n;
@@ -110,6 +112,8 @@ namespace efp
     {
     public:
         using Element = A;
+        using CtSize = Size<dyn>;
+        using CtCapcity = Size<n>;
         using SizeType = size_t;
 
         static constexpr size_t ct_size = dyn;

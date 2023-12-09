@@ -18,29 +18,6 @@ namespace efp
     {
     };
 
-    // template <typename F, typename Ret, typename... Args>
-    // using SignatureCheck = All<IsInvocable<F, Args...>, IsSame<CallReturn<F, Args...>, Ret>>;
-
-    // template <typename A, typename Ret, typename... Args>
-    // using HasSomeFunction = All<
-    //     IsSame<Void<decltype(static_cast<Ret (A::*)(Args...)>(&A::some_func))>, void>,
-    //     SignatureCheck<decltype(&A::some_func), Ret, Args...>>;
-
-    // // template <typename A>
-    // // using HasSomeFunction =
-    // //     IsSame<
-    // //         Void(decltype(declval<A>().some_func(declval<Arg1>(), declval<Arg2>()))),
-    // //         void>;
-
-    // template <typename A>
-    // using TraitName = IsSame<decltype(declval<A>().func_name(declval<Arg1>(), declval<Arg2>())), Ret>;
-
-    // template <typename A>
-    // void require_func(A a, size_t size)
-    // {
-    //     IsSame<decltype(a[size]), Ret>;
-    // }
-
     // Element
     // Should get Element type of containter
 
@@ -52,6 +29,8 @@ namespace efp
 
     template <typename A>
     using Element = typename ElementImpl<A>::Type;
+
+    // Sequence specific traits
 
     // dyn
 
@@ -72,18 +51,27 @@ namespace efp
     template <typename A>
     using CtSize = typename CtSizeImpl<A>::Type;
 
-    // CtCapcity
+    // CtCapacity
     // Should be IntegralConstant<size_t> with compile time capcity.
     // dyn for dynamic size
 
     template <typename A>
-    struct CtCapcityImpl
+    struct CtCapacityImpl
     {
-        using Type = typename A::CtSize;
+        using Type = typename A::CtCapacity;
     };
 
     template <typename A>
-    using CtCapcity = typename CtCapcityImpl<A>::Type;
+    using CtCapacity = typename CtCapacityImpl<A>::Type;
+
+    template <typename A>
+    using IsSequence = True;
+    //  All<
+    //     ImplTypeLevelFunction<A, HasBracketOperator>,
+    //     ImplTypeLevelFunction<A, HasSizeMethod>,
+    //     ImplTypeLevelFunction<A, HasDataMethod>,
+    //     ImplTypeLevelFunction<A, HasBeginMethod>,
+    //     ImplTypeLevelFunction<A, HasEndMethod>>;
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +103,7 @@ namespace efp
     // {
     //     static constexpr bool value = A::ct_capacity != dyn;
     // };
-    using IsStaticCapacity = Bool<CtCapcity<A>::value != dyn>;
+    using IsStaticCapacity = Bool<CtCapacity<A>::value != dyn>;
 
     // AreAllStaticCapacity
 
@@ -143,7 +131,7 @@ namespace efp
     //     static constexpr size_t value = minimum_v(StaticCapacity<A>::value...);
     // };
 
-    using MinStaticCapacity = Min<CtCapcity<As>...>;
+    using MinStaticCapacity = Min<CtCapacity<As>...>;
 
     // length
     // ? Maybe need to be at prelude
