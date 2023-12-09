@@ -238,7 +238,7 @@ namespace efp
     // Max
 
     template <typename Head, typename... Tail>
-    struct Max<Head> : Max<Head, Max<Tail...>>
+    struct Max : Max<Head, Max<Tail...>>
     {
     };
 

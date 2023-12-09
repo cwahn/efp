@@ -12,6 +12,7 @@
 #include <cstring>
 
 #include "sfinae.hpp"
+#include "trait.hpp"
 
 // todo Move and copy assigment operator sort out
 
@@ -111,8 +112,8 @@ namespace efp
         using CtSize = Size<ct_size>;
         using CtCapcity = Size<ct_size>;
 
-        static constexpr size_t ct_size = ct_size;
-        static constexpr size_t ct_capacity = ct_size;
+        // static constexpr size_t ct_size = ct_size;
+        // static constexpr size_t ct_capacity = ct_size;
         // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
         // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
@@ -188,7 +189,7 @@ namespace efp
 
         size_t capacity() const
         {
-            return ct_capacity;
+            return ct_size;
         }
 
         void resize(size_t length)
@@ -201,7 +202,7 @@ namespace efp
 
         void reserve(size_t capacity)
         {
-            if (capacity > ct_capacity)
+            if (capacity > ct_size)
             {
                 abort();
             }
@@ -243,7 +244,7 @@ namespace efp
         }
 
     private:
-        A data_[ct_capacity];
+        A data_[ct_size];
     };
 
     template <typename A, size_t ct_size>
@@ -255,7 +256,7 @@ namespace efp
     {
     public:
         using Element = A;
-        using CtSize = Size<ct_size>;
+        using CtSize = Size<dyn>;
         using CtCapcity = Size<ct_capacity>;
 
         // static constexpr size_t ct_size = dyn;
@@ -529,14 +530,14 @@ namespace efp
     {
     public:
         using Element = A;
-        using CtSize = Size<ct_size>;
-        using CtCapcity = Size<ct_capacity>;
+        using CtSize = Size<dyn>;
+        using CtCapcity = Size<dyn>;
 
         // static constexpr size_t ct_size = dyn;
         // static constexpr size_t ct_capacity = dyn;
 
-        static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : data_{nullptr}, size_{0}, capacity_{0} {}
 
@@ -907,12 +908,12 @@ namespace efp
 
         size_t capacity() const
         {
-            return ct_capacity;
+            return ct_size;
         }
 
         void resize(size_t length)
         {
-            if (length > ct_capacity || length < 0)
+            if (length > ct_size || length < 0)
             {
                 abort();
             }
@@ -920,7 +921,7 @@ namespace efp
 
         void reserve(size_t capacity)
         {
-            if (capacity > ct_capacity)
+            if (capacity > ct_size)
             {
                 abort();
             }
@@ -1211,14 +1212,14 @@ namespace efp
     template <typename A>
     using VectorView = SequenceView<A, dyn, dyn>;
 
-    template <typename A, size_t ct_size, size_t ct_capacity>
-    class SequenceTrait<SequenceView<A, ct_size, ct_capacity>>
-    {
-    public:
-        using Element = A;
-        static constexpr size_t ct_size = ct_size;
-        static constexpr size_t ct_capacity = ct_capacity;
-    };
+    // template <typename A, size_t ct_size, size_t ct_capacity>
+    // class SequenceTrait<SequenceView<A, ct_size, ct_capacity>>
+    // {
+    // public:
+    //     using Element = A;
+    //     static constexpr size_t ct_size = ct_size;
+    //     static constexpr size_t ct_capacity = ct_capacity;
+    // };
 
     // todo STL only
 
@@ -1281,71 +1282,6 @@ namespace efp
     // {
     //     static constexpr size_t value = A::ct_capacity;
     // };
-
-    // length
-    // ? Maybe need to be at prelude
-
-    template <typename A>
-    constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_size != dyn, IntegralConst<size_t, A::ct_size>>
-    {
-        return IntegralConst<size_t, A::ct_size>{};
-    }
-
-    template <typename A>
-    constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_size == dyn, size_t>
-    {
-        return as.size();
-    }
-
-    // data
-
-    template <typename A>
-    constexpr auto data(const Seq<A> &as)
-        -> const Element<A> *
-    {
-        return as.data();
-    }
-
-    template <typename A>
-    constexpr auto data(Seq<A> &as)
-        -> Element<A> *
-    {
-        return as.data();
-    }
-
-    // begin
-
-    template <typename A>
-    constexpr auto begin(const Seq<A> &as)
-        -> const Element<A> *
-    {
-        return as.begin();
-    }
-
-    template <typename A>
-    constexpr auto begin(Seq<A> &as)
-        -> Element<A> *
-    {
-        return as.begin();
-    }
-
-    // end
-
-    template <typename A>
-    constexpr auto end(const Seq<A> &as)
-        -> const Element<A> *
-    {
-        return as.end();
-    }
-
-    template <typename A>
-    constexpr auto end(Seq<A> &as)
-        -> Element<A> *
-    {
-        return as.end();
-    }
 };
 
 #endif

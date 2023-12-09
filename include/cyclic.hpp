@@ -11,7 +11,7 @@ namespace efp
 {
     template <typename A, size_t n>
     class Vcb
-        : public SequenceBase<Vcb<A, n>>
+    // : public SequenceBase<Vcb<A, n>>
     {
     public:
         using Element = A;
@@ -95,18 +95,18 @@ namespace efp
         A *data_;
     };
 
-    template <typename A, size_t n>
-    class SequenceTrait<Vcb<A, n>>
-    {
-    public:
-        using Element = A;
-        static constexpr size_t ct_size = n;
-        static constexpr size_t ct_capacity = n;
-    };
+    // template <typename A, size_t n>
+    // class SequenceTrait<Vcb<A, n>>
+    // {
+    // public:
+    //     using Element = A;
+    //     static constexpr size_t ct_size = n;
+    //     static constexpr size_t ct_capacity = n;
+    // };
 
     template <typename A, size_t n>
     class Vcq
-        : public SequenceBase<Vcq<A, n>>
+    // : public SequenceBase<Vcq<A, n>>
     {
     public:
         using Element = A;
@@ -216,14 +216,14 @@ namespace efp
         A *middle_;
     };
 
-    template <typename A, size_t n>
-    class SequenceTrait<Vcq<A, n>>
-    {
-    public:
-        using Element = A;
-        static constexpr size_t ct_size = dyn;
-        static constexpr size_t ct_capacity = n;
-    };
+    // template <typename A, size_t n>
+    // class SequenceTrait<Vcq<A, n>>
+    // {
+    // public:
+    //     using Element = A;
+    //     static constexpr size_t ct_size = dyn;
+    //     static constexpr size_t ct_capacity = n;
+    // };
 
 }
 

@@ -93,9 +93,11 @@ namespace efp
     template <typename A>
     // struct IsStaticSize
     // {
-    //     static constexpr bool value = A::ct_size != dyn;
+    //     static constexpr bool value = CtSize<A>::value != dyn;
     // };
     using IsStaticSize = Bool<CtSize<A>::value != dyn>;
+
+    // todo Remove AreAlls and Min Max x
 
     // AreAllStaticSize
 
@@ -142,6 +144,71 @@ namespace efp
     // };
 
     using MinStaticCapacity = Min<CtCapcity<As>...>;
+
+    // length
+    // ? Maybe need to be at prelude
+
+    template <typename A>
+    constexpr auto length(const A &as)
+        -> EnableIf<CtSize<A>::value != dyn, CtSize<A>>
+    {
+        return {};
+    }
+
+    template <typename A>
+    constexpr auto length(const A &as)
+        -> EnableIf<CtSize<A>::value == dyn, size_t>
+    {
+        return as.size();
+    }
+
+    // data
+
+    template <typename A>
+    constexpr auto data(const A &as)
+        -> const Element<A> *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(A &as)
+        -> Element<A> *
+    {
+        return as.data();
+    }
+
+    // begin
+
+    template <typename A>
+    constexpr auto begin(const A &as)
+        -> const Element<A> *
+    {
+        return as.begin();
+    }
+
+    template <typename A>
+    constexpr auto begin(A &as)
+        -> Element<A> *
+    {
+        return as.begin();
+    }
+
+    // end
+
+    template <typename A>
+    constexpr auto end(const A &as)
+        -> const Element<A> *
+    {
+        return as.end();
+    }
+
+    template <typename A>
+    constexpr auto end(A &as)
+        -> Element<A> *
+    {
+        return as.end();
+    }
 
 } // namespace efp
 

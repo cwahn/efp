@@ -82,7 +82,7 @@ namespace efp
 
     template <>
     class Sequence<char, dyn, dyn>
-        : public SequenceBase<Sequence<char, dyn, dyn>>
+    // : public SequenceBase<Sequence<char, dyn, dyn>>
     {
     public:
         using Element = char;
@@ -407,7 +407,7 @@ namespace efp
     // VectorView<const char> specialization for StringView
     template <>
     class SequenceView<const char, dyn, dyn>
-        : public SequenceBase<SequenceView<const char, dyn, dyn>>
+    // : public SequenceBase<SequenceView<const char, dyn, dyn>>
     {
     public:
         using Element = const char;
