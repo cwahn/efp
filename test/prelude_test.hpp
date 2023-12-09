@@ -413,7 +413,7 @@ TEST_CASE("slice")
     {
         const auto slice_ = slice(Size<1>{}, Size<3>{}, array_5);
         CHECK(length(slice_) == 2);
-        CHECK(IsStaticLength<decltype(slice_)>::value);
+        CHECK(IsStaticSize<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
         CHECK(slice_[1] == 3.);
     }
@@ -422,7 +422,7 @@ TEST_CASE("slice")
     {
         const auto slice_ = slice(1, 3, array_5);
         CHECK(IsSame<decltype(length(slice_)), size_t>::value);
-        CHECK(!IsStaticLength<decltype(slice_)>::value);
+        CHECK(!IsStaticSize<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
         CHECK(slice_[1] == 3.);
     }

@@ -15,5 +15,6 @@
 // #include "format.hpp"
 #include "io.hpp"
 #include "sort.hpp"
+#include "trait.hpp"
 
 #endif

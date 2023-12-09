@@ -87,11 +87,11 @@ namespace efp
 
     template <typename... As>
     using AppendReturn = Conditional<
-        AreAllStaticLength<As...>::value,
-        Sequence<Common<Element<As>...>, sum_v(As::ct_len...), sum_v(As::ct_len...)>,
+        AreAllStaticSize<As...>::value,
+        Sequence<Common<Element<As>...>, sum_v(As::ct_size...), sum_v(As::ct_size...)>,
         Conditional<
             AreAllStaticCapacity<As...>::value,
-            Sequence<Common<Element<As>...>, dyn, sum_v(As::ct_cap...)>,
+            Sequence<Common<Element<As>...>, dyn, sum_v(As::ct_capacity...)>,
             Sequence<Common<Element<As>...>, dyn, dyn>>>;
 
     // append
@@ -116,7 +116,7 @@ namespace efp
     {
         AppendReturn<H, As...> result{};
 
-        if (AppendReturn<H, As...>::ct_len == dyn)
+        if (AppendReturn<H, As...>::ct_size == dyn)
         {
             result.resize(sum_v(static_cast<size_t>(length(head)), length(tail)...));
         }
@@ -167,7 +167,7 @@ namespace efp
     template <typename R, typename... As>
     using NAryReturn = Sequence<
         R,
-        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn,
+        AreAllStaticSize<As...>::value ? MinStaticLength<As...>::value : dyn,
         AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn>;
 
     // MapReturn
@@ -183,7 +183,7 @@ namespace efp
     {
         MapReturn<F, As...> result{};
         const size_t bounded_n = min_length(seqs...);
-        if (MapReturn<F, As...>::ct_len == dyn)
+        if (MapReturn<F, As...>::ct_size == dyn)
         {
             result.resize(bounded_n);
         }
@@ -199,7 +199,7 @@ namespace efp
     // FilterReturn
 
     template <typename A>
-    using FilterReturn = Sequence<Element<A>, dyn, A::ct_cap>;
+    using FilterReturn = Sequence<Element<A>, dyn, A::ct_capacity>;
 
     // filter
 
@@ -285,7 +285,7 @@ namespace efp
         -> FromFunctionReturn<N, F>
     {
         FromFunctionReturn<N, F> result{};
-        if (FromFunctionReturn<N, F>::ct_len == dyn)
+        if (FromFunctionReturn<N, F>::ct_size == dyn)
         {
             result.resize(length);
         }
@@ -387,7 +387,7 @@ namespace efp
     using MapWithIndexRetrun = Sequence<
         CallReturn<F, size_t, Element<As>...>,
         AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
-        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
+        AreAllStaticSize<As...>::value ? MinStaticLength<As...>::value : dyn>;
 
     // map_with_index
 
@@ -398,7 +398,7 @@ namespace efp
         MapWithIndexRetrun<F, As...> result;
         const auto bounded_n = min_length(seqs...);
 
-        if (MapWithIndexRetrun<F, As...>::ct_len == dyn)
+        if (MapWithIndexRetrun<F, As...>::ct_size == dyn)
         {
             result.resize(bounded_n);
         }
@@ -416,7 +416,7 @@ namespace efp
     template <typename F, typename... As>
     using CartesianMapReturn = Sequence<
         CallReturn<F, Element<As>...>,
-        AreAllStaticLength<As...>::value ? product_v(StaticLength<As>::value...) : dyn,
+        AreAllStaticSize<As...>::value ? product_v(StaticLength<As>::value...) : dyn,
         AreAllStaticCapacity<As...>::value ? product_v(StaticCapacity<As>::value...) : dyn>;
 
     // cartesian_map
@@ -427,7 +427,7 @@ namespace efp
         -> CartesianMapReturn<F, As...>
     {
         CartesianMapReturn<F, As...> result;
-        if (CartesianMapReturn<F, As...>::ct_len == dyn)
+        if (CartesianMapReturn<F, As...>::ct_size == dyn)
         {
             result.resize(product_v(static_cast<size_t>(length(seqs))...));
         }
@@ -477,10 +477,10 @@ namespace efp
     // TailReturn
 
     template <typename A, bool is_const>
-    using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
+    using TailReturn = EnableIf<A::ct_size != 0 && A::ct_capacity != 0,
                                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                             IsStaticSize<A>::value ? A::ct_size - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_capacity - 1 : dyn>>;
 
     // tail
     // ! Partial function. Application on empty list is abortion.
@@ -502,10 +502,10 @@ namespace efp
     // InitReturn
 
     template <typename A, bool is_const>
-    using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
+    using InitReturn = EnableIf<A::ct_size != 0 && A::ct_capacity != 0,
                                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+                                             IsStaticSize<A>::value ? A::ct_size - 1 : dyn,
+                                             IsStaticCapacity<A>::value ? A::ct_capacity - 1 : dyn>>;
 
     // init
 
@@ -549,7 +549,7 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_capacity>,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
@@ -557,11 +557,11 @@ namespace efp
     struct TakeReturnImpl<Size<n>, A, is_const>
     {
         using Type = Conditional<
-            IsStaticLength<A>::value,
+            IsStaticSize<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, n, n>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_capacity>,
                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
@@ -595,7 +595,7 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_capacity>,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
     };
 
@@ -603,11 +603,11 @@ namespace efp
     struct DropReturnImpl<Size<n>, A, is_const>
     {
         using Type = Conditional<
-            IsStaticLength<A>::value,
+            IsStaticSize<A>::value,
             SequenceView<Conditional<is_const, const Element<A>, Element<A>>, Size<n>{}, Size<n>{}>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
+                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_capacity>,
                 SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
     };
 
@@ -659,7 +659,7 @@ namespace efp
     // take_while
 
     template <typename A>
-    using TakeWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
+    using TakeWhileReturn = SequenceView<Element<A>, dyn, A::ct_capacity>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
     auto take_while(const F &f, const A &as)
@@ -680,7 +680,7 @@ namespace efp
     // drop_while
 
     template <typename A>
-    using DropWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
+    using DropWhileReturn = SequenceView<Element<A>, dyn, A::ct_capacity>;
 
     template <typename A, typename F = bool (*)(const Element<A> &)>
     auto drop_while(const F &f, const A &as)
@@ -735,7 +735,7 @@ namespace efp
     template <typename A>
     using ElemIndicesReturn = Conditional<
         IsStaticCapacity<A>::value,
-        Sequence<size_t, dyn, A::ct_cap>,
+        Sequence<size_t, dyn, A::ct_capacity>,
         Sequence<size_t, dyn, dyn>>;
 
     // elem_indices
@@ -794,7 +794,7 @@ namespace efp
     template <typename A>
     using FindIndicesReturn = Conditional<
         IsStaticCapacity<A>::value,
-        Sequence<size_t, dyn, A::ct_cap>,
+        Sequence<size_t, dyn, A::ct_capacity>,
         Sequence<size_t, dyn, dyn>>;
 
     // find_indices

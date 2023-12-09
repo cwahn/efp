@@ -39,6 +39,22 @@ namespace efp
     };
 
     template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<bool, lhs == rhs> operator==(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<bool, lhs == rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<bool, lhs != rhs> operator!=(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<bool, lhs != rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
     constexpr IntegralConst<A, lhs + rhs> operator+(
         IntegralConst<A, lhs>,
         IntegralConst<A, rhs>)
@@ -78,6 +94,11 @@ namespace efp
 
     using False = IntegralConst<bool, false>;
 
+    // Bool
+
+    template <bool b>
+    using Bool = IntegralConst<bool, b>;
+
     // Int
 
     template <size_t n>
@@ -114,40 +135,6 @@ namespace efp
 
     template <typename T>
     struct AlwaysFalse : False
-    {
-    };
-
-    // All
-
-    template <typename... Args>
-    struct All;
-
-    // Base case: When no types are left, return true.
-    template <>
-    struct All<> : True
-    {
-    };
-
-    // Recursive case: Check the first type, and recurse for the rest.
-    template <typename Head, typename... Tail>
-    struct All<Head, Tail...> : IntegralConst<bool, Head::value && All<Tail...>::value>
-    {
-    };
-
-    // Any
-
-    template <typename... Args>
-    struct Any;
-
-    // Base case: When no types are left, return false.
-    template <>
-    struct Any<> : False
-    {
-    };
-
-    // Recursive case: Check the first type, and recurse for the rest.
-    template <typename Head, typename... Tail>
-    struct Any<Head, Tail...> : IntegralConst<bool, Head::value || Any<Tail...>::value>
     {
     };
 
@@ -192,6 +179,78 @@ namespace efp
 
     template <bool cond, typename T, typename F>
     using Conditional = typename ConditionalImpl<cond, T, F>::Type;
+
+    // All
+
+    template <typename... Args>
+    struct All
+    {
+    };
+
+    // Base case: When no types are left, return true.
+    template <>
+    struct All<> : True
+    {
+    };
+
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct All<Head, Tail...> : IntegralConst<bool, Head::value && All<Tail...>::value>
+    {
+    };
+
+    // Any
+
+    template <typename... Args>
+    struct Any
+    {
+    };
+
+    // Base case: When no types are left, return false.
+    template <>
+    struct Any<> : False
+    {
+    };
+
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct Any<Head, Tail...> : IntegralConst<bool, Head::value || Any<Tail...>::value>
+    {
+    };
+
+    // Min
+
+    template <typename Head, typename... Tail>
+    struct Min : Min<Head, Min<Tail...>>
+    {
+    };
+
+    template <typename Head, typename Tail>
+    struct Min<Head, Tail> : Conditional<Head::value <= Tail::value, Head, Tail>
+    {
+    };
+
+    template <typename Head>
+    struct Min<Head> : Head
+    {
+    };
+
+    // Max
+
+    template <typename Head, typename... Tail>
+    struct Max<Head> : Max<Head, Max<Tail...>>
+    {
+    };
+
+    template <typename Head, typename Tail>
+    struct Max<Head, Tail> : Conditional<Head::value >= Tail::value, Head, Tail>
+    {
+    };
+
+    template <typename Head>
+    struct Max<Head> : Head
+    {
+    };
 
     // size_of_ptr_v
     constexpr auto size_of_ptr_v = sizeof(void *);
@@ -1225,7 +1284,7 @@ namespace efp
     template <typename... Ts>
     struct VoidImpl
     {
-        typedef void type;
+        using Type = void;
     };
 
     template <typename... Ts>

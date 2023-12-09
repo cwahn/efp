@@ -17,16 +17,16 @@ namespace efp
         using Element = A;
         using SizeType = size_t;
 
-        static constexpr size_t ct_len = n;
-        static constexpr size_t ct_cap = n;
+        static constexpr size_t ct_size = n;
+        static constexpr size_t ct_capacity = n;
 
-        // static_assert(ct_len >= 0, "ct_length must greater or equal than 0.");
-        // static_assert(ct_cap >= 0, "ct_capacity must greater or equal than 0.");
+        // static_assert(ct_size >= 0, "ct_size must greater or equal than 0.");
+        // static_assert(ct_capacity >= 0, "ct_capacity must greater or equal than 0.");
 
         Vcb()
             : buffer_{}
         {
-            middle_ = buffer_.data() + ct_len;
+            middle_ = buffer_.data() + ct_size;
             data_ = buffer_.data();
         }
 
@@ -43,15 +43,15 @@ namespace efp
         void push_back(A value)
         {
             data_[0] = value;
-            data_[ct_len] = value;
+            data_[ct_size] = value;
 
             ++data_;
-            data_ -= ct_len * (data_ == middle_);
+            data_ -= ct_size * (data_ == middle_);
         }
 
         constexpr SizeType size() const
         {
-            return ct_len;
+            return ct_size;
         }
 
         A *data()
@@ -81,16 +81,16 @@ namespace efp
 
         const A *end() const
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
         A *end()
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
     private:
-        std::array<A, ct_len * 2> buffer_;
+        std::array<A, ct_size * 2> buffer_;
         A *middle_;
         A *data_;
     };
@@ -100,8 +100,8 @@ namespace efp
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = n;
-        static constexpr size_t ct_cap = n;
+        static constexpr size_t ct_size = n;
+        static constexpr size_t ct_capacity = n;
     };
 
     template <typename A, size_t n>
@@ -112,18 +112,18 @@ namespace efp
         using Element = A;
         using SizeType = size_t;
 
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = n;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = n;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         Vcq()
             : buffer_{}
         {
             read_ = buffer_.data();
             write_ = buffer_.data();
-            middle_ = buffer_.data() + ct_cap;
+            middle_ = buffer_.data() + ct_capacity;
         }
         ~Vcq() {}
 
@@ -140,19 +140,19 @@ namespace efp
         void push_back(const A &value)
         {
             write_[0] = value;
-            write_[ct_cap] = value;
+            write_[ct_capacity] = value;
 
             ++write_;
-            write_ -= ct_cap * (write_ == middle_);
+            write_ -= ct_capacity * (write_ == middle_);
 
-            if (size_ < ct_cap)
+            if (size_ < ct_capacity)
             {
                 ++size_;
             }
             else
             {
                 read_++;
-                read_ -= ct_cap * (read_ == middle_);
+                read_ -= ct_capacity * (read_ == middle_);
             }
         }
         // ! Undefined if empty
@@ -163,7 +163,7 @@ namespace efp
             size_--;
 
             read_++;
-            read_ -= ct_cap * (read_ == middle_);
+            read_ -= ct_capacity * (read_ == middle_);
 
             return value;
         }
@@ -200,16 +200,16 @@ namespace efp
 
         const A *end() const
         {
-            return write_ > read_ ? write_ : write_ + ct_cap;
+            return write_ > read_ ? write_ : write_ + ct_capacity;
         }
 
         A *end()
         {
-            return write_ > read_ ? write_ : write_ + ct_cap;
+            return write_ > read_ ? write_ : write_ + ct_capacity;
         }
 
     private:
-        Array<A, ct_cap * 2> buffer_ = {};
+        Array<A, ct_capacity * 2> buffer_ = {};
         size_t size_ = 0;
         A *read_;
         A *write_;
@@ -221,8 +221,8 @@ namespace efp
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = n;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = n;
     };
 
 }

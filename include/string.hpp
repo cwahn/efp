@@ -86,11 +86,11 @@ namespace efp
     {
     public:
         using Element = char;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = dyn;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+        static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         Sequence() : data_{nullptr}, size_{0}, capacity_{0} {}
 
@@ -411,8 +411,8 @@ namespace efp
     {
     public:
         using Element = const char;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = dyn;
 
         SequenceView()
             : data_(nullptr), size_(0), capacity_(0) {}
