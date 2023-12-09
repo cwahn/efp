@@ -25,18 +25,129 @@ namespace efp
         return false;
     }
 
-    struct True
+    // IntegralConst
+
+    template <typename A, A a>
+    struct IntegralConst
     {
-        static constexpr bool value = true;
+        static constexpr A value = a;
+        using value_type = A;
+        using Type = IntegralConst;
+
+        constexpr operator value_type() const noexcept { return value; }   // Conversion operator
+        constexpr value_type operator()() const noexcept { return value; } // Function call operator
     };
 
-    struct False
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs + rhs> operator+(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs + rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs - rhs> operator-(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs - rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs * rhs> operator*(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs * rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs / rhs> operator/(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs / rhs>{};
+    }
+
+    // True
+
+    using True = IntegralConst<bool, true>;
+
+    // False
+
+    using False = IntegralConst<bool, false>;
+
+    // Int
+
+    template <size_t n>
+    using Int = IntegralConst<int, n>;
+
+    // Size
+
+    template <size_t n>
+    using Size = IntegralConst<size_t, n>;
+
+    // IsIntegralConst
+
+    template <typename A>
+    struct IsIntegralConst
     {
         static constexpr bool value = false;
     };
 
+    template <typename A, A a>
+    struct IsIntegralConst<IntegralConst<A, a>>
+    {
+        static constexpr bool value = true;
+    };
+
+    template <typename A>
+    struct IsIntegralConst<A &> : IsIntegralConst<A>
+    {
+    };
+
+    template <typename A>
+    struct IsIntegralConst<A &&> : IsIntegralConst<A>
+    {
+    };
+
     template <typename T>
     struct AlwaysFalse : False
+    {
+    };
+
+    // All
+
+    template <typename... Args>
+    struct All;
+
+    // Base case: When no types are left, return true.
+    template <>
+    struct All<> : True
+    {
+    };
+
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct All<Head, Tail...> : IntegralConst<bool, Head::value && All<Tail...>::value>
+    {
+    };
+
+    // Any
+
+    template <typename... Args>
+    struct Any;
+
+    // Base case: When no types are left, return false.
+    template <>
+    struct Any<> : False
+    {
+    };
+
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct Any<Head, Tail...> : IntegralConst<bool, Head::value || Any<Tail...>::value>
     {
     };
 
@@ -305,85 +416,6 @@ namespace efp
 
     // template <typename A>
     // using ReferenceRemoved = typename std::remove_reference<A>::Type;
-
-    // IntegralConst
-
-    template <typename A, A a>
-    struct IntegralConst
-    {
-        static constexpr A value = a;
-        using value_type = A;
-        using Type = IntegralConst;
-
-        constexpr operator value_type() const noexcept { return value; }   // Conversion operator
-        constexpr value_type operator()() const noexcept { return value; } // Function call operator
-    };
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs + rhs> operator+(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs + rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs - rhs> operator-(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs - rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs * rhs> operator*(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs * rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs / rhs> operator/(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs / rhs>{};
-    }
-
-    // IsIntegralConst
-
-    template <typename A>
-    struct IsIntegralConst
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename A, A a>
-    struct IsIntegralConst<IntegralConst<A, a>>
-    {
-        static constexpr bool value = true;
-    };
-
-    template <typename A>
-    struct IsIntegralConst<A &> : IsIntegralConst<A>
-    {
-    };
-
-    template <typename A>
-    struct IsIntegralConst<A &&> : IsIntegralConst<A>
-    {
-    };
-
-    // Int
-
-    template <size_t n>
-    using Int = IntegralConst<int, n>;
-
-    // Size
-
-    template <size_t n>
-    using Size = IntegralConst<size_t, n>;
 
     // IsSame
 
