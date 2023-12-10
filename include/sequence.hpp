@@ -190,6 +190,9 @@ namespace efp
         return as[i];
     }
 
+    // static_assert(IsSame<decltype(nth(0, Array<int, 2>{0, 1, 2})), int &>::value, "Assert nth");
+    // DebugType<decltype(nth(0, Array<int, 2>{0, 1, 2}))> _;
+
     template <typename A, size_t n>
     constexpr auto data(const Array<A, n> &as) -> const A *
     {

@@ -1398,6 +1398,9 @@ namespace efp
         constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
     };
 
+    template <typename T>
+    struct DebugType; // Intentionally undefined
+
 }
 
 #endif

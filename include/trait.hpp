@@ -79,10 +79,13 @@ namespace efp
     };
 
     template <typename A>
-    struct IsSequenceImplNth<A, Void<decltype(nth(declval<size_t>(), declval<const A>())), decltype(nth(declval<size_t>(), declval<A>()))>>
-        : All<
-              IsSame<decltype(nth(declval<size_t>(), declval<const A>())), const Element<A> &>,
-              IsSame<decltype(nth(declval<size_t>(), declval<A>())), Element<A> &>>
+    struct IsSequenceImplNth<A, Void<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), decltype(nth(declval<size_t>(), declval<Cleaned<A>>()))>>
+        // : All<
+        //       IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>,
+        //       IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>>
+        : IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>
+    // : IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>
+
     {
     };
 
@@ -95,9 +98,11 @@ namespace efp
 
     template <typename A>
     struct IsSequenceImplData<A, Void<decltype(data(declval<const A>())), decltype(data(declval<A>()))>>
-        : All<
-              IsSame<decltype(data(declval<const A>())), const Element<A> *>,
-              IsSame<decltype(data(declval<A>())), Element<A> *>>
+        // : All<
+        //   IsSame<decltype(data(declval<const A>())), const Element<A> *>,
+        //       IsSame<decltype(data(declval<A>())), Element<A> *>>
+
+        : IsSame<decltype(data(declval<const A>())), const Element<A> *>
     {
     };
 
@@ -106,11 +111,9 @@ namespace efp
         ImplTypeLevelFunction<Element, A>,
         ImplTypeLevelFunction<CtSize, A>,
         ImplTypeLevelFunction<CtCapacity, A>,
-        IsSequenceImplLength<A>
-        // ! Trait is not working properlly at the moments
-        // IsSequenceImplNth<A>
-        // IsSequenceImplData<A>,
-        >;
+        IsSequenceImplLength<A>,
+        IsSequenceImplNth<A>,
+        IsSequenceImplData<A>>;
 
     ////////////////////////////////////////////////////////////////////////
 
