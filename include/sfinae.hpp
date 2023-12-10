@@ -1241,7 +1241,9 @@ namespace efp
     // Cleaned
 
     template <typename A>
-    using Cleaned = ConstRemoved<ReferenceRemoved<A>>;
+    using Cleaned = CVRemoved<ReferenceRemoved<A>>;
+
+    // todo Decay
 
     // Common
 
