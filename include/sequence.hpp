@@ -1,15 +1,8 @@
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
 
-// Curiously Recurring Template Pattern Sequence
-// Check validity on data store
-
 // ct_capacity is compile time bound of length. It does not mean safety of access.
 // However, actual capacity does means the length of memory safe to access.
-
-// todo STL only
-// #include <iostream>
-// #include <cstring>
 
 #include "cpp_core.hpp"
 #include "sfinae.hpp"
@@ -19,105 +12,14 @@
 
 namespace efp
 {
-    // constexpr size_t dyn = -1;
-
-    // template <typename Derived>
-    // class SequenceTrait;
-
-    // template <typename Derived>
-    // class SequenceBase
-    // {
-    // public:
-    //     using Trait = SequenceTrait<Derived>;
-
-    //     using Element = typename Trait::Element;
-    //     static constexpr size_t ct_size = Trait::ct_size;
-    //     static constexpr size_t ct_capacity = Trait::ct_capacity;
-
-    //     const Element &operator[](size_t index) const
-    //     {
-    //         return derived()[index];
-    //     }
-
-    //     // ! Mut
-    //     Element &operator[](size_t index)
-    //     {
-    //         return derived()[index];
-    //     }
-
-    //     bool operator==(const SequenceBase &other) const
-    //     {
-    //         return derived() == other.derived();
-    //     }
-
-    //     size_t size() const
-    //     {
-    //         return derived().size();
-    //     }
-
-    //     const Element *data() const
-    //     {
-    //         return derived().data();
-    //     }
-
-    //     Element *data()
-    //     {
-    //         return derived().data();
-    //     }
-
-    //     const Element *begin() const
-    //     {
-    //         return derived().begin();
-    //     }
-
-    //     Element *begin()
-    //     {
-    //         return derived().begin();
-    //     }
-
-    //     const Element *end() const
-    //     {
-    //         return derived().end();
-    //     }
-
-    //     Element *end()
-    //     {
-    //         return derived().end();
-    //     }
-
-    // private:
-    //     Derived &derived()
-    //     {
-    //         return *static_cast<Derived *>(this);
-    //     }
-    //     const Derived &derived() const
-    //     {
-    //         return *static_cast<const Derived *>(this);
-    //     }
-    // };
-
-    // template <typename Derived>
-    // using Seq = SequenceBase<Derived>;
-
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // class Sequence
-    // {
-    // };
 
     template <typename A, size_t ct_size>
-    // class Sequence<A, ct_size, ct_size>
     class Array
-    // : public SequenceBase<Sequence<A, ct_size, ct_size>>
     {
     public:
         using Element = A;
         using CtSize = Size<ct_size>;
         using CtCapacity = Size<ct_size>;
-
-        // static constexpr size_t ct_size = ct_size;
-        // static constexpr size_t ct_capacity = ct_size;
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         Array()
         {
@@ -301,20 +203,12 @@ namespace efp
     }
 
     template <typename A, size_t ct_capacity>
-    // class Sequence<A, dyn, ct_capacity>
     class ArrVec
-    // : public SequenceBase<Sequence<A, dyn, ct_capacity>>
     {
     public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<ct_capacity>;
-
-        // static constexpr size_t ct_size = dyn;
-        // static constexpr size_t ct_capacity = ct_capacity;
-
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         ArrVec() : size_{0} {}
 
@@ -572,9 +466,6 @@ namespace efp
         size_t size_;
     };
 
-    // template <typename A, size_t ct_capacity>
-    // using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
-
     template <typename A, size_t n>
     struct ElementImpl<ArrVec<A, n>>
     {
@@ -624,20 +515,12 @@ namespace efp
     }
 
     template <typename A>
-    // class Sequence<A, dyn, dyn>
     class Vector
-    // : public SequenceBase<Sequence<A, dyn, dyn>>
     {
     public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
-
-        // static constexpr size_t ct_size = dyn;
-        // static constexpr size_t ct_capacity = dyn;
-
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         Vector() : data_{nullptr}, size_{0}, capacity_{0} {}
 
@@ -939,9 +822,6 @@ namespace efp
         size_t capacity_;
     };
 
-    // template <typename A>
-    // using Vector = Sequence<A, dyn, dyn>;
-
     template <typename A>
     struct ElementImpl<Vector<A>>
     {
@@ -990,34 +870,13 @@ namespace efp
         return as.data();
     }
 
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // class SequenceTrait<Sequence<A, ct_size, ct_capacity>>
-    // {
-    // public:
-    //     using Element = A;
-    //     static constexpr size_t ct_size = ct_size;
-    //     static constexpr size_t ct_capacity = ct_capacity;
-    // };
-
-    // Should have all these three template parameter not to break static link
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // class SequenceView
-    // {
-    // };
-
     template <typename A, size_t ct_size>
-    // class SequenceView<A, ct_size, ct_size>
     class ArrayView
-    // : public SequenceBase<SequenceView<A, ct_size, ct_size>>
     {
     public:
         using Element = A;
         using CtSize = Size<ct_size>;
         using CtCapacity = Size<ct_size>;
-        // static constexpr size_t ct_size = ct_size;
-        // static constexpr size_t ct_capacity = ct_size;
-
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
 
         ArrayView()
             : data_(nullptr)
@@ -1163,24 +1022,13 @@ namespace efp
         return as.data();
     }
 
-    // template <typename A, size_t ct_size>
-    // using ArrayView = EnableIf<ct_size != dyn, SequenceView<A, ct_size, ct_size>>;
-
     template <typename A, size_t ct_capacity>
-    // class SequenceView<A, dyn, ct_capacity>
     class ArrVecView
-    // : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
     {
     public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<ct_capacity>;
-
-        // static constexpr size_t ct_size = dyn;
-        // static constexpr size_t ct_capacity = ct_capacity;
-
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         ArrVecView()
             : data_(nullptr), size_(0)
@@ -1280,9 +1128,6 @@ namespace efp
         size_t size_;
     };
 
-    // template <typename A, size_t ct_capacity>
-    // using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
-
     template <typename A, size_t n>
     struct ElementImpl<ArrVecView<A, n>>
     {
@@ -1332,20 +1177,12 @@ namespace efp
     }
 
     template <typename A>
-    // class SequenceView<A, dyn, dyn>
     class VectorView
-    // : public SequenceBase<SequenceView<A, dyn, dyn>>
     {
     public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
-
-        // static constexpr size_t ct_size = dyn;
-        // static constexpr size_t ct_capacity = dyn;
-
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
         VectorView()
             : data_{nullptr}, size_{0}, capacity_{0}
@@ -1506,15 +1343,6 @@ namespace efp
         return as.data();
     }
 
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // class SequenceTrait<SequenceView<A, ct_size, ct_capacity>>
-    // {
-    // public:
-    //     using Element = A;
-    //     static constexpr size_t ct_size = ct_size;
-    //     static constexpr size_t ct_capacity = ct_capacity;
-    // };
-
     // todo STL only
 
     // template <typename A, size_t ct_size, size_t ct_capacity>
@@ -1570,34 +1398,6 @@ namespace efp
     //         os << " }";
     //         return os;
     //     }
-
-    // Element
-
-    // template <typename A>
-    // struct ElementImpl
-    // {
-    //     using type = typename A::Element;
-    // };
-
-    // template <typename A>
-    // using Element = typename ElementImpl<A>::type;
-
-    // StaticLength
-    //! Deprecated
-
-    // template <typename A>
-    // struct StaticLength
-    // {
-    //     static constexpr size_t value = A::ct_size;
-    // };
-
-    // StaticCapacity
-    // ! Deprecated
-    // template <typename A>
-    // struct StaticCapacity
-    // {
-    //     static constexpr size_t value = A::ct_capacity;
-    // };
 };
 
 #endif
