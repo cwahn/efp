@@ -252,6 +252,54 @@ namespace efp
     // template <typename A, size_t ct_size>
     // using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
 
+    template <typename A, size_t n>
+    struct ElementImpl<Array<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<Array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<Array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const Array<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const Array<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, Array<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const Array<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(Array<A, n> &as) -> A *
+    {
+        return as.data();
+    }
+
     template <typename A, size_t ct_capacity>
     // class Sequence<A, dyn, ct_capacity>
     class ArrVec
@@ -526,6 +574,54 @@ namespace efp
 
     // template <typename A, size_t ct_capacity>
     // using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
+
+    template <typename A, size_t n>
+    struct ElementImpl<ArrVec<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrVec<A, n>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrVec<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrVec<A, n> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrVec<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrVec<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrVec<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrVec<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A>
     // class Sequence<A, dyn, dyn>
@@ -846,6 +942,54 @@ namespace efp
     // template <typename A>
     // using Vector = Sequence<A, dyn, dyn>;
 
+    template <typename A>
+    struct ElementImpl<Vector<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct CtSizeImpl<Vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<Vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const Vector<A> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, const Vector<A> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, Vector<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const Vector<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(Vector<A> &as) -> A *
+    {
+        return as.data();
+    }
+
     // template <typename A, size_t ct_size, size_t ct_capacity>
     // class SequenceTrait<Sequence<A, ct_size, ct_capacity>>
     // {
@@ -971,6 +1115,54 @@ namespace efp
         Element *data_;
     };
 
+    template <typename A, size_t n>
+    struct ElementImpl<ArrayView<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrayView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrayView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrayView<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrayView<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrayView<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrayView<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrayView<A, n> &as) -> A *
+    {
+        return as.data();
+    }
+
     // template <typename A, size_t ct_size>
     // using ArrayView = EnableIf<ct_size != dyn, SequenceView<A, ct_size, ct_size>>;
 
@@ -1090,6 +1282,54 @@ namespace efp
 
     // template <typename A, size_t ct_capacity>
     // using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
+
+    template <typename A, size_t n>
+    struct ElementImpl<ArrVecView<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrVecView<A, n>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrVecView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrVecView<A, n> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrVecView<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrVecView<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrVecView<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrVecView<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A>
     // class SequenceView<A, dyn, dyn>
@@ -1217,6 +1457,54 @@ namespace efp
 
     // template <typename A>
     // using VectorView = SequenceView<A, dyn, dyn>;
+
+    template <typename A>
+    struct ElementImpl<VectorView<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct CtSizeImpl<VectorView<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<VectorView<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const VectorView<A> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, const VectorView<A> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, VectorView<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const VectorView<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(VectorView<A> &as) -> A *
+    {
+        return as.data();
+    }
 
     // template <typename A, size_t ct_size, size_t ct_capacity>
     // class SequenceTrait<SequenceView<A, ct_size, ct_capacity>>

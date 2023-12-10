@@ -107,6 +107,54 @@ namespace efp
     // };
 
     template <typename A, size_t n>
+    struct ElementImpl<Vcb<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<Vcb<A, n>> 
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<Vcb<A, n>> 
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const Vcb<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const Vcb<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, Vcb<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const Vcb<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(Vcb<A, n> &as) -> A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
     class Vcq
     // : public SequenceBase<Vcq<A, n>>
     {
@@ -228,6 +276,54 @@ namespace efp
     //     static constexpr size_t ct_size = dyn;
     //     static constexpr size_t ct_capacity = n;
     // };
+
+    template <typename A, size_t n>
+    struct ElementImpl<Vcq<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<Vcq<A, n>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<Vcq<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const Vcq<A, n> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const Vcq<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, Vcq<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const Vcq<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(Vcq<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
 }
 

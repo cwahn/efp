@@ -8,15 +8,18 @@
 
 namespace efp
 {
-    template <typename A, template <typename> class TypeLevelFunction, typename = void>
+    template <template <typename> class TypeLevelFunction, typename A, typename = void>
     struct ImplTypeLevelFunction : False
     {
     };
 
-    template <typename A, template <typename> class TypeLevelFunction>
-    struct ImplTypeLevelFunction<A, TypeLevelFunction, Void<TypeLevelFunction<A>>> : True
+    template <template <typename> class TypeLevelFunction, typename A>
+    struct ImplTypeLevelFunction<TypeLevelFunction, A, Void<TypeLevelFunction<A>>> : True
     {
     };
+
+    // template <typename F, F f, typename R, typaname A>
+    // using ImplFunction = IsSame<CallReturn<F, A>, R>;
 
     // Element
     // Should get Element type of containter
@@ -24,11 +27,11 @@ namespace efp
     template <typename A>
     struct ElementImpl
     {
-        using Type = typename A::Element;
+        // using Type = typename A::Element;
     };
 
     template <typename A>
-    using Element = typename ElementImpl<A>::Type;
+    using Element = typename ElementImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
 
     // Sequence specific traits
 
@@ -45,11 +48,11 @@ namespace efp
     template <typename A>
     struct CtSizeImpl
     {
-        using Type = typename A::CtSize;
+        // using Type = typename A::CtSize;
     };
 
     template <typename A>
-    using CtSize = typename CtSizeImpl<A>::Type;
+    using CtSize = typename CtSizeImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
 
     // CtCapacity
     // Should be IntegralConstant<size_t> with compile time capcity.
@@ -58,33 +61,147 @@ namespace efp
     template <typename A>
     struct CtCapacityImpl
     {
-        using Type = typename A::CtCapacity;
+        // using Type = typename A::CtCapacity;
     };
 
     template <typename A>
-    using CtCapacity = typename CtCapacityImpl<A>::Type;
+    using CtCapacity = typename CtCapacityImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
+
+    // length
+    // ? Maybe need to be at prelude
+
+    // template <typename A>
+    // constexpr auto length(const A &as)
+    //     -> EnableIf<CtSize<A>::value != dyn, CtSize<A>>;
+    // // {
+    // //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    // //     return {};
+    // // }
+
+    // template <typename A>
+    // constexpr auto length(const A &as)
+    //     -> EnableIf<CtSize<A>::value == dyn, size_t>;
+    // // {
+    // //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    // //     return as.size();
+    // // }
+
+    // // data
+
+    // template <typename A>
+    // constexpr auto data(const A &as) -> const Element<A> *;
+    // // {
+    // //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    // //     return as.data();
+    // // }
+
+    // template <typename A>
+    // constexpr auto data(A &as) -> Element<A> *;
+    // // {
+    // //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    // //     return as.data();
+    // // }
+
+    // // nth
+
+    // template <typename A>
+    // constexpr auto nth(size_t n, const A &as) -> const Element<A> &;
+    // // {
+    // // }
+
+    // template <typename A>
+    // constexpr auto nth(size_t n, A &as) -> Element<A> &;
+    // // {
+    // // }
+
+    // template <typename A>
+    // constexpr auto length(const A &as)
+    //     -> EnableIf<CtSize<A>::value != dyn, CtSize<A>>;
+
+    // template <typename A>
+    // constexpr auto length(const A &as)
+    //     -> EnableIf<CtSize<A>::value == dyn, size_t>;
+
+    template <typename A, typename = void>
+    struct IsSequenceImplLength : False
+    {
+    };
 
     template <typename A>
-    using HasBracketOperator = IsSame<decltype(std::declval<A>()[std::declval<size_t>()]), Element<A> &>;
+    struct IsSequenceImplLength<A, Void<decltype(length(declval<const A>())), decltype(length(declval<A>()))>>
+        : Any<
+              IsSame<decltype(length(declval<const A>())), CtSize<A>>,
+              IsSame<decltype(length(declval<const A>())), size_t>>
+    {
+    };
+
+    // template <typename A>
+    // using IsSequenceImplLength = Any<
+    //     IsSame<decltype(length(declval<const A>())), CtSize<A>>,
+    //     IsSame<decltype(length(declval<const A>())), size_t>>;
+
+    // nth
+
+    // template <typename A>
+    // constexpr auto nth(size_t n, const A &as) -> const Element<A> &;
+
+    // template <typename A>
+    // constexpr auto nth(size_t n, A &as) -> Element<A> &;
+
+    // template <typename A>
+    // using IsSequenceImplNth = All<
+    //     IsSame<decltype(data(declval<const A>())), const Element<A> *>,
+    //     IsSame<decltype(data(declval<A>())), Element<A> *>>;
+
+    template <typename A, typename = void>
+    struct IsSequenceImplNth : False
+    {
+    };
 
     template <typename A>
-    using HasSizeMethod = IsSame<decltype(std::declval<A>().size()), size_t>;
+    struct IsSequenceImplNth<A, Void<decltype(nth(declval<size_t>(), declval<const A>())), decltype(nth(declval<size_t>(), declval<A>()))>>
+        : All<
+              IsSame<decltype(nth(declval<size_t>(), declval<const A>())), const Element<A> &>,
+              IsSame<decltype(nth(declval<size_t>(), declval<A>())), Element<A> &>>
+    {
+    };
+
+    // data
+
+    // template <typename A>
+    // constexpr auto data(const A &as) -> const Element<A> *;
+
+    // template <typename A>
+    // constexpr auto data(A &as) -> Element<A> *;
+
+    template <typename A, typename = void>
+    struct IsSequenceImplData : False
+    {
+    };
 
     template <typename A>
-    using HasDataMethod = IsSame<decltype(std::declval<A>().data()), Element<A> *>;
+    struct IsSequenceImplData<A, Void<decltype(data(declval<const A>())), decltype(data(declval<A>()))>>
+        : All<
+              IsSame<decltype(data(declval<const A>())), const Element<A> *>,
+              IsSame<decltype(data(declval<A>())), Element<A> *>>
+    {
+    };
+
+    // template <typename A>
+    // using IsSequenceImplData = All<
+    //     IsSame<decltype(data(declval<const A>())), const Element<A> *>,
+    //     IsSame<decltype(data(declval<A>())), Element<A> *>>;
 
     template <typename A>
-    using HasBeginMethod = IsSame<decltype(std::declval<A>().begin()), Element<A> *>;
-
-    template <typename A>
-    using HasEndMethod = IsSame<decltype(std::declval<A>().end()), Element<A> *>;
-
-    template <typename A>
-    using IsSequence = All<HasBracketOperator<A>,
-                           HasSizeMethod<A>,
-                           HasDataMethod<A>,
-                           HasBeginMethod<A>,
-                           HasEndMethod<A>>;
+    using IsSequence = All<
+        ImplTypeLevelFunction<Element, A>,
+        ImplTypeLevelFunction<CtSize, A>,
+        ImplTypeLevelFunction<CtCapacity, A>,
+        IsSequenceImplLength<A>
+        // ! Trait is not working properlly at the moments
+        // IsSequenceImplNth<A>,
+        // IsSequenceImplData<A>,
+        >;
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -145,43 +262,6 @@ namespace efp
     // };
 
     using MinStaticCapacity = Min<CtCapacity<As>...>;
-
-    // length
-    // ? Maybe need to be at prelude
-
-    template <typename A>
-    constexpr auto length(const A &as)
-        -> EnableIf<CtSize<A>::value != dyn, CtSize<A>>
-    {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return {};
-    }
-
-    template <typename A>
-    constexpr auto length(const A &as)
-        -> EnableIf<CtSize<A>::value == dyn, size_t>
-    {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return as.size();
-    }
-
-    // data
-
-    template <typename A>
-    constexpr auto data(const A &as)
-        -> const Element<A> *
-    {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return as.data();
-    }
-
-    template <typename A>
-    constexpr auto data(A &as)
-        -> Element<A> *
-    {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return as.data();
-    }
 
     // // begin
 
