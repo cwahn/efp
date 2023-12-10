@@ -92,7 +92,7 @@ namespace efp
         }
 
     private:
-        std::array<A, ct_size * 2> buffer_;
+        Array<A, ct_size * 2> buffer_;
         A *middle_;
         A *data_;
     };

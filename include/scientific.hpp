@@ -9,19 +9,19 @@
 namespace efp
 {
     template <typename R, typename A>
-    constexpr R mean(const Seq<A> &as)
+    constexpr R mean(const A &as)
     {
         return sum(as) / (R)length(as);
     }
 
     template <typename R, typename A>
-    constexpr R rms(const Seq<A> &as)
+    constexpr R rms(const A &as)
     {
         return sqrt<R>(mean<R>(map(square<Element<A>>, as)));
     }
 
     template <typename R, typename A, typename B>
-    R sse(const Seq<A> &as, const Seq<B> &bs)
+    R sse(const A &as, const B &bs)
     {
         const auto square_error = [](const Element<A> &a, const Element<B> &b)
         { return square(a - b); };
@@ -30,7 +30,7 @@ namespace efp
     }
 
     template <typename R, typename A, typename B>
-    R mse(const Seq<A> &as, const Seq<B> &bs)
+    R mse(const A &as, const B &bs)
     {
         const auto square_error = [](const Element<A> &a, const Element<B> &b)
         { return square(a - b); };
@@ -39,25 +39,25 @@ namespace efp
     }
 
     template <typename R, typename A, typename B>
-    R rmse(const Seq<A> &as, const Seq<B> &bs)
+    R rmse(const A &as, const B &bs)
     {
         return sqrt(mse<R>(as, bs));
     }
 
     template <typename R, typename A, typename B>
-    R nrmse_mean(const Seq<A> &as, const Seq<B> &bs)
+    R nrmse_mean(const A &as, const B &bs)
     {
         return rmse<R>(as, bs) / (R)mean<R>(bs);
     }
 
     template <typename R, typename A, typename B>
-    R nrmse_max_min(const Seq<A> &as, const Seq<B> &bs)
+    R nrmse_max_min(const A &as, const B &bs)
     {
         return rmse<R>(as, bs) / (R)max_min(bs);
     }
 
     template <typename R, bool bessel_correction = false, typename A>
-    R variance(const Seq<A> &as)
+    R variance(const A &as)
     {
         const auto as_mean = mean<R>(as);
 
@@ -70,13 +70,13 @@ namespace efp
     }
 
     template <typename R, bool bessel_correction = false, typename A>
-    R standard_deviation(const Seq<A> &as)
+    R standard_deviation(const A &as)
     {
         return sqrt(variance<R, bessel_correction>(as));
     }
 
     template <typename R, bool bessel_correction = false, typename A, typename B>
-    R covariance(const Seq<A> &as, const Seq<B> &bs)
+    R covariance(const A &as, const B &bs)
     {
         const auto as_mean = mean<R>(as);
         const auto bs_mean = mean<R>(bs);
@@ -90,14 +90,14 @@ namespace efp
     }
 
     template <typename R, bool bessel_correction = false, typename A, typename B>
-    R correlation(const Seq<A> &as, const Seq<B> &bs)
+    R correlation(const A &as, const B &bs)
     {
         return covariance<R, bessel_correction>(as, bs) /
                (standard_deviation<R, bessel_correction>(as) * standard_deviation<R, bessel_correction>(bs));
     }
 
     template <typename R, bool bessel_correction = false, bool adjusted = false, typename A>
-    R autocovariance(const Seq<A> &as, const int &lag)
+    R autocovariance(const A &as, const int &lag)
     {
         const auto as_mean = mean<R>(as);
         const auto n = length(as);
@@ -124,14 +124,14 @@ namespace efp
     }
 
     template <typename R, bool bessel_correction = false, bool adjusted = false, typename A>
-    R autocorrelation(const Seq<A> &as, const int &lag)
+    R autocorrelation(const A &as, const int &lag)
     {
         return autocovariance<R, bessel_correction, adjusted>(as, lag) /
                variance<R, bessel_correction>(as);
     }
 
     template <typename R, typename A>
-    NAryReturn<R, A> remove_dc(const Seq<A> &as)
+    NAryReturn<R, A> remove_dc(const A &as)
     {
         const auto as_mean = mean<R>(as);
 
@@ -142,7 +142,7 @@ namespace efp
     }
 
     template <typename R, typename A, typename B>
-    Tuple<R, R> linear_regression(const Seq<A> &as, const Seq<B> &bs)
+    Tuple<R, R> linear_regression(const A &as, const B &bs)
     {
         const auto as_mean = mean<R>(as);
         const auto bs_mean = mean<R>(bs);
@@ -165,7 +165,7 @@ namespace efp
     }
 
     template <typename R, typename A>
-    Tuple<R, R> linear_regression_with_index(const Seq<A> &as)
+    Tuple<R, R> linear_regression_with_index(const A &as)
     {
         const int n = length(as);
 
@@ -185,7 +185,7 @@ namespace efp
     }
 
     template <typename R, typename A>
-    NAryReturn<R, A> detrend(const Seq<A> &as)
+    NAryReturn<R, A> detrend(const A &as)
     {
         const auto betas = linear_regression_with_index<R>(as);
         const auto beta_1 = get<0>(betas);

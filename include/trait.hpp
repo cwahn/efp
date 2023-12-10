@@ -65,17 +65,30 @@ namespace efp
     using CtCapacity = typename CtCapacityImpl<A>::Type;
 
     template <typename A>
-    using IsSequence = True;
-    //  All<
-    //     ImplTypeLevelFunction<A, HasBracketOperator>,
-    //     ImplTypeLevelFunction<A, HasSizeMethod>,
-    //     ImplTypeLevelFunction<A, HasDataMethod>,
-    //     ImplTypeLevelFunction<A, HasBeginMethod>,
-    //     ImplTypeLevelFunction<A, HasEndMethod>>;
+    using HasBracketOperator = IsSame<decltype(std::declval<A>()[std::declval<size_t>()]), Element<A> &>;
+
+    template <typename A>
+    using HasSizeMethod = IsSame<decltype(std::declval<A>().size()), size_t>;
+
+    template <typename A>
+    using HasDataMethod = IsSame<decltype(std::declval<A>().data()), Element<A> *>;
+
+    template <typename A>
+    using HasBeginMethod = IsSame<decltype(std::declval<A>().begin()), Element<A> *>;
+
+    template <typename A>
+    using HasEndMethod = IsSame<decltype(std::declval<A>().end()), Element<A> *>;
+
+    template <typename A>
+    using IsSequence = All<HasBracketOperator<A>,
+                           HasSizeMethod<A>,
+                           HasDataMethod<A>,
+                           HasBeginMethod<A>,
+                           HasEndMethod<A>>;
 
     ////////////////////////////////////////////////////////////////////////
 
-    // Utility Functions
+    // Utility Functionsƒ
     // IsStaticSize
 
     template <typename A>
@@ -140,6 +153,7 @@ namespace efp
     constexpr auto length(const A &as)
         -> EnableIf<CtSize<A>::value != dyn, CtSize<A>>
     {
+        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         return {};
     }
 
@@ -147,6 +161,7 @@ namespace efp
     constexpr auto length(const A &as)
         -> EnableIf<CtSize<A>::value == dyn, size_t>
     {
+        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         return as.size();
     }
 
@@ -156,6 +171,7 @@ namespace efp
     constexpr auto data(const A &as)
         -> const Element<A> *
     {
+        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         return as.data();
     }
 
@@ -163,40 +179,45 @@ namespace efp
     constexpr auto data(A &as)
         -> Element<A> *
     {
+        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         return as.data();
     }
 
-    // begin
+    // // begin
 
-    template <typename A>
-    constexpr auto begin(const A &as)
-        -> const Element<A> *
-    {
-        return as.begin();
-    }
+    // template <typename A>
+    // constexpr auto begin(const A &as)
+    //     -> const Element<A> *
+    // {
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     return as.begin();
+    // }
 
-    template <typename A>
-    constexpr auto begin(A &as)
-        -> Element<A> *
-    {
-        return as.begin();
-    }
+    // template <typename A>
+    // constexpr auto begin(A &as)
+    //     -> Element<A> *
+    // {
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     return as.begin();
+    // }
 
-    // end
+    // // end
 
-    template <typename A>
-    constexpr auto end(const A &as)
-        -> const Element<A> *
-    {
-        return as.end();
-    }
+    // template <typename A>
+    // constexpr auto end(const A &as)
+    //     -> const Element<A> *
+    // {
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     return as.end();
+    // }
 
-    template <typename A>
-    constexpr auto end(A &as)
-        -> Element<A> *
-    {
-        return as.end();
-    }
+    // template <typename A>
+    // constexpr auto end(A &as)
+    //     -> Element<A> *
+    // {
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     return as.end();
+    // }
 
 } // namespace efp
 

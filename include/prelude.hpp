@@ -2,6 +2,7 @@
 #define PRELUDE_HPP_
 
 #include "sfinae.hpp"
+#include "trait.hpp"
 #include "enum_type.hpp"
 #include "maybe.hpp"
 #include "sequence.hpp"
@@ -122,7 +123,7 @@ namespace efp
     // }
 
     template <typename A, typename B>
-    Unit append_impl(size_t &idx, const A &result, const B &seq)
+    Unit append_impl(size_t &idx, A &result, const B &seq)
     {
         static_assert(IsSequence<A>::value && IsSequence<B>::value, "A and B must be sequence types.");
 
@@ -158,11 +159,11 @@ namespace efp
     template <typename H, typename... As>
     auto append(const H &head, const As &...tail) -> AppendReturn<H, As...>
     {
-        static_assert(IsSequence<H>::value && (IsSequence<As>::value && ...), "All types must be sequence types.");
+        static_assert(All<IsSequence<H>, IsSequence<As>...>::value, "All types must be sequence types.");
 
         AppendReturn<H, As...> result{};
 
-        if (AppendReturn<H, As...>::ct_size == dyn)
+        if (CtSize<AppendReturn<H, As...>>::value == dyn)
         {
             result.resize(sum_v(static_cast<size_t>(head.size()), tail.size()...));
         }
@@ -290,7 +291,7 @@ namespace efp
 
         MapReturn<F, As...> result{};
         const size_t bounded_n = min_length(seqs...);
-        if constexpr (MapReturn<F, As...>::ct_size == dyn)
+        if (CtSize<MapReturn<F, As...>>::value == dyn)
         {
             result.resize(bounded_n);
         }
@@ -565,7 +566,7 @@ namespace efp
     template <typename A, typename... As, typename F = void (*)(const Element<A> &, const Element<As> &...)>
     void cartesian_for_each(const F &f, const A &as, const As &...seqs)
     {
-        static_assert(IsSequence<A>::value && (IsSequence<As>::value && ...), "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<A>, IsSequence<As>...>::value, "All arguments should be instance of sequence trait.");
         const auto as_length = as.size();
 
         for (size_t i = 0; i < as_length; ++i)
@@ -588,7 +589,7 @@ namespace efp
     template <typename A, typename... As, typename F = void (*)(Element<A> &, Element<As> &...)>
     void cartesian_for_eachi(const F &f, A &as, As &...seqs)
     {
-        static_assert(IsSequence<A>::value && (IsSequence<As>::value && ...), "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<A>, IsSequence<As>...>::value, "All arguments should be instance of sequence trait.");
         const auto as_length = as.size();
 
         for (size_t i = 0; i < as_length; ++i)
@@ -650,7 +651,7 @@ namespace efp
         auto result = MapWithIndexReturn<F, As...>{};
         const auto bounded_n = min_length(seqs...);
 
-        if constexpr (MapWithIndexReturn<F, As...>::ct_size == dyn)
+        if (CtSize<MapWithIndexReturn<F, As...>>::value == dyn)
         {
             result.resize(bounded_n);
         }
@@ -710,7 +711,7 @@ namespace efp
         static_assert(All<IsSequence<As>...>::value, "All arguments should be instance of sequence trait.");
 
         auto result = CartesianMapReturn<F, As...>{};
-        if constexpr (CartesianMapReturn<F, As...>::ct_size == dyn)
+        if (CtSize<CartesianMapReturn<F, As...>>::value == dyn)
         {
             result.resize(product_v(static_cast<size_t>(seqs.size())...));
         }
@@ -815,7 +816,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, as.size() - 1};
+        return TailReturn<A, true>{as.data() + 1, as.size() - 1};
     }
 
     template <typename A>
@@ -823,7 +824,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, as.size() - 1};
+        return TailReturn<A, false>{as.data() + 1, as.size() - 1};
     }
 
     // InitReturn
@@ -876,7 +877,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data(), as.size() - 1};
+        return InitReturn<A, true>{as.data(), as.size() - 1};
     }
 
     template <typename A>
@@ -884,7 +885,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data(), as.size() - 1};
+        return InitReturn<A, false>{as.data(), as.size() - 1};
     }
 
     // last
@@ -941,7 +942,7 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            Conditional<is_const, ArrVecView<const Element<A>, A::ct_capacity>, ArrVecView<Element<A>, A::ct_capacity>>,
+            Conditional<is_const, ArrVecView<const Element<A>, CtCapacity<A>::value>, ArrVecView<Element<A>, CtCapacity<A>::value>>,
             Conditional<is_const, VectorView<const Element<A>>, VectorView<Element<A>>>>;
     };
 
@@ -953,7 +954,7 @@ namespace efp
             Conditional<is_const, ArrayView<const Element<A>, n>, ArrayView<Element<A>, n>>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                Conditional<is_const, ArrVecView<const Element<A>, A::ct_capacity>, ArrVecView<Element<A>, A::ct_capacity>>,
+                Conditional<is_const, ArrVecView<const Element<A>, CtCapacity<A>::value>, ArrVecView<Element<A>, CtCapacity<A>::value>>,
                 Conditional<is_const, VectorView<const Element<A>>, VectorView<Element<A>>>>>;
     };
 
@@ -982,18 +983,19 @@ namespace efp
     //     return TakeReturn<N, A, true>(data(as), n);
     // }
 
+    // Let's make unsafe version as well
     template <typename N, typename A>
     auto take(N n, const A &as) -> TakeReturn<N, A, true>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return {as.data(), std::min(n, as.size())}; // Safeguarding against n > as.size()
+        return TakeReturn<N, A, true>(as.data(), n); // Safeguarding against n > as.size()
     }
 
     template <typename N, typename A>
     auto take(N n, A &as) -> TakeReturn<N, A, false>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return {as.data(), std::min(n, as.size())}; // Safeguarding against n > as.size()
+        return TakeReturn<N, A, true>(as.data(), n); // Safeguarding against n > as.size()
     }
 
     // DropReturnImpl
@@ -1024,7 +1026,7 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<A>::value,
-            Conditional<is_const, ArrVecView<const Element<A>, A::ct_capacity>, ArrVecView<Element<A>, A::ct_capacity>>,
+            Conditional<is_const, ArrVecView<const Element<A>, CtCapacity<A>::value>, ArrVecView<Element<A>, CtCapacity<A>::value>>,
             Conditional<is_const, VectorView<const Element<A>>, VectorView<Element<A>>>>;
     };
 
@@ -1036,7 +1038,7 @@ namespace efp
             Conditional<is_const, ArrayView<const Element<A>, n>, ArrayView<Element<A>, n>>,
             Conditional<
                 IsStaticCapacity<A>::value,
-                Conditional<is_const, ArrVecView<const Element<A>, A::ct_capacity>, ArrVecView<Element<A>, A::ct_capacity>>,
+                Conditional<is_const, ArrVecView<const Element<A>, CtCapacity<A>::value>, ArrVecView<Element<A>, CtCapacity<A>::value>>,
                 Conditional<is_const, VectorView<const Element<A>>, VectorView<Element<A>>>>>;
     };
 
@@ -1068,14 +1070,14 @@ namespace efp
     auto drop(N n, const A &as) -> DropReturn<N, A, true>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return {as.data() + n, std::max(static_cast<size_t>(0), as.size() - n)};
+        return DropReturn<N, A, true>(as.data() + n, as.size() - n);
     }
 
     template <typename N, typename A>
     auto drop(N n, A &as) -> DropReturn<N, A, false>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
-        return {as.data() + n, std::max(static_cast<size_t>(0), as.size() - n)};
+        return DropReturn<N, A, false>(as.data() + n, as.size() - n);
     }
 
     // SliceReturn
