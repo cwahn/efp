@@ -30,8 +30,18 @@ namespace efp
         // using Type = typename A::Element;
     };
 
+    // template <typename A>
+    // struct ElementImpl<const A> : ElementImpl<A>
+    // {
+    // };
+
+    // template <typename A>
+    // struct ElementImpl<A &> : ElementImpl<A>
+    // {
+    // };
+
     template <typename A>
-    using Element = typename ElementImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
+    using Element = typename ElementImpl<Cleaned<A>>::Type;
 
     // Sequence specific traits
 
@@ -51,8 +61,18 @@ namespace efp
         // using Type = typename A::CtSize;
     };
 
+    // template <typename A>
+    // struct CtSizeImpl<const A> : CtSizeImpl<A>
+    // {
+    // };
+
+    // template <typename A>
+    // struct CtSizeImpl<A &> : CtSizeImpl<A>
+    // {
+    // };
+
     template <typename A>
-    using CtSize = typename CtSizeImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
+    using CtSize = typename CtSizeImpl<Cleaned<A>>::Type;
 
     // CtCapacity
     // Should be IntegralConstant<size_t> with compile time capcity.
@@ -64,8 +84,18 @@ namespace efp
         // using Type = typename A::CtCapacity;
     };
 
+    // template <typename A>
+    // struct CtCapacityImpl<const A> : CtCapacityImpl<A>
+    // {
+    // };
+
+    // template <typename A>
+    // struct CtCapacityImpl<A &> : CtCapacityImpl<A>
+    // {
+    // };
+
     template <typename A>
-    using CtCapacity = typename CtCapacityImpl<ConstRemoved<ReferenceRemoved<A>>>::Type;
+    using CtCapacity = typename CtCapacityImpl<Cleaned<A>>::Type;
 
     // length
     // ? Maybe need to be at prelude
@@ -199,7 +229,7 @@ namespace efp
         ImplTypeLevelFunction<CtCapacity, A>,
         IsSequenceImplLength<A>
         // ! Trait is not working properlly at the moments
-        // IsSequenceImplNth<A>,
+        // IsSequenceImplNth<A>
         // IsSequenceImplData<A>,
         >;
 
