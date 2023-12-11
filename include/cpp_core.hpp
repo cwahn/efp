@@ -19,5 +19,7 @@
 #include <initializer_list>
 // todo STL only
 #include <iostream>
+#include <array>
+#include <vector>
 
 #endif
