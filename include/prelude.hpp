@@ -717,11 +717,6 @@ namespace efp
                 IsStaticCapacity<As>::value,
                 Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value - n>, ArrVecView<Element<As>, CtCapacity<As>::value - n>>,
                 Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
-
-        // using Type = Conditional<
-        //     is_const,
-        //     ArrayView<const Element<As>, n>,
-        //     ArrayView<Element<As>, n>>;
     };
 
     // DropUnsafeReturn
