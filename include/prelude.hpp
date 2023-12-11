@@ -93,7 +93,7 @@ namespace efp
 
             for (size_t i = 0; i < seq_length; ++i)
             {
-                as[idx] = bs[i];
+                nth(idx, as) = nth(i, bs);
                 idx++;
             }
 
@@ -135,7 +135,7 @@ namespace efp
 
         for (size_t i = 0; i < res_length; ++i)
         {
-            f(ass[i]...);
+            f(nth(i, ass)...);
         }
     }
 
@@ -147,7 +147,7 @@ namespace efp
 
         for (size_t i = 0; i < res_length; ++i)
         {
-            f(ass[i]...);
+            f(nth(i, ass)...);
         }
     }
 
@@ -181,7 +181,7 @@ namespace efp
 
         for (size_t i = 0; i < res_len; ++i)
         {
-            res[i] = f(ass[i]...);
+            nth(i, res) = f(nth(i, ass)...);
         }
 
         return res;
@@ -207,7 +207,7 @@ namespace efp
 
         for (size_t i = 0; i < res_len; ++i)
         {
-            const auto &a = as[i];
+            const auto &a = nth(i, as);
             if (f(a))
             {
                 res.push_back(a);
@@ -228,7 +228,7 @@ namespace efp
 
         for (size_t i = 0; i < length(as); ++i)
         {
-            res = f(res, as[i]);
+            res = f(res, nth(i, as));
         }
 
         return res;
@@ -245,7 +245,7 @@ namespace efp
 
         for (size_t i = length(as) - 1; i != -1; --i)
         {
-            res = f(as[i], res);
+            res = f(nth(i, as), res);
         }
 
         return res;
@@ -289,7 +289,7 @@ namespace efp
 
         for (size_t i = 0; i < length; ++i)
         {
-            res[i] = f(i);
+            nth(i, res) = f(i);
         }
 
         return res;
@@ -316,7 +316,7 @@ namespace efp
 
         for (size_t i = 0; i < min_len; ++i)
         {
-            f(i, seqs[i]...);
+            f(i, nth(i, seqs)...);
         }
     }
 
@@ -328,7 +328,7 @@ namespace efp
 
         for (size_t i = 0; i < min_len; ++i)
         {
-            f(i, seqs[i]...);
+            f(i, nth(i, seqs)...);
         }
     }
 
@@ -349,7 +349,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            const auto a = as[i];
+            const auto a = nth(i, as);
             const auto inner = [&](const Element<Ass> &...xs)
             { f(a, xs...); };
 
@@ -372,7 +372,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            const auto a = as[i];
+            const auto a = nth(i, as);
             const auto inner = [&](Element<Ass> &...xs)
             { f(a, xs...); };
 
@@ -408,7 +408,7 @@ namespace efp
 
         for (size_t i = 0; i < res_len; ++i)
         {
-            res[i] = f(i, ass[i]...);
+            nth(i, res) = f(i, nth(i, ass)...);
         }
 
         return res;
@@ -478,7 +478,7 @@ namespace efp
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(!as.empty()); // Ensure the sequence is not empty.
-        return as[0];
+        return nth(0, as);
     }
 
     // TailReturn
@@ -511,7 +511,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
         assert(length(as) > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, length(as) - 1};
+        return {data(as) + 1, length(as) - 1};
     }
 
     template <typename A>
@@ -519,7 +519,7 @@ namespace efp
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
         assert(length(as) > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, length(as) - 1};
+        return {data(as) + 1, length(as) - 1};
     }
 
     // InitReturn
@@ -552,7 +552,7 @@ namespace efp
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(length(as) > 0); // Ensure the sequence is not empty.
-        return {as.data(), length(as) - 1};
+        return {data(as), length(as) - 1};
     }
 
     template <typename As>
@@ -560,7 +560,7 @@ namespace efp
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(length(as) > 0); // Ensure the sequence is not empty.
-        return {as.data(), length(as) - 1};
+        return {data(as), length(as) - 1};
     }
 
     // last
@@ -623,14 +623,14 @@ namespace efp
     auto take_unsafe(N n, const As &as) -> TakeUnsafeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeUnsafeReturn<N, As, true>(as.data(), n);
+        return TakeUnsafeReturn<N, As, true>(data(as), n);
     }
 
     template <typename N, typename As>
     auto take_unsafe(N n, As &as) -> TakeUnsafeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeUnsafeReturn<N, As, false>(as.data(), n);
+        return TakeUnsafeReturn<N, As, false>(data(as), n);
     }
 
     // TakeReturnImpl
@@ -685,14 +685,14 @@ namespace efp
     auto take(N n, const As &as) -> TakeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeReturn<N, As, true>(as.data(), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
+        return TakeReturn<N, As, true>(data(as), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
     }
 
     template <typename N, typename As>
     auto take(N n, As &as) -> TakeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeReturn<N, As, false>(as.data(), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
+        return TakeReturn<N, As, false>(data(as), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
     }
 
     // Dr)opUnsafeReturnImpl
@@ -747,14 +747,14 @@ namespace efp
     auto drop_unsafe(N n, const As &as) -> DropUnsafeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return DropUnsafeReturn<N, As, true>(as.data() + n, length(as) - n);
+        return DropUnsafeReturn<N, As, true>(data(as) + n, length(as) - n);
     }
 
     template <typename N, typename As>
     auto drop_unsafe(N n, As &as) -> DropUnsafeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return DropUnsafeReturn<N, As, false>(as.data() + n, length(as) - n);
+        return DropUnsafeReturn<N, As, false>(data(as) + n, length(as) - n);
     }
 
     // DropReturnImpl
@@ -814,7 +814,7 @@ namespace efp
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         const size_t as_len = length(as);
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
-        return DropReturn<N, As, true>(as.data() + bound_drop_size, as_len - bound_drop_size);
+        return DropReturn<N, As, true>(data(as) + bound_drop_size, as_len - bound_drop_size);
     }
 
     template <typename N, typename As>
@@ -823,7 +823,7 @@ namespace efp
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         const size_t as_len = length(as);
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
-        return DropReturn<N, As, false>(as.data() + bound_drop_size, as_len - bound_drop_size);
+        return DropReturn<N, As, false>(data(as) + bound_drop_size, as_len - bound_drop_size);
     }
 
     // SliceUnsafeReturn
@@ -887,7 +887,7 @@ namespace efp
         const auto as_len = length(as);
 
         size_t i = 0;
-        while (i < as_len && f(as[i]))
+        while (i < as_len && f(nth(i, as)))
         {
             ++i;
         }
@@ -910,7 +910,7 @@ namespace efp
         const auto as_len = length(as);
 
         size_t i = 0;
-        while (i < as_len && f(as[i]))
+        while (i < as_len && f(nth(i, as)))
         {
             ++i;
         }
@@ -927,7 +927,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (as[i] == a)
+            if (nth(i, as) == a)
                 return true;
         }
 
@@ -943,7 +943,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (as[i] == a)
+            if (nth(i, as) == a)
                 return i;
         }
 
@@ -969,7 +969,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (a == as[i])
+            if (a == nth(i, as))
                 res.push_back(i);
         }
 
@@ -985,7 +985,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
+            if (f(nth(i, as)))
                 return true;
         }
 
@@ -1002,7 +1002,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
+            if (f(nth(i, as)))
                 return i;
         }
 
@@ -1028,7 +1028,7 @@ namespace efp
 
         for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
+            if (f(nth(i, as)))
                 res.push_back(i);
         }
 

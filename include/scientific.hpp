@@ -106,7 +106,7 @@ namespace efp
 
         for_index(
             [&](const int &i)
-            { summation += (as[i] - as_mean) * (as[i + lag] - as_mean); },
+            { summation += (nth(i, as) - as_mean) * (as[i + lag] - as_mean); },
             sum_length);
 
         if (adjusted)
