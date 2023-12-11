@@ -937,29 +937,31 @@ TEST_CASE("Test drop function")
     {
         auto array_3 = Array<double, 3>{1., 2., 3.};
         auto res = drop(Size<0>{}, array_3);
-        CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
+        CHECK(IsSame<decltype(res), ArrayView<double, 3>>::value);
+        // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const Array with static size smaller than size")
     {
         auto array_3 = Array<double, 3>{1., 2., 3.};
         auto res = drop(Size<2>{}, array_3);
-        CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
-        CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(IsSame<decltype(res), ArrayView<double, 1>>::value);
+        CHECK(data(res) == data(array_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const Array with static size larger than size")
     {
         auto res = drop(Size<5>{}, array_3);
-        CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
-        CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(IsSame<decltype(res), ArrayView<const double, 0>>::value);
+        CHECK(data(res) == data(array_3) + 3);
+        CHECK(length(res) == 0);
     }
 
     // Tests with ArrVec Type
@@ -967,31 +969,32 @@ TEST_CASE("Test drop function")
     {
         auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
         auto res = drop(Size<0>{}, arrvec_3);
-        CHECK(IsSame<decltype(res), ArrVecView<double, 0>>::value);
+        CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const ArrVec with static size smaller than size")
     {
         auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
         auto res = drop(Size<2>{}, arrvec_3);
-        CHECK(IsSame<decltype(res), ArrVecView<double, 2>>::value);
+        CHECK(IsSame<decltype(res), ArrVecView<double, 1>>::value);
         // DebugType<decltype(res)> _{};
-        CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(data(res) == data(arrvec_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const ArrVec with static size larger than size")
     {
         auto res = drop(Size<5>{}, arrvec_3);
-        CHECK(IsSame<decltype(res), ArrVecView<const double, 3>>::value);
-        CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(IsSame<decltype(res), ArrVecView<const double, 0>>::value);
+        CHECK(data(res) == data(arrvec_3) + 3);
+        CHECK(length(res) == 0);
     }
 
     // Tests with Vector Type
@@ -999,32 +1002,33 @@ TEST_CASE("Test drop function")
     {
         auto vector_3 = Vector<double>{1., 2., 3.};
         auto res = drop(Size<0>{}, vector_3);
-        CHECK(IsSame<decltype(res), ArrVecView<double, 0>>::value);
+        CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const Vector with static size smaller than size")
     {
         auto vector_3 = Vector<double>{1., 2., 3.};
         auto res = drop(Size<2>{}, vector_3);
-        CHECK(IsSame<decltype(res), ArrVecView<double, 2>>::value);
+        CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
-        CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(data(res) == data(vector_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const Vector with static size larger than size")
     {
         auto res = drop(Size<5>{}, vector_3);
-        CHECK(IsSame<decltype(res), ArrVecView<const double, 5>>::value);
+        CHECK(IsSame<decltype(res), VectorView<const double>>::value);
         // DebugType<decltype(res)> _{};
-        CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(data(res) == data(vector_3) + 3);
+        CHECK(length(res) == 0);
     }
 
     // Test with runtime size
@@ -1036,7 +1040,10 @@ TEST_CASE("Test drop function")
         auto res = drop(0, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const Array with dynamic size smaller than size")
@@ -1044,19 +1051,17 @@ TEST_CASE("Test drop function")
         auto array_3 = Array<double, 3>{1., 2., 3.};
         auto res = drop(2, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
-        CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(data(res) == data(array_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const Array with dynamic size larger than size")
     {
         auto res = drop(5, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 3>>::value);
-        CHECK(data(res) == data(array_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(data(res) == data(array_3) + 3);
+        CHECK(length(res) == 0);
     }
 
     // Tests with ArrVec Type
@@ -1067,7 +1072,10 @@ TEST_CASE("Test drop function")
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const ArrVec with dynamic size smaller than size")
@@ -1076,19 +1084,17 @@ TEST_CASE("Test drop function")
         auto res = drop(2, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
-        CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(data(res) == data(arrvec_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const ArrVec with dynamic size larger than size")
     {
         auto res = drop(5, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 3>>::value);
-        CHECK(data(res) == data(arrvec_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(data(res) == data(arrvec_3) + 3);
+        CHECK(length(res) == 0);
     }
 
     // Tests with Vector Type
@@ -1099,7 +1105,10 @@ TEST_CASE("Test drop function")
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 0);
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+        CHECK(res[2] == 3.0);
     }
 
     SECTION("Non-const Vector with dynamic size smaller than size")
@@ -1108,19 +1117,17 @@ TEST_CASE("Test drop function")
         auto res = drop(2, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
-        CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 2);
-        CHECK(res[0] == 1.0);
-        CHECK(res[1] == 2.0);
+        CHECK(data(res) == data(vector_3) + 2);
+        CHECK(length(res) == 1);
+        CHECK(res[0] == 3.0);
     }
 
     SECTION("Const Vector with dynamic size larger than size")
     {
         auto res = drop(5, vector_3);
         CHECK(IsSame<decltype(res), VectorView<const double>>::value);
-        CHECK(data(res) == data(vector_3));
-        CHECK(length(res) == 3);
-        CHECK(res[2] == 3.0);
+        CHECK(data(res) == data(vector_3) + 3);
+        CHECK(length(res) == 0);
     }
 }
 

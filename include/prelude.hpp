@@ -822,8 +822,8 @@ namespace efp
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
         const size_t as_len = as.size();
-        size_t bound_size = (n < as_len) ? n : as_len; // Ensuring n doesn't exceed the size of as
-        return DropReturn<N, As, true>(as.data() + n, bound_size);
+        size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, true>(as.data() + bound_drop_size, as_len - bound_drop_size);
     }
 
     template <typename N, typename As>
@@ -831,8 +831,8 @@ namespace efp
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
         const size_t as_len = as.size();
-        size_t bound_size = (n < as_len) ? n : as_len; // Ensuring n doesn't exceed the size of as
-        return DropReturn<N, As, false>(as.data() + n, bound_size);
+        size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, false>(as.data() + bound_drop_size, as_len - bound_drop_size);
     }
 
     // SliceUnsafeReturn
