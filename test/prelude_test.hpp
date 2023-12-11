@@ -150,7 +150,7 @@ TEST_CASE("map")
 
 TEST_CASE("filter")
 {
-    Array<int, 3> crtp_array{1, 2, 3};
+    Array<int, 3> array_3{1, 2, 3};
 
     auto is_even = [](int x)
     { return x % 2 == 0 ? true : false; };
@@ -159,7 +159,7 @@ TEST_CASE("filter")
     ref.resize(1);
     ref[0] = 2;
 
-    CHECK(filter(is_even, crtp_array) == ref);
+    CHECK(filter(is_even, array_3) == ref);
 }
 
 TEST_CASE("foldl")
@@ -347,9 +347,106 @@ TEST_CASE("last")
     CHECK(last(vector_3) == 3);
 }
 
+TEST_CASE("Test take_unsafe function")
+{
+    // Tests with Array Type
+    SECTION("Non-const Array with static zero size")
+    {
+        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto res = take_unsafe(Size<0>{}, array_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
+        CHECK(data(res) == data(array_3));
+        CHECK(length(res) == 0);
+    }
+
+    SECTION("Non-const Array with static size smaller than capacity")
+    {
+        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto res = take_unsafe(Size<2>{}, array_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
+        CHECK(data(res) == data(array_3));
+        CHECK(length(res) == 2);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+    }
+
+    SECTION("Const Array with static size equal to capacity")
+    {
+        auto res = take_unsafe(Size<3>{}, array_3);
+        CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
+        CHECK(data(res) == data(array_3));
+        CHECK(length(res) == 3);
+        CHECK(res[2] == 3.0);
+    }
+
+    // Tests with ArrVec Type
+    SECTION("Non-const ArrVec with static zero size")
+    {
+        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto res = take_unsafe(Size<0>{}, arrvec_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
+        // DebugType<decltype(res)> _{};
+        CHECK(data(res) == data(arrvec_3));
+        CHECK(length(res) == 0);
+    }
+
+    SECTION("Non-const ArrVec with static size smaller than capacity")
+    {
+        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto res = take_unsafe(Size<2>{}, arrvec_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
+        // DebugType<decltype(res)> _{};
+        CHECK(data(res) == data(arrvec_3));
+        CHECK(length(res) == 2);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+    }
+
+    SECTION("Const ArrVec with static size equal to capacity")
+    {
+        auto res = take_unsafe(Size<3>{}, arrvec_3);
+        CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
+        CHECK(data(res) == data(arrvec_3));
+        CHECK(length(res) == 3);
+        CHECK(res[2] == 3.0);
+    }
+
+    // Tests with Vector Type
+    SECTION("Non-const Vector with static zero size")
+    {
+        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto res = take_unsafe(Size<0>{}, vector_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
+        // DebugType<decltype(res)> _{};
+        CHECK(data(res) == data(vector_3));
+        CHECK(length(res) == 0);
+    }
+
+    SECTION("Non-const Vector with static size smaller than capacity")
+    {
+        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto res = take_unsafe(Size<2>{}, vector_3);
+        CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
+        // DebugType<decltype(res)> _{};
+        CHECK(data(res) == data(vector_3));
+        CHECK(length(res) == 2);
+        CHECK(res[0] == 1.0);
+        CHECK(res[1] == 2.0);
+    }
+
+    SECTION("Const Vector with static size equal to capacity")
+    {
+        auto res = take_unsafe(Size<3>{}, vector_3);
+        CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
+        CHECK(data(res) == data(vector_3));
+        CHECK(length(res) == 3);
+        CHECK(res[2] == 3.0);
+    }
+}
+
 TEST_CASE("take")
 {
-    SECTION("array 0")
+    SECTION("array within bounds")
     {
         const auto res = take(2, array_3);
         CHECK(data(res) == data(array_3));
@@ -358,30 +455,40 @@ TEST_CASE("take")
         CHECK(res[1] == 2.);
     }
 
-    SECTION("array 1")
+    SECTION("array zero length")
     {
         const auto res = take(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
 
-    SECTION("array 2")
+    SECTION("array exceeding bounds")
     {
-        // ! Should not put n longer than the length. Check should be done by the caller
         const auto res = take(9, array_3);
         CHECK(data(res) == data(array_3));
-        CHECK_FALSE(length(res) == 3);
+        // Since 9 exceeds the array size, length should be adjusted to the size of array_3
+        CHECK(length(res) == 3);
+        CHECK(res[0] == 1.);
+        CHECK(res[1] == 2.);
+        CHECK(res[2] == 3.);
+    }
+
+    SECTION("array exact length")
+    {
+        const auto res = take(3, array_3);
+        CHECK(data(res) == data(array_3));
+        CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
         CHECK(res[1] == 2.);
         CHECK(res[2] == 3.);
     }
 }
 
-TEST_CASE("drop")
+TEST_CASE("drop_unsafe")
 {
     SECTION("array 0")
     {
-        const auto res = drop(2, array_3);
+        const auto res = drop_unsafe(2, array_3);
         CHECK(data(res) == data(array_3) + 2);
         CHECK(length(res) == 1);
         CHECK(res[0] == 3.);
@@ -390,7 +497,7 @@ TEST_CASE("drop")
     SECTION("array 1")
     {
         // ! do not put negative values
-        const auto res = drop(0, array_3);
+        const auto res = drop_unsafe(0, array_3);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
         CHECK(res[0] == 1.);
@@ -401,17 +508,17 @@ TEST_CASE("drop")
     SECTION("array 2")
     {
         // ! Not supposed to put any n longer then the length. Check sould be done by the caller
-        const auto res = drop(9, array_3);
+        const auto res = drop_unsafe(9, array_3);
         CHECK_FALSE(data(res) == data(array_3) + 3);
         CHECK_FALSE(length(res) == 0);
     }
 }
 
-TEST_CASE("slice")
+TEST_CASE("slice_unsafe")
 {
     SECTION("static")
     {
-        const auto slice_ = slice(Size<1>{}, Size<3>{}, array_5);
+        const auto slice_ = slice_unsafe(Size<1>{}, Size<3>{}, array_5);
         CHECK(length(slice_) == 2);
         CHECK(IsStaticSize<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
@@ -420,7 +527,7 @@ TEST_CASE("slice")
 
     SECTION("dynamic")
     {
-        const auto slice_ = slice(1, 3, array_5);
+        const auto slice_ = slice_unsafe(1, 3, array_5);
         CHECK(IsSame<decltype(length(slice_)), size_t>::value);
         CHECK(!IsStaticSize<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);

@@ -581,10 +581,10 @@ namespace efp
         return length(as) == 0;
     }
 
-    // TakeReturnImpl
-
+    // TakeUnsafeReturnImpl
+    // ! Size must be valid. It must be smaller than compile time and runtime size.
     template <typename N, typename As, bool is_const>
-    struct TakeReturnImpl
+    struct TakeUnsafeReturnImpl
     {
         using Type = Conditional<
             IsStaticCapacity<As>::value,
@@ -593,16 +593,103 @@ namespace efp
     };
 
     template <size_t n, typename As, bool is_const>
-    struct TakeReturnImpl<Size<n>, As, is_const>
+    struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
+    {
+        // using Type = Conditional<
+        //     IsStaticSize<As>::value,
+        //     Conditional<
+        //         is_const,
+        //         ArrayView<const Element<As>, n>,
+        //         ArrayView<Element<As>, n>>,
+        //     Conditional<
+        //         IsStaticCapacity<As>::value,
+        //         Conditional<
+        //             is_const,
+        //             ArrVecView<const Element<As>, n>,
+        //             ArrVecView<Element<As>, n>>,
+        //         Conditional<
+        //             is_const,
+        //             VectorView<const Element<As>>,
+        //             VectorView<Element<As>>>>>;
+        using Type = Conditional<
+            is_const,
+            ArrayView<const Element<As>, n>,
+            ArrayView<Element<As>, n>>;
+    };
+
+    // TakeUnsafeReturn
+
+    template <typename N, typename As, bool is_const>
+    using TakeUnsafeReturn = typename TakeUnsafeReturnImpl<N, As, is_const>::Type;
+
+    // TakeUnsafeReturn
+
+    template <typename N, typename As, bool is_const>
+    using TakeUnsafeReturn = typename TakeUnsafeReturnImpl<N, As, is_const>::Type;
+
+    // take_unsafe
+
+    // !Should not put n longer than the length. Check should be done by the caller
+    // Let's make unsafe version as well
+    template <typename N, typename As>
+    auto take_unsafe(N n, const As &as) -> TakeUnsafeReturn<N, As, true>
+    {
+        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        return TakeUnsafeReturn<N, As, true>(as.data(), n);
+    }
+
+    template <typename N, typename As>
+    auto take_unsafe(N n, As &as) -> TakeUnsafeReturn<N, As, false>
+    {
+        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        return TakeUnsafeReturn<N, As, false>(as.data(), n);
+    }
+
+    // TakeReturnImpl
+
+    template <typename N, typename As, bool is_const>
+    struct TakeReturnImpl
     {
         using Type = Conditional<
+            IsStaticCapacity<As>::value,
+            Conditional<
+                is_const,
+                ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                ArrVecView<Element<As>, CtCapacity<As>::value>>,
+            Conditional<
+                is_const,
+                VectorView<const Element<As>>,
+                VectorView<Element<As>>>>;
+    };
+
+    template <size_t n, typename As, bool is_const>
+    struct TakeReturnImpl<Size<n>, As, is_const>
+    {
+        static constexpr size_t bound_size = min_v(n, CtSize<As>::value);
+        static constexpr size_t bound_capacity = min_v(n, CtCapacity<As>::value);
+
+        using Type = Conditional<
             IsStaticSize<As>::value,
-            Conditional<is_const, ArrayView<const Element<As>, n>, ArrayView<Element<As>, n>>,
+            Conditional<
+                is_const,
+                ArrayView<const Element<As>, bound_size>,
+                ArrayView<Element<As>, bound_size>>,
             Conditional<
                 IsStaticCapacity<As>::value,
-                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
-                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, bound_capacity>,
+                    ArrVecView<Element<As>, bound_capacity>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>>;
     };
+
+    // TakeReturn
+
+    template <typename N, typename As, bool is_const>
+    using TakeReturn = typename TakeReturnImpl<N, As, is_const>::Type;
 
     // TakeReturn
 
@@ -612,20 +699,63 @@ namespace efp
     // take
 
     // !Should not put n longer than the length. Check should be done by the caller
-
     // Let's make unsafe version as well
     template <typename N, typename As>
     auto take(N n, const As &as) -> TakeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
-        return TakeReturn<N, As, true>(as.data(), n); // Safeguarding against n > as.size()
+        return TakeReturn<N, As, true>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
     }
 
     template <typename N, typename As>
     auto take(N n, As &as) -> TakeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
-        return TakeReturn<N, As, false>(as.data(), n); // Safeguarding against n > as.size()
+        return TakeReturn<N, As, false>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
+    }
+
+    // DropUnsafeReturnImpl
+
+    template <typename N, typename As, bool is_const>
+    struct DropUnsafeReturnImpl
+    {
+        using Type = Conditional<
+            IsStaticCapacity<As>::value,
+            Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
+            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
+    };
+
+    template <size_t n, typename As, bool is_const>
+    struct DropUnsafeReturnImpl<Size<n>, As, is_const>
+    {
+        using Type = Conditional<
+            IsStaticSize<As>::value,
+            Conditional<is_const, ArrayView<const Element<As>, n>, ArrayView<Element<As>, n>>,
+            Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
+    };
+
+    // DropUnsafeReturn
+
+    template <typename N, typename As, bool is_const>
+    using DropUnsafeReturn = typename DropUnsafeReturnImpl<N, As, is_const>::Type;
+
+    // drop_unsafe
+
+    template <typename N, typename As>
+    auto drop_unsafe(N n, const As &as) -> DropUnsafeReturn<N, As, true>
+    {
+        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        return DropUnsafeReturn<N, As, true>(as.data() + n, as.size() - n);
+    }
+
+    template <typename N, typename As>
+    auto drop_unsafe(N n, As &as) -> DropUnsafeReturn<N, As, false>
+    {
+        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        return DropUnsafeReturn<N, As, false>(as.data() + n, as.size() - n);
     }
 
     // DropReturnImpl
@@ -635,20 +765,38 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticCapacity<As>::value,
-            Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
-            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
+            Conditional<
+                is_const,
+                ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                ArrVecView<Element<As>, CtCapacity<As>::value>>,
+            Conditional<
+                is_const,
+                VectorView<const Element<As>>,
+                VectorView<Element<As>>>>;
     };
 
     template <size_t n, typename As, bool is_const>
     struct DropReturnImpl<Size<n>, As, is_const>
     {
+        static constexpr size_t bound_size = (CtSize<As>::value > n) ? (CtSize<As>::value - n) : 0;
+        static constexpr size_t bound_capacity = (CtCapacity<As>::value > n) ? (CtCapacity<As>::value - n) : 0;
+
         using Type = Conditional<
             IsStaticSize<As>::value,
-            Conditional<is_const, ArrayView<const Element<As>, n>, ArrayView<Element<As>, n>>,
+            Conditional<
+                is_const,
+                ArrayView<const Element<As>, bound_size>,
+                ArrayView<Element<As>, bound_size>>,
             Conditional<
                 IsStaticCapacity<As>::value,
-                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
-                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, bound_capacity>,
+                    ArrVecView<Element<As>, bound_capacity>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>>;
     };
 
     // DropReturn
@@ -662,14 +810,40 @@ namespace efp
     auto drop(N n, const As &as) -> DropReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
-        return DropReturn<N, As, true>(as.data() + n, as.size() - n);
+        const size_t as_len = as.size();
+        size_t bound_size = (n < as_len) ? n : as_len; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, true>(as.data() + n, bound_size);
     }
 
     template <typename N, typename As>
     auto drop(N n, As &as) -> DropReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
-        return DropReturn<N, As, false>(as.data() + n, as.size() - n);
+        const size_t as_len = as.size();
+        size_t bound_size = (n < as_len) ? n : as_len; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, false>(as.data() + n, bound_size);
+    }
+
+    // SliceUnsafeReturn
+
+    template <typename S, typename E, typename As, bool is_const>
+    using SliceUnsafeReturn = TakeUnsafeReturn<decltype(efp::declval<E>() - efp::declval<S>()), DropUnsafeReturn<S, As, is_const>, is_const>;
+
+    // slice_unsafe
+
+    // todo Optimization
+    template <typename S, typename E, typename As>
+    auto slice_unsafe(S start, E end, const As &as)
+        -> SliceUnsafeReturn<S, E, As, true>
+    {
+        return SliceUnsafeReturn<S, E, As, true>(data(as) + start, end - start);
+    }
+
+    template <typename S, typename E, typename As>
+    auto slice_unsafe(S start, E end, As &as)
+        -> SliceUnsafeReturn<S, E, As, false>
+    {
+        return SliceUnsafeReturn<S, E, As, false>(data(as) + start, end - start);
     }
 
     // SliceReturn
