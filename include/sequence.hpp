@@ -1348,59 +1348,24 @@ namespace efp
 
     // todo STL only
 
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_size, ct_capacity> &seq)
-    // {
-    //     os << "{ ";
-    //     for (size_t i = 0; i < seq.size(); ++i)
-    //     {
-    //         os << seq[i];
-    //         if (i != seq.size() - 1)
-    //         {
-    //             os << ", ";
-    //         }
-    //     }
-    //     os << " }";
-    //     return os;
-    // }
+    template <typename A, typename = EnableIf<IsSequence<A>::value, void>>
+    std::ostream &operator<<(std::ostream &os, const A &seq)
+    {
+        static_assert(IsSequence<A>(), "Argument should be an instance of sequence trait.");
 
-    // template <typename A, size_t ct_size, size_t ct_capacity>
-    // std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_size, ct_capacity> &seq)
-    // {
-    //     os << "{ ";
-    //     for (size_t i = 0; i < seq.size(); ++i)
-    //     {
-    //         os << seq[i];
-    //         if (i != seq.size() - 1)
-    //         {
-    //             os << ", ";
-    //         }
-    //     }
-    //     os << " }";
-    //     return os;
-    // }
-
-    // ?!
-
-    // #include <iostream>
-    //     template <typename A>
-    //     std::ostream &operator<<(std::ostream &os, const A &seq)
-    //     {
-    //         static_assert(IsSequence<A>(), "Argument should be an instance of sequence trait.");
-
-    //         // ? Interesting. Automatically consider it as VectorStream?
-    //         os << "{ ";
-    //         for (size_t i = 0; i < seq.size(); ++i)
-    //         {
-    //             os << seq[i];
-    //             if (i != seq.size() - 1)
-    //             {
-    //                 os << ", ";
-    //             }
-    //         }
-    //         os << " }";
-    //         return os;
-    //     }
+        // ? Interesting. Automatically consider it as VectorStream?
+        os << "{ ";
+        for (size_t i = 0; i < seq.size(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.size() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
+    }
 };
 
 #endif

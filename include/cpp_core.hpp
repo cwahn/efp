@@ -17,5 +17,7 @@
 
 // ! temp
 #include <initializer_list>
+// todo STL only
+#include <iostream>
 
 #endif

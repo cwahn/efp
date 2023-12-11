@@ -564,17 +564,13 @@ namespace efp
         return result;
     }
 
-    // ?!
-
-    // // todo STL only
-    // #include <iostream>
-    //     inline std::ostream &operator<<(std::ostream &os, const String &string)
-    //     {
-    //         for_each([&](char c)
-    //                  { os << c; },
-    //                  string);
-    //         return os;
-    //     }
+    inline std::ostream &operator<<(std::ostream &os, const String &string)
+    {
+        for_each([&](char c)
+                 { os << c; },
+                 string);
+        return os;
+    }
 };
 
 #endif
