@@ -110,7 +110,7 @@ namespace efp
 
         if (CtSize<AppendReturn<As, Ass...>>::value == dyn)
         {
-            res.resize(sum_v(static_cast<size_t>(as.size()), ass.size()...));
+            res.resize(sum_v(static_cast<size_t>(length(as)), length(ass)...));
         }
 
         size_t idx{0};
@@ -124,7 +124,7 @@ namespace efp
     size_t min_length(const As &as, const Ass &...ass)
     {
         static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
-        return minimum_v(static_cast<size_t>(as.size()), ass.size()...);
+        return minimum_v(static_cast<size_t>(length(as)), length(ass)...);
     }
 
     template <typename... Ass, typename F = void (*)(const Element<Ass> &...)>
@@ -510,16 +510,16 @@ namespace efp
     auto tail(const A &as) -> TailReturn<A, true>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
-        assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, as.size() - 1};
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {as.data() + 1, length(as) - 1};
     }
 
     template <typename A>
     auto tail(A &as) -> TailReturn<A, false>
     {
         static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
-        assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data() + 1, as.size() - 1};
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {as.data() + 1, length(as) - 1};
     }
 
     // InitReturn
@@ -551,16 +551,16 @@ namespace efp
     auto init(const As &as) -> InitReturn<As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data(), as.size() - 1};
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {as.data(), length(as) - 1};
     }
 
     template <typename As>
     auto init(As &as) -> InitReturn<As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        assert(as.size() > 0); // Ensure the sequence is not empty.
-        return {as.data(), as.size() - 1};
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {as.data(), length(as) - 1};
     }
 
     // last
@@ -571,8 +571,8 @@ namespace efp
     auto last(const As &as) -> const Element<As> &
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        assert(as.size() > 0); // Ensure the sequence is not empty.
-        return as[as.size() - 1];
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return as[length(as) - 1];
     }
 
     // is_null
@@ -685,17 +685,17 @@ namespace efp
     auto take(N n, const As &as) -> TakeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeReturn<N, As, true>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
+        return TakeReturn<N, As, true>(as.data(), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
     }
 
     template <typename N, typename As>
     auto take(N n, As &as) -> TakeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return TakeReturn<N, As, false>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
+        return TakeReturn<N, As, false>(as.data(), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
     }
 
-    // DropUnsafeReturnImpl
+    // Dr)opUnsafeReturnImpl
 
     namespace detail
     {
@@ -747,21 +747,20 @@ namespace efp
     auto drop_unsafe(N n, const As &as) -> DropUnsafeReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return DropUnsafeReturn<N, As, true>(as.data() + n, as.size() - n);
+        return DropUnsafeReturn<N, As, true>(as.data() + n, length(as) - n);
     }
 
     template <typename N, typename As>
     auto drop_unsafe(N n, As &as) -> DropUnsafeReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        return DropUnsafeReturn<N, As, false>(as.data() + n, as.size() - n);
+        return DropUnsafeReturn<N, As, false>(as.data() + n, length(as) - n);
     }
 
     // DropReturnImpl
 
     namespace detail
     {
-
         template <typename N, typename As, bool is_const>
         struct DropReturnImpl
         {
@@ -813,7 +812,7 @@ namespace efp
     auto drop(N n, const As &as) -> DropReturn<N, As, true>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        const size_t as_len = as.size();
+        const size_t as_len = length(as);
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
         return DropReturn<N, As, true>(as.data() + bound_drop_size, as_len - bound_drop_size);
     }
@@ -822,7 +821,7 @@ namespace efp
     auto drop(N n, As &as) -> DropReturn<N, As, false>
     {
         static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-        const size_t as_len = as.size();
+        const size_t as_len = length(as);
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
         return DropReturn<N, As, false>(as.data() + bound_drop_size, as_len - bound_drop_size);
     }

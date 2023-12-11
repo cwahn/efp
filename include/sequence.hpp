@@ -577,8 +577,8 @@ namespace efp
         // Constructor from ArrVec
         template <size_t ct_cap_>
         Vector(const ArrVec<Element, ct_cap_> &as)
-            : data_(new Element[as.size()]),
-              size_(as.size()),
+            : data_(new Element[length(as)]),
+              size_(length(as)),
               capacity_(ct_cap_)
         {
             for (size_t i = 0; i < size_; ++i)
@@ -1051,7 +1051,7 @@ namespace efp
         // Constructor from ArrayView
         template <size_t ct_size_>
         ArrVecView(const ArrayView<Element, ct_size_> &as)
-            : data_(as.data()), size_(as.size())
+            : data_(as.data()), size_(length(as))
         {
         }
 
@@ -1205,14 +1205,14 @@ namespace efp
         // Constructor from ArrayView
         template <size_t ct_size_>
         VectorView(const ArrayView<Element, ct_size_> &as)
-            : data_(as.data()), size_(as.size())
+            : data_(as.data()), size_(length(as))
         {
         }
 
         // Constructor from ArrVecView
         template <size_t ct_cap_>
         VectorView(const ArrVecView<Element, ct_cap_> &as)
-            : data_(as.data()), size_(as.size())
+            : data_(as.data()), size_(length(as))
         {
         }
 

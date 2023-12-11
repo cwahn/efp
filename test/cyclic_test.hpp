@@ -74,7 +74,7 @@ TEST_CASE("Vcq")
 //     {
 //         BufferArrVec<int, 3> as;
 //         CHECK(IsSame<Element<decltype(as)>, int>::value == true);
-//         CHECK(as.size() == 0);
+//         CHECK(length(as) == 0);
 //         CHECK(length(as) == 0);
 //         CHECK(IsIntegralConst<decltype(length(as))>::value == false);
 //         CHECK(as.empty() == false);
