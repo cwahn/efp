@@ -678,14 +678,14 @@ namespace efp
                 ArrayView<Element<As>, bound_size>>,
             // Conditional<
             //     IsStaticCapacity<As>::value,
-                Conditional<
-                    is_const,
-                    ArrVecView<const Element<As>, bound_capacity>,
-                    ArrVecView<Element<As>, bound_capacity>>>;
-                // Conditional<
-                //     is_const,
-                //     VectorView<const Element<As>>,
-                //     VectorView<Element<As>>>>>;
+            Conditional<
+                is_const,
+                ArrVecView<const Element<As>, bound_capacity>,
+                ArrVecView<Element<As>, bound_capacity>>>;
+        // Conditional<
+        //     is_const,
+        //     VectorView<const Element<As>>,
+        //     VectorView<Element<As>>>>>;
         // using Type = Conditional<
         //     is_const,
         //     ArrayView<const Element<As>, bound_size>,
@@ -736,11 +736,16 @@ namespace efp
     {
         using Type = Conditional<
             IsStaticSize<As>::value,
-            Conditional<is_const, ArrayView<const Element<As>, n>, ArrayView<Element<As>, n>>,
+            Conditional<is_const, ArrayView<const Element<As>, CtSize<As>::value - n>, ArrayView<Element<As>, CtSize<As>::value - n>>,
             Conditional<
                 IsStaticCapacity<As>::value,
-                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value - n>, ArrVecView<Element<As>, CtCapacity<As>::value - n>>,
                 Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
+
+        // using Type = Conditional<
+        //     is_const,
+        //     ArrayView<const Element<As>, n>,
+        //     ArrayView<Element<As>, n>>;
     };
 
     // DropUnsafeReturn
