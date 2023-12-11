@@ -512,11 +512,4 @@ TEST_CASE("Vector Copy")
     }
 }
 
-// TEST_CASE("Element_t")
-// {
-//     CHECK(IsSame<double, Element_t<decltype(array_3)>>::value == true);
-//     //  Element_t is not catching const of container.
-//     CHECK(IsSame<const double, Element_t<decltype(array_3)>>::value == false);
-// }
-
 #endif

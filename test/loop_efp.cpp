@@ -23,19 +23,19 @@ int main(int argc, char const *argv[])
     { x = sqrt<double>(x); };
 
     auto ys = map(square<double>, xs);
-    for_eachi(sqrt_mut, ys);
+    for_each_mut(sqrt_mut, ys);
 
-    for_eachi(square_mut, ys);
-    for_eachi(sqrt_mut, ys);
+    for_each_mut(square_mut, ys);
+    for_each_mut(sqrt_mut, ys);
 
-    for_eachi(square_mut, ys);
-    for_eachi(sqrt_mut, ys);
+    for_each_mut(square_mut, ys);
+    for_each_mut(sqrt_mut, ys);
 
-    for_eachi(square_mut, ys);
-    for_eachi(sqrt_mut, ys);
+    for_each_mut(square_mut, ys);
+    for_each_mut(sqrt_mut, ys);
 
-    for_eachi(square_mut, ys);
-    for_eachi(sqrt_mut, ys);
+    for_each_mut(square_mut, ys);
+    for_each_mut(sqrt_mut, ys);
 
     // 5
     //  auto ys = map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, xs))))))))));

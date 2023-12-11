@@ -84,18 +84,21 @@ namespace efp
             ArrVec<Common<Element<Ass>...>, sum_v(CtCapacity<Ass>::value...)>,
             Vector<Common<Element<Ass>...>>>>;
 
-    template <typename As, typename Bs>
-    Unit append_impl(size_t &idx, As &as, const Bs &bs)
+    namespace detail
     {
-        const auto seq_length = bs.size(); // Assuming `size` method is available
-
-        for (size_t i = 0; i < seq_length; ++i)
+        template <typename As, typename Bs>
+        Unit append_impl(size_t &idx, As &as, const Bs &bs)
         {
-            as[idx] = bs[i];
-            idx++;
-        }
+            const auto seq_length = bs.size(); // Assuming `size` method is available
 
-        return unit;
+            for (size_t i = 0; i < seq_length; ++i)
+            {
+                as[idx] = bs[i];
+                idx++;
+            }
+
+            return unit;
+        }
     }
 
     template <typename As, typename... Ass>
@@ -111,8 +114,8 @@ namespace efp
         }
 
         size_t idx{0};
-        execute_pack(append_impl(idx, res, as),
-                     append_impl(idx, res, ass)...);
+        execute_pack(detail::append_impl(idx, res, as),
+                     detail::append_impl(idx, res, ass)...);
 
         return res;
     }
@@ -137,7 +140,7 @@ namespace efp
     }
 
     template <typename... Ass, typename F = void (*)(Element<Ass> &...)>
-    void for_eachi(const F &f, Ass &...ass)
+    void for_each_mut(const F &f, Ass &...ass)
     {
         static_assert(All<IsSequence<Ass>...>::value, "All types must be sequence types.");
         const size_t res_length = min_length(ass...);
@@ -318,7 +321,7 @@ namespace efp
     }
 
     template <typename... Ass, typename F = void (*)(size_t, Element<Ass> &...)>
-    void for_each_with_indexi(const F &f, Ass &...seqs)
+    void for_each_with_index_mut(const F &f, Ass &...seqs)
     {
         static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
         const size_t min_len = min_length(seqs...);
@@ -355,14 +358,14 @@ namespace efp
     }
 
     template <typename As, typename F = void (*)(Element<As> &)>
-    void cartesian_for_eachi(const F &f, As &as)
+    void cartesian_for_each_mut(const F &f, As &as)
     {
         static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
-        for_eachi(f, as);
+        for_each_mut(f, as);
     }
 
     template <typename As, typename... Ass, typename F = void (*)(Element<As> &, Element<Ass> &...)>
-    void cartesian_for_eachi(const F &f, As &as, Ass &...ass)
+    void cartesian_for_each_mut(const F &f, As &as, Ass &...ass)
     {
         static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
         const auto as_len = length(as);
@@ -373,7 +376,7 @@ namespace efp
             const auto inner = [&](Element<Ass> &...xs)
             { f(a, xs...); };
 
-            cartesian_for_eachi(inner, ass...);
+            cartesian_for_each_mut(inner, ass...);
         }
     }
 
@@ -584,35 +587,33 @@ namespace efp
     // TakeUnsafeReturnImpl
     // ! Size must be valid. It must be smaller than compile time and runtime size.
     // ! Invalid size will be undifined behavior
-    template <typename N, typename As, bool is_const>
-    struct TakeUnsafeReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
-            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
-    };
+        template <typename N, typename As, bool is_const>
+        struct TakeUnsafeReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
+        };
 
-    template <size_t n, typename As, bool is_const>
-    struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
-    {
-        // todo Static assert for invalid size
+        template <size_t n, typename As, bool is_const>
+        struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
+        {
+            // todo Static assert for invalid size
 
-        using Type = Conditional<
-            is_const,
-            ArrayView<const Element<As>, n>,
-            ArrayView<Element<As>, n>>;
-    };
+            using Type = Conditional<
+                is_const,
+                ArrayView<const Element<As>, n>,
+                ArrayView<Element<As>, n>>;
+        };
+    }
 
     // TakeUnsafeReturn
 
     template <typename N, typename As, bool is_const>
-    using TakeUnsafeReturn = typename TakeUnsafeReturnImpl<N, As, is_const>::Type;
-
-    // TakeUnsafeReturn
-
-    template <typename N, typename As, bool is_const>
-    using TakeUnsafeReturn = typename TakeUnsafeReturnImpl<N, As, is_const>::Type;
+    using TakeUnsafeReturn = typename detail::TakeUnsafeReturnImpl<N, As, is_const>::Type;
 
     // take_unsafe
 
@@ -634,49 +635,47 @@ namespace efp
 
     // TakeReturnImpl
 
-    template <typename N, typename As, bool is_const>
-    struct TakeReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<
-                is_const,
-                ArrVecView<const Element<As>, CtCapacity<As>::value>,
-                ArrVecView<Element<As>, CtCapacity<As>::value>>,
-            Conditional<
-                is_const,
-                VectorView<const Element<As>>,
-                VectorView<Element<As>>>>;
-    };
+        template <typename N, typename As, bool is_const>
+        struct TakeReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>;
+        };
 
-    template <size_t n, typename As, bool is_const>
-    struct TakeReturnImpl<Size<n>, As, is_const>
-    {
-        static constexpr size_t bound_size = min_v(n, CtSize<As>::value);
-        static constexpr size_t bound_capacity = min_v(n, CtCapacity<As>::value);
+        template <size_t n, typename As, bool is_const>
+        struct TakeReturnImpl<Size<n>, As, is_const>
+        {
+            static constexpr size_t bound_size = min_v(n, CtSize<As>::value);
+            static constexpr size_t bound_capacity = min_v(n, CtCapacity<As>::value);
 
-        using Type = Conditional<
-            IsStaticSize<As>::value,
-            Conditional<
-                is_const,
-                ArrayView<const Element<As>, bound_size>,
-                ArrayView<Element<As>, bound_size>>,
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, bound_size>,
+                    ArrayView<Element<As>, bound_size>>,
 
-            Conditional<
-                is_const,
-                ArrVecView<const Element<As>, bound_capacity>,
-                ArrVecView<Element<As>, bound_capacity>>>;
-    };
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, bound_capacity>,
+                    ArrVecView<Element<As>, bound_capacity>>>;
+        };
+    }
 
     // TakeReturn
 
     template <typename N, typename As, bool is_const>
-    using TakeReturn = typename TakeReturnImpl<N, As, is_const>::Type;
-
-    // TakeReturn
-
-    template <typename N, typename As, bool is_const>
-    using TakeReturn = typename TakeReturnImpl<N, As, is_const>::Type;
+    using TakeReturn = typename detail::TakeReturnImpl<N, As, is_const>::Type;
 
     // take
 
@@ -698,31 +697,49 @@ namespace efp
 
     // DropUnsafeReturnImpl
 
-    template <typename N, typename As, bool is_const>
-    struct DropUnsafeReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
-            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
-    };
-
-    template <size_t n, typename As, bool is_const>
-    struct DropUnsafeReturnImpl<Size<n>, As, is_const>
-    {
-        using Type = Conditional<
-            IsStaticSize<As>::value,
-            Conditional<is_const, ArrayView<const Element<As>, CtSize<As>::value - n>, ArrayView<Element<As>, CtSize<As>::value - n>>,
-            Conditional<
+        template <typename N, typename As, bool is_const>
+        struct DropUnsafeReturnImpl
+        {
+            using Type = Conditional<
                 IsStaticCapacity<As>::value,
-                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value - n>, ArrVecView<Element<As>, CtCapacity<As>::value - n>>,
-                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>;
-    };
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>;
+        };
+
+        template <size_t n, typename As, bool is_const>
+        struct DropUnsafeReturnImpl<Size<n>, As, is_const>
+        {
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, CtSize<As>::value - n>,
+                    ArrayView<Element<As>, CtSize<As>::value - n>>,
+                Conditional<
+                    IsStaticCapacity<As>::value,
+                    Conditional<
+                        is_const,
+                        ArrVecView<const Element<As>, CtCapacity<As>::value - n>,
+                        ArrVecView<Element<As>, CtCapacity<As>::value - n>>,
+                    Conditional<
+                        is_const,
+                        VectorView<const Element<As>>,
+                        VectorView<Element<As>>>>>;
+        };
+    }
 
     // DropUnsafeReturn
 
     template <typename N, typename As, bool is_const>
-    using DropUnsafeReturn = typename DropUnsafeReturnImpl<N, As, is_const>::Type;
+    using DropUnsafeReturn = typename detail::DropUnsafeReturnImpl<N, As, is_const>::Type;
 
     // drop_unsafe
 
@@ -742,49 +759,53 @@ namespace efp
 
     // DropReturnImpl
 
-    template <typename N, typename As, bool is_const>
-    struct DropReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<
-                is_const,
-                ArrVecView<const Element<As>, CtCapacity<As>::value>,
-                ArrVecView<Element<As>, CtCapacity<As>::value>>,
-            Conditional<
-                is_const,
-                VectorView<const Element<As>>,
-                VectorView<Element<As>>>>;
-    };
 
-    template <size_t n, typename As, bool is_const>
-    struct DropReturnImpl<Size<n>, As, is_const>
-    {
-        static constexpr size_t bound_size = (CtSize<As>::value > n) ? (CtSize<As>::value - n) : 0;
-        static constexpr size_t bound_capacity = (CtCapacity<As>::value > n) ? (CtCapacity<As>::value - n) : 0;
-
-        using Type = Conditional<
-            IsStaticSize<As>::value,
-            Conditional<
-                is_const,
-                ArrayView<const Element<As>, bound_size>,
-                ArrayView<Element<As>, bound_size>>,
-            Conditional<
+        template <typename N, typename As, bool is_const>
+        struct DropReturnImpl
+        {
+            using Type = Conditional<
                 IsStaticCapacity<As>::value,
                 Conditional<
                     is_const,
-                    ArrVecView<const Element<As>, bound_capacity>,
-                    ArrVecView<Element<As>, bound_capacity>>,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
                 Conditional<
                     is_const,
                     VectorView<const Element<As>>,
-                    VectorView<Element<As>>>>>;
-    };
+                    VectorView<Element<As>>>>;
+        };
+
+        template <size_t n, typename As, bool is_const>
+        struct DropReturnImpl<Size<n>, As, is_const>
+        {
+            static constexpr size_t bound_size = (CtSize<As>::value > n) ? (CtSize<As>::value - n) : 0;
+            static constexpr size_t bound_capacity = (CtCapacity<As>::value > n) ? (CtCapacity<As>::value - n) : 0;
+
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, bound_size>,
+                    ArrayView<Element<As>, bound_size>>,
+                Conditional<
+                    IsStaticCapacity<As>::value,
+                    Conditional<
+                        is_const,
+                        ArrVecView<const Element<As>, bound_capacity>,
+                        ArrVecView<Element<As>, bound_capacity>>,
+                    Conditional<
+                        is_const,
+                        VectorView<const Element<As>>,
+                        VectorView<Element<As>>>>>;
+        };
+    }
 
     // DropReturn
 
     template <typename N, typename As, bool is_const>
-    using DropReturn = typename DropReturnImpl<N, As, is_const>::Type;
+    using DropReturn = typename detail::DropReturnImpl<N, As, is_const>::Type;
 
     // drop
 
