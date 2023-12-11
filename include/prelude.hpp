@@ -583,6 +583,7 @@ namespace efp
 
     // TakeUnsafeReturnImpl
     // ! Size must be valid. It must be smaller than compile time and runtime size.
+    // ! Invalid size will be undifined behavior
     template <typename N, typename As, bool is_const>
     struct TakeUnsafeReturnImpl
     {
@@ -595,6 +596,7 @@ namespace efp
     template <size_t n, typename As, bool is_const>
     struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
     {
+        // todo Static assert for invalid size
         // using Type = Conditional<
         //     IsStaticSize<As>::value,
         //     Conditional<
@@ -674,16 +676,20 @@ namespace efp
                 is_const,
                 ArrayView<const Element<As>, bound_size>,
                 ArrayView<Element<As>, bound_size>>,
-            Conditional<
-                IsStaticCapacity<As>::value,
+            // Conditional<
+            //     IsStaticCapacity<As>::value,
                 Conditional<
                     is_const,
                     ArrVecView<const Element<As>, bound_capacity>,
-                    ArrVecView<Element<As>, bound_capacity>>,
-                Conditional<
-                    is_const,
-                    VectorView<const Element<As>>,
-                    VectorView<Element<As>>>>>;
+                    ArrVecView<Element<As>, bound_capacity>>>;
+                // Conditional<
+                //     is_const,
+                //     VectorView<const Element<As>>,
+                //     VectorView<Element<As>>>>>;
+        // using Type = Conditional<
+        //     is_const,
+        //     ArrayView<const Element<As>, bound_size>,
+        //     ArrayView<Element<As>, bound_size>>;
     };
 
     // TakeReturn
