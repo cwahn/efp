@@ -8,13 +8,31 @@ It is a general-purpose library. The usage of no-STL, resource-tight embedded ap
 
 ## Features
 ### Higher-Order Functions
-EFP supports major higher-order functions including `for_each`, `map`, `filter`, `foldl`, `foldr`, `from_function`, `for_index`, `for_each_with_index`, `cartesian_for_each`, `map_with_index`, `cartesian_map` and many more.
+EFP supports major higher-order functions including   
+
+**Composition and Utility Functions:** `compose`, `execute_pack`
+
+**Element Access and Manipulation:** `head`, `last`, `tail`, `init`
+
+**Mapping Functions:** `map`, `map_with_index`, `cartesian_map`
+
+**Folding Functions:** `foldl`, `foldr`
+
+**Filtering Functions:** `filter`, `take_while`, `drop_while`
+
+**Iteration Functions:** `for_each`, `for_each_mut`, `for_each_with_index`, `for_each_with_index_mut`, `cartesian_for_each`, `cartesian_for_each_mut`, `for_index`, `cartesian_for_index`
+
+**Sequence Operations:** `append`, `slice`, `slice_unsafe`, `take`, `take_unsafe`, `drop`, `drop_unsafe`
+
+**Element Search and Indexing:** `elem`, `elem_index`, `elem_indices`, `find`, `find_index`, `find_indices`
+
+and many more.
 
 ### Contegious Sequence Types
-EFP offeres no-STL contegious sequence type `efp::Sequence` and `efp::SequenceView`, an immutable conteguous view of a sequence.
+EFP offeres no-STL contegious sequence types and immutable conteguous view types:  `efp::Array`, `efp::ArrVec`, `efp::Vector`, `efp::ArrayView`, `efp::ArrVecView`, and `efp::VectorView`
 
 ### Compile-Time Polymorphism
-HOFs of EFP accept `efp::Sequence` as sequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
+HOFs of EFP acceptsequence arguments. APIs are generic on these types, which means there is (almost)no need to care about sequence container type.  
 
 Sequence-returning functions will return zero-copy sequences of EFP, which are either `efp::Array`, `efp::ArrVec`, or `efp::Vector` based on the types of argument sequences. The adequate type will be selected at compile time, based on if capacity and length are known in compile time, in a manner minimizing memory usage and avoiding allocation;
 - Static capacity && static length
@@ -38,10 +56,6 @@ EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad
 
 ### String and formatting
 EFP provides a `String` class tailored for efficient manipulation, which is basically `Vector<char>` with some specialization, supporting operations without explicit null-termination. The `format` function enables embedded variable formatting, harnessing the library's type-safe templates for concise and expressive string composition at compile-time. 
-
-### File IO
-
-WIP
 
 ## Examples
 ### General
@@ -88,7 +102,14 @@ int c = a.match(
 CHECK(b == 42);
 ```
 
-### String and formatting
+### File IO
+```c++
+file = File::open("test", "w+").move();
+file.write("Hello, world!\nThis is a test file.\nEnd of test.");
+file.close();
+```
+
+<!-- ### String and formatting
 ```cpp
 String name = "Alice";
 Vector<char> hobby = "coding";
@@ -96,16 +117,16 @@ Vector<char> hobby = "coding";
 String result = join(", ", format("Name: {}", name), format("Hobby: {}", hobby));
 
 std::cout << result << std::endl; // Output: "Name: Alice, Hobby: coding"
-``` 
+```  -->
 
 ## Benchmarks
 WIP
 
 ## Tests
-EFP is tested with Catch2 with g++ and clang.
+EFP is tested with Catch2 with GCC and Clang.
 ```
 ===============================================================================
-All tests passed (466 assertions in 95 test cases)
+All tests passed (779 assertions in 99 test cases)
 ```
 
 ## Requirements
