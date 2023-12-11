@@ -8,19 +8,7 @@ namespace efp
     // Is WildCard
 
     template <typename F>
-    struct IsWildCard : IsSame<Arguments<F>, Tuple<>>
-    {
-    };
-
-    template <typename F>
-    struct IsWildCard<F &> : IsWildCard<F>
-    {
-    };
-
-    template <typename F>
-    struct IsWildCard<F &&> : IsWildCard<F>
-    {
-    };
+    using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
 
     // WildCardWrapper
 
@@ -38,29 +26,30 @@ namespace efp
     };
 
     template <typename F>
-    struct ReturnImpl<WildCardWrapper<F>>
+    struct detail::ReturnImpl<WildCardWrapper<F>>
     {
         using Type = decltype(declval<F>()());
     };
 
     // MatchBranchImpl
-
-    template <typename F, typename = void>
-    struct MatchBranchImpl
+    namespace detail
     {
-        using Type = Cleaned<F>;
-    };
+        template <typename F, typename = void>
+        struct MatchBranchImpl
+        {
+            using Type = Cleaned<F>;
+        };
 
-    template <typename F>
-    struct MatchBranchImpl<F, EnableIf<IsWildCard<F>::value, void>>
-    {
-        using Type = WildCardWrapper<Cleaned<F>>;
-    };
-
+        template <typename F>
+        struct MatchBranchImpl<F, EnableIf<IsWildCard<F>::value, void>>
+        {
+            using Type = WildCardWrapper<Cleaned<F>>;
+        };
+    }
     // MatchBranch
 
     template <typename F>
-    using MatchBranch = typename MatchBranchImpl<F>::Type;
+    using MatchBranch = typename detail::MatchBranchImpl<F>::Type;
 
     // Overloaded
 
@@ -131,7 +120,7 @@ namespace efp
         }
 
         // Function name or function type will be automatically converted to function pointer type
-        template <typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As > ::value...)>>
+        template <typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As>::value...)>>
         Enum(const A &a)
             : index_(VariantIndex<FuncToFuncPtr<A>>::value)
         {

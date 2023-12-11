@@ -409,7 +409,7 @@ TEST_CASE("linear_regression_with_index")
     SECTION("Array")
     {
         Array<double, 3> ys{};
-        for_each_with_indexi([&](int i, double &x)
+        for_each_with_index_mut([&](int i, double &x)
                              { x = f(i); },
                              ys);
 

@@ -17,6 +17,8 @@ project(
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-backtrace-limit=0")
+
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
 

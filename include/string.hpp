@@ -81,20 +81,21 @@ namespace efp
     };
 
     template <>
-    class Sequence<char, dyn, dyn>
-        : public SequenceBase<Sequence<char, dyn, dyn>>
+    // class Sequence<char, dyn, dyn>
+    class Vector<char>
+    // : public SequenceBase<Sequence<char, dyn, dyn>>
     {
     public:
         using Element = char;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = dyn;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+        static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-        Sequence() : data_{nullptr}, size_{0}, capacity_{0} {}
+        Vector() : data_{nullptr}, size_{0}, capacity_{0} {}
 
-        Sequence(const Sequence &other)
+        Vector(const Vector &other)
             : data_{nullptr}, size_{0}, capacity_{0}
         {
             if (other.data_)
@@ -111,7 +112,7 @@ namespace efp
             }
         }
 
-        Sequence(Sequence &&other)
+        Vector(Vector &&other)
             : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
@@ -131,7 +132,7 @@ namespace efp
         //         data_[i++] = arg;
         // }
 
-        Sequence(const char *c_str)
+        Vector(const char *c_str)
             : data_{nullptr}, size_{0}, capacity_{0}
         {
             for (size_t i = 0; c_str[i] != '\0'; ++i)
@@ -140,7 +141,7 @@ namespace efp
             }
         }
 
-        ~Sequence()
+        ~Vector()
         {
             if (data_)
             {
@@ -150,7 +151,7 @@ namespace efp
         }
 
         // todo copy_and_swap
-        Sequence &operator=(const Sequence &other) noexcept
+        Vector &operator=(const Vector &other) noexcept
         {
             if (this != &other)
             {
@@ -172,7 +173,7 @@ namespace efp
             return *this;
         }
 
-        Sequence &operator=(Sequence &&other) noexcept
+        Vector &operator=(Vector &&other) noexcept
         {
             if (this != &other)
             {
@@ -189,7 +190,7 @@ namespace efp
             return *this;
         }
 
-        Sequence assign_impl(const Sequence &other)
+        Vector assign_impl(const Vector &other)
         {
             if (this != &other)
             {
@@ -221,7 +222,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const Sequence &other) const
+        bool operator==(const Vector &other) const
         {
             if (size_ != other.size_)
             {
@@ -354,7 +355,7 @@ namespace efp
 
         // todo Interface with StringView
 
-        void append_mut(const Sequence &string)
+        void append_mut(const Vector &string)
         {
             for_each([&](char c)
                      { push_back(c); },
@@ -402,22 +403,24 @@ namespace efp
         size_t capacity_;
     };
 
-    using String = Sequence<char, dyn, dyn>;
+    // using String = Sequence<char, dyn, dyn>;
+    using String = Vector<char>;
 
     // VectorView<const char> specialization for StringView
     template <>
-    class SequenceView<const char, dyn, dyn>
-        : public SequenceBase<SequenceView<const char, dyn, dyn>>
+    // class SequenceView<const char, dyn, dyn>
+    class VectorView<const char>
+    // : public SequenceBase<SequenceView<const char, dyn, dyn>>
     {
     public:
         using Element = const char;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        static constexpr size_t ct_size = dyn;
+        static constexpr size_t ct_capacity = dyn;
 
-        SequenceView()
+        VectorView()
             : data_(nullptr), size_(0), capacity_(0) {}
 
-        SequenceView(Element *data, size_t size)
+        VectorView(Element *data, size_t size)
             : data_(data), size_(size), capacity_(size)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -428,13 +431,13 @@ namespace efp
         }
 
         // StringView could be constructed from string literal
-        SequenceView(Element *data)
+        VectorView(Element *data)
             : data_(data), size_(strlen(data)), capacity_(size_)
         {
             // Ensure that data is not nullptr for a non-empty view.
         }
 
-        SequenceView &operator=(const SequenceView &other)
+        VectorView &operator=(const VectorView &other)
         {
             if (this != &other)
             {
@@ -455,7 +458,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceView &other) const
+        bool operator==(const VectorView &other) const
         {
             return (data_ == other.data_) &&
                    (size_ == other.size_) &&
@@ -541,7 +544,8 @@ namespace efp
         size_t capacity_;
     };
 
-    using StringView = SequenceView<const char, dyn, dyn>;
+    // using StringView = SequenceView<const char, dyn, dyn>;
+    using StringView = VectorView<const char>;
 
     inline String join(const String &delimeter, const Vector<String> &strings)
     {
@@ -560,8 +564,8 @@ namespace efp
         return result;
     }
 
-// todo STL only
-#include <iostream>
+    // todo STL only
+
     inline std::ostream &operator<<(std::ostream &os, const String &string)
     {
         for_each([&](char c)

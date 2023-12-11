@@ -14,16 +14,9 @@ int main(int argc, char const *argv[])
 {
     std::cout << "c, array, n = " << n << std::endl;
 
-    // int xs[n];
-    // std::vector<int> xs(n);
     std::array<int, n> xs;
 
     std::iota(std::begin(xs), std::end(xs), 0);
-
-    // for (size_t i = 0; i < n; ++i)
-    // {
-    //     xs[i] = std::rand();
-    // }
 
     // Vector<int> ys(n);
     Array<int, n> ys{};
