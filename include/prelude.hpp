@@ -597,22 +597,7 @@ namespace efp
     struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
     {
         // todo Static assert for invalid size
-        // using Type = Conditional<
-        //     IsStaticSize<As>::value,
-        //     Conditional<
-        //         is_const,
-        //         ArrayView<const Element<As>, n>,
-        //         ArrayView<Element<As>, n>>,
-        //     Conditional<
-        //         IsStaticCapacity<As>::value,
-        //         Conditional<
-        //             is_const,
-        //             ArrVecView<const Element<As>, n>,
-        //             ArrVecView<Element<As>, n>>,
-        //         Conditional<
-        //             is_const,
-        //             VectorView<const Element<As>>,
-        //             VectorView<Element<As>>>>>;
+
         using Type = Conditional<
             is_const,
             ArrayView<const Element<As>, n>,
@@ -676,20 +661,11 @@ namespace efp
                 is_const,
                 ArrayView<const Element<As>, bound_size>,
                 ArrayView<Element<As>, bound_size>>,
-            // Conditional<
-            //     IsStaticCapacity<As>::value,
+
             Conditional<
                 is_const,
                 ArrVecView<const Element<As>, bound_capacity>,
                 ArrVecView<Element<As>, bound_capacity>>>;
-        // Conditional<
-        //     is_const,
-        //     VectorView<const Element<As>>,
-        //     VectorView<Element<As>>>>>;
-        // using Type = Conditional<
-        //     is_const,
-        //     ArrayView<const Element<As>, bound_size>,
-        //     ArrayView<Element<As>, bound_size>>;
     };
 
     // TakeReturn
