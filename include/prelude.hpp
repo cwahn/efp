@@ -170,7 +170,7 @@ namespace efp
     template <typename F, typename... Ass>
     auto map(const F &f, const Ass &...ass) -> MapReturn<F, Ass...>
     {
-        static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
         MapReturn<F, Ass...> res{};
         const size_t res_len = min_length(ass...);
@@ -200,7 +200,7 @@ namespace efp
     template <typename As, typename F = bool (*)(const Element<As> &)>
     auto filter(const F &f, const As &as) -> FilterReturn<As>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
         FilterReturn<As> res{};
         const auto res_len = length(as);
@@ -222,7 +222,7 @@ namespace efp
     template <typename As, typename R, typename F = R (*)(const R &, const Element<As> &)>
     R foldl(const F &f, const R &init, const As &as)
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
         R res = init;
 
@@ -239,7 +239,7 @@ namespace efp
     template <typename As, typename R, typename F = R (*)(const Element<As> &, const R &)>
     R foldr(const F &f, const R &init, const As &as)
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
         R res = init;
 
@@ -311,7 +311,7 @@ namespace efp
     template <typename... Ass, typename F = void (*)(size_t, const Element<Ass> &...)>
     void for_each_with_index(const F &f, const Ass &...seqs)
     {
-        static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
         const auto min_len = min_length(seqs...);
 
         for (size_t i = 0; i < min_len; ++i)
@@ -323,7 +323,7 @@ namespace efp
     template <typename... Ass, typename F = void (*)(size_t, Element<Ass> &...)>
     void for_each_with_index_mut(const F &f, Ass &...seqs)
     {
-        static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
         const size_t min_len = min_length(seqs...);
 
         for (size_t i = 0; i < min_len; ++i)
@@ -337,14 +337,14 @@ namespace efp
     template <typename As, typename F = void (*)(const Element<As> &)>
     void cartesian_for_each(const F &f, const As &as)
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         for_each(f, as);
     }
 
     template <typename As, typename... Ass, typename F = void (*)(const Element<As> &, const Element<Ass> &...)>
     void cartesian_for_each(const F &f, const As &as, const Ass &...ass)
     {
-        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of Sequence trait.");
         const auto as_len = length(as);
 
         for (size_t i = 0; i < as_len; ++i)
@@ -360,14 +360,14 @@ namespace efp
     template <typename As, typename F = void (*)(Element<As> &)>
     void cartesian_for_each_mut(const F &f, As &as)
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         for_each_mut(f, as);
     }
 
     template <typename As, typename... Ass, typename F = void (*)(Element<As> &, Element<Ass> &...)>
     void cartesian_for_each_mut(const F &f, As &as, Ass &...ass)
     {
-        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of Sequence trait.");
         const auto as_len = length(as);
 
         for (size_t i = 0; i < as_len; ++i)
@@ -396,7 +396,7 @@ namespace efp
     template <typename... Ass, typename F = void (*)(size_t, const Element<Ass> &...)>
     auto map_with_index(const F &f, const Ass &...ass) -> MapWithIndexReturn<F, Ass...>
     {
-        static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
         auto res = MapWithIndexReturn<F, Ass...>{};
         const auto res_len = min_length(ass...);
@@ -432,7 +432,7 @@ namespace efp
     template <typename... Ass, typename F = void (*)(const Element<Ass> &...)>
     auto cartesian_map(const F &f, const Ass &...ass) -> CartesianMapReturn<F, Ass...>
     {
-        static_assert(All<IsSequence<Ass>...>::value, "All arguments should be instance of sequence trait.");
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
         auto res = CartesianMapReturn<F, Ass...>{};
         if (CtSize<CartesianMapReturn<F, Ass...>>::value == dyn)
@@ -476,7 +476,7 @@ namespace efp
     template <typename As>
     auto head(const As &as) -> const Element<As> &
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(!as.empty()); // Ensure the sequence is not empty.
         return as[0];
     }
@@ -509,7 +509,7 @@ namespace efp
     template <typename A>
     auto tail(const A &as) -> TailReturn<A, true>
     {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
         return {as.data() + 1, as.size() - 1};
     }
@@ -517,7 +517,7 @@ namespace efp
     template <typename A>
     auto tail(A &as) -> TailReturn<A, false>
     {
-        static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
         return {as.data() + 1, as.size() - 1};
     }
@@ -550,7 +550,7 @@ namespace efp
     template <typename As>
     auto init(const As &as) -> InitReturn<As, true>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
         return {as.data(), as.size() - 1};
     }
@@ -558,7 +558,7 @@ namespace efp
     template <typename As>
     auto init(As &as) -> InitReturn<As, false>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
         return {as.data(), as.size() - 1};
     }
@@ -570,7 +570,7 @@ namespace efp
     template <typename As>
     auto last(const As &as) -> const Element<As> &
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         assert(as.size() > 0); // Ensure the sequence is not empty.
         return as[as.size() - 1];
     }
@@ -580,7 +580,7 @@ namespace efp
     template <typename As>
     bool is_null(const As &as)
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return length(as) == 0;
     }
 
@@ -622,14 +622,14 @@ namespace efp
     template <typename N, typename As>
     auto take_unsafe(N n, const As &as) -> TakeUnsafeReturn<N, As, true>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return TakeUnsafeReturn<N, As, true>(as.data(), n);
     }
 
     template <typename N, typename As>
     auto take_unsafe(N n, As &as) -> TakeUnsafeReturn<N, As, false>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return TakeUnsafeReturn<N, As, false>(as.data(), n);
     }
 
@@ -684,14 +684,14 @@ namespace efp
     template <typename N, typename As>
     auto take(N n, const As &as) -> TakeReturn<N, As, true>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return TakeReturn<N, As, true>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
     }
 
     template <typename N, typename As>
     auto take(N n, As &as) -> TakeReturn<N, As, false>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return TakeReturn<N, As, false>(as.data(), min_v(static_cast<size_t>(n), as.size())); // Safeguarding against n > as.size()
     }
 
@@ -746,14 +746,14 @@ namespace efp
     template <typename N, typename As>
     auto drop_unsafe(N n, const As &as) -> DropUnsafeReturn<N, As, true>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return DropUnsafeReturn<N, As, true>(as.data() + n, as.size() - n);
     }
 
     template <typename N, typename As>
     auto drop_unsafe(N n, As &as) -> DropUnsafeReturn<N, As, false>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return DropUnsafeReturn<N, As, false>(as.data() + n, as.size() - n);
     }
 
@@ -812,7 +812,7 @@ namespace efp
     template <typename N, typename As>
     auto drop(N n, const As &as) -> DropReturn<N, As, true>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         const size_t as_len = as.size();
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
         return DropReturn<N, As, true>(as.data() + bound_drop_size, as_len - bound_drop_size);
@@ -821,7 +821,7 @@ namespace efp
     template <typename N, typename As>
     auto drop(N n, As &as) -> DropReturn<N, As, false>
     {
-        static_assert(IsSequence<As>::value, "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         const size_t as_len = as.size();
         size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
         return DropReturn<N, As, false>(as.data() + bound_drop_size, as_len - bound_drop_size);

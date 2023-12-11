@@ -1352,7 +1352,7 @@ namespace efp
     auto operator<<(std::ostream &os, const A &seq)
         -> EnableIf<IsSequence<A>::value, std::ostream &>
     {
-        static_assert(IsSequence<A>(), "Argument should be an instance of sequence trait.");
+        static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
         // ? Interesting. Automatically consider it as VectorStream?
         os << "{ ";

@@ -167,32 +167,32 @@ namespace efp
 
     // Reducings
 
-    template <typename A>
-    constexpr Element<A> max_elem(const A &as)
+    template <typename As>
+    constexpr Element<As> max_elem(const As &as)
     {
-        return foldl(max, NumericLimits<Element<A>>::min(), as);
+        return foldl(max, NumericLimits<Element<As>>::min(), as);
     }
 
-    template <typename A>
-    constexpr Element<A> min_elem(const A &as)
+    template <typename As>
+    constexpr Element<As> min_elem(const As &as)
     {
-        return foldl(min, NumericLimits<Element<A>>::max(), as);
+        return foldl(min, NumericLimits<Element<As>>::max(), as);
     }
 
-    template <typename A>
-    constexpr Element<A> max_min(const A &as)
+    template <typename As>
+    constexpr Element<As> max_min(const As &as)
     {
         return max_elem(as) - min_elem(as);
     }
 
-    template <typename A>
-    constexpr Element<A> sum(const A &as)
+    template <typename As>
+    constexpr Element<As> sum(const As &as)
     {
         return foldl(plus, 0, as);
     }
 
-    template <typename A>
-    constexpr Element<A> product(const A &as)
+    template <typename As>
+    constexpr Element<As> product(const As &as)
     {
         return foldl(times, 1, as);
     }

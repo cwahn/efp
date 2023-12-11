@@ -146,7 +146,7 @@ namespace efp
     // constexpr auto begin(const A &as)
     //     -> const Element<A> *
     // {
-    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
     //     return as.begin();
     // }
 
@@ -154,7 +154,7 @@ namespace efp
     // constexpr auto begin(A &as)
     //     -> Element<A> *
     // {
-    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
     //     return as.begin();
     // }
 
@@ -164,7 +164,7 @@ namespace efp
     // constexpr auto end(const A &as)
     //     -> const Element<A> *
     // {
-    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
     //     return as.end();
     // }
 
@@ -172,7 +172,7 @@ namespace efp
     // constexpr auto end(A &as)
     //     -> Element<A> *
     // {
-    //     static_assert(IsSequence<A>::value, "Argument should be an instance of sequence trait.");
+    //     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
     //     return as.end();
     // }
 
