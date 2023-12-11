@@ -1,154 +1,61 @@
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
 
-// Curiously Recurring Template Pattern Sequence
-// Check validity on data store
-
 // ct_capacity is compile time bound of length. It does not mean safety of access.
 // However, actual capacity does means the length of memory safe to access.
 
-// todo STL only
-#include <iostream>
-#include <cstring>
-
+#include "cpp_core.hpp"
 #include "sfinae.hpp"
+#include "trait.hpp"
 
 // todo Move and copy assigment operator sort out
 
 namespace efp
 {
-    constexpr size_t dyn = -1;
 
-    template <typename Derived>
-    class SequenceTrait;
-
-    template <typename Derived>
-    class SequenceBase
-    {
-    public:
-        using Trait = SequenceTrait<Derived>;
-
-        using Element = typename Trait::Element;
-        static constexpr size_t ct_len = Trait::ct_len;
-        static constexpr size_t ct_cap = Trait::ct_cap;
-
-        const Element &operator[](size_t index) const
-        {
-            return derived()[index];
-        }
-
-        // ! Mut
-        Element &operator[](size_t index)
-        {
-            return derived()[index];
-        }
-
-        bool operator==(const SequenceBase &other) const
-        {
-            return derived() == other.derived();
-        }
-
-        size_t size() const
-        {
-            return derived().size();
-        }
-
-        const Element *data() const
-        {
-            return derived().data();
-        }
-
-        Element *data()
-        {
-            return derived().data();
-        }
-
-        const Element *begin() const
-        {
-            return derived().begin();
-        }
-
-        Element *begin()
-        {
-            return derived().begin();
-        }
-
-        const Element *end() const
-        {
-            return derived().end();
-        }
-
-        Element *end()
-        {
-            return derived().end();
-        }
-
-    private:
-        Derived &derived()
-        {
-            return *static_cast<Derived *>(this);
-        }
-        const Derived &derived() const
-        {
-            return *static_cast<const Derived *>(this);
-        }
-    };
-
-    template <typename Derived>
-    using Seq = SequenceBase<Derived>;
-
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    class Sequence
-    {
-    };
-
-    template <typename A, size_t ct_length>
-    class Sequence<A, ct_length, ct_length>
-        : public SequenceBase<Sequence<A, ct_length, ct_length>>
+    template <typename A, size_t ct_size>
+    class Array
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = ct_length;
-        static constexpr size_t ct_cap = ct_length;
+        using CtSize = Size<ct_size>;
+        using CtCapacity = Size<ct_size>;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
-
-        Sequence()
+        Array()
         {
-            for (size_t i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_size; ++i)
             {
                 new (&data_[i]) Element();
             }
         }
 
-        Sequence(const Sequence &other)
+        Array(const Array &other)
         {
-            for (size_t i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_size; ++i)
             {
                 new (&data_[i]) Element(other.data_[i]);
             }
         }
 
-        Sequence(Sequence &&other) noexcept
+        Array(Array &&other) noexcept
         {
-            for (size_t i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_size; ++i)
             {
                 new (&data_[i]) Element(efp::move(other.data_[i])); // Move-construct each element
             }
         }
 
         template <typename... Arg>
-        Sequence(const Arg &...args)
+        Array(const Arg &...args)
             : data_{args...}
         {
         }
 
-        Sequence &operator=(const Sequence &other)
+        Array &operator=(const Array &other)
         {
             if (this != &other)
             {
-                for (size_t i = 0; i < ct_len; ++i)
+                for (size_t i = 0; i < ct_size; ++i)
                 {
                     data_[i] = other.data_[i]; // Use assignment for each element
                 }
@@ -166,9 +73,9 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const Sequence &other) const
+        bool operator==(const Array &other) const
         {
-            for (size_t i = 0; i < ct_len; ++i)
+            for (size_t i = 0; i < ct_size; ++i)
             {
                 if (data_[i] != other.data_[i])
                 {
@@ -181,17 +88,17 @@ namespace efp
 
         size_t size() const
         {
-            return ct_len;
+            return ct_size;
         }
 
         size_t capacity() const
         {
-            return ct_cap;
+            return ct_size;
         }
 
         void resize(size_t length)
         {
-            if (length != ct_len)
+            if (length != ct_size)
             {
                 abort();
             }
@@ -199,7 +106,7 @@ namespace efp
 
         void reserve(size_t capacity)
         {
-            if (capacity > ct_cap)
+            if (capacity > ct_size)
             {
                 abort();
             }
@@ -227,41 +134,88 @@ namespace efp
 
         Element *end()
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
         const Element *end() const
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
         bool empty() const
         {
-            return ct_len == 0;
+            return ct_size == 0;
         }
 
     private:
-        A data_[ct_cap];
+        A data_[ct_size];
     };
 
-    template <typename A, size_t ct_length>
-    using Array = EnableIf<ct_length != dyn, Sequence<A, ct_length, ct_length>>;
+    // template <typename A, size_t ct_size>
+    // using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
+
+    template <typename A, size_t n>
+    struct ElementImpl<Array<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<Array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<Array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const Array<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const Array<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, Array<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    // static_assert(IsSame<decltype(nth(0, Array<int, 2>{0, 1, 2})), int &>::value, "Assert nth");
+    // DebugType<decltype(nth(0, Array<int, 2>{0, 1, 2}))> _;
+
+    template <typename A, size_t n>
+    constexpr auto data(const Array<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(Array<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A, size_t ct_capacity>
-    class Sequence<A, dyn, ct_capacity>
-        : public SequenceBase<Sequence<A, dyn, ct_capacity>>
+    class ArrVec
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = ct_capacity;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<ct_capacity>;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        ArrVec() : size_{0} {}
 
-        Sequence() : size_{0} {}
-
-        Sequence(const Sequence &other) : size_{other.size_}
+        ArrVec(const ArrVec &other) : size_{other.size_}
         {
             for (size_t i = 0; i < size_; ++i)
             {
@@ -269,7 +223,7 @@ namespace efp
             }
         }
 
-        Sequence(Sequence &&other) : size_{other.size_}
+        ArrVec(ArrVec &&other) : size_{other.size_}
         {
             other.size_ = 0;
             for (size_t i = 0; i < size_; ++i)
@@ -279,24 +233,24 @@ namespace efp
         }
 
         template <typename... Arg>
-        Sequence(const Arg &...args)
+        ArrVec(const Arg &...args)
             : data_{args...},
               size_(sizeof...(args))
         {
         }
 
         // Constructor from array
-        template <size_t ct_len_, typename = EnableIf<ct_cap >= ct_len_, void>>
-        Sequence(const Sequence<Element, ct_len_, ct_len_> &as)
-            : size_(ct_len_)
+        template <size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
+        ArrVec(const ArrVec<Element, ct_size_> &as)
+            : size_(ct_size_)
         {
-            for (size_t i = 0; i < ct_len_; ++i)
+            for (size_t i = 0; i < ct_size_; ++i)
             {
                 new (&data_[i]) Element(as[i]);
             }
         }
 
-        ~Sequence()
+        ~ArrVec()
         {
             for (size_t i = 0; i < size_; ++i)
             {
@@ -304,7 +258,7 @@ namespace efp
             }
         }
 
-        Sequence &operator=(const Sequence &other)
+        ArrVec &operator=(const ArrVec &other)
         {
             if (this != &other)
             {
@@ -317,7 +271,7 @@ namespace efp
             return *this;
         }
 
-        Sequence &operator=(Sequence &&other) noexcept
+        ArrVec &operator=(ArrVec &&other) noexcept
         {
             if (this != &other)
             {
@@ -331,7 +285,7 @@ namespace efp
                 size_ = other.size_;
                 for (size_t i = 0; i < size_; ++i)
                 {
-                    new (&data_[i]) Element(std::move(other.data_[i]));
+                    new (&data_[i]) Element(efp::move(other.data_[i]));
                 }
 
                 // Reset the source object
@@ -350,7 +304,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const Sequence &other) const
+        bool operator==(const ArrVec &other) const
         {
             if (size_ != other.size_)
             {
@@ -375,12 +329,12 @@ namespace efp
 
         size_t capacity() const
         {
-            return ct_cap;
+            return ct_capacity;
         }
 
         void resize(size_t length)
         {
-            if (length > ct_cap || length < 0)
+            if (length > ct_capacity || length < 0)
             {
                 abort();
             }
@@ -390,7 +344,7 @@ namespace efp
 
         void reserve(size_t capacity)
         {
-            if (capacity > ct_cap)
+            if (capacity > ct_capacity)
             {
                 abort();
             }
@@ -398,7 +352,7 @@ namespace efp
 
         void push_back(const Element &value)
         {
-            if (size_ >= ct_cap)
+            if (size_ >= ct_capacity)
             {
                 abort();
             }
@@ -411,7 +365,7 @@ namespace efp
 
         void push_back(Element &&value)
         {
-            if (size_ >= ct_cap)
+            if (size_ >= ct_capacity)
             {
                 abort();
             }
@@ -511,28 +465,69 @@ namespace efp
         }
 
     private:
-        Element data_[ct_cap];
+        Element data_[ct_capacity];
         size_t size_;
     };
 
-    template <typename A, size_t ct_capacity>
-    using ArrVec = EnableIf<ct_capacity != dyn, Sequence<A, dyn, ct_capacity>>;
+    template <typename A, size_t n>
+    struct ElementImpl<ArrVec<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrVec<A, n>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrVec<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrVec<A, n> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrVec<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrVec<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrVec<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrVec<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A>
-    class Sequence<A, dyn, dyn>
-        : public SequenceBase<Sequence<A, dyn, dyn>>
+    class Vector
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<dyn>;
 
-        static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
+        Vector() : data_{nullptr}, size_{0}, capacity_{0} {}
 
-        Sequence() : data_{nullptr}, size_{0}, capacity_{0} {}
-
-        Sequence(const Sequence &other)
+        Vector(const Vector &other)
             : data_{nullptr}, size_{0}, capacity_{0}
         {
             if (other.data_)
@@ -549,14 +544,14 @@ namespace efp
             }
         }
 
-        Sequence(Sequence &&other)
+        Vector(Vector &&other)
             : data_{other.data_}, size_{other.size_}, capacity_{other.capacity_}
         {
             other.data_ = nullptr;
         }
 
         template <typename... Args>
-        Sequence(const Args &...args)
+        Vector(const Args &...args)
             : data_{new Element[sizeof...(args)]},
               capacity_(sizeof...(args)),
               size_(sizeof...(args))
@@ -567,11 +562,11 @@ namespace efp
         }
 
         // Constructor from Array
-        template <size_t ct_len_>
-        Sequence(const Sequence<Element, ct_len_, ct_len_> &as)
-            : data_(new Element[ct_len_]),
-              size_(ct_len_),
-              capacity_(ct_len_)
+        template <size_t ct_size_>
+        Vector(const Array<Element, ct_size_> &as)
+            : data_(new Element[ct_size_]),
+              size_(ct_size_),
+              capacity_(ct_size_)
         {
             for (size_t i = 0; i < size_; ++i)
             {
@@ -581,9 +576,9 @@ namespace efp
 
         // Constructor from ArrVec
         template <size_t ct_cap_>
-        Sequence(const Sequence<Element, dyn, ct_cap_> &as)
-            : data_(new Element[as.size()]),
-              size_(as.size()),
+        Vector(const ArrVec<Element, ct_cap_> &as)
+            : data_(new Element[length(as)]),
+              size_(length(as)),
               capacity_(ct_cap_)
         {
             for (size_t i = 0; i < size_; ++i)
@@ -592,7 +587,7 @@ namespace efp
             }
         }
 
-        ~Sequence()
+        ~Vector()
         {
             if (data_)
             {
@@ -602,7 +597,7 @@ namespace efp
         }
 
         // todo copy_and_swap
-        Sequence &operator=(const Sequence &other) noexcept
+        Vector &operator=(const Vector &other) noexcept
         {
             if (this != &other)
             {
@@ -624,7 +619,7 @@ namespace efp
             return *this;
         }
 
-        Sequence &operator=(Sequence &&other) noexcept
+        Vector &operator=(Vector &&other) noexcept
         {
             if (this != &other)
             {
@@ -651,7 +646,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const Sequence &other) const
+        bool operator==(const Vector &other) const
         {
             if (size_ != other.size_)
             {
@@ -831,45 +826,72 @@ namespace efp
     };
 
     template <typename A>
-    using Vector = Sequence<A, dyn, dyn>;
+    struct ElementImpl<Vector<A>>
+    {
+        using Type = A;
+    };
 
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    class SequenceTrait<Sequence<A, ct_length, ct_capacity>>
+    template <typename A>
+    struct CtSizeImpl<Vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<Vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const Vector<A> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, const Vector<A> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, Vector<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const Vector<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(Vector<A> &as) -> A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t ct_size>
+    class ArrayView
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = ct_length;
-        static constexpr size_t ct_cap = ct_capacity;
-    };
+        using CtSize = Size<ct_size>;
+        using CtCapacity = Size<ct_size>;
 
-    // Should have all these three template parameter not to break static link
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    class SequenceView
-    {
-    };
-
-    template <typename A, size_t ct_length>
-    class SequenceView<A, ct_length, ct_length>
-        : public SequenceBase<SequenceView<A, ct_length, ct_length>>
-    {
-    public:
-        using Element = A;
-        static constexpr size_t ct_len = ct_length;
-        static constexpr size_t ct_cap = ct_length;
-
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-
-        SequenceView()
+        ArrayView()
             : data_(nullptr)
         {
         }
 
         // ! length will not be used
-        SequenceView(Element *data, Size<ct_len> length = Size<ct_len>{})
+        ArrayView(Element *data, size_t length = Size<ct_size>{})
             : data_(data)
         {
             // Ensure that data is not nullptr for a non-empty view.
-            if (ct_len > 0 && data_ == nullptr)
+            if (ct_size > 0 && data_ == nullptr)
             {
                 abort();
             }
@@ -885,24 +907,24 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceView &other) const
+        bool operator==(const ArrayView &other) const
         {
             return data_ == other.data_;
         }
 
         size_t size() const
         {
-            return ct_len;
+            return ct_size;
         }
 
         size_t capacity() const
         {
-            return ct_cap;
+            return ct_size;
         }
 
         void resize(size_t length)
         {
-            if (length > ct_cap || length < 0)
+            if (length > ct_size || length < 0)
             {
                 abort();
             }
@@ -910,7 +932,7 @@ namespace efp
 
         void reserve(size_t capacity)
         {
-            if (capacity > ct_cap)
+            if (capacity > ct_size)
             {
                 abort();
             }
@@ -938,44 +960,85 @@ namespace efp
 
         Element *end()
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
         const Element *end() const
         {
-            return data_ + ct_len;
+            return data_ + ct_size;
         }
 
         bool empty() const
         {
-            return ct_len == 0;
+            return ct_size == 0;
         }
 
     private:
         Element *data_;
     };
 
-    template <typename A, size_t ct_length>
-    using ArrayView = EnableIf<ct_length != dyn, SequenceView<A, ct_length, ct_length>>;
+    template <typename A, size_t n>
+    struct ElementImpl<ArrayView<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrayView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrayView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrayView<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrayView<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrayView<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrayView<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrayView<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A, size_t ct_capacity>
-    class SequenceView<A, dyn, ct_capacity>
-        : public SequenceBase<SequenceView<A, dyn, ct_capacity>>
+    class ArrVecView
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = ct_capacity;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<ct_capacity>;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
-
-        SequenceView()
+        ArrVecView()
             : data_(nullptr), size_(0)
         {
         }
 
-        SequenceView(Element *data, size_t size)
+        ArrVecView(Element *data, size_t size)
             : data_(data), size_(size)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -986,14 +1049,13 @@ namespace efp
         }
 
         // Constructor from ArrayView
-        template <size_t ct_len_>
-        SequenceView(const SequenceView<Element, ct_len_, ct_len_> &as)
-            : data_(as.data()), size_(as.size())
+        template <size_t ct_size_>
+        ArrVecView(const ArrayView<Element, ct_size_> &as)
+            : data_(as.data()), size_(length(as))
         {
         }
 
-        SequenceView &
-        operator=(const SequenceView &other)
+        ArrVecView &operator=(const ArrVecView &other)
         {
             if (this != &other)
             {
@@ -1013,7 +1075,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceView &other) const
+        bool operator==(const ArrVecView &other) const
         {
             return (data_ == other.data_) &&
                    (size_ == other.size_);
@@ -1026,7 +1088,7 @@ namespace efp
 
         size_t capacity() const
         {
-            return ct_cap;
+            return ct_capacity;
         }
 
         const Element *data() const
@@ -1069,27 +1131,68 @@ namespace efp
         size_t size_;
     };
 
-    template <typename A, size_t ct_capacity>
-    using ArrVecView = EnableIf<ct_capacity != dyn, SequenceView<A, dyn, ct_capacity>>;
+    template <typename A, size_t n>
+    struct ElementImpl<ArrVecView<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<ArrVecView<A, n>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<ArrVecView<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const ArrVecView<A, n> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const ArrVecView<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, ArrVecView<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const ArrVecView<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(ArrVecView<A, n> &as) -> A *
+    {
+        return as.data();
+    }
 
     template <typename A>
-    class SequenceView<A, dyn, dyn>
-        : public SequenceBase<SequenceView<A, dyn, dyn>>
+    class VectorView
     {
     public:
         using Element = A;
-        static constexpr size_t ct_len = dyn;
-        static constexpr size_t ct_cap = dyn;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<dyn>;
 
-        // static_assert(ct_len >= -1, "ct_length must greater or equal than -1.");
-        // static_assert(ct_cap >= -1, "ct_capacity must greater or equal than -1.");
-
-        SequenceView()
+        VectorView()
             : data_{nullptr}, size_{0}, capacity_{0}
         {
         }
 
-        SequenceView(Element *data, size_t size)
+        VectorView(Element *data, size_t size)
             : data_(data), size_(size), capacity_(size)
         {
             // Ensure that data is not nullptr for a non-empty view.
@@ -1100,20 +1203,20 @@ namespace efp
         }
 
         // Constructor from ArrayView
-        template <size_t ct_len_>
-        SequenceView(const SequenceView<Element, ct_len_, ct_len_> &as)
-            : data_(as.data()), size_(as.size())
+        template <size_t ct_size_>
+        VectorView(const ArrayView<Element, ct_size_> &as)
+            : data_(as.data()), size_(length(as))
         {
         }
 
         // Constructor from ArrVecView
         template <size_t ct_cap_>
-        SequenceView(const SequenceView<Element, dyn, ct_cap_> &as)
-            : data_(as.data()), size_(as.size())
+        VectorView(const ArrVecView<Element, ct_cap_> &as)
+            : data_(as.data()), size_(length(as))
         {
         }
 
-        SequenceView &operator=(const SequenceView &other)
+        VectorView &operator=(const VectorView &other)
         {
             if (this != &other)
             {
@@ -1134,7 +1237,7 @@ namespace efp
             return data_[index];
         }
 
-        bool operator==(const SequenceView &other) const
+        bool operator==(const VectorView &other) const
         {
             return (data_ == other.data_) &&
                    (size_ == other.size_) &&
@@ -1192,190 +1295,176 @@ namespace efp
         size_t capacity_;
     };
 
-    template <typename A>
-    using VectorView = SequenceView<A, dyn, dyn>;
-
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    class SequenceTrait<SequenceView<A, ct_length, ct_capacity>>
-    {
-    public:
-        using Element = A;
-        static constexpr size_t ct_len = ct_length;
-        static constexpr size_t ct_cap = ct_capacity;
-    };
-
-    // todo STL only
-
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    std::ostream &operator<<(std::ostream &os, const Sequence<A, ct_length, ct_capacity> &seq)
-    {
-        os << "{ ";
-        for (size_t i = 0; i < seq.size(); ++i)
-        {
-            os << seq[i];
-            if (i != seq.size() - 1)
-            {
-                os << ", ";
-            }
-        }
-        os << " }";
-        return os;
-    }
-
-    template <typename A, size_t ct_length, size_t ct_capacity>
-    std::ostream &operator<<(std::ostream &os, const SequenceView<A, ct_length, ct_capacity> &seq)
-    {
-        os << "{ ";
-        for (size_t i = 0; i < seq.size(); ++i)
-        {
-            os << seq[i];
-            if (i != seq.size() - 1)
-            {
-                os << ", ";
-            }
-        }
-        os << " }";
-        return os;
-    }
-
-    // Element
+    // template <typename A>
+    // using VectorView = SequenceView<A, dyn, dyn>;
 
     template <typename A>
-    struct ElementImpl
+    struct ElementImpl<VectorView<A>>
     {
-        using type = typename A::Element;
+        using Type = A;
     };
 
     template <typename A>
-    using Element = typename ElementImpl<A>::type;
-
-    // StaticLength
+    struct CtSizeImpl<VectorView<A>>
+    {
+        using Type = Size<dyn>;
+    };
 
     template <typename A>
-    struct StaticLength
+    struct CtCapacityImpl<VectorView<A>>
     {
-        static constexpr size_t value = A::ct_len;
+        using Type = Size<dyn>;
     };
-
-    // StaticCapacity
 
     template <typename A>
-    struct StaticCapacity
-    {
-        static constexpr size_t value = A::ct_cap;
-    };
-
-    // IsStaticLength
-
-    template <typename A>
-    struct IsStaticLength
-    {
-        static constexpr bool value = A::ct_len != dyn;
-    };
-
-    // AreAllStaticLength
-
-    template <typename... A>
-    struct AreAllStaticLength
-    {
-        static constexpr bool value = all_v(IsStaticLength<A>::value...);
-    };
-
-    // IsStaticCapacity
-
-    template <typename A>
-    struct IsStaticCapacity
-    {
-        static constexpr bool value = A::ct_cap != dyn;
-    };
-
-    // AreAllStaticCapacity
-
-    template <typename... A>
-    struct AreAllStaticCapacity
-    {
-        static constexpr bool value = all_v(IsStaticCapacity<A>::value...);
-    };
-
-    // MinStaticLength
-
-    template <typename... A>
-    struct MinStaticLength
-    {
-        static constexpr size_t value = minimum_v(StaticLength<A>::value...);
-    };
-
-    // MinStaticCapacity
-
-    template <typename... A>
-    struct MinStaticCapacity
-    {
-        static constexpr size_t value = minimum_v(StaticCapacity<A>::value...);
-    };
-
-    // length
-    // ? Maybe need to be at prelude
-
-    template <typename A>
-    constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_len != dyn, IntegralConst<size_t, A::ct_len>>
-    {
-        return IntegralConst<size_t, A::ct_len>{};
-    }
-
-    template <typename A>
-    constexpr auto length(const Seq<A> &as)
-        -> EnableIf<A::ct_len == dyn, size_t>
+    constexpr auto length(const VectorView<A> &as) -> size_t
     {
         return as.size();
     }
 
-    // data
+    template <typename A>
+    constexpr auto nth(size_t i, const VectorView<A> &as) -> const A &
+    {
+        return as[i];
+    }
 
     template <typename A>
-    constexpr auto data(const Seq<A> &as)
-        -> const Element<A> *
+    constexpr auto nth(size_t i, VectorView<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const VectorView<A> &as) -> const A *
     {
         return as.data();
     }
 
     template <typename A>
-    constexpr auto data(Seq<A> &as)
-        -> Element<A> *
+    constexpr auto data(VectorView<A> &as) -> A *
     {
         return as.data();
     }
 
-    // begin
+    // todo STL only
 
     template <typename A>
-    constexpr auto begin(const Seq<A> &as)
-        -> const Element<A> *
+    auto operator<<(std::ostream &os, const A &seq)
+        -> EnableIf<IsSequence<A>::value, std::ostream &>
     {
-        return as.begin();
+        static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
+
+        // ? Interesting. Automatically consider it as VectorStream?
+        os << "{ ";
+        for (size_t i = 0; i < seq.size(); ++i)
+        {
+            os << seq[i];
+            if (i != seq.size() - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << " }";
+        return os;
+    }
+
+    // Sequence trait implementation for std::array
+
+    template <typename A, size_t n>
+    struct ElementImpl<std::array<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<std::array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<std::array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const std::array<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const std::array<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, std::array<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const std::array<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(std::array<A, n> &as) -> A *
+    {
+        return as.data();
+    }
+
+    // Sequence trait implementation for std::vector
+    template <typename A>
+    struct ElementImpl<std::vector<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct CtSizeImpl<std::vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<std::vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const std::vector<A> &as) -> size_t
+    {
+        return as.size();
     }
 
     template <typename A>
-    constexpr auto begin(Seq<A> &as)
-        -> Element<A> *
+    constexpr auto nth(size_t i, const std::vector<A> &as) -> const A &
     {
-        return as.begin();
-    }
-
-    // end
-
-    template <typename A>
-    constexpr auto end(const Seq<A> &as)
-        -> const Element<A> *
-    {
-        return as.end();
+        return as[i];
     }
 
     template <typename A>
-    constexpr auto end(Seq<A> &as)
-        -> Element<A> *
+    constexpr auto nth(size_t i, std::vector<A> &as) -> A &
     {
-        return as.end();
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const std::vector<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(std::vector<A> &as) -> A *
+    {
+        return as.data();
     }
 };
 

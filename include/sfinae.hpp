@@ -25,14 +25,112 @@ namespace efp
         return false;
     }
 
-    struct True
+    // IntegralConst
+
+    template <typename A, A a>
+    struct IntegralConst
+    {
+        static constexpr A value = a;
+        using value_type = A;
+        using Type = IntegralConst;
+
+        constexpr operator value_type() const noexcept { return value; }   // Conversion operator
+        constexpr value_type operator()() const noexcept { return value; } // Function call operator
+    };
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<bool, lhs == rhs> operator==(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<bool, lhs == rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<bool, lhs != rhs> operator!=(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<bool, lhs != rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs + rhs> operator+(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs + rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs - rhs> operator-(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs - rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs * rhs> operator*(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs * rhs>{};
+    }
+
+    template <typename A, A lhs, A rhs>
+    constexpr IntegralConst<A, lhs / rhs> operator/(
+        IntegralConst<A, lhs>,
+        IntegralConst<A, rhs>)
+    {
+        return IntegralConst<A, lhs / rhs>{};
+    }
+
+    // True
+
+    using True = IntegralConst<bool, true>;
+
+    // False
+
+    using False = IntegralConst<bool, false>;
+
+    // Bool
+
+    template <bool b>
+    using Bool = IntegralConst<bool, b>;
+
+    // Int
+
+    template <size_t n>
+    using Int = IntegralConst<int, n>;
+
+    // Size
+
+    template <size_t n>
+    using Size = IntegralConst<size_t, n>;
+
+    // IsIntegralConst
+
+    template <typename A>
+    struct IsIntegralConst
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename A, A a>
+    struct IsIntegralConst<IntegralConst<A, a>>
     {
         static constexpr bool value = true;
     };
 
-    struct False
+    template <typename A>
+    struct IsIntegralConst<A &> : IsIntegralConst<A>
     {
-        static constexpr bool value = false;
+    };
+
+    template <typename A>
+    struct IsIntegralConst<A &&> : IsIntegralConst<A>
+    {
     };
 
     template <typename T>
@@ -42,45 +140,121 @@ namespace efp
 
     // EnableIfImpl
 
-    template <bool cond, typename A = void>
-    struct EnableIfImpl
+    namespace detail
     {
-    };
+        template <bool cond, typename A = void>
+        struct EnableIfImpl
+        {
+        };
 
-    template <typename A>
-    struct EnableIfImpl<true, A>
-    {
-        typedef A Type;
-    };
+        template <typename A>
+        struct EnableIfImpl<true, A>
+        {
+            typedef A Type;
+        };
+    }
 
     // EnableIf
 
     template <bool cond, typename A = void>
-    using EnableIf = typename EnableIfImpl<cond, A>::Type;
+    using EnableIf = typename detail::EnableIfImpl<cond, A>::Type;
 
-    // ConditionalImpl
+    // Conditionl
+
+    namespace detail
+    {
+        template <bool cond, typename T, typename F>
+        struct ConditionalImpl
+        {
+        };
+
+        template <typename T, typename F>
+        struct ConditionalImpl<true, T, F>
+        {
+            using Type = T;
+        };
+
+        template <typename T, typename F>
+        struct ConditionalImpl<false, T, F>
+        {
+            using Type = F;
+        };
+    }
 
     template <bool cond, typename T, typename F>
-    struct ConditionalImpl
+    using Conditional = typename detail::ConditionalImpl<cond, T, F>::Type;
+
+    // All
+
+    template <typename... Args>
+    struct All
     {
     };
 
-    template <typename T, typename F>
-    struct ConditionalImpl<true, T, F>
+    // Base case: When no types are left, return true.
+    template <>
+    struct All<> : True
     {
-        using Type = T;
     };
 
-    template <typename T, typename F>
-    struct ConditionalImpl<false, T, F>
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct All<Head, Tail...> : IntegralConst<bool, Head::value && All<Tail...>::value>
     {
-        using Type = F;
     };
 
-    // Conditionl_t
+    // Any
 
-    template <bool cond, typename T, typename F>
-    using Conditional = typename ConditionalImpl<cond, T, F>::Type;
+    template <typename... Args>
+    struct Any
+    {
+    };
+
+    // Base case: When no types are left, return false.
+    template <>
+    struct Any<> : False
+    {
+    };
+
+    // Recursive case: Check the first type, and recurse for the rest.
+    template <typename Head, typename... Tail>
+    struct Any<Head, Tail...> : IntegralConst<bool, Head::value || Any<Tail...>::value>
+    {
+    };
+
+    // Min
+
+    template <typename Head, typename... Tail>
+    struct Min : Min<Head, Min<Tail...>>
+    {
+    };
+
+    template <typename Head, typename Tail>
+    struct Min<Head, Tail> : Conditional<Head::value <= Tail::value, Head, Tail>
+    {
+    };
+
+    template <typename Head>
+    struct Min<Head> : Head
+    {
+    };
+
+    // Max
+
+    template <typename Head, typename... Tail>
+    struct Max : Max<Head, Max<Tail...>>
+    {
+    };
+
+    template <typename Head, typename Tail>
+    struct Max<Head, Tail> : Conditional<Head::value >= Tail::value, Head, Tail>
+    {
+    };
+
+    template <typename Head>
+    struct Max<Head> : Head
+    {
+    };
 
     // size_of_ptr_v
     constexpr auto size_of_ptr_v = sizeof(void *);
@@ -205,27 +379,28 @@ namespace efp
     //     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
     // }
 
-    // FoldlImpl
-
-    template <template <class, class> class F, typename A, typename... Bs>
-    struct FoldlImpl
-    {
-    };
-
-    template <template <class, class> class F, typename A, typename B>
-    struct FoldlImpl<F, A, B> : F<A, B>::Type
-    {
-    };
-
-    template <template <class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-    struct FoldlImpl<F, A, B0, B1, Bs...> : FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...>
-    {
-    };
-
     // Foldl
 
+    namespace detail
+    {
+        template <template <class, class> class F, typename A, typename... Bs>
+        struct FoldlImpl
+        {
+        };
+
+        template <template <class, class> class F, typename A, typename B>
+        struct FoldlImpl<F, A, B> : F<A, B>::Type
+        {
+        };
+
+        template <template <class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+        struct FoldlImpl<F, A, B0, B1, Bs...> : FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...>
+        {
+        };
+    }
+
     template <template <class, class> class F, typename A, typename... Bs>
-    using Foldl = typename FoldlImpl<F, A, Bs...>::Type;
+    using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
     // * Maybe just recursive constexpr template function could be enough
 
@@ -299,92 +474,6 @@ namespace efp
         return foldl_v(times_v<A>, a, as...);
     }
 
-    // RemoveReferenceImpl
-
-    // ! Deprecated
-
-    // template <typename A>
-    // using ReferenceRemoved = typename std::remove_reference<A>::Type;
-
-    // IntegralConst
-
-    template <typename A, A a>
-    struct IntegralConst
-    {
-        static constexpr A value = a;
-        using value_type = A;
-        using Type = IntegralConst;
-
-        constexpr operator value_type() const noexcept { return value; }   // Conversion operator
-        constexpr value_type operator()() const noexcept { return value; } // Function call operator
-    };
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs + rhs> operator+(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs + rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs - rhs> operator-(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs - rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs * rhs> operator*(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs * rhs>{};
-    }
-
-    template <typename A, A lhs, A rhs>
-    constexpr IntegralConst<A, lhs / rhs> operator/(
-        IntegralConst<A, lhs>,
-        IntegralConst<A, rhs>)
-    {
-        return IntegralConst<A, lhs / rhs>{};
-    }
-
-    // IsIntegralConst
-
-    template <typename A>
-    struct IsIntegralConst
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename A, A a>
-    struct IsIntegralConst<IntegralConst<A, a>>
-    {
-        static constexpr bool value = true;
-    };
-
-    template <typename A>
-    struct IsIntegralConst<A &> : IsIntegralConst<A>
-    {
-    };
-
-    template <typename A>
-    struct IsIntegralConst<A &&> : IsIntegralConst<A>
-    {
-    };
-
-    // Int
-
-    template <size_t n>
-    using Int = IntegralConst<int, n>;
-
-    // Size
-
-    template <size_t n>
-    using Size = IntegralConst<size_t, n>;
-
     // IsSame
 
     template <typename A, typename B>
@@ -399,32 +488,31 @@ namespace efp
         static constexpr bool value = true;
     };
 
-    // PackAtImpl
-
-    template <uint8_t n, typename... Args>
-    struct PackAtImpl
-    {
-        // static_assert(n >= 0, "Index out of range");
-        // static_assert(n < sizeof...(Args), "Index out of range");
-        using Type = void *;
-    };
-
-    template <typename Head, typename... Tail>
-    struct PackAtImpl<0, Head, Tail...>
-    {
-        using Type = Head;
-    };
-
-    template <uint8_t n, typename Head, typename... Tail>
-    struct PackAtImpl<n, Head, Tail...>
-        : PackAtImpl<n - 1, Tail...>
-    {
-    };
-
     // PackAt
 
+    namespace detail
+    {
+        template <uint8_t n, typename... Args>
+        struct PackAtImpl
+        {
+            using Type = void *;
+        };
+
+        template <typename Head, typename... Tail>
+        struct PackAtImpl<0, Head, Tail...>
+        {
+            using Type = Head;
+        };
+
+        template <uint8_t n, typename Head, typename... Tail>
+        struct PackAtImpl<n, Head, Tail...>
+            : PackAtImpl<n - 1, Tail...>
+        {
+        };
+    }
+
     template <uint8_t n, typename... Args>
-    using PackAt = typename PackAtImpl<n, Args...>::Type;
+    using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
     // FindHelperValue
     template <uint8_t n>
@@ -497,19 +585,22 @@ namespace efp
         static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
     }
 
-    // CallReturnImpl;
+    // CallReturn
 
-    template <typename, typename...>
-    struct CallReturnImpl;
-
-    template <typename F, typename... Args>
-    struct CallReturnImpl
+    namespace detail
     {
-        using Type = decltype(declval<F>()(declval<Args>()...));
-    };
+        template <typename, typename...>
+        struct CallReturnImpl;
+
+        template <typename F, typename... Args>
+        struct CallReturnImpl
+        {
+            using Type = decltype(declval<F>()(declval<Args>()...));
+        };
+    }
 
     template <typename F, typename... Args>
-    using CallReturn = typename CallReturnImpl<F, Args...>::Type;
+    using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
 
     // HasCallOperator
 
@@ -683,43 +774,46 @@ namespace efp
     template <typename... Ts>
     using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
-    // TupleImpl
-    template <typename IndexSequence, typename... As>
-    class TupleImpl
+    // Tuple
+    namespace detail
     {
-    };
-
-    template <int... idxs, typename... As>
-    class TupleImpl<IndexSequence<idxs...>, As...>
-        : public TupleLeaf<idxs, As>...
-    {
-    public:
-        // Function name or function type will be automatically converted to function pointer type
-        TupleImpl(const As &...as)
-            : TupleLeaf<idxs, As>{as}...
+        template <typename IndexSequence, typename... As>
+        class TupleImpl
         {
-        }
+        };
 
-    protected:
-        template <typename F>
-        auto match_impl(const F &f) const
-            -> EnableIf<
-                IsInvocable<F, As...>::value,
-                CallReturn<F, As...>>
+        template <int... idxs, typename... As>
+        class TupleImpl<IndexSequence<idxs...>, As...>
+            : public TupleLeaf<idxs, As>...
         {
-            return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
-        }
-    };
+        public:
+            // Function name or function type will be automatically converted to function pointer type
+            TupleImpl(const As &...as)
+                : TupleLeaf<idxs, As>{as}...
+            {
+            }
+
+        protected:
+            template <typename F>
+            auto match_impl(const F &f) const
+                -> EnableIf<
+                    IsInvocable<F, As...>::value,
+                    CallReturn<F, As...>>
+            {
+                return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
+            }
+        };
+    }
 
     // Tuple
 
     template <typename... As>
     class Tuple
-        : public TupleImpl<IndexSequenceFor<As...>, As...>
+        : public detail::TupleImpl<IndexSequenceFor<As...>, As...>
     {
     public:
         Tuple(const As &...as)
-            : TupleImpl<
+            : detail::TupleImpl<
                   IndexSequenceFor<As...>,
                   As...>{as...}
         {
@@ -745,7 +839,7 @@ namespace efp
                 IsInvocable<F, As...>::value,
                 CallReturn<F, As...>>
         {
-            return TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
+            return detail::TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
         }
 
     private:
@@ -818,44 +912,47 @@ namespace efp
         return tpl.template get<1>();
     }
 
-    template <size_t index>
-    struct TupleLeafComparatorImpl
-    {
-        template <typename... As>
-        static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
-        {
-            if (lhs.template get<index>() != rhs.template get<index>())
-                return false;
-            return TupleLeafComparatorImpl<index - 1>::compare(lhs, rhs);
-        }
-    };
-
-    template <>
-    struct TupleLeafComparatorImpl<0>
-    {
-        template <typename... As>
-        static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
-        {
-            return lhs.template get<0>() == rhs.template get<0>();
-        }
-    };
-
-    template <>
-    struct TupleLeafComparatorImpl<static_cast<size_t>(-1)>
-    {
-        template <typename... As>
-        static bool compare(const Tuple<As...> &, const Tuple<As...> &)
-        {
-            return true;
-        }
-    };
-
     // Equality operator for Tuple
+
+    namespace detail
+    {
+        template <size_t index>
+        struct TupleLeafComparatorImpl
+        {
+            template <typename... As>
+            static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+            {
+                if (lhs.template get<index>() != rhs.template get<index>())
+                    return false;
+                return TupleLeafComparatorImpl<index - 1>::compare(lhs, rhs);
+            }
+        };
+
+        template <>
+        struct TupleLeafComparatorImpl<0>
+        {
+            template <typename... As>
+            static bool compare(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
+            {
+                return lhs.template get<0>() == rhs.template get<0>();
+            }
+        };
+
+        template <>
+        struct TupleLeafComparatorImpl<static_cast<size_t>(-1)>
+        {
+            template <typename... As>
+            static bool compare(const Tuple<As...> &, const Tuple<As...> &)
+            {
+                return true;
+            }
+        };
+    }
 
     template <typename... As>
     bool operator==(const Tuple<As...> &lhs, const Tuple<As...> &rhs)
     {
-        return TupleLeafComparatorImpl<sizeof...(As) - 1>::compare(lhs, rhs);
+        return detail::TupleLeafComparatorImpl<sizeof...(As) - 1>::compare(lhs, rhs);
     }
 
     template <typename... As>
@@ -892,289 +989,290 @@ namespace efp
     template <size_t n, typename Tpl>
     using TupleAt = typename detail::TupleAtImpl<n, Tpl>::Type;
 
-    // ArgumentsImpl
-
-    template <typename, bool>
-    struct ArgumentsImpl
-    {
-    };
-
-    template <typename F>
-    struct ArgumentsImpl<F, true> : ArgumentsImpl<decltype(&F::operator()), false>
-    {
-        // using Type = typename
-    };
-
-    template <typename R, typename... Args>
-    struct ArgumentsImpl<R (*)(Args...), false>
-    {
-        using Type = Tuple<Args...>;
-    };
-
-    template <typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...), false>
-    {
-        using Type = Tuple<Args...>;
-    };
-
-    template <typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...) const, false>
-    {
-        using Type = Tuple<Args...>;
-    };
-
-    // Arguement_t
+    // Arguements
     // l-value and r-value reference will preserved at the result, but const will be removed.
 
+    namespace detail
+    {
+        template <typename, bool>
+        struct ArgumentsImpl
+        {
+        };
+
+        template <typename F>
+        struct ArgumentsImpl<F, true> : ArgumentsImpl<decltype(&F::operator()), false>
+        {
+            // using Type = typename
+        };
+
+        template <typename R, typename... Args>
+        struct ArgumentsImpl<R (*)(Args...), false>
+        {
+            using Type = Tuple<Args...>;
+        };
+
+        template <typename R, typename A, typename... Args>
+        struct ArgumentsImpl<R (A::*)(Args...), false>
+        {
+            using Type = Tuple<Args...>;
+        };
+
+        template <typename R, typename A, typename... Args>
+        struct ArgumentsImpl<R (A::*)(Args...) const, false>
+        {
+            using Type = Tuple<Args...>;
+        };
+    }
+
     template <typename F>
-    using Arguments = typename ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
-
-    // ReturnFromArgumentImpl
-
-    template <typename, typename>
-    struct ReturnFromArgumentImpl
-    {
-    };
-
-    template <typename F, typename... Args>
-    struct ReturnFromArgumentImpl<F, Tuple<Args...>>
-    {
-        using Type = CallReturn<F, Args...>;
-    };
+    using Arguments = typename detail::ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
 
     // ReturnFromArgument
 
-    template <typename F>
-    using ReturnFromArgument = typename ReturnFromArgumentImpl<F, Arguments<F>>::Type;
-
-    // Primary template (left undefined)
-    template <typename F>
-    struct FunctionReturnImpl
+    namespace detail
     {
-    };
+        template <typename, typename>
+        struct ReturnFromArgumentImpl
+        {
+        };
 
-    // Specialization for function posize_ters
-    template <typename R, typename... Args>
-    struct FunctionReturnImpl<R (*)(Args...)>
-    {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...)>
-    {
-        using Type = R;
-    };
-
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...)>
-    {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with const qualifier
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) const>
-    {
-        using Type = R;
-    };
-
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) const>
-    {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with volatile qualifier
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) volatile>
-    {
-        using Type = R;
-    };
-
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) volatile>
-    {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with const volatile qualifier
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) const volatile>
-    {
-        using Type = R;
-    };
-
-    template <typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) const volatile>
-    {
-        using Type = R;
-    };
-
-    // Template alias for Return
-    template <typename F>
-    using FunctionReturn = typename FunctionReturnImpl<F>::Type;
-
-    // ReturnImpl
-
-    template <typename F, typename Enable = void>
-    struct ReturnImpl : FunctionReturnImpl<F>
-    {
-    };
-
-    // template <typename F>
-    // struct ReturnImpl<F, EnableIf<!HasCallOperator<F>::value, void>> : FunctionReturnImpl<F>
-    // {
-    // };
+        template <typename F, typename... Args>
+        struct ReturnFromArgumentImpl<F, Tuple<Args...>>
+        {
+            using Type = CallReturn<F, Args...>;
+        };
+    }
 
     template <typename F>
-    struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>> : FunctionReturnImpl<decltype(&F::operator())>
+    using ReturnFromArgument = typename detail::ReturnFromArgumentImpl<F, Arguments<F>>::Type;
+
+    // FunctionReturn
+
+    namespace detail
     {
-    };
+        template <typename F>
+        struct FunctionReturnImpl
+        {
+        };
+
+        // Specialization for function posize_ters
+        template <typename R, typename... Args>
+        struct FunctionReturnImpl<R (*)(Args...)>
+        {
+            using Type = R;
+        };
+
+        // Specialization for member function posize_ters
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args...)>
+        {
+            using Type = R;
+        };
+
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args..., ...)>
+        {
+            using Type = R;
+        };
+
+        // Specialization for member function posize_ters with const qualifier
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args...) const>
+        {
+            using Type = R;
+        };
+
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args..., ...) const>
+        {
+            using Type = R;
+        };
+
+        // Specialization for member function posize_ters with volatile qualifier
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args...) volatile>
+        {
+            using Type = R;
+        };
+
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args..., ...) volatile>
+        {
+            using Type = R;
+        };
+
+        // Specialization for member function posize_ters with const volatile qualifier
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args...) const volatile>
+        {
+            using Type = R;
+        };
+
+        template <typename R, typename C, typename... Args>
+        struct FunctionReturnImpl<R (C::*)(Args..., ...) const volatile>
+        {
+            using Type = R;
+        };
+    }
+
+    template <typename F>
+    using FunctionReturn = typename detail::FunctionReturnImpl<F>::Type;
 
     // Return
 
+    namespace detail
+    {
+        template <typename F, typename Enable = void>
+        struct ReturnImpl : FunctionReturnImpl<F>
+        {
+        };
+
+        template <typename F>
+        struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>> : FunctionReturnImpl<decltype(&F::operator())>
+        {
+        };
+    }
+
     template <typename F>
-    using Return = typename ReturnImpl<F>::Type;
+    using Return = typename detail::ReturnImpl<F>::Type;
 
     // apply
 
-    template <typename F, typename... As, int... indices>
-    Return<F> apply_impl(const F &f, const Tuple<As...> &tpl, IndexSequence<indices...>)
+    namespace detail
     {
-        return f(get<indices>(tpl)...);
+        template <typename F, typename... As, int... indices>
+        Return<F> apply_impl(const F &f, const Tuple<As...> &tpl, IndexSequence<indices...>)
+        {
+            return f(get<indices>(tpl)...);
+        }
     }
 
     template <typename F, typename... As, typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
     Return<F> apply(const F &f, const Tuple<As...> &tpl)
     {
-        return apply_impl(f, tpl, IndexSequenceFor<As...>{});
+        return detail::apply_impl(f, tpl, IndexSequenceFor<As...>{});
     }
-
-    // PointerRemovedImpl
-
-    template <typename A>
-    struct PointerRemovedImpl
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct PointerRemovedImpl<A *>
-    {
-        using Type = A;
-    };
 
     // PointerRemoved
 
-    template <typename A>
-    using PointerRemoved = typename PointerRemovedImpl<A>::Type;
-
-    // ReferenceRemovedImpl
-
-    template <typename A>
-    struct ReferenceRemovedImpl
+    namespace detail
     {
-        using Type = A;
-    };
+        template <typename A>
+        struct PointerRemovedImpl
+        {
+            using Type = A;
+        };
+
+        template <typename A>
+        struct PointerRemovedImpl<A *>
+        {
+            using Type = A;
+        };
+    }
 
     template <typename A>
-    struct ReferenceRemovedImpl<A &>
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct ReferenceRemovedImpl<A &&>
-    {
-        using Type = A;
-    };
+    using PointerRemoved = typename detail::PointerRemovedImpl<A>::Type;
 
     // ReferenceRemoved
 
-    template <typename A>
-    using ReferenceRemoved = typename ReferenceRemovedImpl<A>::Type;
-
-    // ConstRemovedImpl
-
-    template <typename A>
-    struct ConstRemovedImpl
+    namespace detail
     {
-        using Type = A;
-    };
+        template <typename A>
+        struct ReferenceRemovedImpl
+        {
+            using Type = A;
+        };
+
+        template <typename A>
+        struct ReferenceRemovedImpl<A &>
+        {
+            using Type = A;
+        };
+
+        template <typename A>
+        struct ReferenceRemovedImpl<A &&>
+        {
+            using Type = A;
+        };
+    }
 
     template <typename A>
-    struct ConstRemovedImpl<const A>
-    {
-        using Type = A;
-    };
+    using ReferenceRemoved = typename detail::ReferenceRemovedImpl<A>::Type;
 
     // ConstRemoved
 
+    namespace detail
+    {
+        template <typename A>
+        struct ConstRemovedImpl
+        {
+            using Type = A;
+        };
+
+        template <typename A>
+        struct ConstRemovedImpl<const A>
+        {
+            using Type = A;
+        };
+    }
+
     template <typename A>
-    using ConstRemoved = typename ConstRemovedImpl<A>::Type;
+    using ConstRemoved = typename detail::ConstRemovedImpl<A>::Type;
 
     // VoletileRemovedImpl
 
-    template <typename A>
-    struct VoletileRemovedImpl
+    namespace detail
     {
-        using Type = A;
-    };
+        template <typename A>
+        struct VoletileRemovedImpl
+        {
+            using Type = A;
+        };
 
-    template <typename A>
-    struct VoletileRemovedImpl<const A>
-    {
-        using Type = A;
-    };
+        template <typename A>
+        struct VoletileRemovedImpl<const A>
+        {
+            using Type = A;
+        };
+    }
 
     // VoletileRemoved
 
     template <typename A>
-    using VoletileRemoved = typename VoletileRemovedImpl<A>::Type;
+    using VoletileRemoved = typename detail::VoletileRemovedImpl<A>::Type;
 
     // CVRemoved
 
     template <typename A>
     using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
-    // // CleanedImpl
-
-    // template <typename A>
-    // struct CleanedImpl
-    // {
-    //     using Type = ConstRemoved<ReferenceRemoved<A>>;
-    // };
-
     // Cleaned
 
     template <typename A>
-    using Cleaned = ConstRemoved<ReferenceRemoved<A>>;
+    using Cleaned = CVRemoved<ReferenceRemoved<A>>;
+
+    // todo Decay
 
     // Common
 
-    template <typename... As>
-    struct CommonImpl
+    namespace detail
     {
-        using Type = void;
-    };
+        template <typename... As>
+        struct CommonImpl
+        {
+            using Type = void;
+        };
 
-    template <typename A, typename... As>
-    struct CommonImpl<A, As...>
-    {
-        using Type = EnableIf<
-            all_v(IsSame<A, As>::value...), A>;
-    };
-
-    // Common
+        template <typename A, typename... As>
+        struct CommonImpl<A, As...>
+        {
+            using Type = EnableIf<
+                all_v(IsSame<A, As>::value...), A>;
+        };
+    }
 
     template <typename... As>
-    using Common = typename CommonImpl<As...>::Type;
-
-    // template <typename Head, typename... Tail>
-    // using Common = EnableIf<
-    //     all_v(IsSame<Head, Tail>::value...), Head>;
+    using Common = typename detail::CommonImpl<As...>::Type;
 
     // IsConst
 
@@ -1190,39 +1288,17 @@ namespace efp
 
     // Void
 
+    namespace detail
+    {
+        template <typename... Ts>
+        struct VoidImpl
+        {
+            using Type = void;
+        };
+    }
+
     template <typename... Ts>
-    struct VoidImpl
-    {
-        typedef void type;
-    };
-
-    template <typename... Ts>
-    using Void = typename VoidImpl<Ts...>::Type;
-
-    // RemoveReferenceImpl
-
-    template <typename A>
-    struct RemoveReferenceImpl
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct RemoveReferenceImpl<A &>
-    {
-        using Type = A;
-    };
-
-    template <typename A>
-    struct RemoveReferenceImpl<A &&>
-    {
-        using Type = A;
-    };
-
-    // RemoveReference
-
-    template <typename A>
-    using RemoveReference = typename RemoveReferenceImpl<A>::Type;
+    using Void = typename detail::VoidImpl<Ts...>::Type;
 
     // IsLvalueReference
 
@@ -1239,13 +1315,13 @@ namespace efp
     // Forward
 
     template <typename A>
-    A &&forward(RemoveReference<A> &a) noexcept
+    A &&forward(ReferenceRemoved<A> &a) noexcept
     {
         return static_cast<A &&>(a);
     }
 
     template <typename A>
-    A &&forward(RemoveReference<A> &&a) noexcept
+    A &&forward(ReferenceRemoved<A> &&a) noexcept
     {
         static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
         return static_cast<A &&>(a);
@@ -1266,44 +1342,47 @@ namespace efp
     // move
 
     template <typename A>
-    RemoveReference<A> &&move(A &&a)
+    ReferenceRemoved<A> &&move(A &&a)
     {
-        return static_cast<RemoveReference<A> &&>(a);
+        return static_cast<ReferenceRemoved<A> &&>(a);
     }
 
     // InitializerList
 
-    template <class A>
-    class InitializerList
-    {
-    public:
-        using value_type = A;
-        using reference = const A &;
-        using const_reference = const A &;
-        using size_type = size_t;
+    // template <class A>
+    // class InitializerList
+    // {
+    // public:
+    //     using value_type = A;
+    //     using reference = const A &;
+    //     using const_reference = const A &;
+    //     using size_type = size_t;
 
-        using iterator = const A *;
-        using const_iterator = const A *;
+    //     using iterator = const A *;
+    //     using const_iterator = const A *;
 
-        constexpr InitializerList() noexcept : array(nullptr), len(0) {}
+    //     constexpr InitializerList() noexcept : array(nullptr), len(0) {}
 
-        // Number of elements
-        constexpr size_type size() const noexcept { return len; }
+    //     // Number of elements
+    //     constexpr size_type size() const noexcept { return len; }
 
-        // First element
-        constexpr const_iterator begin() const noexcept { return array; }
+    //     // First element
+    //     constexpr const_iterator begin() const noexcept { return array; }
 
-        // One past the last element
-        constexpr const_iterator end() const noexcept { return array + len; }
+    //     // One past the last element
+    //     constexpr const_iterator end() const noexcept { return array + len; }
 
-    private:
-        iterator array;
-        size_type len;
+    // private:
+    //     iterator array;
+    //     size_type len;
 
-        // The constructor is private and can only be called by the compiler
-        // which will create an InitializerList using an array temporary.
-        constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
-    };
+    //     // The constructor is private and can only be called by the compiler
+    //     // which will create an InitializerList using an array temporary.
+    //     constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
+    // };
+
+    template <typename T>
+    struct DebugType; // Intentionally undefined
 
 }
 

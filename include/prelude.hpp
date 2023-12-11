@@ -2,6 +2,7 @@
 #define PRELUDE_HPP_
 
 #include "sfinae.hpp"
+#include "trait.hpp"
 #include "enum_type.hpp"
 #include "maybe.hpp"
 #include "sequence.hpp"
@@ -10,9 +11,6 @@
 
 namespace efp
 {
-    // struct Unit
-    // {
-    // };
 
     template <typename A>
     constexpr A id(const A &a)
@@ -72,211 +70,209 @@ namespace efp
         return Composed<F, Fs...>(f, fs...);
     }
 
-    // // template <typename F, typename G>
-    // // inline auto operator*(F f, G g) -> Composed<F, G>
-    // // {
-    // //     return compose(f, g);
-    // // }
-
     // execute_pack
 
     template <typename... Args>
     void execute_pack(Args... args) {}
 
-    // AppendReturn
-
-    template <typename... As>
+    template <typename... Ass>
     using AppendReturn = Conditional<
-        AreAllStaticLength<As...>::value,
-        Sequence<Common<Element<As>...>, sum_v(As::ct_len...), sum_v(As::ct_len...)>,
+        All<IsStaticSize<Ass>...>::value,
+        Array<Common<Element<Ass>...>, sum_v(CtSize<Ass>::value...)>,
         Conditional<
-            AreAllStaticCapacity<As...>::value,
-            Sequence<Common<Element<As>...>, dyn, sum_v(As::ct_cap...)>,
-            Sequence<Common<Element<As>...>, dyn, dyn>>>;
+            All<IsStaticCapacity<Ass>...>::value,
+            ArrVec<Common<Element<Ass>...>, sum_v(CtCapacity<Ass>::value...)>,
+            Vector<Common<Element<Ass>...>>>>;
 
-    // append
-
-    template <typename A, typename B>
-    Unit append_impl(size_t &idx, Seq<A> &result, const Seq<B> &seq)
+    namespace detail
     {
-        const auto seq_length = length(seq);
-
-        for (size_t i = 0; i < seq_length; ++i)
+        template <typename As, typename Bs>
+        Unit append_impl(size_t &idx, As &as, const Bs &bs)
         {
-            result[idx] = seq[i];
-            idx++;
-        }
+            const auto seq_length = bs.size(); // Assuming `size` method is available
 
-        return unit;
+            for (size_t i = 0; i < seq_length; ++i)
+            {
+                nth(idx, as) = nth(i, bs);
+                idx++;
+            }
+
+            return unit;
+        }
     }
 
-    template <typename H, typename... As>
-    auto append(const Seq<H> &head, const Seq<As> &...tail)
-        -> AppendReturn<H, As...>
+    template <typename As, typename... Ass>
+    auto append(const As &as, const Ass &...ass) -> AppendReturn<As, Ass...>
     {
-        AppendReturn<H, As...> result{};
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
 
-        if (AppendReturn<H, As...>::ct_len == dyn)
+        AppendReturn<As, Ass...> res{};
+
+        if (CtSize<AppendReturn<As, Ass...>>::value == dyn)
         {
-            result.resize(sum_v(static_cast<size_t>(length(head)), length(tail)...));
+            res.resize(sum_v(static_cast<size_t>(length(as)), length(ass)...));
         }
 
         size_t idx{0};
-        execute_pack(append_impl(idx, result, head),
-                     append_impl(idx, result, tail)...);
+        execute_pack(detail::append_impl(idx, res, as),
+                     detail::append_impl(idx, res, ass)...);
 
-        return result;
+        return res;
     }
 
-    // min_length
-
-    template <typename A, typename... As>
-    size_t min_length(const Seq<A> &as, const Seq<As> &...seqs)
+    template <typename As, typename... Ass>
+    size_t min_length(const As &as, const Ass &...ass)
     {
-        return minimum_v(static_cast<size_t>(length(as)), length(seqs)...);
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
+        return minimum_v(static_cast<size_t>(length(as)), length(ass)...);
     }
 
-    // for_each
-
-    template <typename... As, typename F = void (*)(const Element<As> &...)>
-    void for_each(const F &f, const Seq<As> &...seqs)
+    template <typename... Ass, typename F = void (*)(const Element<Ass> &...)>
+    void for_each(const F &f, const Ass &...ass)
     {
-        const size_t seq_length = min_length(seqs...);
+        static_assert(All<IsSequence<Ass>...>::value, "All types must be sequence types.");
+        const size_t res_length = min_length(ass...);
 
-        for (size_t i = 0; i < seq_length; ++i)
+        for (size_t i = 0; i < res_length; ++i)
         {
-            f(seqs[i]...);
+            f(nth(i, ass)...);
         }
     }
 
-    // for_eachi
-
-    template <typename... As, typename F = void (*)(Element<As> &...)>
-    void for_eachi(const F &f, Seq<As> &...seqs)
+    template <typename... Ass, typename F = void (*)(Element<Ass> &...)>
+    void for_each_mut(const F &f, Ass &...ass)
     {
-        const size_t seq_length = min_length(seqs...);
+        static_assert(All<IsSequence<Ass>...>::value, "All types must be sequence types.");
+        const size_t res_length = min_length(ass...);
 
-        for (size_t i = 0; i < seq_length; ++i)
+        for (size_t i = 0; i < res_length; ++i)
         {
-            f(seqs[i]...);
+            f(nth(i, ass)...);
         }
     }
 
-    // NAryReturn
-
-    template <typename R, typename... As>
-    using NAryReturn = Sequence<
-        R,
-        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn,
-        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn>;
+    template <typename R, typename... Ass>
+    using NAryReturn = Conditional<
+        All<IsStaticSize<Ass>...>::value,
+        Array<R, Min<CtSize<Ass>...>::value>,
+        Conditional<
+            All<IsStaticCapacity<Ass>...>::value,
+            ArrVec<R, Min<CtCapacity<Ass>...>::value>,
+            Vector<R>>>;
 
     // MapReturn
 
-    template <typename F, typename... As>
-    using MapReturn = NAryReturn<CallReturn<F, Element<As>...>, As...>;
+    template <typename F, typename... Ass>
+    using MapReturn = NAryReturn<CallReturn<F, Element<Ass>...>, Ass...>;
 
     // map
 
-    template <typename F, typename... As>
-    auto map(const F &f, const Seq<As> &...seqs)
-        -> MapReturn<F, As...>
+    template <typename F, typename... Ass>
+    auto map(const F &f, const Ass &...ass) -> MapReturn<F, Ass...>
     {
-        MapReturn<F, As...> result{};
-        const size_t bounded_n = min_length(seqs...);
-        if (MapReturn<F, As...>::ct_len == dyn)
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
+
+        MapReturn<F, Ass...> res{};
+        const size_t res_len = min_length(ass...);
+        if (CtSize<MapReturn<F, Ass...>>::value == dyn)
         {
-            result.resize(bounded_n);
+            res.resize(res_len);
         }
 
-        for (size_t i = 0; i < bounded_n; ++i)
+        for (size_t i = 0; i < res_len; ++i)
         {
-            result[i] = f(seqs[i]...);
+            nth(i, res) = f(nth(i, ass)...);
         }
 
-        return result;
+        return res;
     }
 
     // FilterReturn
 
-    template <typename A>
-    using FilterReturn = Sequence<Element<A>, dyn, A::ct_cap>;
+    template <typename As>
+    using FilterReturn = Conditional<
+        CtCapacity<As>::value != dyn,
+        ArrVec<Element<As>, CtCapacity<As>::value>,
+        Vector<Element<As>>>;
 
     // filter
 
-    template <typename A, typename F = bool (*)(Element<A> &)>
-    auto filter(const F &f, const Seq<A> &as)
-        -> FilterReturn<A>
+    template <typename As, typename F = bool (*)(const Element<As> &)>
+    auto filter(const F &f, const As &as) -> FilterReturn<As>
     {
-        FilterReturn<A> result{};
-        const auto input_length = length(as);
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
-        for (size_t i = 0; i < input_length; ++i)
+        FilterReturn<As> res{};
+        const auto res_len = length(as);
+
+        for (size_t i = 0; i < res_len; ++i)
         {
-            const auto a = as[i];
+            const auto &a = nth(i, as);
             if (f(a))
             {
-                result.push_back(a);
+                res.push_back(a);
             }
         }
 
-        return result;
+        return res;
     }
 
     // foldl
 
-    template <typename A, typename R, typename F = R (*)(const R &, const Element<A> &)>
-    R foldl(const F &f, const R &init, const Seq<A> &as)
+    template <typename As, typename R, typename F = R (*)(const R &, const Element<As> &)>
+    R foldl(const F &f, const R &init, const As &as)
     {
-        R result = init;
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
+        R res = init;
 
         for (size_t i = 0; i < length(as); ++i)
         {
-            result = f(result, as[i]);
+            res = f(res, nth(i, as));
         }
 
-        return result;
+        return res;
     }
 
     // foldr
 
-    template <typename A, typename R, typename F = R (*)(const Element<A> &, const R &)>
-    R foldr(const F &f, const R &init, const Seq<A> &as)
+    template <typename As, typename R, typename F = R (*)(const Element<As> &, const R &)>
+    R foldr(const F &f, const R &init, const As &as)
     {
-        R result = init;
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
+        R res = init;
 
         for (size_t i = length(as) - 1; i != -1; --i)
         {
-            result = f(as[i], result);
+            res = f(nth(i, as), res);
         }
 
-        return result;
+        return res;
     }
 
     // todo size_t
     // FromFunctionReturnImpl
 
-    template <typename N, typename F>
-    struct FromFunctionReturnImpl
+    namespace detail
     {
-        using Type = Sequence<CallReturn<F, N>, dyn, dyn>;
-    };
+        template <typename N, typename F>
+        struct FromFunctionReturnImpl
+        {
+            using Type = Vector<CallReturn<F, N>>;
+        };
 
-    template <size_t n, typename F>
-    struct FromFunctionReturnImpl<Size<n>, F>
-    {
-        using Type = Sequence<CallReturn<F, size_t>, n, n>;
-    };
-
-    // template <typename F>
-    // struct FromFunctionReturnImpl<size_t, F>
-    // {
-    //     using Type = Sequence<CallReturn<F, size_t>, dyn, dyn>;
-    // };
+        template <size_t n, typename F>
+        struct FromFunctionReturnImpl<Size<n>, F>
+        {
+            using Type = Array<CallReturn<F, size_t>, n>;
+        };
+    }
 
     // FromFunctionReturn
 
     template <typename N, typename F>
-    using FromFunctionReturn = typename FromFunctionReturnImpl<N, F>::Type;
+    using FromFunctionReturn = typename detail::FromFunctionReturnImpl<N, F>::Type;
 
     // from_function
 
@@ -284,392 +280,614 @@ namespace efp
     auto from_function(const N &length, const F &f)
         -> FromFunctionReturn<N, F>
     {
-        FromFunctionReturn<N, F> result{};
-        if (FromFunctionReturn<N, F>::ct_len == dyn)
+        FromFunctionReturn<N, F> res{};
+
+        if (!IsStaticSize<FromFunctionReturn<N, F>>::value)
         {
-            result.resize(length);
+            res.resize(length);
         }
 
         for (size_t i = 0; i < length; ++i)
         {
-            result[i] = f(i);
+            nth(i, res) = f(i);
         }
 
-        return result;
+        return res;
     }
 
     // for_index
 
     template <typename F = void (*)(size_t)>
-    void for_index(const F &f, const size_t i)
+    void for_index(const F &f, const size_t n)
     {
-        for (size_t j = 0; j < i; ++j)
+        for (size_t i = 0; i < n; ++i)
         {
-            f(j);
+            f(i);
         }
     }
 
     // for_each_with_index
 
-    template <typename... As, typename F = void (*)(size_t, const Element<As> &...)>
-    void for_each_with_index(const F &f, const Seq<As> &...seqs)
+    template <typename... Ass, typename F = void (*)(size_t, const Element<Ass> &...)>
+    void for_each_with_index(const F &f, const Ass &...seqs)
     {
-        const auto min_length_ = min_length(seqs...);
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
+        const auto min_len = min_length(seqs...);
 
-        for (size_t i = 0; i < min_length_; ++i)
+        for (size_t i = 0; i < min_len; ++i)
         {
-            f(i, seqs[i]...);
+            f(i, nth(i, seqs)...);
         }
     }
 
-    // for_each_with_indexi
-
-    template <typename... As, typename F = void (*)(size_t, Element<As> &...)>
-    void for_each_with_indexi(const F &f, Seq<As> &...seqs)
+    template <typename... Ass, typename F = void (*)(size_t, Element<Ass> &...)>
+    void for_each_with_index_mut(const F &f, Ass &...seqs)
     {
-        const size_t min_length_ = min_length(seqs...);
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
+        const size_t min_len = min_length(seqs...);
 
-        for (size_t i = 0; i < min_length_; ++i)
+        for (size_t i = 0; i < min_len; ++i)
         {
-            f(i, seqs[i]...);
+            f(i, nth(i, seqs)...);
         }
     }
 
     // cartesian_for_each
 
-    template <typename A, typename F = void (*)(const Element<A> &)>
-    void cartesian_for_each(const F &f, const Seq<A> &as)
+    template <typename As, typename F = void (*)(const Element<As> &)>
+    void cartesian_for_each(const F &f, const As &as)
     {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         for_each(f, as);
     }
 
-    template <typename A, typename... As, typename F = void (*)(const Element<A> &, const Element<As> &...)>
-    void cartesian_for_each(const F &f, const Seq<A> &as, const Seq<As> &...seqs)
+    template <typename As, typename... Ass, typename F = void (*)(const Element<As> &, const Element<Ass> &...)>
+    void cartesian_for_each(const F &f, const As &as, const Ass &...ass)
     {
-        const auto as_length = length(as);
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of Sequence trait.");
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            const auto a = as[i];
-            const auto inner = [&](Element<As>... xs)
+            const auto a = nth(i, as);
+            const auto inner = [&](const Element<Ass> &...xs)
             { f(a, xs...); };
 
-            cartesian_for_each<As..., decltype(inner)>(inner, seqs...);
+            cartesian_for_each(inner, ass...);
         }
     }
 
-    // cartesian_for_eachi
-
-    template <typename A, typename F = void (*)(const Element<A> &)>
-    void cartesian_for_eachi(const F &f, Seq<A> &as)
+    template <typename As, typename F = void (*)(Element<As> &)>
+    void cartesian_for_each_mut(const F &f, As &as)
     {
-        for_eachi(f, as);
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        for_each_mut(f, as);
     }
 
-    template <typename A, typename... As, typename F = void (*)(const Element<A> &, const Element<As> &...)>
-    void cartesian_for_eachi(const F &f, Seq<A> &as, Seq<As> &...seqs)
+    template <typename As, typename... Ass, typename F = void (*)(Element<As> &, Element<Ass> &...)>
+    void cartesian_for_each_mut(const F &f, As &as, Ass &...ass)
     {
-        const auto as_length = length(as);
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All arguments should be instance of Sequence trait.");
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            const auto a = as[i];
-            const auto inner = [&](Element<As>... xs)
+            const auto a = nth(i, as);
+            const auto inner = [&](Element<Ass> &...xs)
             { f(a, xs...); };
 
-            cartesian_for_eachi<As..., decltype(inner)>(inner, seqs...);
+            cartesian_for_each_mut(inner, ass...);
         }
     }
 
     // MapWithIndexRetrun
 
-    template <typename F, typename... As>
-    using MapWithIndexRetrun = Sequence<
-        CallReturn<F, size_t, Element<As>...>,
-        AreAllStaticCapacity<As...>::value ? MinStaticCapacity<As...>::value : dyn,
-        AreAllStaticLength<As...>::value ? MinStaticLength<As...>::value : dyn>;
+    template <typename F, typename... Ass>
+    using MapWithIndexReturn = Conditional<
+        All<IsStaticSize<Ass>...>::value,
+        Array<CallReturn<F, size_t, Element<Ass>...>, Min<CtSize<Ass>...>::value>,
+        Conditional<
+            All<IsStaticCapacity<Ass>...>::value,
+            ArrVec<CallReturn<F, size_t, Element<Ass>...>, Min<CtCapacity<Ass>...>::value>,
+            Vector<CallReturn<F, size_t, Element<Ass>...>>>>;
 
     // map_with_index
 
-    template <typename... As, typename F = void (*)(size_t, const Element<As> &...)>
-    auto map_with_index(const F &f, const Seq<As> &...seqs)
-        -> MapWithIndexRetrun<F, As...>
+    template <typename... Ass, typename F = void (*)(size_t, const Element<Ass> &...)>
+    auto map_with_index(const F &f, const Ass &...ass) -> MapWithIndexReturn<F, Ass...>
     {
-        MapWithIndexRetrun<F, As...> result;
-        const auto bounded_n = min_length(seqs...);
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
-        if (MapWithIndexRetrun<F, As...>::ct_len == dyn)
+        auto res = MapWithIndexReturn<F, Ass...>{};
+        const auto res_len = min_length(ass...);
+
+        if (CtSize<MapWithIndexReturn<F, Ass...>>::value == dyn)
         {
-            result.resize(bounded_n);
+            res.resize(res_len);
         }
 
-        for (size_t i = 0; i < bounded_n; ++i)
+        for (size_t i = 0; i < res_len; ++i)
         {
-            result[i] = f(i, seqs[i]...);
+            nth(i, res) = f(i, nth(i, ass)...);
         }
 
-        return result;
+        return res;
     }
 
     // CartesianMapReturn
 
-    template <typename F, typename... As>
-    using CartesianMapReturn = Sequence<
-        CallReturn<F, Element<As>...>,
-        AreAllStaticLength<As...>::value ? product_v(StaticLength<As>::value...) : dyn,
-        AreAllStaticCapacity<As...>::value ? product_v(StaticCapacity<As>::value...) : dyn>;
+    template <typename F, typename... Ass>
+    using CartesianMapReturn = Conditional<
+        All<IsStaticSize<Ass>...>::value,
+        Array<CallReturn<F, Element<Ass>...>, product_v(CtSize<Ass>::value...)>,
+        Conditional<
+            All<IsStaticCapacity<Ass>...>::value,
+            ArrVec<CallReturn<F, Element<Ass>...>, product_v(CtCapacity<Ass>::value...)>,
+            Vector<CallReturn<F, Element<Ass>...>>>>;
 
     // cartesian_map
 
     // ! Maybe need to bechmark and optimize
-    template <typename... As, typename F = void (*)(const Element<As> &...)>
-    auto cartesian_map(const F &f, const Seq<As> &...seqs)
-        -> CartesianMapReturn<F, As...>
+
+    template <typename... Ass, typename F = void (*)(const Element<Ass> &...)>
+    auto cartesian_map(const F &f, const Ass &...ass) -> CartesianMapReturn<F, Ass...>
     {
-        CartesianMapReturn<F, As...> result;
-        if (CartesianMapReturn<F, As...>::ct_len == dyn)
+        static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
+
+        auto res = CartesianMapReturn<F, Ass...>{};
+        if (CtSize<CartesianMapReturn<F, Ass...>>::value == dyn)
         {
-            result.resize(product_v(static_cast<size_t>(length(seqs))...));
+            res.resize(product_v(static_cast<size_t>(length(ass))...));
         }
 
         size_t i = 0;
-        const auto inner = [&](Element<As>... xs)
-        { result[i++] = f(xs...); };
+        const auto inner = [&](const Element<Ass> &...xss)
+        { res[i++] = f(xss...); };
 
-        cartesian_for_each(inner, seqs...);
+        cartesian_for_each(inner, ass...);
 
-        return result;
+        return res;
     }
 
     // cartesian_for_index
 
     template <typename F = void (*)(size_t)>
-    void cartesian_for_index(const F &f, size_t i)
+    void cartesian_for_index(const F &f, size_t n)
     {
-        for_index(f, i);
+        for_index(f, n);
     }
 
     template <typename... Ints, typename F = void (*)(size_t)>
-    void cartesian_for_index(const F &f, size_t i, const Ints &...is)
+    void cartesian_for_index(const F &f, size_t n, const Ints &...is)
     {
-        for (size_t i_ = 0; i_ < i; ++i_)
+        for (size_t i = 0; i < n; ++i)
         {
             const auto inner = [&](const Ints &...is)
-            { f(i_, is...); };
+            { f(i, is...); };
 
             cartesian_for_index(inner, is...);
         }
     }
 
-    // // // todo begin
-
-    // // // todo end
-
     // head
 
     // ! Partial function. Make sure non empty
-    template <typename A>
-    Element<A> head(const Seq<A> &as)
+
+    template <typename As>
+    auto head(const As &as) -> const Element<As> &
     {
-        return as[0];
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        assert(!as.empty()); // Ensure the sequence is not empty.
+        return nth(0, as);
     }
 
     // TailReturn
 
-    template <typename A, bool is_const>
-    using TailReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
+    template <typename As, bool is_const>
+    using TailReturn = EnableIf<
+        CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
+        Conditional<
+            IsStaticSize<As>::value,
+            Conditional<
+                is_const,
+                ArrayView<const Element<As>, CtSize<As>::value - 1>,
+                ArrayView<Element<As>, CtSize<As>::value - 1>>,
+            Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>>>;
 
     // tail
     // ! Partial function. Application on empty list is abortion.
 
     template <typename A>
-    auto tail(const Seq<A> &as)
-        -> TailReturn<A, true>
+    auto tail(const A &as) -> TailReturn<A, true>
     {
-        return TailReturn<A, true>{data(as) + 1, length(as) - Size<1>{}};
+        static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {data(as) + 1, length(as) - 1};
     }
 
     template <typename A>
-    auto tail(Seq<A> &as)
-        -> TailReturn<A, false>
+    auto tail(A &as) -> TailReturn<A, false>
     {
-        return TailReturn<A, false>{data(as) + 1, length(as) - Size<1>{}};
+        static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {data(as) + 1, length(as) - 1};
     }
 
     // InitReturn
 
-    template <typename A, bool is_const>
-    using InitReturn = EnableIf<A::ct_len != 0 && A::ct_cap != 0,
-                                SequenceView<Conditional<is_const, const Element<A>, Element<A>>,
-                                             IsStaticLength<A>::value ? A::ct_len - 1 : dyn,
-                                             IsStaticCapacity<A>::value ? A::ct_cap - 1 : dyn>>;
-
+    template <typename As, bool is_const>
+    using InitReturn = EnableIf<
+        CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
+        Conditional<
+            IsStaticSize<As>::value,
+            Conditional<
+                is_const,
+                ArrayView<const Element<As>, CtSize<As>::value - 1>,
+                ArrayView<Element<As>, CtSize<As>::value - 1>>,
+            Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>>>;
     // init
 
-    // ! Zero length input will envoke abort.
-    template <typename A>
-    auto init(const Seq<A> &as)
-        -> InitReturn<A, true>
+    // ! Zero length input will envoke abort.÷
+
+    template <typename As>
+    auto init(const As &as) -> InitReturn<As, true>
     {
-        return InitReturn<A, true>{data(as), length(as) - Size<1>{}};
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {data(as), length(as) - 1};
     }
 
-    // ! Partial function. Make sure non empty
-    template <typename A>
-    auto init(Seq<A> &as)
-        -> InitReturn<A, false>
+    template <typename As>
+    auto init(As &as) -> InitReturn<As, false>
     {
-        return InitReturn<A, false>{data(as), length(as) - Size<1>{}};
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        assert(length(as) > 0); // Ensure the sequence is not empty.
+        return {data(as), length(as) - 1};
     }
 
     // last
 
     // ! Partial function. Make sure non
-    template <typename A>
-    Element<A> last(const Seq<A> &as)
+
+    template <typename As>
+    auto last(const As &as) -> const Element<As> &
     {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        assert(length(as) > 0); // Ensure the sequence is not empty.
         return as[length(as) - 1];
     }
 
     // is_null
 
-    template <typename A>
-    bool is_null(const Seq<A> &as)
+    template <typename As>
+    bool is_null(const As &as)
     {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
         return length(as) == 0;
+    }
+
+    // TakeUnsafeReturnImpl
+    // ! Size must be valid. It must be smaller than compile time and runtime size.
+    // ! Invalid size will be undifined behavior
+    namespace detail
+    {
+        template <typename N, typename As, bool is_const>
+        struct TakeUnsafeReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<is_const, ArrVecView<const Element<As>, CtCapacity<As>::value>, ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>;
+        };
+
+        template <size_t n, typename As, bool is_const>
+        struct TakeUnsafeReturnImpl<Size<n>, As, is_const>
+        {
+            // todo Static assert for invalid size
+
+            using Type = Conditional<
+                is_const,
+                ArrayView<const Element<As>, n>,
+                ArrayView<Element<As>, n>>;
+        };
+    }
+
+    // TakeUnsafeReturn
+
+    template <typename N, typename As, bool is_const>
+    using TakeUnsafeReturn = typename detail::TakeUnsafeReturnImpl<N, As, is_const>::Type;
+
+    // take_unsafe
+
+    // !Should not put n longer than the length. Check should be done by the caller
+    // Let's make unsafe version as well
+    template <typename N, typename As>
+    auto take_unsafe(N n, const As &as) -> TakeUnsafeReturn<N, As, true>
+    {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return TakeUnsafeReturn<N, As, true>(data(as), n);
+    }
+
+    template <typename N, typename As>
+    auto take_unsafe(N n, As &as) -> TakeUnsafeReturn<N, As, false>
+    {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return TakeUnsafeReturn<N, As, false>(data(as), n);
     }
 
     // TakeReturnImpl
 
-    template <typename N, typename A, bool is_const>
-    struct TakeReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
-    };
+        template <typename N, typename As, bool is_const>
+        struct TakeReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>;
+        };
 
-    template <size_t n, typename A, bool is_const>
-    struct TakeReturnImpl<Size<n>, A, is_const>
-    {
-        using Type = Conditional<
-            IsStaticLength<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, n, n>,
-            Conditional<
-                IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
-    };
+        template <size_t n, typename As, bool is_const>
+        struct TakeReturnImpl<Size<n>, As, is_const>
+        {
+            static constexpr size_t bound_size = min_v(n, CtSize<As>::value);
+            static constexpr size_t bound_capacity = min_v(n, CtCapacity<As>::value);
+
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, bound_size>,
+                    ArrayView<Element<As>, bound_size>>,
+
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, bound_capacity>,
+                    ArrVecView<Element<As>, bound_capacity>>>;
+        };
+    }
 
     // TakeReturn
 
-    template <typename N, typename A, bool is_const>
-    using TakeReturn = typename TakeReturnImpl<N, A, is_const>::Type;
+    template <typename N, typename As, bool is_const>
+    using TakeReturn = typename detail::TakeReturnImpl<N, As, is_const>::Type;
 
     // take
 
     // !Should not put n longer than the length. Check should be done by the caller
-    template <typename N, typename A>
-    auto take(N n, const Seq<A> &as)
-        -> TakeReturn<N, A, true>
+    // Let's make unsafe version as well
+    template <typename N, typename As>
+    auto take(N n, const As &as) -> TakeReturn<N, As, true>
     {
-        return TakeReturn<N, A, true>(data(as), n);
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return TakeReturn<N, As, true>(data(as), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
     }
 
-    template <typename N, typename A>
-    auto take(N n, Seq<A> &as)
-        -> TakeReturn<N, A, false>
+    template <typename N, typename As>
+    auto take(N n, As &as) -> TakeReturn<N, As, false>
     {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return TakeReturn<N, As, false>(data(as), min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))); // Safeguarding against n > length(as)
+    }
 
-        return TakeReturn<N, A, true>(data(as), n);
+    // Dr)opUnsafeReturnImpl
+
+    namespace detail
+    {
+        template <typename N, typename As, bool is_const>
+        struct DropUnsafeReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>;
+        };
+
+        template <size_t n, typename As, bool is_const>
+        struct DropUnsafeReturnImpl<Size<n>, As, is_const>
+        {
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, CtSize<As>::value - n>,
+                    ArrayView<Element<As>, CtSize<As>::value - n>>,
+                Conditional<
+                    IsStaticCapacity<As>::value,
+                    Conditional<
+                        is_const,
+                        ArrVecView<const Element<As>, CtCapacity<As>::value - n>,
+                        ArrVecView<Element<As>, CtCapacity<As>::value - n>>,
+                    Conditional<
+                        is_const,
+                        VectorView<const Element<As>>,
+                        VectorView<Element<As>>>>>;
+        };
+    }
+
+    // DropUnsafeReturn
+
+    template <typename N, typename As, bool is_const>
+    using DropUnsafeReturn = typename detail::DropUnsafeReturnImpl<N, As, is_const>::Type;
+
+    // drop_unsafe
+
+    template <typename N, typename As>
+    auto drop_unsafe(N n, const As &as) -> DropUnsafeReturn<N, As, true>
+    {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return DropUnsafeReturn<N, As, true>(data(as) + n, length(as) - n);
+    }
+
+    template <typename N, typename As>
+    auto drop_unsafe(N n, As &as) -> DropUnsafeReturn<N, As, false>
+    {
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        return DropUnsafeReturn<N, As, false>(data(as) + n, length(as) - n);
     }
 
     // DropReturnImpl
 
-    template <typename N, typename A, bool is_const>
-    struct DropReturnImpl
+    namespace detail
     {
-        using Type = Conditional<
-            IsStaticCapacity<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>;
-    };
+        template <typename N, typename As, bool is_const>
+        struct DropReturnImpl
+        {
+            using Type = Conditional<
+                IsStaticCapacity<As>::value,
+                Conditional<
+                    is_const,
+                    ArrVecView<const Element<As>, CtCapacity<As>::value>,
+                    ArrVecView<Element<As>, CtCapacity<As>::value>>,
+                Conditional<
+                    is_const,
+                    VectorView<const Element<As>>,
+                    VectorView<Element<As>>>>;
+        };
 
-    template <size_t n, typename A, bool is_const>
-    struct DropReturnImpl<Size<n>, A, is_const>
-    {
-        using Type = Conditional<
-            IsStaticLength<A>::value,
-            SequenceView<Conditional<is_const, const Element<A>, Element<A>>, Size<n>{}, Size<n>{}>,
-            Conditional<
-                IsStaticCapacity<A>::value,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, A::ct_cap>,
-                SequenceView<Conditional<is_const, const Element<A>, Element<A>>, dyn, dyn>>>;
-    };
+        template <size_t n, typename As, bool is_const>
+        struct DropReturnImpl<Size<n>, As, is_const>
+        {
+            static constexpr size_t bound_size = (CtSize<As>::value > n) ? (CtSize<As>::value - n) : 0;
+            static constexpr size_t bound_capacity = (CtCapacity<As>::value > n) ? (CtCapacity<As>::value - n) : 0;
+
+            using Type = Conditional<
+                IsStaticSize<As>::value,
+                Conditional<
+                    is_const,
+                    ArrayView<const Element<As>, bound_size>,
+                    ArrayView<Element<As>, bound_size>>,
+                Conditional<
+                    IsStaticCapacity<As>::value,
+                    Conditional<
+                        is_const,
+                        ArrVecView<const Element<As>, bound_capacity>,
+                        ArrVecView<Element<As>, bound_capacity>>,
+                    Conditional<
+                        is_const,
+                        VectorView<const Element<As>>,
+                        VectorView<Element<As>>>>>;
+        };
+    }
 
     // DropReturn
 
-    template <typename N, typename A, bool is_const>
-    using DropReturn = typename DropReturnImpl<N, A, is_const>::Type;
+    template <typename N, typename As, bool is_const>
+    using DropReturn = typename detail::DropReturnImpl<N, As, is_const>::Type;
 
     // drop
 
-    template <typename N, typename A>
-    auto drop(N n, const Seq<A> &as)
-        -> DropReturn<N, A, true>
+    template <typename N, typename As>
+    auto drop(N n, const As &as) -> DropReturn<N, As, true>
     {
-        return DropReturn<N, A, true>(data(as) + n, length(as) - n);
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        const size_t as_len = length(as);
+        size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, true>(data(as) + bound_drop_size, as_len - bound_drop_size);
     }
 
-    template <typename N, typename A>
-    auto drop(N n, Seq<A> &as)
-        -> DropReturn<N, A, false>
+    template <typename N, typename As>
+    auto drop(N n, As &as) -> DropReturn<N, As, false>
     {
-        return DropReturn<N, A, false>(data(as) + n, length(as) - n);
+        static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+        const size_t as_len = length(as);
+        size_t bound_drop_size = (n > as_len) ? as_len : n; // Ensuring n doesn't exceed the size of as
+        return DropReturn<N, As, false>(data(as) + bound_drop_size, as_len - bound_drop_size);
+    }
+
+    // SliceUnsafeReturn
+
+    template <typename S, typename E, typename As, bool is_const>
+    using SliceUnsafeReturn = TakeUnsafeReturn<decltype(efp::declval<E>() - efp::declval<S>()), DropUnsafeReturn<S, As, is_const>, is_const>;
+
+    // slice_unsafe
+
+    // todo Optimization
+    template <typename S, typename E, typename As>
+    auto slice_unsafe(S start, E end, const As &as)
+        -> SliceUnsafeReturn<S, E, As, true>
+    {
+        return SliceUnsafeReturn<S, E, As, true>(data(as) + start, end - start);
+    }
+
+    template <typename S, typename E, typename As>
+    auto slice_unsafe(S start, E end, As &as)
+        -> SliceUnsafeReturn<S, E, As, false>
+    {
+        return SliceUnsafeReturn<S, E, As, false>(data(as) + start, end - start);
     }
 
     // SliceReturn
 
-    template <typename S, typename E, typename A, bool is_const>
-    using SliceReturn = TakeReturn<decltype(efp::declval<E>() - efp::declval<S>()), DropReturn<S, A, is_const>, is_const>;
+    template <typename S, typename E, typename As, bool is_const>
+    using SliceReturn = TakeReturn<decltype(efp::declval<E>() - efp::declval<S>()), DropReturn<S, As, is_const>, is_const>;
 
     // slice
 
     // todo Optimization
-    template <typename S, typename E, typename A>
-    auto slice(S start, E end, const Seq<A> &as)
-        -> SliceReturn<S, E, A, true>
+    template <typename S, typename E, typename As>
+    auto slice(S start, E end, const As &as)
+        -> SliceReturn<S, E, As, true>
     {
-        return SliceReturn<S, E, A, true>(data(as) + start, end - start);
+        return SliceReturn<S, E, As, true>(data(as) + start, end - start);
     }
 
-    template <typename S, typename E, typename A>
-    auto slice(S start, E end, Seq<A> &as)
-        -> SliceReturn<S, E, A, false>
+    template <typename S, typename E, typename As>
+    auto slice(S start, E end, As &as)
+        -> SliceReturn<S, E, As, false>
     {
-        return SliceReturn<S, E, A, false>(data(as) + start, end - start);
+        return SliceReturn<S, E, As, false>(data(as) + start, end - start);
     }
 
     // todo Add test for take_while and drop_while
 
     // take_while
 
-    template <typename A>
-    using TakeWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
+    template <typename As>
+    using TakeWhileReturn = Conditional<
+        IsStaticCapacity<As>::value,
+        ArrVecView<Element<As>, CtCapacity<As>::value>,
+        VectorView<Element<As>>>;
 
-    template <typename A, typename F = bool (*)(const Element<A> &)>
-    auto take_while(const F &f, const A &as)
-        -> TakeWhileReturn<A>
+    template <typename As, typename F = bool (*)(const Element<As> &)>
+    auto take_while(const F &f, const As &as)
+        -> TakeWhileReturn<As>
     {
-        TakeWhileReturn<A> result{};
-        const auto input_length = length(as);
+        const auto as_len = length(as);
 
         size_t i = 0;
-        while (i < input_length && f(as[i]))
+        while (i < as_len && f(nth(i, as)))
         {
             ++i;
         }
@@ -679,18 +897,20 @@ namespace efp
 
     // drop_while
 
-    template <typename A>
-    using DropWhileReturn = SequenceView<Element<A>, dyn, A::ct_cap>;
+    template <typename As>
+    using DropWhileReturn = Conditional<
+        IsStaticCapacity<As>::value,
+        ArrVecView<Element<As>, CtCapacity<As>::value>,
+        VectorView<Element<As>>>;
 
-    template <typename A, typename F = bool (*)(const Element<A> &)>
-    auto drop_while(const F &f, const A &as)
-        -> DropWhileReturn<A>
+    template <typename As, typename F = bool (*)(const Element<As> &)>
+    auto drop_while(const F &f, const As &as)
+        -> DropWhileReturn<As>
     {
-        DropWhileReturn<A> result{};
-        const auto input_length = length(as);
+        const auto as_len = length(as);
 
         size_t i = 0;
-        while (i < input_length && f(as[i]))
+        while (i < as_len && f(nth(i, as)))
         {
             ++i;
         }
@@ -700,14 +920,14 @@ namespace efp
 
     // elem
 
-    template <typename A>
-    bool elem(const Element<A> &a, const Seq<A> &as)
+    template <typename As>
+    bool elem(const Element<As> &a, const As &as)
     {
-        const auto as_length = length(as);
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (as[i] == a)
+            if (nth(i, as) == a)
                 return true;
         }
 
@@ -716,14 +936,14 @@ namespace efp
 
     // elem_index
 
-    template <typename A>
-    Maybe<size_t> elem_index(const Element<A> &a, const Seq<A> &as)
+    template <typename As>
+    Maybe<size_t> elem_index(const Element<As> &a, const As &as)
     {
-        const auto as_length = length(as);
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (as[i] == a)
+            if (nth(i, as) == a)
                 return i;
         }
 
@@ -732,40 +952,40 @@ namespace efp
 
     // ElemIndicesReturn
 
-    template <typename A>
+    template <typename As>
     using ElemIndicesReturn = Conditional<
-        IsStaticCapacity<A>::value,
-        Sequence<size_t, dyn, A::ct_cap>,
-        Sequence<size_t, dyn, dyn>>;
+        IsStaticCapacity<As>::value,
+        ArrVec<size_t, CtCapacity<As>::value>,
+        Vector<size_t>>;
 
     // elem_indices
 
-    template <typename A>
-    auto elem_indices(const Element<A> &a, const Seq<A> &as)
-        -> ElemIndicesReturn<A>
+    template <typename As>
+    auto elem_indices(const Element<As> &a, const As &as)
+        -> ElemIndicesReturn<As>
     {
-        ElemIndicesReturn<A> result{};
-        const auto as_length = length(as);
+        ElemIndicesReturn<As> res{};
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (a == as[i])
-                result.push_back(i);
+            if (a == nth(i, as))
+                res.push_back(i);
         }
 
-        return result;
+        return res;
     }
 
     // find
 
-    template <typename A, typename F = void (*)(const Element<A> &)>
-    bool find(const F &f, const Seq<A> &as)
+    template <typename As, typename F = void (*)(const Element<As> &)>
+    bool find(const F &f, const As &as)
     {
-        const auto as_length = length(as);
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
+            if (f(nth(i, as)))
                 return true;
         }
 
@@ -774,15 +994,15 @@ namespace efp
 
     // find_index
 
-    template <typename A, typename F = void (*)(const Element<A> &)>
-    auto find_index(const F &f, const Seq<A> &as)
+    template <typename As, typename F = void (*)(const Element<As> &)>
+    auto find_index(const F &f, const As &as)
         -> Maybe<size_t>
     {
-        const auto as_length = length(as);
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
+            if (f(nth(i, as)))
                 return i;
         }
 
@@ -791,28 +1011,28 @@ namespace efp
 
     // FindIndicesReturn
 
-    template <typename A>
+    template <typename As>
     using FindIndicesReturn = Conditional<
-        IsStaticCapacity<A>::value,
-        Sequence<size_t, dyn, A::ct_cap>,
-        Sequence<size_t, dyn, dyn>>;
+        IsStaticCapacity<As>::value,
+        ArrVec<size_t, CtCapacity<As>::value>,
+        Vector<size_t>>;
 
     // find_indices
 
-    template <typename A, typename F = void (*)(const Element<A> &)>
-    auto find_indices(const F &f, const A &as)
-        -> FindIndicesReturn<A>
+    template <typename As, typename F = void (*)(const Element<As> &)>
+    auto find_indices(const F &f, const As &as)
+        -> FindIndicesReturn<As>
     {
-        FindIndicesReturn<A> result{};
-        const auto as_length = length(as);
+        FindIndicesReturn<As> res{};
+        const auto as_len = length(as);
 
-        for (size_t i = 0; i < as_length; ++i)
+        for (size_t i = 0; i < as_len; ++i)
         {
-            if (f(as[i]))
-                result.push_back(i);
+            if (f(nth(i, as)))
+                res.push_back(i);
         }
 
-        return result;
+        return res;
     }
 }
 #endif

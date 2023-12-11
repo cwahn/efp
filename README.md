@@ -102,14 +102,7 @@ int c = a.match(
 CHECK(b == 42);
 ```
 
-### File IO
-```c++
-file = File::open("test", "w+").move();
-file.write("Hello, world!\nThis is a test file.\nEnd of test.");
-file.close();
-```
-
-<!-- ### String and formatting
+### String and formatting
 ```cpp
 String name = "Alice";
 Vector<char> hobby = "coding";

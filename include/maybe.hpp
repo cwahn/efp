@@ -2,6 +2,7 @@
 #define MAYBE_HPP_
 
 #include "sfinae.hpp"
+#include "trait.hpp"
 #include "enum_type.hpp"
 
 namespace efp
@@ -66,6 +67,8 @@ namespace efp
     public:
         template <size_t n, typename... Bs>
         friend struct Match;
+
+        using Element = T;
 
         template <typename A>
         struct IsSameUnary
@@ -286,6 +289,13 @@ namespace efp
     template <typename A>
     struct IsMaybe<Maybe<A>> : True
     {
+    };
+
+    // Element specializetion for Maybe
+    template <typename A>
+    struct ElementImpl<Enum<Nothing, A>>
+    {
+        using Type = A;
     };
 
     // functor
