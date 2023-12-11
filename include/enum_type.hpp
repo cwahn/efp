@@ -38,7 +38,7 @@ namespace efp
     };
 
     template <typename F>
-    struct ReturnImpl<WildCardWrapper<F>>
+    struct detail::ReturnImpl<WildCardWrapper<F>>
     {
         using Type = decltype(declval<F>()());
     };
