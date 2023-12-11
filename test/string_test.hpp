@@ -184,7 +184,7 @@ TEST_CASE("String class functionality", "[String]")
     SECTION("c_str")
     {
         String str("Hello");
-        CHECK(std::strcmp(str.c_str().get(), "Hello") == 0);
+        CHECK(std::strcmp(str.c_str(), "Hello") == 0);
     }
 
     SECTION("Equality with C-Style String")
@@ -254,7 +254,7 @@ TEST_CASE("StringView class functionality", "[StringView]")
     SECTION("Conversion to CString")
     {
         StringView view("Hello");
-        CHECK(std::strcmp(view.c_str().get(), "Hello") == 0);
+        CHECK(std::strcmp(view.c_str(), "Hello") == 0);
     }
 
     SECTION("Begin and End Iterators")
