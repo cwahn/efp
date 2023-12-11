@@ -7,24 +7,31 @@
 using namespace efp;
 
 static_assert(IsSequence<Array<int, 3>>::value, "Array<int, 3> should satisfy IsSequence");
+// static_assert(IsSequenceImplLength<Array<int, 3>>::value, "IsSequenceImplLength should be satisfied by Array");
+// static_assert(IsSequenceImplNth<Array<int, 3>>::value, "IsSequenceImplNth should be satisfied by Array");
+// static_assert(IsSequenceImplData<Array<int, 3>>::value, "IsSequenceImplData should be satisfied by Array");
 
-// static_assert(ImplTypeLevelFunction<Element, Array<int, 3>>::value, "Element trait should be satisfied by Array");
-// static_assert(ImplTypeLevelFunction<CtSize, Array<int, 3>>::value, "CtSize trait should be satisfied by Array");
-// static_assert(ImplTypeLevelFunction<CtCapacity, Array<int, 3>>::value, "CtCapacity trait should be satisfied by Array");
-static_assert(IsSequenceImplLength<Array<int, 3>>::value, "IsSequenceImplLength should be satisfied by Array");
-static_assert(IsSequenceImplNth<Array<int, 3>>::value, "IsSequenceImplNth should be satisfied by Array");
-static_assert(IsSequenceImplData<Array<int, 3>>::value, "IsSequenceImplData should be satisfied by Array");
+static_assert(IsSequence<ArrVec<int, 3>>::value, "ArrVec<int, 3> should satisfy IsSequence");
+// static_assert(IsSequenceImplLength<ArrVec<int, 3>>::value, "IsSequenceImplLength should be satisfied by ArrVec");
+// static_assert(IsSequenceImplNth<ArrVec<int, 3>>::value, "IsSequenceImplNth should be satisfied by ArrVec");
+// static_assert(IsSequenceImplData<ArrVec<int, 3>>::value, "IsSequenceImplData should be satisfied by ArrVec");
+
+static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequence");
+// static_assert(IsSequenceImplLength<Vector<int>>::value, "IsSequenceImplLength should be satisfied by Vector");
+// static_assert(IsSequenceImplNth<Vector<int>>::value, "IsSequenceImplNth should be satisfied by Vector");
+// static_assert(IsSequenceImplData<Vector<int>>::value, "IsSequenceImplData should be satisfied by Vector");
+
+// todo STL only
 
 static_assert(IsSequence<std::array<int, 3>>::value, "std::array<int, 3> should satisfy IsSequence");
+// static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
+// static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
+// static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by std::array");
 
-// static_assert(ImplTypeLevelFunction<Element, std::array<int, 3>>::value, "Element trait should be satisfied by std::array");
-// static_assert(ImplTypeLevelFunction<CtSize, std::array<int, 3>>::value, "CtSize trait should be satisfied by std::array");
-// static_assert(ImplTypeLevelFunction<CtCapacity, std::array<int, 3>>::value, "CtCapacity trait should be satisfied by std::array");
-static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
-static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
-static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by std::array");
-
-// todo Add assertion for other Containers...
+static_assert(IsSequence<std::vector<int>>::value, "std::vector<int> should satisfy IsSequence");
+// static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by std::array");
+// static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by std::array");
+// static_assert(IsSequenceImplData<std::vector<int>>::value, "IsSequenceImplData should be satisfied by std::array");
 
 TEST_CASE("Initialization")
 {

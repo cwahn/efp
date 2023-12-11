@@ -151,10 +151,10 @@ namespace efp
     template <typename R, typename... Ass>
     using NAryReturn = Conditional<
         All<IsStaticSize<Ass>...>::value,
-        Array<R, MinStaticLength<Ass...>::value>,
+        Array<R, Min<CtSize<Ass>...>::value>,
         Conditional<
             All<IsStaticCapacity<Ass>...>::value,
-            ArrVec<R, MinStaticCapacity<Ass...>::value>,
+            ArrVec<R, Min<CtCapacity<Ass>...>::value>,
             Vector<R>>>;
 
     // MapReturn
@@ -382,10 +382,10 @@ namespace efp
     template <typename F, typename... Ass>
     using MapWithIndexReturn = Conditional<
         All<IsStaticSize<Ass>...>::value,
-        Array<CallReturn<F, size_t, Element<Ass>...>, MinStaticLength<Ass...>::value>,
+        Array<CallReturn<F, size_t, Element<Ass>...>, Min<CtSize<Ass>...>::value>,
         Conditional<
             All<IsStaticCapacity<Ass>...>::value,
-            ArrVec<CallReturn<F, size_t, Element<Ass>...>, MinStaticCapacity<Ass...>::value>,
+            ArrVec<CallReturn<F, size_t, Element<Ass>...>, Min<CtCapacity<Ass>...>::value>,
             Vector<CallReturn<F, size_t, Element<Ass>...>>>>;
 
     // map_with_index

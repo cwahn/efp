@@ -12,43 +12,30 @@ constexpr int n = 10000;
 
 int main(int argc, char const *argv[])
 {
-    std::cout << "efp, array, n = " << n << " iter: " << 1 << std::endl;
+    std::cout << "efp, array, n = " << n << std::endl;
 
-    // int xs[n];
-    // std::vector<int> xs(n);
-    std::array<int, n> xs;
+    const auto xs = from_function(Size<n>{}, id<int>);
 
-    std::iota(std::begin(xs), std::end(xs), 0);
+    auto square_mut = [&](double &x)
+    { x = square<double>(x); };
 
-    // for (size_t i = 0; i < n; ++i)
-    // {
-    //     xs[i] = std::rand();
-    // }
-
-    auto isquare = [&](double x)
-    {
-        return x = square<double>(x);
-    };
-
-    auto isqrt = [&](double x)
-    {
-        return x = sqrt<double>(x);
-    };
+    auto sqrt_mut = [&](double &x)
+    { x = sqrt<double>(x); };
 
     auto ys = map(square<double>, xs);
-    for_each(isqrt, xs);
+    for_eachi(sqrt_mut, ys);
 
-    for_each(isquare, xs);
-    for_each(isqrt, xs);
+    for_eachi(square_mut, ys);
+    for_eachi(sqrt_mut, ys);
 
-    for_each(isquare, xs);
-    for_each(isqrt, xs);
+    for_eachi(square_mut, ys);
+    for_eachi(sqrt_mut, ys);
 
-    for_each(isquare, xs);
-    for_each(isqrt, xs);
+    for_eachi(square_mut, ys);
+    for_eachi(sqrt_mut, ys);
 
-    for_each(isquare, xs);
-    for_each(isqrt, xs);
+    for_eachi(square_mut, ys);
+    for_eachi(sqrt_mut, ys);
 
     // 5
     //  auto ys = map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, map(sqrt<double>, map(square<double>, xs))))))))));

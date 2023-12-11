@@ -348,15 +348,6 @@ namespace efp
             return CString(extended_buffer); // Mark for deletion.
         }
 
-        // std::unique_ptr<const char[]> c_str() const
-        // {
-        //     const size_t size_ = size();
-        //     std::unique_ptr<char[]> extended_buffer(new char[size_ + 1]);
-        //     std::memcpy(extended_buffer.get(), data(), size_);
-        //     extended_buffer[size_] = '\0';
-        //     return extended_buffer;
-        // }
-
         // String append(const String &string) const
         // {
         //     return efp::append(*this, string);
@@ -502,15 +493,6 @@ namespace efp
             return CString(extended_buffer);
         }
 
-        // std::unique_ptr<const char[]> c_str() const
-        // {
-        //     const size_t size_ = size();
-        //     std::unique_ptr<char[]> extended_buffer(new char[size_ + 1]);
-        //     std::memcpy(extended_buffer.get(), data(), size_);
-        //     extended_buffer[size_] = '\0';
-        //     return extended_buffer;
-        // }
-
         size_t size() const
         {
             return size_;
@@ -581,6 +563,8 @@ namespace efp
 
         return result;
     }
+
+    // todo STL only
 
     inline std::ostream &operator<<(std::ostream &os, const String &string)
     {

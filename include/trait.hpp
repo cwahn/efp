@@ -8,26 +8,9 @@
 
 namespace efp
 {
-    // template <template <typename> class TypeLevelFunction, typename A, typename = void>
-    // struct ImplTypeLevelFunction : False
-    // {
-    // };
+    // Element trait
 
-    // template <template <typename> class TypeLevelFunction, typename A>
-    // struct ImplTypeLevelFunction<TypeLevelFunction, A, Void<TypeLevelFunction<A>>> : True
-    // {
-    // };
-
-    // template <template <typename> class TypeLevelFunction, typename A, typename = void>
-    // struct ImplTypeLevelFunction : False
-    // {
-    // };
-
-    // template <template <typename> class TypeLevelFunction, typename A>
-    // struct ImplTypeLevelFunction<TypeLevelFunction, A, decltype(void(sizeof(TypeLevelFunction<A>)), void())> : True
-    // {
-    // };
-
+    // Rethrive element type from container
     template <typename A>
     struct ElementImpl
     {
@@ -36,12 +19,10 @@ namespace efp
     template <typename A>
     using Element = typename ElementImpl<Cleaned<A>>::Type;
 
-    // Sequence specific traits
-
+    // Sequence traits
     // dyn
 
     constexpr size_t dyn = -1;
-
     using Dyn = Size<dyn>;
 
     // CtSize
@@ -100,6 +81,7 @@ namespace efp
     };
 
     // nth
+    // todo non-const ref check
 
     template <typename A, typename = void>
     struct IsSequenceImplNth : False
@@ -112,7 +94,6 @@ namespace efp
         //       IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>,
         //       IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>>
         : IsSame<decltype(efp::nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>
-    // : IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>
 
     {
     };
@@ -139,21 +120,6 @@ namespace efp
     {
     };
 
-    // template <typename A>
-    // struct IsSequence<A, Void<ImplTypeLevelFunction<Element, A>,
-    //                           ImplTypeLevelFunction<CtSize, A>,
-    //                           ImplTypeLevelFunction<CtCapacity, A>,
-    //                           IsSequenceImplLength<A>,
-    //                           IsSequenceImplNth<A>,
-    //                           IsSequenceImplData<A>>> : All<ImplTypeLevelFunction<Element, A>,
-    //                                                         ImplTypeLevelFunction<CtSize, A>,
-    //                                                         ImplTypeLevelFunction<CtCapacity, A>,
-    //                                                         IsSequenceImplLength<A>,
-    //                                                         IsSequenceImplNth<A>,
-    //                                                         IsSequenceImplData<A>>
-    // {
-    // };
-
     template <typename A>
     struct IsSequence<A, Void<Element<A>, CtSize<A>, CtCapacity<A>>>
         : All<IsSequenceImplLength<A>,
@@ -162,49 +128,17 @@ namespace efp
     {
     };
 
-    // template <typename A>
-    // using IsSequence = All<
-    //     ImplTypeLevelFunction<Element, A>,
-    //     ImplTypeLevelFunction<CtSize, A>,
-    //     ImplTypeLevelFunction<CtCapacity, A>,
-    //     IsSequenceImplLength<A>,
-    //     IsSequenceImplNth<A>,
-    //     IsSequenceImplData<A>>;
+    // Utility type-level functions for Sequence trait
 
-    ////////////////////////////////////////////////////////////////////////
-
-    // Utility Functions
     // IsStaticSize
 
     template <typename A>
     using IsStaticSize = Bool<CtSize<A>::value != dyn>;
 
-    // todo Remove AreAlls and Min Max x
-
-    // AreAllStaticSize
-
-    template <typename... As>
-    using AreAllStaticSize = All<IsStaticSize<As>...>;
-
     // IsStaticCapacity
 
     template <typename A>
     using IsStaticCapacity = Bool<CtCapacity<A>::value != dyn>;
-
-    // AreAllStaticCapacity
-
-    template <typename... As>
-    using AreAllStaticCapacity = All<IsStaticCapacity<As>...>;
-
-    // MinStaticLength
-
-    template <typename... As>
-    using MinStaticLength = Min<CtSize<As>...>;
-
-    // MinStaticCapacity
-
-    template <typename... As>
-    using MinStaticCapacity = Min<CtCapacity<As>...>;
 
     // // begin
 
