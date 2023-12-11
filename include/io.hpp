@@ -22,7 +22,7 @@ namespace efp
 
         static Maybe<File> open(const String &path, const char *mode)
         {
-            FILE *file = fopen(path.c_str(), mode);
+            FILE *file = fopen(path.c_str().get(), mode);
 
             if (file)
                 return File{file, mode};
@@ -141,7 +141,7 @@ namespace efp
             }
             else
             {
-                return fputs(data.c_str(), file_) != EOF;
+                return fputs(data.c_str().get(), file_) != EOF;
             }
         }
 

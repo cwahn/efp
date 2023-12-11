@@ -9,76 +9,76 @@ namespace efp
     // CString
     // Owned C-style null operator including const char*
     // Not safe to build from regular const char *
-    class CString
-    {
-    private:
-        const char *ptr_;
+    // class CString
+    // {
+    // private:
+    //     const char *ptr_;
 
-    public:
-        // const char pointer with nullptr.
-        CString(const char *ptr)
-            : ptr_(ptr) {}
+    // public:
+    //     // const char pointer with nullptr.
+    //     CString(const char *ptr)
+    //         : ptr_(ptr) {}
 
-        CString(const CString &) = delete;
-        CString &operator=(const CString &) = delete;
+    //     CString(const CString &) = delete;
+    //     CString &operator=(const CString &) = delete;
 
-        CString(CString &&other) noexcept : ptr_(other.ptr_)
-        {
-            other.ptr_ = nullptr;
-        }
+    //     CString(CString &&other) noexcept : ptr_(other.ptr_)
+    //     {
+    //         other.ptr_ = nullptr;
+    //     }
 
-        CString &operator=(CString &&other) noexcept
-        {
-            if (this != &other)
-            {
-                delete[] ptr_;
+    //     CString &operator=(CString &&other) noexcept
+    //     {
+    //         if (this != &other)
+    //         {
+    //             delete[] ptr_;
 
-                ptr_ = other.ptr_;
-                other.ptr_ = nullptr;
-            }
-            return *this;
-        }
+    //             ptr_ = other.ptr_;
+    //             other.ptr_ = nullptr;
+    //         }
+    //         return *this;
+    //     }
 
-        ~CString()
-        {
-            delete[] ptr_;
-        }
+    //     ~CString()
+    //     {
+    //         delete[] ptr_;
+    //     }
 
-        operator const char *() const
-        {
-            return ptr_;
-        }
+    //     operator const char *() const
+    //     {
+    //         return ptr_;
+    //     }
 
-        // Equality operator for comparing with another CString
-        bool operator==(const CString &other) const
-        {
-            // If both are null, they are considered equal
-            if (ptr_ == nullptr && other.ptr_ == nullptr)
-                return true;
+    //     // Equality operator for comparing with another CString
+    //     bool operator==(const CString &other) const
+    //     {
+    //         // If both are null, they are considered equal
+    //         if (ptr_ == nullptr && other.ptr_ == nullptr)
+    //             return true;
 
-            // If one is null and the other is not, they can't be equal
-            if (ptr_ == nullptr || other.ptr_ == nullptr)
-                return false;
+    //         // If one is null and the other is not, they can't be equal
+    //         if (ptr_ == nullptr || other.ptr_ == nullptr)
+    //             return false;
 
-            // Use strcmp to compare the strings
-            return strcmp(ptr_, other.ptr_) == 0;
-        }
+    //         // Use strcmp to compare the strings
+    //         return strcmp(ptr_, other.ptr_) == 0;
+    //     }
 
-        // Equality operator for comparing with a C-style string
-        bool operator==(const char *c_str) const
-        {
-            // If both are null, they are considered equal
-            if (ptr_ == nullptr && c_str == nullptr)
-                return true;
+    //     // Equality operator for comparing with a C-style string
+    //     bool operator==(const char *c_str) const
+    //     {
+    //         // If both are null, they are considered equal
+    //         if (ptr_ == nullptr && c_str == nullptr)
+    //             return true;
 
-            // If one is null and the other is not, they can't be equal
-            if (ptr_ == nullptr || c_str == nullptr)
-                return false;
+    //         // If one is null and the other is not, they can't be equal
+    //         if (ptr_ == nullptr || c_str == nullptr)
+    //             return false;
 
-            // Use strcmp to compare the strings
-            return strcmp(ptr_, c_str) == 0;
-        }
-    };
+    //         // Use strcmp to compare the strings
+    //         return strcmp(ptr_, c_str) == 0;
+    //     }
+    // };
 
     template <>
     // class Sequence<char, dyn, dyn>
@@ -339,13 +339,22 @@ namespace efp
             --size_;
         }
 
-        const CString c_str() const
+        // const CString c_str() const
+        // {
+        //     const size_t size_ = size();
+        //     char *extended_buffer = new char[size_ + 1];
+        //     memcpy(extended_buffer, data(), size_);
+        //     extended_buffer[size_] = '\0';
+        //     return CString(extended_buffer); // Mark for deletion.
+        // }
+
+        std::unique_ptr<char[]> c_str() const
         {
             const size_t size_ = size();
-            char *extended_buffer = new char[size_ + 1];
-            memcpy(extended_buffer, data(), size_);
+            std::unique_ptr<char[]> extended_buffer(new char[size_ + 1]);
+            std::memcpy(extended_buffer.get(), data(), size_);
             extended_buffer[size_] = '\0';
-            return CString(extended_buffer); // Mark for deletion.
+            return extended_buffer;
         }
 
         // String append(const String &string) const
@@ -484,13 +493,22 @@ namespace efp
             return c_str[size_] == '\0';
         }
 
-        const CString c_str() const
+        // const CString c_str() const
+        // {
+        //     const size_t size_ = size();
+        //     char *extended_buffer = new char[size_ + 1];
+        //     memcpy(extended_buffer, data_, size_);
+        //     extended_buffer[size_] = '\0';
+        //     return CString(extended_buffer);
+        // }
+
+        std::unique_ptr<char[]> c_str() const
         {
             const size_t size_ = size();
-            char *extended_buffer = new char[size_ + 1];
-            memcpy(extended_buffer, data_, size_);
+            std::unique_ptr<char[]> extended_buffer(new char[size_ + 1]);
+            std::memcpy(extended_buffer.get(), data(), size_);
             extended_buffer[size_] = '\0';
-            return CString(extended_buffer);
+            return extended_buffer;
         }
 
         size_t size() const

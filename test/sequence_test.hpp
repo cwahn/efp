@@ -8,12 +8,21 @@ using namespace efp;
 
 static_assert(IsSequence<Array<int, 3>>::value, "Array<int, 3> should satisfy IsSequence");
 
-static_assert(ImplTypeLevelFunction<Element, Array<int, 3>>::value, "Element trait should be satisfied by Array");
-static_assert(ImplTypeLevelFunction<CtSize, Array<int, 3>>::value, "CtSize trait should be satisfied by Array");
-static_assert(ImplTypeLevelFunction<CtCapacity, Array<int, 3>>::value, "CtCapacity trait should be satisfied by Array");
+// static_assert(ImplTypeLevelFunction<Element, Array<int, 3>>::value, "Element trait should be satisfied by Array");
+// static_assert(ImplTypeLevelFunction<CtSize, Array<int, 3>>::value, "CtSize trait should be satisfied by Array");
+// static_assert(ImplTypeLevelFunction<CtCapacity, Array<int, 3>>::value, "CtCapacity trait should be satisfied by Array");
 static_assert(IsSequenceImplLength<Array<int, 3>>::value, "IsSequenceImplLength should be satisfied by Array");
 static_assert(IsSequenceImplNth<Array<int, 3>>::value, "IsSequenceImplNth should be satisfied by Array");
 static_assert(IsSequenceImplData<Array<int, 3>>::value, "IsSequenceImplData should be satisfied by Array");
+
+static_assert(IsSequence<std::array<int, 3>>::value, "std::array<int, 3> should satisfy IsSequence");
+
+// static_assert(ImplTypeLevelFunction<Element, std::array<int, 3>>::value, "Element trait should be satisfied by std::array");
+// static_assert(ImplTypeLevelFunction<CtSize, std::array<int, 3>>::value, "CtSize trait should be satisfied by std::array");
+// static_assert(ImplTypeLevelFunction<CtCapacity, std::array<int, 3>>::value, "CtCapacity trait should be satisfied by std::array");
+static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
+static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
+static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by std::array");
 
 // todo Add assertion for other Containers...
 

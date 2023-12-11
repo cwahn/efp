@@ -8,15 +8,25 @@
 
 namespace efp
 {
-    template <template <typename> class TypeLevelFunction, typename A, typename = void>
-    struct ImplTypeLevelFunction : False
-    {
-    };
+    // template <template <typename> class TypeLevelFunction, typename A, typename = void>
+    // struct ImplTypeLevelFunction : False
+    // {
+    // };
 
-    template <template <typename> class TypeLevelFunction, typename A>
-    struct ImplTypeLevelFunction<TypeLevelFunction, A, Void<TypeLevelFunction<A>>> : True
-    {
-    };
+    // template <template <typename> class TypeLevelFunction, typename A>
+    // struct ImplTypeLevelFunction<TypeLevelFunction, A, Void<TypeLevelFunction<A>>> : True
+    // {
+    // };
+
+    // template <template <typename> class TypeLevelFunction, typename A, typename = void>
+    // struct ImplTypeLevelFunction : False
+    // {
+    // };
+
+    // template <template <typename> class TypeLevelFunction, typename A>
+    // struct ImplTypeLevelFunction<TypeLevelFunction, A, decltype(void(sizeof(TypeLevelFunction<A>)), void())> : True
+    // {
+    // };
 
     template <typename A>
     struct ElementImpl
@@ -58,16 +68,34 @@ namespace efp
     template <typename A>
     using CtCapacity = typename CtCapacityImpl<Cleaned<A>>::Type;
 
+    template <typename As, size_t n, typename = Void<CtSize<As>>>
+    constexpr auto length(const As &as) -> CtSize<As>;
+
+    template <typename As>
+    constexpr auto length(const As &as) -> size_t;
+
+    template <typename As, typename = Void<Element<As>>>
+    constexpr auto nth(size_t i, const As &as) -> const Element<As> &;
+
+    template <typename As, typename = Void<Element<As>>>
+    constexpr auto nth(size_t i, As &as) -> Element<As> &;
+
+    template <typename As, typename = Void<Element<As>>>
+    constexpr auto data(const As &as) -> const Element<As> *;
+
+    template <typename As, typename = Void<Element<As>>>
+    constexpr auto data(As &as) -> Element<As> *;
+
     template <typename A, typename = void>
     struct IsSequenceImplLength : False
     {
     };
 
     template <typename A>
-    struct IsSequenceImplLength<A, Void<decltype(length(declval<const A>())), decltype(length(declval<A>()))>>
+    struct IsSequenceImplLength<A, Void<decltype(efp::length(declval<const A>())), decltype(efp::length(declval<A>()))>>
         : Any<
-              IsSame<decltype(length(declval<const A>())), CtSize<A>>,
-              IsSame<decltype(length(declval<const A>())), size_t>>
+              IsSame<decltype(efp::length(declval<const A>())), CtSize<A>>,
+              IsSame<decltype(efp::length(declval<const A>())), size_t>>
     {
     };
 
@@ -79,11 +107,11 @@ namespace efp
     };
 
     template <typename A>
-    struct IsSequenceImplNth<A, Void<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), decltype(nth(declval<size_t>(), declval<Cleaned<A>>()))>>
+    struct IsSequenceImplNth<A, Void<decltype(efp::nth(declval<size_t>(), declval<const Cleaned<A>>())), decltype(efp::nth(declval<size_t>(), declval<Cleaned<A>>()))>>
         // : All<
         //       IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>,
         //       IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>>
-        : IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>
+        : IsSame<decltype(efp::nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>
     // : IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>
 
     {
@@ -106,14 +134,42 @@ namespace efp
     {
     };
 
+    template <typename A, typename = void>
+    struct IsSequence : False
+    {
+    };
+
+    // template <typename A>
+    // struct IsSequence<A, Void<ImplTypeLevelFunction<Element, A>,
+    //                           ImplTypeLevelFunction<CtSize, A>,
+    //                           ImplTypeLevelFunction<CtCapacity, A>,
+    //                           IsSequenceImplLength<A>,
+    //                           IsSequenceImplNth<A>,
+    //                           IsSequenceImplData<A>>> : All<ImplTypeLevelFunction<Element, A>,
+    //                                                         ImplTypeLevelFunction<CtSize, A>,
+    //                                                         ImplTypeLevelFunction<CtCapacity, A>,
+    //                                                         IsSequenceImplLength<A>,
+    //                                                         IsSequenceImplNth<A>,
+    //                                                         IsSequenceImplData<A>>
+    // {
+    // };
+
     template <typename A>
-    using IsSequence = All<
-        ImplTypeLevelFunction<Element, A>,
-        ImplTypeLevelFunction<CtSize, A>,
-        ImplTypeLevelFunction<CtCapacity, A>,
-        IsSequenceImplLength<A>,
-        IsSequenceImplNth<A>,
-        IsSequenceImplData<A>>;
+    struct IsSequence<A, Void<Element<A>, CtSize<A>, CtCapacity<A>>>
+        : All<IsSequenceImplLength<A>,
+              IsSequenceImplNth<A>,
+              IsSequenceImplData<A>>
+    {
+    };
+
+    // template <typename A>
+    // using IsSequence = All<
+    //     ImplTypeLevelFunction<Element, A>,
+    //     ImplTypeLevelFunction<CtSize, A>,
+    //     ImplTypeLevelFunction<CtCapacity, A>,
+    //     IsSequenceImplLength<A>,
+    //     IsSequenceImplNth<A>,
+    //     IsSequenceImplData<A>>;
 
     ////////////////////////////////////////////////////////////////////////
 

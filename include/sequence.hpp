@@ -1348,8 +1348,9 @@ namespace efp
 
     // todo STL only
 
-    template <typename A, typename = EnableIf<IsSequence<A>::value, void>>
-    std::ostream &operator<<(std::ostream &os, const A &seq)
+    template <typename A>
+    auto operator<<(std::ostream &os, const A &seq)
+        -> EnableIf<IsSequence<A>::value, std::ostream &>
     {
         static_assert(IsSequence<A>(), "Argument should be an instance of sequence trait.");
 
@@ -1365,6 +1366,105 @@ namespace efp
         }
         os << " }";
         return os;
+    }
+
+    // Sequence trait implementation for std::array
+
+    template <typename A, size_t n>
+    struct ElementImpl<std::array<A, n>>
+    {
+        using Type = A;
+    };
+
+    template <typename A, size_t n>
+    struct CtSizeImpl<std::array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    struct CtCapacityImpl<std::array<A, n>>
+    {
+        using Type = Size<n>;
+    };
+
+    template <typename A, size_t n>
+    constexpr auto length(const std::array<A, n> &as) -> Size<n>
+    {
+        return Size<n>{};
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, const std::array<A, n> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto nth(size_t i, std::array<A, n> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(const std::array<A, n> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A, size_t n>
+    constexpr auto data(std::array<A, n> &as) -> A *
+    {
+        return as.data();
+    }
+
+    // Sequence trait implementation for std::vector
+    template <typename A>
+    struct ElementImpl<std::vector<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct CtSizeImpl<std::vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<std::vector<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const std::vector<A> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, const std::vector<A> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, std::vector<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const std::vector<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(std::vector<A> &as) -> A *
+    {
+        return as.data();
     }
 };
 
