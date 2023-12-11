@@ -57,10 +57,6 @@ EFP provides sum-type `efp::Maybe` which is also Functor, Applicative, and Monad
 ### String and formatting
 EFP provides a `String` class tailored for efficient manipulation, which is basically `Vector<char>` with some specialization, supporting operations without explicit null-termination. The `format` function enables embedded variable formatting, harnessing the library's type-safe templates for concise and expressive string composition at compile-time. 
 
-### File IO
-
-WIP
-
 ## Examples
 ### General
 ```cpp
@@ -104,6 +100,13 @@ int c = a.match(
     { return b * 1; }); // Empty branch indicates wildcard
 
 CHECK(b == 42);
+```
+
+### File IO
+```c++
+file = File::open("test", "w+").move();
+file.write("Hello, world!\nThis is a test file.\nEnd of test.");
+file.close();
 ```
 
 <!-- ### String and formatting
