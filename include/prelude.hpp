@@ -12,6 +12,8 @@
 namespace efp
 {
 
+    // todo concat, concat_map
+
     template <typename A>
     constexpr A id(const A &a)
     {
@@ -70,55 +72,7 @@ namespace efp
         return Composed<F, Fs...>(f, fs...);
     }
 
-    // execute_pack
-
-    template <typename... Args>
-    void execute_pack(Args... args) {}
-
-    template <typename... Ass>
-    using AppendReturn = Conditional<
-        All<IsStaticSize<Ass>...>::value,
-        Array<Common<Element<Ass>...>, sum_v(CtSize<Ass>::value...)>,
-        Conditional<
-            All<IsStaticCapacity<Ass>...>::value,
-            ArrVec<Common<Element<Ass>...>, sum_v(CtCapacity<Ass>::value...)>,
-            Vector<Common<Element<Ass>...>>>>;
-
-    namespace detail
-    {
-        template <typename As, typename Bs>
-        Unit append_impl(size_t &idx, As &as, const Bs &bs)
-        {
-            const auto seq_length = bs.size(); // Assuming `size` method is available
-
-            for (size_t i = 0; i < seq_length; ++i)
-            {
-                nth(idx, as) = nth(i, bs);
-                idx++;
-            }
-
-            return unit;
-        }
-    }
-
-    template <typename As, typename... Ass>
-    auto append(const As &as, const Ass &...ass) -> AppendReturn<As, Ass...>
-    {
-        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
-
-        AppendReturn<As, Ass...> res{};
-
-        if (CtSize<AppendReturn<As, Ass...>>::value == dyn)
-        {
-            res.resize(sum_v(static_cast<size_t>(length(as)), length(ass)...));
-        }
-
-        size_t idx{0};
-        execute_pack(detail::append_impl(idx, res, as),
-                     detail::append_impl(idx, res, ass)...);
-
-        return res;
-    }
+    // min_length
 
     template <typename As, typename... Ass>
     size_t min_length(const As &as, const Ass &...ass)
@@ -126,6 +80,8 @@ namespace efp
         static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
         return minimum_v(static_cast<size_t>(length(as)), length(ass)...);
     }
+
+    // for_each
 
     template <typename... Ass, typename F = void (*)(const Element<Ass> &...)>
     void for_each(const F &f, const Ass &...ass)
@@ -138,6 +94,8 @@ namespace efp
             f(nth(i, ass)...);
         }
     }
+
+    // for_each_mut
 
     template <typename... Ass, typename F = void (*)(Element<Ass> &...)>
     void for_each_mut(const F &f, Ass &...ass)
@@ -290,6 +248,116 @@ namespace efp
         for (size_t i = 0; i < length; ++i)
         {
             nth(i, res) = f(i);
+        }
+
+        return res;
+    }
+
+    // execute_pack
+
+    template <typename... Args>
+    void execute_pack(Args... args) {}
+
+    template <typename... Ass>
+    using AppendReturn = Conditional<
+        All<IsStaticSize<Ass>...>::value,
+        Array<Common<Element<Ass>...>, sum_v(CtSize<Ass>::value...)>,
+        Conditional<
+            All<IsStaticCapacity<Ass>...>::value,
+            ArrVec<Common<Element<Ass>...>, sum_v(CtCapacity<Ass>::value...)>,
+            Vector<Common<Element<Ass>...>>>>;
+
+    namespace detail
+    {
+        template <typename As, typename Bs>
+        Unit append_impl(size_t &idx, As &as, const Bs &bs)
+        {
+            const auto seq_length = bs.size(); // Assuming `size` method is available
+
+            for (size_t i = 0; i < seq_length; ++i)
+            {
+                nth(idx, as) = nth(i, bs);
+                idx++;
+            }
+
+            return unit;
+        }
+    }
+
+    template <typename As, typename... Ass>
+    auto append(const As &as, const Ass &...ass) -> AppendReturn<As, Ass...>
+    {
+        static_assert(All<IsSequence<As>, IsSequence<Ass>...>::value, "All types must be sequence types.");
+
+        AppendReturn<As, Ass...> res{};
+
+        if (CtSize<AppendReturn<As, Ass...>>::value == dyn)
+        {
+            res.resize(sum_v(static_cast<size_t>(length(as)), length(ass)...));
+        }
+
+        size_t idx{0};
+        execute_pack(detail::append_impl(idx, res, as),
+                     detail::append_impl(idx, res, ass)...);
+
+        return res;
+    }
+
+    // ConcatReturn
+
+    template <typename As, typename... Ass>
+    struct ConcatReturnImpl
+    {
+    };
+
+    template <typename Ass>
+    using ConcatReturn =
+        Conditional<
+            IsStaticSize<Ass>::value && IsStaticSize<Element<Ass>>::value,
+            Array<Element<Element<Ass>>, CtSize<Ass>::value * CtSize<Element<Ass>>::value>,
+            Conditional<
+                IsStaticCapacity<Ass>::value && IsStaticCapacity<Element<Ass>>::value,
+                Conditional<
+                    IsStaticSize<Ass>::value,
+                    ArrVec<Element<Element<Ass>>, CtSize<Ass>::value * CtCapacity<Element<Ass>>::value>,
+                    Conditional<
+                        IsStaticSize<Element<Ass>>::value,
+                        ArrVec<Element<Element<Ass>>, CtCapacity<Ass>::value * CtSize<Element<Ass>>::value>,
+                        ArrVec<Element<Element<Ass>>, CtCapacity<Ass>::value * CtCapacity<Element<Ass>>::value>>>,
+                Vector<Element<Element<Ass>>>>>;
+
+    // concat
+
+    template <typename Ass>
+    auto concat(const Ass ass) -> ConcatReturn<Ass>
+    {
+        static_assert(IsSequence<Ass>::value && IsSequence<Element<Ass>>::value, "Argument and element of argument should implement Sequence trait.");
+
+        ConcatReturn<Ass> res{};
+
+        const auto ass_len = length(ass);
+
+        if (!IsStaticSize<ConcatReturn<Ass>>::value)
+        {
+            size_t res_len = 0;
+            for (size_t i = 0; i < ass_len; ++i)
+            {
+                res_len += length(nth(i, ass));
+            }
+
+            res.resize(res_len);
+        }
+
+        size_t idx = 0;
+        for (size_t i = 0; i < ass_len; ++i)
+        {
+            const auto &as = nth(i, ass); // Access each as
+            const auto as_len = length(as);
+
+            for (size_t j = 0; j < as_len; ++j)
+            {
+                nth(idx++, res) = nth(j, as);
+            }
         }
 
         return res;

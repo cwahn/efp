@@ -98,27 +98,6 @@ TEST_CASE("compose")
     }
 }
 
-TEST_CASE("append")
-{
-    SECTION("Array")
-    {
-        Array<double, 6> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(array_3, array_3) == res);
-    }
-
-    SECTION("ArrVec")
-    {
-        ArrVec<double, 6> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(arrvec_3, array_3) == res);
-    }
-
-    SECTION("Array")
-    {
-        Vector<double> res{1., 2., 3., 1., 2., 3.};
-        CHECK(append(array_3, vector_3) == res);
-    }
-}
-
 TEST_CASE("for_each")
 {
     Array<int, 3> crtp_array{1, 2, 3};
@@ -198,6 +177,102 @@ TEST_CASE("from_function")
     SECTION("template")
     {
         CHECK(from_function(Size<3>{}, id<int>) == Array<int, 3>{0, 1, 2});
+    }
+}
+
+TEST_CASE("append")
+{
+    SECTION("Array")
+    {
+        Array<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(array_3, array_3) == res);
+    }
+
+    SECTION("ArrVec")
+    {
+        ArrVec<double, 6> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(arrvec_3, array_3) == res);
+    }
+
+    SECTION("Array")
+    {
+        Vector<double> res{1., 2., 3., 1., 2., 3.};
+        CHECK(append(array_3, vector_3) == res);
+    }
+}
+
+TEST_CASE("concat")
+{
+    SECTION("Array of Array")
+    {
+        Array<Array<int, 2>, 2> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Array<int, 4>{1, 2, 3, 4});
+    }
+
+    SECTION("ArrVec of ArrVec")
+    {
+        ArrVec<ArrVec<int, 2>, 2> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+    }
+
+    SECTION("Vector of Vector")
+    {
+        Vector<Vector<int>> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Vector<int>{1, 2, 3, 4});
+    }
+
+    SECTION("Array of ArrVec")
+    {
+        Array<ArrVec<int, 2>, 2> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+    }
+
+    SECTION("Array of Vector")
+    {
+        Array<Vector<int>, 2> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Vector<int>{1, 2, 3, 4});
+    }
+
+    SECTION("ArrVec of Array")
+    {
+        ArrVec<Array<int, 2>, 2> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+    }
+
+    SECTION("Vector of Array")
+    {
+        Vector<Array<int, 2>> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Vector<int>{1, 2, 3, 4});
+    }
+
+    SECTION("ArrVec of Vector")
+    {
+        ArrVec<Vector<int>, 2> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Vector<int>{1, 2, 3, 4});
+    }
+
+    SECTION("Vector of ArrVec")
+    {
+        Vector<ArrVec<int, 2>> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        const auto res = concat(ass);
+
+        CHECK(res == Vector<int>{1, 2, 3, 4});
     }
 }
 
