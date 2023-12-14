@@ -35,6 +35,18 @@ endif()
 
 include(CTest)
 
+# fmt
+find_package(fmt QUIET)
+
+if(NOT fmt_FOUND)
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG master
+    )
+    FetchContent_MakeAvailable(fmt)
+endif()
+
 find_package(Catch2 QUIET)
 
 if(NOT Catch2_FOUND)
@@ -51,6 +63,7 @@ include(Catch)
 enable_testing()
 
 add_library(efp INTERFACE)
+target_link_libraries(efp INTERFACE fmt)
 target_include_directories(efp INTERFACE "./include")
 
 add_subdirectory("./test")

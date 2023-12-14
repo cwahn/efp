@@ -80,6 +80,8 @@ namespace efp
         }
     };
 
+#include "fmt/format.h"
+
     template <>
     // class Sequence<char, dyn, dyn>
     class Vector<char>
@@ -118,6 +120,13 @@ namespace efp
             other.data_ = nullptr;
             other.size_ = 0;
             other.capacity_ = 0;
+        }
+
+        Vector(fmt::basic_memory_buffer<char> &&buf)
+            : data_{buf.data()}, size_{buf.size()}, capacity_{buf.capacity()}
+        {
+            buf.set(nullptr, 0);
+            buf.clear();
         }
 
         // ! Varadic constructor is not working for String
