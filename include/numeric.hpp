@@ -188,13 +188,13 @@ namespace efp
     template <typename As>
     constexpr Element<As> sum(const As &as)
     {
-        return foldl(plus, 0, as);
+        return foldl(plus, static_cast<Element<As>>(0), as);
     }
 
     template <typename As>
     constexpr Element<As> product(const As &as)
     {
-        return foldl(times, 1, as);
+        return foldl(times, static_cast<Element<As>>(1), as);
     }
 }
 
