@@ -363,6 +363,8 @@ namespace efp
         return res;
     }
 
+    // IntercalateReturn
+
     template <typename As, typename Ass>
     using IntercalateReturn =
         Conditional<
