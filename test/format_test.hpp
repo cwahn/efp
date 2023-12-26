@@ -3,10 +3,10 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-#include "format.hpp"
+#include "efp.hpp"
 #include "test_common.hpp"
 
-// using namespace efp;
+using namespace efp;
 
 // TEST_CASE("String Construction")
 // {
@@ -161,7 +161,7 @@
 
 TEST_CASE("format")
 {
-    CHECK(efp::format("This is {}", 42) == "This is 42");
+    CHECK(format("This is {}", 42) == "This is 42");
 }
 
 #endif

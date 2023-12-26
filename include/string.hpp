@@ -4,6 +4,10 @@
 #include "prelude.hpp"
 #include "sequence.hpp"
 
+#define FMT_HEADER_ONLY
+#define FMT_LIB_EXPORT
+#include "fmt/format.h"
+
 namespace efp
 {
     // CString
@@ -80,8 +84,6 @@ namespace efp
         }
     };
 
-#include "fmt/format.h"
-
     template <>
     // class Sequence<char, dyn, dyn>
     class Vector<char>
@@ -89,11 +91,11 @@ namespace efp
     {
     public:
         using Element = char;
-        static constexpr size_t ct_size = dyn;
-        static constexpr size_t ct_capacity = dyn;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<dyn>;
 
-        static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
+        // STl support
+        using value_type = char;
 
         Vector() : data_{nullptr}, size_{0}, capacity_{0} {}
 

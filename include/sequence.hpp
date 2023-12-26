@@ -525,6 +525,9 @@ namespace efp
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
 
+        // STl support
+        using value_type = A;
+
         Vector() : data_{nullptr}, size_{0}, capacity_{0} {}
 
         Vector(const Vector &other)

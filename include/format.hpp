@@ -5,56 +5,139 @@
 #include "sequence.hpp"
 #include "string.hpp"
 
-#define FMT_HEADER_ONLY
-#include "fmt/format.h"
-// #include "fmt/format-inl.h"
+// #include "fmt/format.h"
+
+// ! efp
+
+namespace fmt
+{
+    namespace detail
+    {
+        template <typename Char>
+        struct efp_default_arg_formatter
+        {
+            using iterator = std::back_insert_iterator<efp::Vector<char>>;
+            // using context = buffer_context<Char>;
+            using context = basic_format_context<iterator, Char>;
+
+            iterator out;
+            basic_format_args<context> args;
+            locale_ref loc;
+
+            template <typename T>
+            auto operator()(T value) -> iterator
+            {
+                return write<Char>(out, value);
+            }
+            auto operator()(typename basic_format_arg<context>::handle h) -> iterator
+            {
+                basic_format_parse_context<Char> parse_ctx({});
+                context format_ctx(out, args, loc);
+                h.format(parse_ctx, format_ctx);
+                return format_ctx.out();
+            }
+        };
+
+        void vformat_to_efp(efp::Vector<char> &buf, basic_string_view<char> fmt,
+                        typename vformat_args<char>::type args, locale_ref loc)
+        {
+            // auto out = buffer_appender<char>(buf);
+            auto out = std::back_insert_iterator<efp::Vector<char>>(buf);
+            if (fmt.size() == 2 && equal2(fmt.data(), "{}"))
+            {
+                auto arg = args.get(0);
+                if (!arg)
+                    error_handler().on_error("argument not found");
+                // ! efp
+                visit_format_arg(efp_default_arg_formatter<char>{out, args, loc}, arg);
+                return;
+            }
+
+            struct format_handler : error_handler
+            {
+                basic_format_parse_context<char> parse_context;
+                buffer_context<char> context;
+
+                // format_handler(buffer_appender<char> p_out, basic_string_view<char> str,
+                //                basic_format_args<buffer_context<char>> p_args,
+                //                locale_ref p_loc)
+
+                format_handler(std::back_insert_iterator<efp::Vector<char>> p_out, basic_string_view<char> str,
+                               basic_format_args<buffer_context<char>> p_args,
+                               locale_ref p_loc)
+                    : parse_context(str), context(p_out, p_args, p_loc) {}
+
+                void on_text(const char *begin, const char *end)
+                {
+                    auto text = basic_string_view<char>(begin, to_unsigned(end - begin));
+                    context.advance_to(write<char>(context.out(), text));
+                }
+
+                FMT_CONSTEXPR auto on_arg_id() -> int
+                {
+                    return parse_context.next_arg_id();
+                }
+                FMT_CONSTEXPR auto on_arg_id(int id) -> int
+                {
+                    return parse_context.check_arg_id(id), id;
+                }
+                FMT_CONSTEXPR auto on_arg_id(basic_string_view<char> id) -> int
+                {
+                    int arg_id = context.arg_id(id);
+                    if (arg_id < 0)
+                        on_error("argument not found");
+                    return arg_id;
+                }
+
+                FMT_INLINE void on_replacement_field(int id, const char *)
+                {
+                    auto arg = get_arg(context, id);
+                    context.advance_to(visit_format_arg(
+                        default_arg_formatter<char>{context.out(), context.args(),
+                                                    context.locale()},
+                        arg));
+                }
+
+                auto on_format_specs(int id, const char *begin, const char *end)
+                    -> const char *
+                {
+                    auto arg = get_arg(context, id);
+                    if (arg.type() == type::custom_type)
+                    {
+                        parse_context.advance_to(begin);
+                        visit_format_arg(custom_formatter<char>{parse_context, context}, arg);
+                        return parse_context.begin();
+                    }
+                    auto specs = detail::dynamic_format_specs<char>();
+                    begin = parse_format_specs(begin, end, specs, parse_context, arg.type());
+                    detail::handle_dynamic_spec<detail::width_checker>(
+                        specs.width, specs.width_ref, context);
+                    detail::handle_dynamic_spec<detail::precision_checker>(
+                        specs.precision, specs.precision_ref, context);
+                    if (begin == end || *begin != '}')
+                        on_error("missing '}' in format string");
+                    auto f = arg_formatter<char>{context.out(), specs, context.locale()};
+                    context.advance_to(visit_format_arg(f, arg));
+                    return begin;
+                }
+            };
+            detail::parse_format_string<false>(fmt, format_handler(out, fmt, args, loc));
+        }
+    }
+}
 
 efp::String vformat_efp(fmt::string_view fmt, fmt::format_args args)
 {
     // Don't optimize the "{}" case to keep the binary size small and because it
     // can be better optimized in fmt::format anyway.
-    auto buffer = fmt::memory_buffer();
-    fmt::detail::vformat_to(buffer, fmt, args);
+    // auto buffer = fmt::memory_buffer();
+    auto buffer = efp::String();
+    fmt::detail::vformat_to_efp(buffer, fmt, args);
     return efp::String(efp::move(buffer));
 }
 
 namespace efp
 {
-    // #include "fmt/format-inl.h"
-    // namespace detail
-    // {
-
-    // }
-
-    // #include "fmt/format.h"
-    //     template <typename Locale, typename Char>
-    //     auto vformat(const Locale &loc, basic_string_view<Char> fmt,
-    //                  basic_format_args<buffer_context<type_identity_t<Char>>> args)
-    //         -> std::basic_string<Char>
-    //     {
-    //         auto buf = basic_memory_buffer<Char>();
-    //         detail::vformat_to(buf, fmt, args, detail::locale_ref(loc));
-    //         return {buf.data(), buf.size()};
-    //     }
-
-    //     template <typename Locale, FMT_ENABLE_IF(detail::is_locale<Locale>::value)>
-    //     inline auto vformat(const Locale &loc, string_view fmt, format_args args)
-    //         -> std::string
-    //     {
-    //         return detail::vformat(loc, fmt, args);
-    //     }
-
-    // #include "fmt/core.h"
-
-    //     template <typename S>
-    //     inline String vformat(
-    //         const text_style &ts, const S &format_str,
-    //         basic_format_args<buffer_context<type_identity_t<char>>> args)
-    //     {
-    //         basic_memory_buffer<char> buf;
-    //         detail::vformat_to(buf, ts, detail::to_string_view(format_str), args);
-    //         return String(buf);
-    //     }
 
     template <typename... T>
     inline auto format(fmt::format_string<T...> fmt, T &&...args)
