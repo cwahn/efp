@@ -33,6 +33,16 @@ if(MSVC)
     endif()
 endif()
 
+# Check for pthread_create function
+include(CheckFunctionExists)
+check_function_exists(pthread_create HAVE_PTHREAD)
+
+# If pthread_create is found, define a preprocessor macro
+if(HAVE_PTHREAD)
+    add_definitions(-DHAVE_POSIX)
+endif()
+
+
 include(CTest)
 
 find_package(Catch2 QUIET)
