@@ -271,7 +271,7 @@ TEST_CASE("Strings are joined with a delimiter", "[string]")
     {
         Vector<String> empty_strings;
         String delimiter(",");
-        String result = join(delimiter, empty_strings);
+        String result = intercalate(delimiter, empty_strings);
         CHECK(result.size() == 0);
     }
 
@@ -279,7 +279,7 @@ TEST_CASE("Strings are joined with a delimiter", "[string]")
     {
         Vector<String> strings = {String("Hello"), String("World")};
         String delimiter("");
-        String result = join(delimiter, strings);
+        String result = intercalate(delimiter, strings);
         CHECK(result == String("HelloWorld"));
     }
 
@@ -287,7 +287,7 @@ TEST_CASE("Strings are joined with a delimiter", "[string]")
     {
         Vector<String> strings = {String("Hello"), String("World")};
         String delimiter(" ");
-        String result = join(delimiter, strings);
+        String result = intercalate(delimiter, strings);
         CHECK(result == String("Hello World"));
     }
 
@@ -295,7 +295,7 @@ TEST_CASE("Strings are joined with a delimiter", "[string]")
     {
         Vector<String> strings = {String("apple"), String("banana"), String("cherry")};
         String delimiter(", ");
-        String result = join(delimiter, strings);
+        String result = intercalate(delimiter, strings);
         CHECK(result == String("apple, banana, cherry"));
     }
 
@@ -303,7 +303,7 @@ TEST_CASE("Strings are joined with a delimiter", "[string]")
     {
         Vector<String> strings = {String("Hello")};
         String delimiter(", ");
-        String result = join(delimiter, strings);
+        String result = intercalate(delimiter, strings);
         CHECK(result == String("Hello"));
     }
 }

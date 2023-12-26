@@ -363,6 +363,71 @@ namespace efp
         return res;
     }
 
+    template <typename As, typename Ass>
+    using IntercalateReturn =
+        Conditional<
+            All<IsStaticSize<As>, IsStaticSize<Ass>, IsStaticSize<Element<Ass>>>::value,
+            Array<Element<Element<Ass>>, CtSize<Ass>::value *(CtSize<Element<Ass>>::value + CtSize<As>::value) - CtSize<As>::value>,
+            Conditional<
+                All<IsStaticCapacity<As>, IsStaticCapacity<Ass>, IsStaticCapacity<Element<Ass>>>::value,
+                ArrVec<Element<Element<Ass>>, CtCapacity<Ass>::value *(CtCapacity<Element<Ass>>::value + CtCapacity<As>::value) - CtCapacity<As>::value>,
+                Vector<Element<Element<Ass>>>>>;
+
+    // intercalate
+
+    template <typename As, typename Ass>
+    auto intercalate(const As &delimeter, const Ass &ass) -> IntercalateReturn<As, Ass>
+    {
+        static_assert(All<IsSequence<As>, IsSequence<Ass>, IsSequence<Element<Ass>>>::value, "Argument should implement sequence trait.");
+
+        IntercalateReturn<As, Ass> result{};
+        const size_t delimeter_len = length(delimeter);
+        const size_t ass_len = length(ass);
+
+        if (ass_len == 0)
+            return result;
+
+        if (CtSize<IntercalateReturn<As, Ass>>::value == dyn)
+        {
+            size_t result_len = 0;
+            for (size_t i = 0; i < ass_len; ++i)
+            {
+                result_len += length(nth(i, ass));
+            }
+
+            if (ass_len != 0)
+                result_len = result_len + (ass_len - 1) * delimeter_len;
+
+            result.resize(result_len);
+        }
+
+        size_t idx = 0;
+        for (size_t i = 0; i < ass_len - 1; ++i)
+        {
+            const auto &as = nth(i, ass); // Access each as
+            const auto as_len = length(as);
+
+            for (size_t j = 0; j < as_len; ++j)
+            {
+                nth(idx++, result) = nth(j, as);
+            }
+            for (size_t j = 0; j < delimeter_len; ++j)
+            {
+                nth(idx++, result) = nth(j, delimeter);
+            }
+        }
+
+        const auto &as = nth(ass_len - 1, ass); // Last of ass
+        const auto as_len = length(as);
+
+        for (size_t j = 0; j < as_len; ++j)
+        {
+            nth(idx++, result) = nth(j, as);
+        }
+
+        return result;
+    }
+
     // for_index
 
     template <typename F = void (*)(size_t)>

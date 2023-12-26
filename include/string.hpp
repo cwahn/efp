@@ -547,22 +547,22 @@ namespace efp
     // using StringView = SequenceView<const char, dyn, dyn>;
     using StringView = VectorView<const char>;
 
-    inline String join(const String &delimeter, const Vector<String> &strings)
-    {
-        String result{};
+    // inline String join(const String &delimeter, const Vector<String> &strings)
+    // {
+    //     String result{};
 
-        const size_t string_num = length(strings);
-        const auto join_ = [&](int i, const String &s)
-        {
-            result.append_mut(s);
-            if (i < string_num - 1)
-                result.append_mut(delimeter);
-        };
+    //     const size_t string_num = length(strings);
+    //     const auto join_ = [&](int i, const String &s)
+    //     {
+    //         result.append_mut(s);
+    //         if (i < string_num - 1)
+    //             result.append_mut(delimeter);
+    //     };
 
-        for_each_with_index(join_, strings);
+    //     for_each_with_index(join_, strings);
 
-        return result;
-    }
+    //     return result;
+    // }
 
     // todo STL only
 

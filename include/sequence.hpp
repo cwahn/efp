@@ -1466,6 +1466,56 @@ namespace efp
     {
         return as.data();
     }
+
+    // Sequence trait implementation for std::basic_string
+    template <typename A>
+    struct ElementImpl<std::basic_string<A>>
+    {
+        using Type = A;
+    };
+
+    template <typename A>
+    struct CtSizeImpl<std::basic_string<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    struct CtCapacityImpl<std::basic_string<A>>
+    {
+        using Type = Size<dyn>;
+    };
+
+    template <typename A>
+    constexpr auto length(const std::basic_string<A> &as) -> size_t
+    {
+        return as.size();
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, const std::basic_string<A> &as) -> const A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto nth(size_t i, std::basic_string<A> &as) -> A &
+    {
+        return as[i];
+    }
+
+    template <typename A>
+    constexpr auto data(const std::basic_string<A> &as) -> const A *
+    {
+        return as.data();
+    }
+
+    template <typename A>
+    constexpr auto data(std::basic_string<A> &as) -> A *
+    {
+        return as.data();
+    }
+
 };
 
 #endif
