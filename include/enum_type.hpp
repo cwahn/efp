@@ -300,7 +300,7 @@ namespace efp
 #define CASE(i)                                                                            \
     case i:                                                                                \
     {                                                                                      \
-        return overloaded(*(reinterpret_cast<const PackAt<i, As...> *>(outer->storage_))); \
+        return overloaded(*(reinterpret_cast<const PackAt<i < sizeof...(As)? i : sizeof...(As) - 1, As...> *>(outer->storage_))); \
         break;                                                                             \
     }
 

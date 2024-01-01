@@ -153,6 +153,41 @@ TEST_CASE("enum_match")
         CHECK(b == 42);
     }
 
+    SECTION("non-void3")
+    {
+        struct InitState {};
+        struct AState {};
+        struct BState {};
+        struct ErrorState {};
+        struct TerminatedState {};
+
+        using MajorState = efp::Enum<
+            InitState,
+            AState,
+            BState,
+            ErrorState,
+            TerminatedState>;
+
+        MajorState a {InitState{}};
+
+        int b = 42;
+
+        int c = a.match(
+            [&](InitState x)
+            { return b * 0; },
+            [&](AState x)
+            { return b * 1; },
+            [&](BState x)
+            { return b * 2; },
+            [&](ErrorState x)
+            { return b * 3; },
+            [&](TerminatedState x)
+            { return b * 4; }
+            );
+
+        CHECK(b == 42);
+    }
+
     SECTION("wild_card0")
     {
         Enum<Unit, int, double> a = unit;
