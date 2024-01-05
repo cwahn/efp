@@ -8,18 +8,14 @@
 
 using namespace efp;
 
-struct None
-{
+struct None {
 };
 
-TEST_CASE("WildCard")
-{
-    SECTION("Void return")
-    {
+TEST_CASE("WildCard") {
+    SECTION("Void return") {
         bool wild_card_work = false;
 
-        const auto wc = [&]()
-        { wild_card_work = true; };
+        const auto wc = [&]() { wild_card_work = true; };
 
         const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
         wrapped(42);
@@ -27,10 +23,8 @@ TEST_CASE("WildCard")
         CHECK(wild_card_work == true);
     }
 
-    SECTION("Non-void return")
-    {
-        const auto wc = [&]()
-        { return 42; };
+    SECTION("Non-void return") {
+        const auto wc = [&]() { return 42; };
 
         const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
 
@@ -38,8 +32,7 @@ TEST_CASE("WildCard")
     }
 }
 
-TEST_CASE("enum_type")
-{
+TEST_CASE("enum_type") {
     CHECK(sizeof(Enum<int, double>) == 16);
     Enum<int, double> a = 1;
     CHECK(a.index() == 0);
@@ -54,18 +47,39 @@ TEST_CASE("enum_type")
     // CHECK(b.get<int>() == 1);
 }
 
-TEST_CASE("enum_match")
-{
-    SECTION("void0")
-    {
+TEST_CASE("Enum Exteneded Constructor") {
+    SECTION("") {
+        struct A {
+            A(bool arg)
+                : value(arg) {}
+            bool value;
+        };
+        struct B {};
+
+        using SomeEnum = Enum<A, B>;
+
+        CHECK(IsConstructible<bool, bool>::value);
+        CHECK(IsConstructible<A, bool>::value);
+
+        CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+
+        int idx_0 = (int)SomeEnum(true).index();
+        int idx_1 = (int)SomeEnum{A{true}}.index();
+
+        CHECK(idx_0 == idx_1);
+
+        // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+    }
+}
+
+TEST_CASE("enum_match") {
+    SECTION("void0") {
         Enum<int, double> a = 42;
         double b = 0.;
 
         a.match(
-            [&](int x)
-            { b += x; },
-            [&](double x)
-            { b++; });
+            [&](int x) { b += x; },
+            [&](double x) { b++; });
 
         //! Non-exhaustive match will not compile
 
@@ -76,85 +90,64 @@ TEST_CASE("enum_match")
         CHECK(b == 42.);
     }
 
-    SECTION("void1")
-    {
+    SECTION("void1") {
         Enum<int, double> a = 42.;
         double b = 0.;
 
         a.match(
-            [&](int x)
-            { b += x; },
-            [&](double x)
-            { b++; });
+            [&](int x) { b += x; },
+            [&](double x) { b++; });
 
         CHECK(b == 1.);
     }
 
-    SECTION("non-void0")
-    {
+    SECTION("non-void0") {
         Enum<Unit, int> a = unit;
 
         int b = a.match(
-            [&](Unit x)
-            { return -1; },
-            [&](int x)
-            { return 1; });
+            [&](Unit x) { return -1; },
+            [&](int x) { return 1; });
 
         CHECK(b == -1);
     }
 
-    SECTION("non-void1")
-    {
+    SECTION("non-void1") {
         Enum<Unit, int> a = 42;
 
         int b = a.match(
-            [&](Unit x)
-            { return -1; },
-            [&](int x)
-            { return x; });
+            [&](Unit x) { return -1; },
+            [&](int x) { return x; });
 
         CHECK(b == 42);
     }
 
-    SECTION("non-void2")
-    {
+    SECTION("non-void2") {
         Enum<bool, int, double> a = 0;
         int b = 42;
 
         int c = a.match(
-            [&](bool x)
-            { return b * 0; },
-            [&](int x)
-            { return b * 1; },
-            [&](double x)
-            { return b * 2; });
+            [&](bool x) { return b * 0; },
+            [&](int x) { return b * 1; },
+            [&](double x) { return b * 2; });
 
         CHECK(b == 42);
     }
 
-    SECTION("non-void3")
-    {
+    SECTION("non-void3") {
         Enum<bool, int, double, float, long> a = 0;
         int b = 42;
 
         int c = a.match(
-            [&](bool x)
-            { return b * 0; },
-            [&](int x)
-            { return b * 1; },
-            [&](double x)
-            { return b * 2; },
-            [&](float x)
-            { return b * 3; },
-            [&](long x)
-            { return b * 4; }
-            );
+            [&](bool x) { return b * 0; },
+            [&](int x) { return b * 1; },
+            [&](double x) { return b * 2; },
+            [&](float x) { return b * 3; },
+            [&](long x) { return b * 4; });
 
         CHECK(b == 42);
     }
 
-    SECTION("non-void3")
-    {
+    SECTION("non-void3") {
         struct InitState {};
         struct AState {};
         struct BState {};
@@ -168,34 +161,26 @@ TEST_CASE("enum_match")
             ErrorState,
             TerminatedState>;
 
-        MajorState a {InitState{}};
+        MajorState a{InitState{}};
 
         int b = 42;
 
         int c = a.match(
-            [&](InitState x)
-            { return b * 0; },
-            [&](AState x)
-            { return b * 1; },
-            [&](BState x)
-            { return b * 2; },
-            [&](ErrorState x)
-            { return b * 3; },
-            [&](TerminatedState x)
-            { return b * 4; }
-            );
+            [&](InitState x) { return b * 0; },
+            [&](AState x) { return b * 1; },
+            [&](BState x) { return b * 2; },
+            [&](ErrorState x) { return b * 3; },
+            [&](TerminatedState x) { return b * 4; });
 
         CHECK(b == 42);
     }
 
-    SECTION("wild_card0")
-    {
+    SECTION("wild_card0") {
         Enum<Unit, int, double> a = unit;
         double b = 0.;
 
         a.match(
-            [&](int x)
-            { b += 1; },
+            [&](int x) { b += 1; },
             [&]() {});
 
         CHECK(b == 0.);
@@ -207,55 +192,44 @@ TEST_CASE("enum_match")
         //     [&]() {});
     }
 
-    SECTION("wild_card1")
-    {
+    SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
 
-        CHECK(a.match([]()
-                      { return 42; }) == 42);
+        CHECK(a.match([]() { return 42; }) == 42);
     }
 
-    SECTION("non-trivial0")
-    {
+    SECTION("non-trivial0") {
 #include <string>
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
         int c = a.match(
-            [&](bool x)
-            { return b * 0; },
-            [&](std::string x)
-            { return 42; });
+            [&](bool x) { return b * 0; },
+            [&](std::string x) { return 42; });
 
         CHECK(b == 42);
     }
 
-    SECTION("non-trivial0")
-    {
+    SECTION("non-trivial0") {
 #include <string>
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
         int c = a.match(
-            [&](bool x)
-            { return b * 0; },
-            [&](const std::string &x)
-            { return 42; });
+            [&](bool x) { return b * 0; },
+            [&](const std::string& x) { return 42; });
 
         CHECK(b == 42);
     }
 }
 
 // A test function to be pointed to
-int enum_test_function()
-{
+int enum_test_function() {
     return 42;
 }
 
-TEST_CASE("Function Pointer in Enum")
-{
-    SECTION("Storing and retrieving function pointer")
-    {
+TEST_CASE("Function Pointer in Enum") {
+    SECTION("Storing and retrieving function pointer") {
         // Create an Enum instance holding a function pointer
         Enum<int (*)()> my_enum_func_ptr = enum_test_function;
 
@@ -266,11 +240,9 @@ TEST_CASE("Function Pointer in Enum")
         CHECK(retrieved_func_ptr == &enum_test_function);
     }
 
-    SECTION("Storing and retrieving lambda")
-    {
+    SECTION("Storing and retrieving lambda") {
         // ! For some reason this does not work with const qualifier
-        auto enum_test_lambda = [&]()
-        { return 84; };
+        auto enum_test_lambda = [&]() { return 84; };
 
         // Create an Enum instance holding a lambda
         Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);
@@ -284,8 +256,7 @@ TEST_CASE("Function Pointer in Enum")
         CHECK(retrieved_lambda() == enum_test_lambda());
     }
 
-    SECTION("Using function name directly")
-    {
+    SECTION("Using function name directly") {
         // Create an Enum instance using the function name directly
         Enum<int (*)()> my_enum_func_name = enum_test_function;
 
@@ -297,8 +268,7 @@ TEST_CASE("Function Pointer in Enum")
     }
 }
 
-TEST_CASE("EnumAt")
-{
+TEST_CASE("EnumAt") {
     CHECK(IsSame<EnumAt<0, Enum<int, double>>, int>::value);
     CHECK(IsSame<EnumAt<1, Enum<int, double>>, double>::value);
 }
