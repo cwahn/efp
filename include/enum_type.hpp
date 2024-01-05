@@ -113,22 +113,7 @@ public:
         template <typename... Args>
         using Type =
             Size<IsConstructible<First, Args...>::value ? 1 : 0 + ConstructibleCount<Rest...>::template Type<Args...>::value>;
-        // IsConstructible<First, Args...> +
-        //     ConstructibleCount<Rest...>::template Type<Args...>::value;
     };
-
-    // Determine if exactly one type in the pack is constructible with Args...
-    // template <typename... Types>
-    // struct IsUniquelyConstructible {
-    //     template <typename ... Args>
-    //     using Type = False
-    // }
-
-    // template <typename... Types>
-    // struct IsUniquelyConstructible {
-    //     template <typename... Args>
-    //     using Type = Bool<ConstructibleCount<Types...>::template Type<Args...>::value == 1>;
-    // };
 
     template <typename... Args>
     using IsUniquelyConstructible = Bool<ConstructibleCount<As...>::template Type<Args...>::value == 1>;
@@ -149,19 +134,6 @@ public:
             First,
             typename FirstConstructible<Rest...>::template Type<Args...>>::type;
     };
-
-    // Determine the variant type
-    // template <typename... Types>
-    // struct DetermineVariant;
-
-    // template <typename... Types>
-    // struct DetermineVariant {
-    //     template <typename... Args>
-    //     using Type =
-    //         typename EnableIf<
-    //             IsUniquelyConstructible<As...>::template Type<Args...>::value,
-    //             typename FirstConstructible<As...>::template Type<Args...>>::Type;
-    // };
 
     template <typename... Args>
     using DetermineVariant = EnableIf<
@@ -185,6 +157,7 @@ public:
         new (reinterpret_cast<FuncToFuncPtr<A>*>(storage_)) FuncToFuncPtr<A>(efp::move(a));
     }
 
+    // Extended constructor
     // Templated constructor for forwarding arguments to the variants' constructors
     template <
         typename Head,
@@ -208,7 +181,7 @@ public:
     //         switch index_{
     //             // todo macro
     //         }
-    //     }ㅈ
+    //     }
     //     return false;
     // }
 
