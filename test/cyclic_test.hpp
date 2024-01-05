@@ -5,10 +5,8 @@
 
 using namespace efp;
 
-TEST_CASE("Vcb")
-{
-    SECTION("0")
-    {
+TEST_CASE("Vcb") {
+    SECTION("0") {
         Vcb<int, 3> vcb;
         CHECK(IsSame<Element<decltype(vcb)>, int>::value == true);
         CHECK(vcb.size() == 3);
@@ -27,10 +25,8 @@ TEST_CASE("Vcb")
     }
 }
 
-TEST_CASE("Vcq")
-{
-    SECTION("Array")
-    {
+TEST_CASE("Vcq") {
+    SECTION("Array") {
         Vcq<int, 3> vcq;
         CHECK(IsSame<Element<decltype(vcq)>, int>::value == true);
         CHECK(vcq.size() == 0);

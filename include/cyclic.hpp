@@ -7,325 +7,280 @@
 
 #include "sequence.hpp"
 
-namespace efp
+namespace efp {
+template <typename A, size_t n>
+class Vcb
+// : public SequenceBase<Vcb<A, n>>
 {
-    template <typename A, size_t n>
-    class Vcb
-    // : public SequenceBase<Vcb<A, n>>
-    {
-    public:
-        using Element = A;
-        using CtSize = Size<n>;
-        using CtCapcity = Size<n>;
-        using SizeType = size_t;
+public:
+    using Element = A;
+    using CtSize = Size<n>;
+    using CtCapcity = Size<n>;
+    using SizeType = size_t;
 
-        static constexpr size_t ct_size = n;
-        static constexpr size_t ct_capacity = n;
+    static constexpr size_t ct_size = n;
+    static constexpr size_t ct_capacity = n;
 
-        // static_assert(ct_size >= 0, "ct_size must greater or equal than 0.");
-        // static_assert(ct_capacity >= 0, "ct_capacity must greater or equal than 0.");
+    // static_assert(ct_size >= 0, "ct_size must greater or equal than 0.");
+    // static_assert(ct_capacity >= 0, "ct_capacity must greater or equal than 0.");
 
-        Vcb()
-            : buffer_{}
-        {
-            middle_ = buffer_.data() + ct_size;
-            data_ = buffer_.data();
-        }
-
-        A &operator[](const SizeType index)
-        {
-            return data_[index];
-        }
-
-        const A &operator[](const SizeType index) const
-        {
-            return data_[index];
-        }
-
-        void push_back(A value)
-        {
-            data_[0] = value;
-            data_[ct_size] = value;
-
-            ++data_;
-            data_ -= ct_size * (data_ == middle_);
-        }
-
-        constexpr SizeType size() const
-        {
-            return ct_size;
-        }
-
-        A *data()
-        {
-            return data_;
-        }
-
-        const A *data() const
-        {
-            return data_;
-        }
-
-        bool empty() const
-        {
-            return false;
-        }
-
-        const A *begin() const
-        {
-            return data_;
-        }
-
-        A *begin()
-        {
-            return data_;
-        }
-
-        const A *end() const
-        {
-            return data_ + ct_size;
-        }
-
-        A *end()
-        {
-            return data_ + ct_size;
-        }
-
-    private:
-        Array<A, ct_size * 2> buffer_;
-        A *middle_;
-        A *data_;
-    };
-
-    // template <typename A, size_t n>
-    // class SequenceTrait<Vcb<A, n>>
-    // {
-    // public:
-    //     using Element = A;
-    //     static constexpr size_t ct_size = n;
-    //     static constexpr size_t ct_capacity = n;
-    // };
-
-    template <typename A, size_t n>
-    struct ElementImpl<Vcb<A, n>>
-    {
-        using Type = A;
-    };
-
-    template <typename A, size_t n>
-    struct CtSizeImpl<Vcb<A, n>> 
-    {
-        using Type = Size<n>;
-    };
-
-    template <typename A, size_t n>
-    struct CtCapacityImpl<Vcb<A, n>> 
-    {
-        using Type = Size<n>;
-    };
-
-    template <typename A, size_t n>
-    constexpr auto length(const Vcb<A, n> &as) -> Size<n>
-    {
-        return Size<n>{};
+    Vcb()
+        : buffer_{} {
+        middle_ = buffer_.data() + ct_size;
+        data_ = buffer_.data();
     }
 
-    template <typename A, size_t n>
-    constexpr auto nth(size_t i, const Vcb<A, n> &as) -> const A &
-    {
-        return as[i];
+    A& operator[](const SizeType index) {
+        return data_[index];
     }
 
-    template <typename A, size_t n>
-    constexpr auto nth(size_t i, Vcb<A, n> &as) -> A &
-    {
-        return as[i];
+    const A& operator[](const SizeType index) const {
+        return data_[index];
     }
 
-    template <typename A, size_t n>
-    constexpr auto data(const Vcb<A, n> &as) -> const A *
-    {
-        return as.data();
+    void push_back(A value) {
+        data_[0] = value;
+        data_[ct_size] = value;
+
+        ++data_;
+        data_ -= ct_size * (data_ == middle_);
     }
 
-    template <typename A, size_t n>
-    constexpr auto data(Vcb<A, n> &as) -> A *
-    {
-        return as.data();
+    constexpr SizeType size() const {
+        return ct_size;
     }
 
-    template <typename A, size_t n>
-    class Vcq
-    // : public SequenceBase<Vcq<A, n>>
-    {
-    public:
-        using Element = A;
-        using CtSize = Size<dyn>;
-        using CtCapcity = Size<n>;
-        using SizeType = size_t;
+    A* data() {
+        return data_;
+    }
 
-        static constexpr size_t ct_size = dyn;
-        static constexpr size_t ct_capacity = n;
+    const A* data() const {
+        return data_;
+    }
 
-        // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-        // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
+    bool empty() const {
+        return false;
+    }
 
-        Vcq()
-            : buffer_{}
-        {
-            read_ = buffer_.data();
-            write_ = buffer_.data();
-            middle_ = buffer_.data() + ct_capacity;
-        }
-        ~Vcq() {}
+    const A* begin() const {
+        return data_;
+    }
 
-        A &operator[](const SizeType index)
-        {
-            return read_[index];
-        }
+    A* begin() {
+        return data_;
+    }
 
-        const A &operator[](const SizeType index) const
-        {
-            return read_[index];
-        }
+    const A* end() const {
+        return data_ + ct_size;
+    }
 
-        void push_back(const A &value)
-        {
-            write_[0] = value;
-            write_[ct_capacity] = value;
+    A* end() {
+        return data_ + ct_size;
+    }
 
-            ++write_;
-            write_ -= ct_capacity * (write_ == middle_);
+private:
+    Array<A, ct_size * 2> buffer_;
+    A* middle_;
+    A* data_;
+};
 
-            if (size_ < ct_capacity)
-            {
-                ++size_;
-            }
-            else
-            {
-                read_++;
-                read_ -= ct_capacity * (read_ == middle_);
-            }
-        }
-        // ! Undefined if empty
+// template <typename A, size_t n>
+// class SequenceTrait<Vcb<A, n>>
+// {
+// public:
+//     using Element = A;
+//     static constexpr size_t ct_size = n;
+//     static constexpr size_t ct_capacity = n;
+// };
 
-        A pop_front()
-        {
-            A value = *(read_);
-            size_--;
+template <typename A, size_t n>
+struct ElementImpl<Vcb<A, n>> {
+    using Type = A;
+};
 
+template <typename A, size_t n>
+struct CtSizeImpl<Vcb<A, n>> {
+    using Type = Size<n>;
+};
+
+template <typename A, size_t n>
+struct CtCapacityImpl<Vcb<A, n>> {
+    using Type = Size<n>;
+};
+
+template <typename A, size_t n>
+constexpr auto length(const Vcb<A, n>& as) -> Size<n> {
+    return Size<n>{};
+}
+
+template <typename A, size_t n>
+constexpr auto nth(size_t i, const Vcb<A, n>& as) -> const A& {
+    return as[i];
+}
+
+template <typename A, size_t n>
+constexpr auto nth(size_t i, Vcb<A, n>& as) -> A& {
+    return as[i];
+}
+
+template <typename A, size_t n>
+constexpr auto data(const Vcb<A, n>& as) -> const A* {
+    return as.data();
+}
+
+template <typename A, size_t n>
+constexpr auto data(Vcb<A, n>& as) -> A* {
+    return as.data();
+}
+
+template <typename A, size_t n>
+class Vcq
+// : public SequenceBase<Vcq<A, n>>
+{
+public:
+    using Element = A;
+    using CtSize = Size<dyn>;
+    using CtCapcity = Size<n>;
+    using SizeType = size_t;
+
+    static constexpr size_t ct_size = dyn;
+    static constexpr size_t ct_capacity = n;
+
+    // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+    // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
+
+    Vcq()
+        : buffer_{} {
+        read_ = buffer_.data();
+        write_ = buffer_.data();
+        middle_ = buffer_.data() + ct_capacity;
+    }
+    ~Vcq() {}
+
+    A& operator[](const SizeType index) {
+        return read_[index];
+    }
+
+    const A& operator[](const SizeType index) const {
+        return read_[index];
+    }
+
+    void push_back(const A& value) {
+        write_[0] = value;
+        write_[ct_capacity] = value;
+
+        ++write_;
+        write_ -= ct_capacity * (write_ == middle_);
+
+        if (size_ < ct_capacity) {
+            ++size_;
+        } else {
             read_++;
             read_ -= ct_capacity * (read_ == middle_);
-
-            return value;
         }
+    }
+    // ! Undefined if empty
 
-        constexpr SizeType size() const
-        {
-            return size_;
-        }
+    A pop_front() {
+        A value = *(read_);
+        size_--;
 
-        bool empty() const
-        {
-            return size_ == 0;
-        }
+        read_++;
+        read_ -= ct_capacity * (read_ == middle_);
 
-        A *data()
-        {
-            return read_;
-        }
-
-        const A *data() const
-        {
-            return read_;
-        }
-
-        const A *begin() const
-        {
-            return read_;
-        }
-
-        A *begin()
-        {
-            return read_;
-        }
-
-        const A *end() const
-        {
-            return write_ > read_ ? write_ : write_ + ct_capacity;
-        }
-
-        A *end()
-        {
-            return write_ > read_ ? write_ : write_ + ct_capacity;
-        }
-
-    private:
-        Array<A, ct_capacity * 2> buffer_ = {};
-        size_t size_ = 0;
-        A *read_;
-        A *write_;
-        A *middle_;
-    };
-
-    // template <typename A, size_t n>
-    // class SequenceTrait<Vcq<A, n>>
-    // {
-    // public:
-    //     using Element = A;
-    //     static constexpr size_t ct_size = dyn;
-    //     static constexpr size_t ct_capacity = n;
-    // };
-
-    template <typename A, size_t n>
-    struct ElementImpl<Vcq<A, n>>
-    {
-        using Type = A;
-    };
-
-    template <typename A, size_t n>
-    struct CtSizeImpl<Vcq<A, n>>
-    {
-        using Type = Size<dyn>;
-    };
-
-    template <typename A, size_t n>
-    struct CtCapacityImpl<Vcq<A, n>>
-    {
-        using Type = Size<n>;
-    };
-
-    template <typename A, size_t n>
-    constexpr auto length(const Vcq<A, n> &as) -> size_t
-    {
-        return as.size();
+        return value;
     }
 
-    template <typename A, size_t n>
-    constexpr auto nth(size_t i, const Vcq<A, n> &as) -> const A &
-    {
-        return as[i];
+    constexpr SizeType size() const {
+        return size_;
     }
 
-    template <typename A, size_t n>
-    constexpr auto nth(size_t i, Vcq<A, n> &as) -> A &
-    {
-        return as[i];
+    bool empty() const {
+        return size_ == 0;
     }
 
-    template <typename A, size_t n>
-    constexpr auto data(const Vcq<A, n> &as) -> const A *
-    {
-        return as.data();
+    A* data() {
+        return read_;
     }
 
-    template <typename A, size_t n>
-    constexpr auto data(Vcq<A, n> &as) -> A *
-    {
-        return as.data();
+    const A* data() const {
+        return read_;
     }
 
+    const A* begin() const {
+        return read_;
+    }
+
+    A* begin() {
+        return read_;
+    }
+
+    const A* end() const {
+        return write_ > read_ ? write_ : write_ + ct_capacity;
+    }
+
+    A* end() {
+        return write_ > read_ ? write_ : write_ + ct_capacity;
+    }
+
+private:
+    Array<A, ct_capacity * 2> buffer_ = {};
+    size_t size_ = 0;
+    A* read_;
+    A* write_;
+    A* middle_;
+};
+
+// template <typename A, size_t n>
+// class SequenceTrait<Vcq<A, n>>
+// {
+// public:
+//     using Element = A;
+//     static constexpr size_t ct_size = dyn;
+//     static constexpr size_t ct_capacity = n;
+// };
+
+template <typename A, size_t n>
+struct ElementImpl<Vcq<A, n>> {
+    using Type = A;
+};
+
+template <typename A, size_t n>
+struct CtSizeImpl<Vcq<A, n>> {
+    using Type = Size<dyn>;
+};
+
+template <typename A, size_t n>
+struct CtCapacityImpl<Vcq<A, n>> {
+    using Type = Size<n>;
+};
+
+template <typename A, size_t n>
+constexpr auto length(const Vcq<A, n>& as) -> size_t {
+    return as.size();
 }
+
+template <typename A, size_t n>
+constexpr auto nth(size_t i, const Vcq<A, n>& as) -> const A& {
+    return as[i];
+}
+
+template <typename A, size_t n>
+constexpr auto nth(size_t i, Vcq<A, n>& as) -> A& {
+    return as[i];
+}
+
+template <typename A, size_t n>
+constexpr auto data(const Vcq<A, n>& as) -> const A* {
+    return as.data();
+}
+
+template <typename A, size_t n>
+constexpr auto data(Vcq<A, n>& as) -> A* {
+    return as.data();
+}
+
+} // namespace efp
 
 // // BufferArrVec
 

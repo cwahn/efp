@@ -10,8 +10,7 @@ using namespace efp;
 
 constexpr int n = 10000;
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const* argv[]) {
     std::cout << "c, array, n = " << n << std::endl;
 
     std::array<int, n> xs;
@@ -21,55 +20,44 @@ int main(int argc, char const *argv[])
     // Vector<int> ys(n);
     Array<int, n> ys{};
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = square(xs[i]);
     }
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = sqrt<double>(ys[i]);
     }
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = square<double>(ys[i]);
     }
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = sqrt<double>(ys[i]);
     }
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = square<double>(ys[i]);
     }
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = sqrt<double>(ys[i]);
     }
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = square<double>(ys[i]);
     }
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = sqrt<double>(ys[i]);
     }
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = square<double>(ys[i]);
     }
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         ys[i] = sqrt<double>(ys[i]);
     }
 
     double sum = 0;
 
-    for (size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
         sum += ys[i];
     }
 

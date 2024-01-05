@@ -10,17 +10,14 @@ using namespace efp;
 
 constexpr int n = 10000;
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const* argv[]) {
     std::cout << "efp, array, n = " << n << std::endl;
 
     const auto xs = from_function(Size<n>{}, id<int>);
 
-    auto square_mut = [&](double &x)
-    { x = square<double>(x); };
+    auto square_mut = [&](double& x) { x = square<double>(x); };
 
-    auto sqrt_mut = [&](double &x)
-    { x = sqrt<double>(x); };
+    auto sqrt_mut = [&](double& x) { x = sqrt<double>(x); };
 
     auto ys = map(square<double>, xs);
     for_each_mut(sqrt_mut, ys);

@@ -3,8 +3,7 @@
 
 using namespace efp;
 
-int main()
-{
+int main() {
     print("Hello, world!\n");
     const int a = 42;
     print("a: {}\n", a);

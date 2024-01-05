@@ -6,8 +6,7 @@
 
 // EFP_DEF_IMPL_MEMBER_FUNCTION(A, ImplIndexingOperator, operator(), Element<A>, size_t);
 
-int main()
-{
+int main() {
     using namespace efp;
 
     const Array<int, 3> arr{};

@@ -8,18 +8,15 @@
 
 using namespace efp;
 
-TEST_CASE("maybe_construction")
-{
-    SECTION("Nothing")
-    {
+TEST_CASE("maybe_construction") {
+    SECTION("Nothing") {
         Maybe<int> a = nothing;
 
         CHECK(a.has_value() == false);
         CHECK(!a);
     }
 
-    SECTION("Just")
-    {
+    SECTION("Just") {
         Maybe<int> a = 42;
 
         CHECK(a.has_value() == true);
@@ -28,27 +25,22 @@ TEST_CASE("maybe_construction")
     }
 }
 
-TEST_CASE("maybe_functor")
-{
+TEST_CASE("maybe_functor") {
     Maybe<int> a = 2;
-    const auto square = [](int x)
-    { return x * x; };
+    const auto square = [](int x) { return x * x; };
 
     CHECK(fmap(square, a).index() == 1);
     CHECK(fmap(square, a).is_nothing() == false);
     CHECK(fmap(square, a).value() == 4);
 }
 
-int times_2(int x)
-{
+int times_2(int x) {
     return 2 * x;
 }
 
-TEST_CASE("maybe_applicative")
-{
+TEST_CASE("maybe_applicative") {
 
-    SECTION("pure")
-    {
+    SECTION("pure") {
         CHECK(pure<Maybe<int>>(2).value() == 2);
     }
 
@@ -70,17 +62,13 @@ TEST_CASE("maybe_applicative")
     // }
 }
 
-TEST_CASE("maybe_monad")
-{
-    SECTION("bind")
-    {
+TEST_CASE("maybe_monad") {
+    SECTION("bind") {
         Maybe<int> ma = 2;
 
         const auto div_12_by = [](int x)
-            -> Maybe<double>
-        {
-            if (x == 0)
-            {
+            -> Maybe<double> {
+            if (x == 0) {
                 return nothing;
             }
 
@@ -99,15 +87,12 @@ TEST_CASE("maybe_monad")
         CHECK(bind(mc, div_12_by).is_nothing() == true);
     }
 
-    SECTION(">>=")
-    {
+    SECTION(">>=") {
         Maybe<int> ma = 2;
 
         const auto div_12_by = [](int x)
-            -> Maybe<double>
-        {
-            if (x == 0)
-            {
+            -> Maybe<double> {
+            if (x == 0) {
                 return nothing;
             }
 
@@ -170,10 +155,8 @@ TEST_CASE("maybe_monad")
 //     return a;
 // }
 
-TEST_CASE("Maybe as bool")
-{
-    SECTION("0")
-    {
+TEST_CASE("Maybe as bool") {
+    SECTION("0") {
         Maybe<int> a = 42;
         Maybe<int> b = nothing;
 
@@ -193,8 +176,7 @@ TEST_CASE("Maybe as bool")
     // }
 }
 
-TEST_CASE("EnumAt on Maybe")
-{
+TEST_CASE("EnumAt on Maybe") {
     CHECK(IsSame<EnumAt<0, Maybe<int>>, Nothing>::value);
     CHECK(IsSame<EnumAt<1, Maybe<int>>, int>::value);
 }

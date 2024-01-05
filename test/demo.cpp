@@ -3,16 +3,12 @@
 
 using namespace efp;
 
-int main()
-{
-    auto negate = [](int x)
-    { return -x; };
+int main() {
+    auto negate = [](int x) { return -x; };
 
-    auto is_even = [](int x)
-    { return x % 2 == 0; };
+    auto is_even = [](int x) { return x % 2 == 0; };
 
-    auto stdout = [&](int x)
-    { std::cout << x << " "; };
+    auto stdout = [&](int x) { std::cout << x << " "; };
 
     auto as = from_function(IntegralConst<int, 10>{}, id<int>);
 
