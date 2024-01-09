@@ -240,6 +240,15 @@ public:
         return has_value();
     }
 
+    template <typename F>
+    auto map(const F& f)
+        -> Enum<Nothing, CallReturn<F, T>> {
+        if (has_value())
+            return f(value());
+        else
+            return nothing;
+    }
+
 private:
     alignas(maximum_v(alignof(Nothing), alignof(T))) uint8_t storage_[maximum_v(sizeof(Nothing), sizeof(T))];
     uint8_t index_;
@@ -322,11 +331,11 @@ auto operator>>=(const Maybe<A>& ma, const F& f)
 // #define try_(expr) \
 //     ({ auto&& _tmp_##__COUNTER__ = (expr); _tmp_##__COUNTER__ ? _tmp_##__COUNTER__.value() : return nothing })
 
-#define try_(expr)          \
-    auto&& _tmp_ = (expr);  \
-    if (!_tmp_.has_value()) \
-        return nothing;     \
-    _tmp_.value()
+// #define try_(expr)          \
+//     auto&& _tmp_ = (expr);  \
+//     if (!_tmp_.has_value()) \
+//         return nothing;     \
+//     _tmp_.value()
 
 } // namespace efp
 
