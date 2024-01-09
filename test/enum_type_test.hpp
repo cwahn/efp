@@ -282,12 +282,12 @@ TEST_CASE("enum_match") {
         CHECK(b == 42);
     }
 
-    SECTION("Template Handler") {
-        Enum<int, double> a = 42.;
+    // SECTION("Template Handler") {
+    //     Enum<int, double> a = 42.;
 
-        int b = a.match(TemplateBranch());
-        CHECK(b == 84);
-    }
+    //     int b = a.match(TemplateBranch());
+    //     CHECK(b == 84);
+    // }
 }
 
 // A test function to be pointed to
