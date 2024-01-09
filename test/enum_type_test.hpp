@@ -47,6 +47,20 @@ TEST_CASE("enum_type") {
     // CHECK(b.get<int>() == 1);
 }
 
+// template <typename A>
+// struct Cons;
+
+// struct Nil {};
+
+// template <typename A>
+// using List = Enum<Nil, Cons<A>>;
+
+// template <typename A>
+// struct Cons {
+//     A head;
+//     List<A> tail;
+// };
+
 TEST_CASE("Enum Exteneded Constructor") {
     SECTION("Explicit constructor") {
         struct A {
@@ -104,7 +118,19 @@ TEST_CASE("Enum Exteneded Constructor") {
 
         CHECK(NestedEnum{A{}}.index() == NestedEnum{Enum0{A{}}}.index());
     }
+
+    // SECTION("Self referencing Enum") {
+    //     List<int> empty_list = Nil{};
+    //     List<int> one_list = Cons<int>{42, Nil{}};
+    // }
 }
+
+struct TemplateBranch {
+    template <typename A>
+    int operator()(const A& a) {
+        return a * 2;
+    }
+};
 
 TEST_CASE("enum_match") {
     SECTION("void0") {
@@ -254,6 +280,13 @@ TEST_CASE("enum_match") {
             [&](const std::string& x) { return 42; });
 
         CHECK(b == 42);
+    }
+
+    SECTION("Template Handler") {
+        Enum<int, double> a = 42.;
+
+        int b = a.match(TemplateBranch());
+        CHECK(b == 84);
     }
 }
 
