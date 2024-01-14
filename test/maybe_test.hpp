@@ -26,12 +26,23 @@ TEST_CASE("maybe_construction") {
 }
 
 TEST_CASE("maybe_functor") {
-    Maybe<int> a = 2;
-    const auto square = [](int x) { return x * x; };
+    SECTION("map") {
+        Maybe<int> a = 2;
+        const auto square = [](int x) { return x * x; };
 
-    CHECK(fmap(square, a).index() == 1);
-    CHECK(fmap(square, a).is_nothing() == false);
-    CHECK(fmap(square, a).value() == 4);
+        CHECK(a.map(square).index() == 1);
+        CHECK(a.map(square).is_nothing() == false);
+        CHECK(a.map(square).value() == 4);
+    }
+
+    SECTION("fmap") {
+        Maybe<int> a = 2;
+        const auto square = [](int x) { return x * x; };
+
+        CHECK(fmap(square, a).index() == 1);
+        CHECK(fmap(square, a).is_nothing() == false);
+        CHECK(fmap(square, a).value() == 4);
+    }
 }
 
 int times_2(int x) {
