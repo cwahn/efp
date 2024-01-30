@@ -166,6 +166,7 @@ namespace detail {
         friend struct detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct detail::MatchImpl<power_2_ceiling(sizeof...(As)), As...>;
+        friend struct detail::EqualityImpl<power_2_ceiling(sizeof...(As)), As...>;
 
         template <typename A>
         struct IsSameUnary {
