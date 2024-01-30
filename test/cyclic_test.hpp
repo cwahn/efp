@@ -5,6 +5,31 @@
 
 using namespace efp;
 
+// type having checkable side effect on construction and destruction
+struct SideEffectType {
+    static int construction_count;
+    static int destruction_count;
+    static void reset() {
+        construction_count = 0;
+        destruction_count = 0;
+    }
+    SideEffectType() {
+        ++construction_count;
+    }
+    SideEffectType(const SideEffectType&) {
+        ++construction_count;
+    }
+    SideEffectType(SideEffectType&&) {
+        ++construction_count;
+    }
+    ~SideEffectType() {
+        ++destruction_count;
+    }
+};
+
+int SideEffectType::construction_count = 0;
+int SideEffectType::destruction_count = 0;
+
 TEST_CASE("Vcb") {
     SECTION("0") {
         Vcb<int, 3> vcb;
@@ -22,6 +47,26 @@ TEST_CASE("Vcb") {
         CHECK(vcb[0] == 2);
         CHECK(vcb[1] == 3);
         CHECK(vcb[2] == 4);
+    }
+
+    // Through test of it works with non-trivially copyable type by using custom type having side effect on construction and destruction and destruction.
+    SECTION("Non-Trivially Copiable") {
+
+        SideEffectType::reset();
+        CHECK(SideEffectType::construction_count == 0);
+        CHECK(SideEffectType::destruction_count == 0);
+
+        Vcb<SideEffectType, 3> vcb;
+        CHECK(SideEffectType::construction_count == 6);
+        CHECK(SideEffectType::destruction_count == 0);
+
+        vcb.push_back(SideEffectType{});
+        CHECK(SideEffectType::construction_count == 9);
+        CHECK(SideEffectType::destruction_count == 3);
+
+        vcb.push_back(SideEffectType{});
+        CHECK(SideEffectType::construction_count == 12);
+        CHECK(SideEffectType::destruction_count == 6);
     }
 }
 
@@ -61,6 +106,28 @@ TEST_CASE("Vcq") {
         CHECK(vcq.pop_front() == 6);
         CHECK(vcq.pop_front() == 7);
         CHECK(vcq.pop_front() == 8);
+    }
+
+    SECTION("Non-Trivially Copiable") {
+        SideEffectType::reset();
+        CHECK(SideEffectType::construction_count == 0);
+        CHECK(SideEffectType::destruction_count == 0);
+
+        Vcq<SideEffectType, 3> vcq;
+        CHECK(SideEffectType::construction_count == 6);
+        CHECK(SideEffectType::destruction_count == 0);
+
+        vcq.push_back(SideEffectType{});
+        CHECK(SideEffectType::construction_count == 9);
+        CHECK(SideEffectType::destruction_count == 3);
+
+        vcq.push_back(SideEffectType{});
+        CHECK(SideEffectType::construction_count == 12);
+        CHECK(SideEffectType::destruction_count == 6);
+
+        const auto a = vcq.pop_front();
+        CHECK(SideEffectType::construction_count == 13);
+        CHECK(SideEffectType::destruction_count == 8);
     }
 }
 

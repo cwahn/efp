@@ -26,8 +26,8 @@ public:
 
     Vcb()
         : buffer_{} {
-        middle_ = buffer_.data() + ct_size;
-        data_ = buffer_.data();
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_;
     }
 
     A& operator[](const SizeType index) {
@@ -39,8 +39,11 @@ public:
     }
 
     void push_back(A value) {
-        data_[0] = value;
-        data_[ct_size] = value;
+        data_->~A();
+        (data_ + ct_size)->~A();
+
+        new (data_) A{value};
+        new (data_ + ct_size) A{value};
 
         ++data_;
         data_ -= ct_size * (data_ == middle_);
@@ -79,7 +82,9 @@ public:
     }
 
 private:
-    Array<A, ct_size * 2> buffer_;
+    // ? Too many constructor calls
+    // Array<A, ct_size * 2> buffer_;
+    A buffer_[ct_size * 2];
     A* middle_;
     A* data_;
 };
@@ -151,9 +156,12 @@ public:
 
     Vcq()
         : buffer_{} {
-        read_ = buffer_.data();
-        write_ = buffer_.data();
-        middle_ = buffer_.data() + ct_capacity;
+        // read_ = buffer_.data();
+        // write_ = buffer_.data();
+        // middle_ = buffer_.data() + ct_capacity;
+        read_ = buffer_;
+        write_ = buffer_;
+        middle_ = buffer_ + ct_capacity;
     }
     ~Vcq() {}
 
@@ -166,8 +174,14 @@ public:
     }
 
     void push_back(const A& value) {
-        write_[0] = value;
-        write_[ct_capacity] = value;
+        // write_[0] = value;
+        // write_[ct_capacity] = value;
+
+        write_->~A();
+        (write_ + ct_capacity)->~A();
+
+        new (write_) A{value};
+        new (write_ + ct_capacity) A{value};
 
         ++write_;
         write_ -= ct_capacity * (write_ == middle_);
@@ -182,7 +196,9 @@ public:
     // ! Undefined if empty
 
     A pop_front() {
-        A value = *(read_);
+        A value = std::move(*read_);
+        read_->~A();
+        (read_ + ct_capacity)->~A();
         size_--;
 
         read_++;
@@ -224,7 +240,9 @@ public:
     }
 
 private:
-    Array<A, ct_capacity * 2> buffer_ = {};
+    // Array<A, ct_capacity * 2> buffer_ = {};
+    A buffer_[ct_capacity * 2];
+
     size_t size_ = 0;
     A* read_;
     A* write_;
