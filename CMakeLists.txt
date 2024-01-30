@@ -36,7 +36,6 @@ endif()
 include(CTest)
 
 find_package(Catch2 QUIET)
-
 if(NOT Catch2_FOUND)
     # message("Catch2 not found on the system.\nBuild from source.")
     FetchContent_Declare(
