@@ -115,6 +115,13 @@ namespace detail {
         break;                                                                    \
     }
 
+#define DESTROCTOR_CASE(i)                                                        \
+    case i: {                                                                     \
+        using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
+        reinterpret_cast<Variant*>(self._storage)->~Variant();                         \
+        break;                                                                    \
+    } // namespace detail
+
 #define STAMP2(n, x) \
     x(n)             \
         x(n + 1)
@@ -161,6 +168,11 @@ namespace detail {
         // static_assert(false, "n is not power of 2");
     };
 
+    template <size_t n, typename... As>
+    struct DestroctorImpl {
+        // static_assert(false, "n is not power of 2");
+    };
+
     template <typename... As>
     class EnumBase {
 
@@ -169,10 +181,13 @@ namespace detail {
         friend struct detail::CopyImpl;
 
         template <size_t n, typename... Bs>
-        friend struct detail::MatchImpl;
-
-        template <size_t n, typename...Bs>
         friend struct detail::MoveImpl;
+
+        template <size_t n, typename... Bs>
+        friend struct detail::DestroctorImpl;
+
+        template <size_t n, typename... Bs>
+        friend struct detail::MatchImpl;
 
         template <typename A>
         struct IsSameUnary {
@@ -238,9 +253,27 @@ namespace detail {
             detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
         }
 
-        EnumBase(EnumBase&& other)
+        EnumBase& operator=(const EnumBase& other) {
+            if (this != &other) {
+                detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
+            }
+            return *this;
+        }
+
+        EnumBase(EnumBase&& other) noexcept
             : _index(other._index) {
             detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
+        }
+
+        EnumBase& operator=(EnumBase&& other) noexcept {
+            if (this != &other) {
+                detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
+            }
+            return *this;
+        }
+
+        ~EnumBase() {
+            detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this);
         }
 
         // Function name or function type will be automatically converted to function pointer type
@@ -271,8 +304,6 @@ namespace detail {
             // Construct the variant in place
             new (reinterpret_cast<VariantType*>(_storage)) VariantType(forward<Head>(head), forward<Tail>(args)...);
         }
-
-        ~EnumBase() {}
 
         // todo Implement equality operator
         // bool operator==(const EnumBase &other) const
@@ -590,6 +621,96 @@ namespace detail {
         static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
             switch (src._index) {
                 STAMP256(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    // DestroctorImpl
+
+    template <typename... As>
+    struct DestroctorImpl<2, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP2(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<4, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP4(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<8, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP8(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<16, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP16(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<32, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP32(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<64, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP64(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<128, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP128(0, DESTROCTOR_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct DestroctorImpl<256, As...> {
+        static void impl(EnumBase<As...>& self) {
+            switch (self._index) {
+                STAMP256(0, DESTROCTOR_CASE)
             default:
                 throw std::runtime_error("Invalid Enum variant index");
             }

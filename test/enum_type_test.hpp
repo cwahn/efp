@@ -31,6 +31,28 @@ TEST_CASE("Copy constructor", "Enum") {
     }
 }
 
+TEST_CASE("Copy Assignment", "Enum") {
+    SECTION("Trivially copyable") {
+        Enum<int, double> a = 42;
+        Enum<int, double> b = 0;
+        b = a;
+
+        CHECK(a.index() == b.index());
+        CHECK(a.get<int>() == b.get<int>());
+    }
+
+    SECTION("Non-trivially copyable") {
+        Enum<std::string, None> a = std::string("Hello");
+        Enum<std::string, None> b = std::string("World");
+        b = a;
+
+        CHECK(a.index() == b.index());
+        CHECK(a.get<std::string>() == b.get<std::string>());
+
+        // todo check if memroy allocation and freeing is done correctly
+    }
+}
+
 TEST_CASE("Move constructor", "Enum") {
     SECTION("Trivially copyable") {
         Enum<int, double> a = 42;
@@ -50,6 +72,48 @@ TEST_CASE("Move constructor", "Enum") {
         CHECK(b.get<std::string>() == "Hello");
 
         // todo check if memroy allocation and freeing is done correctly
+    }
+}
+
+TEST_CASE("Move Assignment", "Enum") {
+    SECTION("Trivially copyable") {
+        Enum<int, double> a = 42;
+        Enum<int, double> b = 0;
+        b = std::move(a);
+
+        CHECK(b.index() == 0);
+        CHECK(b.get<int>() == 42);
+    }
+
+    SECTION("Non-trivially copyable") {
+        Enum<std::string, None> a = std::string("Hello");
+        Enum<std::string, None> b = std::string("World");
+        b = std::move(a);
+
+        CHECK(b.index() == 0);
+        CHECK(b.get<std::string>() == "Hello");
+
+        // todo check if memroy allocation and freeing is done correctly
+    }
+}
+
+TEST_CASE("Destroctor", "Enum") {
+    // test with custom type having side effect on destruction
+    struct A {
+        bool& side_effect;
+        A(bool& side_effect)
+            : side_effect(side_effect) {}
+        ~A() {
+            side_effect = true;
+        }
+    };
+
+    SECTION("Destructor with side effect") {
+        bool side_effect = false;
+        {
+            Enum<int, A> a = A{side_effect};
+        }
+        CHECK(side_effect == true);
     }
 }
 
