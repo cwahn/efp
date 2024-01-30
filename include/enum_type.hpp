@@ -9,6 +9,24 @@ namespace efp {
 template <typename F>
 using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
 
+// class ClassName {
+// public:
+//     ClassName() {}
+//     ClassName(const ClassName& other) { /* copy constructor implementation */ }
+//     ClassName& operator=(const ClassName& other) {
+//         // copy assignment implementation
+//         return *this;
+//     }
+//     ClassName(ClassName&& other) noexcept { /* move constructor implementation */ }
+//     ClassName& operator=(ClassName&& other) noexcept {
+//         // move assignment implementation
+//         return *this;
+//     }-=
+
+// private:
+//     // Member variables
+// };
+
 // WildCardWrapper
 
 template <typename F>
@@ -71,13 +89,13 @@ struct Overloaded<F, Fs...> : F, Overloaded<Fs...> {
     }
 };
 
-constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
-    return (power >= n) ? power : power_2_ceiling(n, power * 2);
-}
-
 namespace detail {
 
-#define CASE(i)                                                                                                                   \
+    constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
+        return (power >= n) ? power : power_2_ceiling(n, power * 2);
+    }
+
+#define MATCH_CASE(i)                                                                                                             \
     case i: {                                                                                                                     \
         return overloaded(*(reinterpret_cast < const PackAt<i<sizeof...(As) ? i : sizeof...(As) - 1, As...>*>(outer->_storage))); \
         break;                                                                                                                    \
@@ -88,7 +106,14 @@ namespace detail {
         using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
         new (dest._storage) Variant(src.template get<Variant>());                 \
         break;                                                                    \
-    } // namespace detail
+    }
+
+#define MOVE_CASE(i)                                                              \
+    case i: {                                                                     \
+        using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
+        new (dest._storage) Variant(efp::move(src.template move<Variant>()));     \
+        break;                                                                    \
+    }
 
 #define STAMP2(n, x) \
     x(n)             \
@@ -131,6 +156,11 @@ namespace detail {
         // static_assert(false, "n is not power of 2");
     };
 
+    template <size_t n, typename... As>
+    struct MoveImpl {
+        // static_assert(false, "n is not power of 2");
+    };
+
     template <typename... As>
     class EnumBase {
 
@@ -140,6 +170,9 @@ namespace detail {
 
         template <size_t n, typename... Bs>
         friend struct detail::MatchImpl;
+
+        template <size_t n, typename...Bs>
+        friend struct detail::MoveImpl;
 
         template <typename A>
         struct IsSameUnary {
@@ -203,6 +236,11 @@ namespace detail {
         EnumBase(const EnumBase& other)
             : _index(other._index) {
             detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
+        }
+
+        EnumBase(EnumBase&& other)
+            : _index(other._index) {
+            detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
         }
 
         // Function name or function type will be automatically converted to function pointer type
@@ -369,7 +407,7 @@ namespace detail {
                     IsExhaustive<Fs...>::value &&
                     IsWellFormed<Fs...>::value,
                 Common<Return<Fs>...>> {
-            return detail::MatchImpl<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
+            return detail::MatchImpl<detail::power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
         }
 
     private:
@@ -379,6 +417,7 @@ namespace detail {
     };
 
     // template specialization could not be in the class scope.
+    // CopyImpl
 
     template <typename... As>
     struct CopyImpl<2, As...> {
@@ -468,6 +507,97 @@ namespace detail {
         }
     };
 
+    // MoveImpl
+    template <typename... As>
+    struct MoveImpl<2, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP2(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<4, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP4(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<8, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP8(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<16, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP16(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<32, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP32(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<64, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP64(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<128, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP128(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MoveImpl<256, As...> {
+        static void impl(EnumBase<As...>& dest, EnumBase<As...>&& src) {
+            switch (src._index) {
+                STAMP256(0, MOVE_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    // MatchImpl
+
     template <typename... As>
     struct MatchImpl<2, As...> {
         template <typename... Fs>
@@ -476,7 +606,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP2(0, CASE)
+                STAMP2(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -492,7 +622,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP4(0, CASE)
+                STAMP4(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -508,7 +638,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP8(0, CASE)
+                STAMP8(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -524,7 +654,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP16(0, CASE)
+                STAMP16(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -540,7 +670,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP32(0, CASE)
+                STAMP32(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -556,7 +686,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP64(0, CASE)
+                STAMP64(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -572,7 +702,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP128(0, CASE)
+                STAMP128(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -588,7 +718,7 @@ namespace detail {
             const EnumBase<As...>* outer)
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
-                STAMP256(0, CASE)
+                STAMP256(0, MATCH_CASE)
 
             default:
                 throw std::runtime_error("Invalied Enum variant index");
@@ -596,7 +726,7 @@ namespace detail {
         }
     };
 
-#undef CASE
+#undef MATCH_CASE
 #undef STAMP2
 #undef STAMP4
 #undef STAMP8

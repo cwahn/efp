@@ -11,6 +11,48 @@ using namespace efp;
 struct None {
 };
 
+TEST_CASE("Copy constructor", "Enum") {
+    SECTION("Trivially copyable") {
+        Enum<int, double> a = 42;
+        Enum<int, double> b = a;
+
+        CHECK(a.index() == b.index());
+        CHECK(a.get<int>() == b.get<int>());
+    }
+
+    SECTION("Non-trivially copyable") {
+        Enum<std::string, None> a = std::string("Hello");
+        Enum<std::string, None> b = a;
+
+        CHECK(a.index() == b.index());
+        CHECK(a.get<std::string>() == b.get<std::string>());
+
+        // todo check if memroy allocation and freeing is done correctly
+    }
+}
+
+TEST_CASE("Move constructor", "Enum") {
+    SECTION("Trivially copyable") {
+        Enum<int, double> a = 42;
+        const auto a_index = a.index();
+        Enum<int, double> b = std::move(a);
+
+        CHECK(b.index() == a_index);
+        CHECK(b.get<int>() == 42);
+    }
+
+    SECTION("Non-trivially copyable") {
+        Enum<std::string, None> a = std::string("Hello");
+        const auto a_index = a.index();
+        Enum<std::string, None> b = std::move(a);
+
+        CHECK(b.index() == a_index);
+        CHECK(b.get<std::string>() == "Hello");
+
+        // todo check if memroy allocation and freeing is done correctly
+    }
+}
+
 TEST_CASE("WildCard") {
     SECTION("Void return") {
         bool wild_card_work = false;
