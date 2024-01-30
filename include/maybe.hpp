@@ -104,7 +104,7 @@ public:
 // class Enum<Nothing, T> {
 // public:
 //     template <size_t n, typename... Bs>
-//     friend struct Match;
+//     friend struct MatchImpl;
 
 //     using Element = T;
 
@@ -259,7 +259,7 @@ public:
 //                 IsExhaustive<Fs...>::value &&
 //                 IsWellFormed<Fs...>::value,
 //             Common<Return<Fs>...>> {
-//         return detail::Match<power_2_ceiling(2), Nothing, T>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
+//         return detail::MatchImpl<power_2_ceiling(2), Nothing, T>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
 //     }
 
 //     // * Specialization for Maybe

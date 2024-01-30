@@ -76,23 +76,19 @@ constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
 }
 
 namespace detail {
-    template <size_t n, typename... As>
-    struct Match {
-    };
 
-    template <typename... As>
-    class EnumBase {
-    private:
 #define CASE(i)                                                                                                                   \
     case i: {                                                                                                                     \
         return overloaded(*(reinterpret_cast < const PackAt<i<sizeof...(As) ? i : sizeof...(As) - 1, As...>*>(outer->_storage))); \
         break;                                                                                                                    \
     }
 
-#define COPY_CASE(i)                                   \
-    case i: {                                          \
-        new _storage PackAt<i, As...>(other.get<i>()); \
-    }
+#define COPY_CASE(i)                                                              \
+    case i: {                                                                     \
+        using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
+        new (dest._storage) Variant(src.template get<Variant>());                 \
+        break;                                                                    \
+    } // namespace detail
 
 #define STAMP2(n, x) \
     x(n)             \
@@ -126,9 +122,24 @@ namespace detail {
     STAMP128(n, x)     \
     STAMP128(n + 128, x)
 
+    template <size_t n, typename... As>
+    struct MatchImpl {
+    };
+
+    template <size_t n, typename... As>
+    struct CopyImpl {
+        // static_assert(false, "n is not power of 2");
+    };
+
+    template <typename... As>
+    class EnumBase {
+
     public:
         template <size_t n, typename... Bs>
-        friend struct detail::Match;
+        friend struct detail::CopyImpl;
+
+        template <size_t n, typename... Bs>
+        friend struct detail::MatchImpl;
 
         template <typename A>
         struct IsSameUnary {
@@ -191,11 +202,7 @@ namespace detail {
         // todo Support rule of five
         EnumBase(const EnumBase& other)
             : _index(other._index) {
-            switch (_index) {
-
-            default:
-                break;
-            }
+            detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
         }
 
         // Function name or function type will be automatically converted to function pointer type
@@ -249,7 +256,7 @@ namespace detail {
         auto get() const
             -> EnableIf<any_v(IsSame<A, As>::value...), A> {
             if (_index != VariantIndex<A>::value) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return *(reinterpret_cast<const A*>(_storage));
@@ -259,7 +266,7 @@ namespace detail {
         auto get()
             -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...>> {
             if (_index != n) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return *(reinterpret_cast<PackAt<n, As...>*>(_storage));
@@ -269,7 +276,7 @@ namespace detail {
         auto move() const
             -> EnableIf<any_v(IsSame<A, As>::value...), const A&&> {
             if (_index != VariantIndex<A>::value) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return efp::move(*(reinterpret_cast<const A*>(_storage)));
@@ -279,7 +286,7 @@ namespace detail {
         auto move()
             -> EnableIf<any_v(IsSame<A, As>::value...), A&&> {
             if (_index != VariantIndex<A>::value) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return efp::move(*(reinterpret_cast<A*>(_storage)));
@@ -289,7 +296,7 @@ namespace detail {
         auto move() const
             -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...> const&&> {
             if (_index != n) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return efp::move(*(reinterpret_cast<const PackAt<n, As...>*>(_storage)));
@@ -299,7 +306,7 @@ namespace detail {
         auto move()
             -> EnableIf<lt_v(n, sizeof...(As)), PackAt<n, As...>&&> {
             if (_index != n) {
-                abort();
+                throw std::runtime_error("Wrong variant index");
             }
 
             return efp::move(*(reinterpret_cast<PackAt<n, As...>*>(_storage)));
@@ -362,7 +369,7 @@ namespace detail {
                     IsExhaustive<Fs...>::value &&
                     IsWellFormed<Fs...>::value,
                 Common<Return<Fs>...>> {
-            return detail::Match<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
+            return detail::MatchImpl<power_2_ceiling(sizeof...(As)), As...>::impl(Overloaded<MatchBranch<Fs>...>{fs...}, this);
         }
 
     private:
@@ -374,7 +381,95 @@ namespace detail {
     // template specialization could not be in the class scope.
 
     template <typename... As>
-    struct Match<2, As...> {
+    struct CopyImpl<2, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP2(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<4, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP4(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<8, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP8(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<16, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP16(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<32, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP32(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<64, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP64(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<128, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP128(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct CopyImpl<256, As...> {
+        static void impl(EnumBase<As...>& dest, const EnumBase<As...>& src) {
+            switch (src._index) {
+                STAMP256(0, COPY_CASE)
+            default:
+                throw std::runtime_error("Invalid Enum variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct MatchImpl<2, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -384,13 +479,13 @@ namespace detail {
                 STAMP2(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<4, As...> {
+    struct MatchImpl<4, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -400,13 +495,13 @@ namespace detail {
                 STAMP4(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<8, As...> {
+    struct MatchImpl<8, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -416,13 +511,13 @@ namespace detail {
                 STAMP8(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<16, As...> {
+    struct MatchImpl<16, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -432,13 +527,13 @@ namespace detail {
                 STAMP16(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<32, As...> {
+    struct MatchImpl<32, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -448,13 +543,13 @@ namespace detail {
                 STAMP32(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<64, As...> {
+    struct MatchImpl<64, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -464,13 +559,13 @@ namespace detail {
                 STAMP64(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<128, As...> {
+    struct MatchImpl<128, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -480,13 +575,13 @@ namespace detail {
                 STAMP128(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
 
     template <typename... As>
-    struct Match<256, As...> {
+    struct MatchImpl<256, As...> {
         template <typename... Fs>
         static auto impl(
             const Overloaded<Fs...>& overloaded,
@@ -496,7 +591,7 @@ namespace detail {
                 STAMP256(0, CASE)
 
             default:
-                abort();
+                throw std::runtime_error("Invalied Enum variant index");
             }
         }
     };
@@ -525,7 +620,7 @@ auto match(const Enum<As...>& x, const Fs&... fs)
             Enum<As...>::template IsExhaustive<Fs...>::value &&
             Enum<As...>::template IsWellFormed<Fs...>::value,
         Common<Return<Fs>...>> {
-    return Enum<As...>::template Match<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, &x);
+    return Enum<As...>::template MatchImpl<sizeof...(As)>::impl(Overloaded<Fs...>{fs...}, &x);
 }
 
 // EnumAt
