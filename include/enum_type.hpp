@@ -9,24 +9,6 @@ namespace efp {
 template <typename F>
 using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
 
-// class ClassName {
-// public:
-//     ClassName() {}
-//     ClassName(const ClassName& other) { /* copy constructor implementation */ }
-//     ClassName& operator=(const ClassName& other) {
-//         // copy assignment implementation
-//         return *this;
-//     }
-//     ClassName(ClassName&& other) noexcept { /* move constructor implementation */ }
-//     ClassName& operator=(ClassName&& other) noexcept {
-//         // move assignment implementation
-//         return *this;
-//     }-=
-
-// private:
-//     // Member variables
-// };
-
 // WildCardWrapper
 
 template <typename F>
@@ -95,12 +77,6 @@ namespace detail {
         return (power >= n) ? power : power_2_ceiling(n, power * 2);
     }
 
-#define MATCH_CASE(i)                                                                                                             \
-    case i: {                                                                                                                     \
-        return overloaded(*(reinterpret_cast < const PackAt<i<sizeof...(As) ? i : sizeof...(As) - 1, As...>*>(outer->_storage))); \
-        break;                                                                                                                    \
-    }
-
 #define COPY_CASE(i)                                                              \
     case i: {                                                                     \
         using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
@@ -118,8 +94,21 @@ namespace detail {
 #define DESTROCTOR_CASE(i)                                                        \
     case i: {                                                                     \
         using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>; \
-        reinterpret_cast<Variant*>(self._storage)->~Variant();                         \
+        reinterpret_cast<Variant*>(self._storage)->~Variant();                    \
         break;                                                                    \
+    } // namespace detail
+
+#define MATCH_CASE(i)                                                                                                             \
+    case i: {                                                                                                                     \
+        return overloaded(*(reinterpret_cast < const PackAt<i<sizeof...(As) ? i : sizeof...(As) - 1, As...>*>(outer->_storage))); \
+        break;                                                                                                                    \
+    }
+
+#define EQUALITY_CASE(i)                                                                                                  \
+    case i: {                                                                                                             \
+        using Variant = PackAt < i<sizeof...(As) ? i : sizeof...(As) - 1, As...>;                                         \
+        return *(reinterpret_cast<const Variant*>(self._storage)) == *(reinterpret_cast<const Variant*>(other._storage)); \
+        break;                                                                                                            \
     } // namespace detail
 
 #define STAMP2(n, x) \
@@ -155,39 +144,28 @@ namespace detail {
     STAMP128(n + 128, x)
 
     template <size_t n, typename... As>
-    struct MatchImpl {
-    };
+    struct MatchImpl {};
 
     template <size_t n, typename... As>
-    struct CopyImpl {
-        // static_assert(false, "n is not power of 2");
-    };
+    struct CopyImpl {};
 
     template <size_t n, typename... As>
-    struct MoveImpl {
-        // static_assert(false, "n is not power of 2");
-    };
+    struct MoveImpl {};
 
     template <size_t n, typename... As>
-    struct DestroctorImpl {
-        // static_assert(false, "n is not power of 2");
-    };
+    struct DestroctorImpl {};
+
+    template <size_t n, typename... As>
+    struct EqualityImpl {};
 
     template <typename... As>
     class EnumBase {
 
     public:
-        template <size_t n, typename... Bs>
-        friend struct detail::CopyImpl;
-
-        template <size_t n, typename... Bs>
-        friend struct detail::MoveImpl;
-
-        template <size_t n, typename... Bs>
-        friend struct detail::DestroctorImpl;
-
-        template <size_t n, typename... Bs>
-        friend struct detail::MatchImpl;
+        friend struct detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>;
+        friend struct detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>;
+        friend struct detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>;
+        friend struct detail::MatchImpl<power_2_ceiling(sizeof...(As)), As...>;
 
         template <typename A>
         struct IsSameUnary {
@@ -306,16 +284,17 @@ namespace detail {
         }
 
         // todo Implement equality operator
-        // bool operator==(const EnumBase &other) const
-        // {
-        //     if (_index == other._index)
-        //     {
-        //         switch _index{
-        //             // todo macro
-        //         }
-        //     }
-        //     return false;
-        // }
+        bool operator==(const EnumBase& other) const {
+            if (_index != other._index) {
+                return false;
+            }
+
+            return detail::EqualityImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
+        }
+
+        bool operator!=(const EnumBase& other) const {
+            return !(*this == other);
+        }
 
         uint8_t index() const {
             return _index;
@@ -728,7 +707,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP2(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -744,7 +722,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP4(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -760,7 +737,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP8(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -776,7 +752,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP16(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -792,7 +767,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP32(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -808,7 +782,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP64(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -824,7 +797,6 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP128(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
             }
@@ -840,9 +812,98 @@ namespace detail {
             -> Common<Return<Fs>...> {
             switch (outer->_index) {
                 STAMP256(0, MATCH_CASE)
-
             default:
                 throw std::runtime_error("Invalied Enum variant index");
+            }
+        }
+    };
+
+    // EqualityImpl
+
+    template <typename... As>
+    struct EqualityImpl<2, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP2(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<4, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP4(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<8, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP8(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<16, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP16(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<32, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP32(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<64, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP64(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<128, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP128(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
+            }
+        }
+    };
+
+    template <typename... As>
+    struct EqualityImpl<256, As...> {
+        static bool impl(const EnumBase<As...>& self, const EnumBase<As...>& other) {
+            switch (self._index) {
+                STAMP256(0, EQUALITY_CASE)
+            default:
+                throw std::runtime_error("Wrong variant index");
             }
         }
     };

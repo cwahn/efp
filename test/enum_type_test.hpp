@@ -117,6 +117,26 @@ TEST_CASE("Destroctor", "Enum") {
     }
 }
 
+TEST_CASE("Equality", "Enum") {
+    SECTION("Same type") {
+        Enum<int, double> a = 42;
+        Enum<int, double> b = 42;
+        Enum<int, double> c = 0;
+
+        CHECK(a == b);
+        CHECK_FALSE(a == c);
+    }
+
+    SECTION("Different type") {
+        Enum<int, double> a = 42;
+        Enum<int, double> b = 42.;
+        Enum<int, double> c = 0;
+
+        CHECK(a != b);
+        CHECK(a != c);
+    }
+}
+
 TEST_CASE("WildCard") {
     SECTION("Void return") {
         bool wild_card_work = false;
