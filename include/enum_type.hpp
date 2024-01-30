@@ -223,8 +223,12 @@ namespace detail {
             IsUniquelyConstructible<Args...>::value,
             typename FirstConstructible<As...>::template Type<Args...>>;
 
-        // ! Disable default constructor
-        EnumBase() = delete;
+        // Default constructor will construct the first variant if the first variant is default constructible
+        EnumBase()
+            : _index{0} {
+            using Variant = PackAt<0, As...>;
+            new (reinterpret_cast<Variant*>(_storage)) Variant{};
+        }
 
         // todo Support rule of five
         EnumBase(const EnumBase& other)
