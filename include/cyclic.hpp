@@ -30,6 +30,43 @@ public:
         data_ = buffer_;
     }
 
+    Vcb(const Vcb& other)
+        : buffer_{} {
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_ + (other.data_ - other.buffer_);
+
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            new (buffer_ + i) A(other.buffer_[i]);
+        }
+    }
+
+    Vcb& operator=(const Vcb& other) {
+        buffer_ = other.buffer_;
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_ + (other.data_ - other.buffer_);
+        return *this;
+    }
+
+    Vcb(Vcb&& other)
+        : buffer_{std::move(other.buffer_)} {
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_ + (other.data_ - other.buffer_);
+    }
+
+    Vcb operator=(Vcb&& other) {
+        buffer_ = std::move(other.buffer_);
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_ + (other.data_ - other.buffer_);
+        return *this;
+    }
+
+    ~Vcb() {
+        for (size_t i = 0; i < ct_size; ++i) {
+            data_[i].~A();
+            (data_ + ct_size)[i].~A();
+        }
+    }
+
     A& operator[](const SizeType index) {
         return data_[index];
     }
@@ -163,7 +200,12 @@ public:
         write_ = buffer_;
         middle_ = buffer_ + ct_capacity;
     }
-    ~Vcq() {}
+    ~Vcq() {
+        for (size_t i = 0; i < size_; ++i) {
+            read_[i].~A();
+            (read_ + ct_capacity)[i].~A();
+        }
+    }
 
     A& operator[](const SizeType index) {
         return read_[index];
