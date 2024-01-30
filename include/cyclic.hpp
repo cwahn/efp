@@ -200,6 +200,40 @@ public:
         write_ = buffer_;
         middle_ = buffer_ + ct_capacity;
     }
+
+    Vcq(const Vcq& other)
+        : buffer_{} {
+
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+        middle_ = buffer_ + ct_capacity;
+
+        for (size_t i = 0; i < ct_capacity * 2; ++i) {
+            new (buffer_ + i) A(other.buffer_[i]);
+        }
+    }
+
+    Vcq& operator=(const Vcq& other) {
+        buffer_ = other.buffer_;
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+        middle_ = buffer_ + ct_capacity;
+        return *this;
+    }
+
+    Vcq(Vcq&& other) noexcept
+        : buffer_{std::move(other.buffer_)} {
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+        middle_ = buffer_ + ct_capacity;
+    }
+
+    Vcq operator=(Vcq&& other) noexcept {
+        buffer_ = std::move(other.buffer_);
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+    }
+
     ~Vcq() {
         for (size_t i = 0; i < size_; ++i) {
             read_[i].~A();
