@@ -30,9 +30,9 @@ TEST_CASE("maybe_functor") {
         Maybe<int> a = 2;
         const auto square = [](int x) { return x * x; };
 
-        CHECK(a.map(square).index() == 1);
-        CHECK(a.map(square).is_nothing() == false);
-        CHECK(a.map(square).value() == 4);
+        CHECK(a.fmap(square).index() == 1);
+        CHECK(a.fmap(square).is_nothing() == false);
+        CHECK(a.fmap(square).value() == 4);
     }
 
     SECTION("fmap") {

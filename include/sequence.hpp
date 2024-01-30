@@ -79,13 +79,13 @@ public:
 
     void resize(size_t length) {
         if (length != ct_size) {
-            abort();
+            throw std::runtime_error("Array::resize: length must be equal to ct_size");
         }
     }
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            abort();
+            throw std::runtime_error("Array::reserve: capacity must be less than or equal to ct_size");
         }
     }
 
@@ -274,7 +274,7 @@ public:
 
     void resize(size_t length) {
         if (length > ct_capacity || length < 0) {
-            abort();
+            throw std::runtime_error("ArrVec::resize: length must be less than or equal to ct_capacity");
         }
 
         size_ = length;
@@ -282,13 +282,13 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_capacity) {
-            abort();
+            throw std::runtime_error("ArrVec::reserve: capacity must be less than or equal to ct_capacity");
         }
     }
 
     void push_back(const Element& value) {
         if (size_ >= ct_capacity) {
-            abort();
+            throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
             new (&data_[size_]) Element(value);
             ++size_;
@@ -297,7 +297,7 @@ public:
 
     void push_back(Element&& value) {
         if (size_ >= ct_capacity) {
-            abort();
+            throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
             new (&data_[size_]) Element(efp::move(value));
             ++size_;
@@ -306,7 +306,7 @@ public:
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > size_ || size_ == ct_capacity) {
-            abort();
+            throw std::runtime_error("ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity");
         }
 
         for (size_t i = size_; i > index; --i) {
@@ -321,7 +321,7 @@ public:
 
     void pop_back() {
         if (size_ == 0) {
-            abort();
+            std::runtime_error("ArrVec::pop_back: size must be greater than 0");
         }
 
         data_[size_ - 1].~Element();
@@ -337,7 +337,7 @@ public:
 
     void erase(size_t index) {
         if (index < 0 || index >= size_) {
-            abort();
+            throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
         }
         data_[index].~Element();
         for (size_t i = index; i < size_ - 1; ++i) {
@@ -554,7 +554,7 @@ public:
 
     void resize(size_t length) {
         if (length < 0) {
-            abort();
+            throw std::runtime_error("Vector::resize: length must be greater than or equal to 0");
         }
 
         if (length > capacity_) {
@@ -600,7 +600,7 @@ public:
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > size_) {
-            abort();
+            throw std::runtime_error("Vector::insert: index must be less than or equal to size");
         }
         if (size_ >= capacity_) {
             reserve(capacity_ == 0 ? 1 : 2 * capacity_);
@@ -614,7 +614,7 @@ public:
 
     void erase(size_t index) {
         if (index < 0 || index >= size_) {
-            abort();
+            throw std::runtime_error("Vector::erase: index must be less than or equal to size");
         }
 
         data_[index].~Element();
@@ -635,7 +635,7 @@ public:
 
     void pop_back() {
         if (size_ == 0) {
-            abort();
+            throw std::runtime_error("Vector::pop_back: size must be greater than 0");
         }
         data_[size_ - 1].~Element();
         --size_;
@@ -731,7 +731,7 @@ public:
         : data_(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && data_ == nullptr) {
-            abort();
+            throw std::runtime_error("ArrayView::ArrayView: data must not be nullptr for a non-empty view");
         }
     }
 
@@ -757,13 +757,13 @@ public:
 
     void resize(size_t length) {
         if (length > ct_size || length < 0) {
-            abort();
+            throw std::runtime_error("ArrayView::resize: length must be less than or equal to ct_size and greater than or equal to 0");
         }
     }
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            abort();
+            throw std::runtime_error("ArrayView::reserve: capacity must be less than or equal to ct_size");
         }
     }
 
@@ -854,7 +854,7 @@ public:
         : data_(data), size_(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && data_ == nullptr) {
-            abort();
+            throw std::runtime_error("ArrVecView::ArrVecView: data must not be nullptr for a non-empty view");
         }
     }
 
@@ -981,7 +981,7 @@ public:
         : data_(data), size_(size), capacity_(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && data_ == nullptr) {
-            abort();
+            throw std::runtime_error("VectorView::VectorView: data must not be nullptr for a non-empty view");
         }
     }
 

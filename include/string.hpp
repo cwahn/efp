@@ -237,7 +237,7 @@ public:
 
     void resize(int length) {
         if (length < 0) {
-            abort();
+            throw std::runtime_error("length must be greater or equal than 0.");
         }
 
         if (length > capacity_) {
@@ -282,7 +282,7 @@ public:
 
     void erase(int index) {
         if (index < 0 || index >= size_) {
-            abort();
+            throw std::runtime_error("Vector<char>::erase: index out of range");
         }
 
         for (size_t i = index; i < size_ - 1; ++i) {
@@ -367,7 +367,7 @@ public:
         : data_(data), size_(size), capacity_(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && data_ == nullptr) {
-            abort();
+            throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
         }
     }
 
