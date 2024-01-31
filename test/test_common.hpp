@@ -66,8 +66,9 @@ public:
     }
 
     static void release(Resource resource) {
-        auto it = std::find_if(_resources.begin(), _resources.end(),
-                               [resource](const Resource& r) { return r.id == resource.id; });
+        auto it = std::find_if(_resources.begin(), _resources.end(), [resource](const Resource& r) {
+            return r.id == resource.id;
+        });
 
         if (it != _resources.end()) {
             _resources.erase(it);
@@ -77,17 +78,11 @@ public:
         }
     }
 
-    static int double_free_count() {
-        return _double_free_cnt;
-    }
+    static int double_free_count() { return _double_free_cnt; }
 
-    static int remaining_resource_count() {
-        return _resources.size();
-    }
+    static int remaining_resource_count() { return _resources.size(); }
 
-    static bool is_leak_free() {
-        return _resources.empty();
-    }
+    static bool is_leak_free() { return _resources.empty(); }
 
     // Concatenate the values of all resources into a decimal int
     static int resource_state_to_int() {
@@ -98,9 +93,15 @@ public:
         return result;
     }
 
-    static bool is_sound() {
-        return _double_free_cnt == 0 && _resources.empty();
+    static String resource_state_to_string() {
+        const auto to_str = [](const Resource& resource) {
+            return std::to_string(resource.id);
+        };
+        const auto strings = map(to_str, _resources);
+        return intercalate(std::string{", "}, strings);
     }
+
+    static bool is_sound() { return _double_free_cnt == 0 && _resources.empty(); }
 };
 
 thread_local int MockHW::_next_id = 1;
@@ -112,16 +113,14 @@ class MockRaii {
     MockHW::Resource _resource;
 
 public:
-    MockRaii()
-        : _resource(MockHW::acquire()) {}
+    MockRaii() : _resource(MockHW::acquire()) {}
 
     ~MockRaii() {
         if (_resource.id != 0)
             MockHW::release(_resource);
     }
 
-    MockRaii(const MockRaii& other)
-        : _resource(MockHW::acquire()) {
+    MockRaii(const MockRaii& other) : _resource(MockHW::acquire()) {
         // Copy the value from the other resource
         _resource.value = other._resource.value;
     }
@@ -140,10 +139,7 @@ public:
         return *this;
     }
 
-    MockRaii(MockRaii&& other)
-        : _resource(other._resource) {
-        other._resource.id = 0;
-    }
+    MockRaii(MockRaii&& other) : _resource(other._resource) { other._resource.id = 0; }
 
     MockRaii& operator=(MockRaii&& other) {
         if (this != &other) {
@@ -157,9 +153,7 @@ public:
         return *this;
     }
 
-    MockHW::Resource resource() const {
-        return _resource;
-    }
+    MockHW::Resource resource() const { return _resource; }
 };
 
 TEST_CASE("MockHW and MockRaii", "MockHW") {

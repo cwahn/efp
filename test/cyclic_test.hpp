@@ -6,98 +6,99 @@
 
 using namespace efp;
 
-// TEST_CASE("Vcb Rule of 5", "Vcb") {
-//     // use MockHW and MockRaii to check if the rule of 5 is followed
-//     SECTION("New Construction", "Vcb") {
-//         SECTION("Trivially Copiable") {
-//             // todo with int
-//         }
-//         SECTION("Non-Trivially Copiable") {
-//             {
-//                 MockHW::reset();
-//                 Vcb<MockRaii, 3> vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 6);
-//             }
-//             CHECK(MockHW::is_sound());
-//         }
-//     }
+TEST_CASE("Vcb Rule of 5", "Vcb") {
+    // use MockHW and MockRaii to check if the rule of 5 is followed
+    SECTION("New Construction", "Vcb") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcb<MockRaii, 3> vcb;
+                CHECK(MockHW::remaining_resource_count() == 6);
+                // CHECK(MockHW::resource_state_to_string() == "1, 2, 3, 4, 5, 6");
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
 
-//     SECTION("Copy Construction", "Vcb") {
-//         SECTION("Trivially Copiable") {
-//             // todo with int
-//         }
-//         SECTION("Non-Trivially Copiable") {
-//             {
-//                 MockHW::reset();
-//                 Vcb<MockRaii, 3> vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 6);
-//                 CHECK(MockHW::resource_state_to_int() == -1);
+    SECTION("Copy Construction", "Vcb") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcb<MockRaii, 3> vcb;
+                CHECK(MockHW::remaining_resource_count() == 6);
+                CHECK(MockHW::resource_state_to_int() == 123456);
 
-//                 Vcb<MockRaii, 3> vcb_copy = vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 12);
-//                 CHECK(MockHW::resource_state_to_int() == -1);
-//             }
-//             CHECK(MockHW::is_sound());
-//         }
-//     }
+                Vcb<MockRaii, 3> vcb_copy = vcb;
+                CHECK(MockHW::remaining_resource_count() == 12);
+                // CHECK(MockHW::resource_state_to_string() == "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12");
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
 
-//     SECTION("Copy Assignment", "Vcb") {
-//         SECTION("Trivially Copiable") {
-//             // todo with int
-//         }
-//         SECTION("Non-Trivially Copiable") {
-//             {
-//                 MockHW::reset();
-//                 Vcb<MockRaii, 3> vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 6);
+    SECTION("Copy Assignment", "Vcb") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcb<MockRaii, 3> vcb;
+                CHECK(MockHW::remaining_resource_count() == 6);
 
-//                 Vcb<MockRaii, 3> vcb_copy;
-//                 CHECK(MockHW::remaining_resource_count() == 12);
+                Vcb<MockRaii, 3> vcb_copy;
+                CHECK(MockHW::remaining_resource_count() == 12);
 
-//                 vcb_copy = vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 12);
-//             }
-//             CHECK(MockHW::is_sound());
-//         }
-//     }
+                vcb_copy = vcb;
+                CHECK(MockHW::remaining_resource_count() == 12);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
 
-//     SECTION("Move Construction", "Vcb") {
-//         SECTION("Trivially Copiable") {
-//             // todo with int
-//         }
-//         SECTION("Non-Trivially Copiable") {
-//             {
-//                 MockHW::reset();
-//                 Vcb<MockRaii, 3> vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 6);
+    SECTION("Move Construction", "Vcb") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcb<MockRaii, 3> vcb;
+                CHECK(MockHW::remaining_resource_count() == 6);
 
-//                 Vcb<MockRaii, 3> vcb_move = std::move(vcb);
-//                 CHECK(MockHW::remaining_resource_count() == 6);
-//             }
-//             CHECK(MockHW::is_sound());
-//         }
-//     }
+                Vcb<MockRaii, 3> vcb_move = std::move(vcb);
+                CHECK(MockHW::remaining_resource_count() == 6);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
 
-//     SECTION("Move Assignment", "Vcb") {
-//         SECTION("Trivially Copiable") {
-//             // todo with int
-//         }
-//         SECTION("Non-Trivially Copiable") {
-//             {
-//                 MockHW::reset();
-//                 Vcb<MockRaii, 3> vcb;
-//                 CHECK(MockHW::remaining_resource_count() == 6);
+    SECTION("Move Assignment", "Vcb") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcb<MockRaii, 3> vcb;
+                CHECK(MockHW::remaining_resource_count() == 6);
 
-//                 Vcb<MockRaii, 3> vcb_move;
-//                 CHECK(MockHW::remaining_resource_count() == 12);
+                Vcb<MockRaii, 3> vcb_move;
+                CHECK(MockHW::remaining_resource_count() == 12);
 
-//                 vcb_move = std::move(vcb);
-//                 CHECK(MockHW::remaining_resource_count() == 6);
-//             }
-//             CHECK(MockHW::is_sound());
-//         }
-//     }
-// }
+                vcb_move = std::move(vcb);
+                CHECK(MockHW::remaining_resource_count() == 6);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+}
 
 TEST_CASE("Vcb") {
     SECTION("0") {

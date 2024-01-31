@@ -24,8 +24,10 @@ public:
     // static_assert(ct_size >= 0, "ct_size must greater or equal than 0.");
     // static_assert(ct_capacity >= 0, "ct_capacity must greater or equal than 0.");
 
-    Vcb()
-        : buffer_{} {
+    Vcb() {
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            new (buffer_ + i) A{};
+        }
         middle_ = buffer_ + ct_size;
         data_ = buffer_;
     }
@@ -39,7 +41,6 @@ public:
     }
 
     Vcb& operator=(const Vcb& other) {
-        // buffer_ = other.buffer_;
         for (size_t i = 0; i < ct_size * 2; ++i) {
             (buffer_ + i)->~A();
             new (buffer_ + i) A(other.buffer_[i]);
@@ -59,7 +60,6 @@ public:
     }
 
     Vcb operator=(Vcb&& other) {
-        // buffer_ = std::move(other.buffer_);
         for (size_t i = 0; i < ct_size * 2; ++i) {
             (buffer_ + i)->~A();
             new (buffer_ + i) A(std::move(other.buffer_[i]));
@@ -75,13 +75,9 @@ public:
         }
     }
 
-    A& operator[](const SizeType index) {
-        return data_[index];
-    }
+    A& operator[](const SizeType index) { return data_[index]; }
 
-    const A& operator[](const SizeType index) const {
-        return data_[index];
-    }
+    const A& operator[](const SizeType index) const { return data_[index]; }
 
     void push_back(A value) {
         data_->~A();
@@ -94,42 +90,24 @@ public:
         data_ -= ct_size * (data_ == middle_);
     }
 
-    constexpr SizeType size() const {
-        return ct_size;
-    }
+    constexpr SizeType size() const { return ct_size; }
 
-    A* data() {
-        return data_;
-    }
+    A* data() { return data_; }
 
-    const A* data() const {
-        return data_;
-    }
+    const A* data() const { return data_; }
 
-    bool empty() const {
-        return false;
-    }
+    bool empty() const { return false; }
 
-    const A* begin() const {
-        return data_;
-    }
+    const A* begin() const { return data_; }
 
-    A* begin() {
-        return data_;
-    }
+    A* begin() { return data_; }
 
-    const A* end() const {
-        return data_ + ct_size;
-    }
+    const A* end() const { return data_ + ct_size; }
 
-    A* end() {
-        return data_ + ct_size;
-    }
+    A* end() { return data_ + ct_size; }
 
 private:
-    // ? Too many constructor calls
-    // Array<A, ct_size * 2> buffer_;
-    A buffer_[ct_size * 2];
+    RawStorage<A, 2 * ct_size> buffer_;
     A* middle_;
     A* data_;
 };
@@ -143,45 +121,27 @@ private:
 //     static constexpr size_t ct_capacity = n;
 // };
 
-template <typename A, size_t n>
-struct ElementImpl<Vcb<A, n>> {
+template <typename A, size_t n> struct ElementImpl<Vcb<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
-struct CtSizeImpl<Vcb<A, n>> {
+template <typename A, size_t n> struct CtSizeImpl<Vcb<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
-struct CtCapacityImpl<Vcb<A, n>> {
+template <typename A, size_t n> struct CtCapacityImpl<Vcb<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
-constexpr auto length(const Vcb<A, n>& as) -> Size<n> {
-    return Size<n>{};
-}
+template <typename A, size_t n> constexpr auto length(const Vcb<A, n>& as) -> Size<n> { return Size<n>{}; }
 
-template <typename A, size_t n>
-constexpr auto nth(size_t i, const Vcb<A, n>& as) -> const A& {
-    return as[i];
-}
+template <typename A, size_t n> constexpr auto nth(size_t i, const Vcb<A, n>& as) -> const A& { return as[i]; }
 
-template <typename A, size_t n>
-constexpr auto nth(size_t i, Vcb<A, n>& as) -> A& {
-    return as[i];
-}
+template <typename A, size_t n> constexpr auto nth(size_t i, Vcb<A, n>& as) -> A& { return as[i]; }
 
-template <typename A, size_t n>
-constexpr auto data(const Vcb<A, n>& as) -> const A* {
-    return as.data();
-}
+template <typename A, size_t n> constexpr auto data(const Vcb<A, n>& as) -> const A* { return as.data(); }
 
-template <typename A, size_t n>
-constexpr auto data(Vcb<A, n>& as) -> A* {
-    return as.data();
-}
+template <typename A, size_t n> constexpr auto data(Vcb<A, n>& as) -> A* { return as.data(); }
 
 template <typename A, size_t n>
 class Vcq
@@ -199,8 +159,7 @@ public:
     // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
     // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-    Vcq()
-        : buffer_{} {
+    Vcq() : buffer_{} {
         // read_ = buffer_.data();
         // write_ = buffer_.data();
         // middle_ = buffer_.data() + ct_capacity;
@@ -209,8 +168,7 @@ public:
         middle_ = buffer_ + ct_capacity;
     }
 
-    Vcq(const Vcq& other)
-        : buffer_{} {
+    Vcq(const Vcq& other) : buffer_{} {
 
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
@@ -229,8 +187,7 @@ public:
         return *this;
     }
 
-    Vcq(Vcq&& other) noexcept
-        : buffer_{std::move(other.buffer_)} {
+    Vcq(Vcq&& other) noexcept : buffer_{std::move(other.buffer_)} {
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
@@ -249,13 +206,9 @@ public:
         }
     }
 
-    A& operator[](const SizeType index) {
-        return read_[index];
-    }
+    A& operator[](const SizeType index) { return read_[index]; }
 
-    const A& operator[](const SizeType index) const {
-        return read_[index];
-    }
+    const A& operator[](const SizeType index) const { return read_[index]; }
 
     void push_back(const A& value) {
         // write_[0] = value;
@@ -291,37 +244,21 @@ public:
         return value;
     }
 
-    constexpr SizeType size() const {
-        return size_;
-    }
+    constexpr SizeType size() const { return size_; }
 
-    bool empty() const {
-        return size_ == 0;
-    }
+    bool empty() const { return size_ == 0; }
 
-    A* data() {
-        return read_;
-    }
+    A* data() { return read_; }
 
-    const A* data() const {
-        return read_;
-    }
+    const A* data() const { return read_; }
 
-    const A* begin() const {
-        return read_;
-    }
+    const A* begin() const { return read_; }
 
-    A* begin() {
-        return read_;
-    }
+    A* begin() { return read_; }
 
-    const A* end() const {
-        return write_ > read_ ? write_ : write_ + ct_capacity;
-    }
+    const A* end() const { return write_ > read_ ? write_ : write_ + ct_capacity; }
 
-    A* end() {
-        return write_ > read_ ? write_ : write_ + ct_capacity;
-    }
+    A* end() { return write_ > read_ ? write_ : write_ + ct_capacity; }
 
 private:
     // Array<A, ct_capacity * 2> buffer_ = {};
@@ -342,45 +279,27 @@ private:
 //     static constexpr size_t ct_capacity = n;
 // };
 
-template <typename A, size_t n>
-struct ElementImpl<Vcq<A, n>> {
+template <typename A, size_t n> struct ElementImpl<Vcq<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
-struct CtSizeImpl<Vcq<A, n>> {
+template <typename A, size_t n> struct CtSizeImpl<Vcq<A, n>> {
     using Type = Size<dyn>;
 };
 
-template <typename A, size_t n>
-struct CtCapacityImpl<Vcq<A, n>> {
+template <typename A, size_t n> struct CtCapacityImpl<Vcq<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
-constexpr auto length(const Vcq<A, n>& as) -> size_t {
-    return as.size();
-}
+template <typename A, size_t n> constexpr auto length(const Vcq<A, n>& as) -> size_t { return as.size(); }
 
-template <typename A, size_t n>
-constexpr auto nth(size_t i, const Vcq<A, n>& as) -> const A& {
-    return as[i];
-}
+template <typename A, size_t n> constexpr auto nth(size_t i, const Vcq<A, n>& as) -> const A& { return as[i]; }
 
-template <typename A, size_t n>
-constexpr auto nth(size_t i, Vcq<A, n>& as) -> A& {
-    return as[i];
-}
+template <typename A, size_t n> constexpr auto nth(size_t i, Vcq<A, n>& as) -> A& { return as[i]; }
 
-template <typename A, size_t n>
-constexpr auto data(const Vcq<A, n>& as) -> const A* {
-    return as.data();
-}
+template <typename A, size_t n> constexpr auto data(const Vcq<A, n>& as) -> const A* { return as.data(); }
 
-template <typename A, size_t n>
-constexpr auto data(Vcq<A, n>& as) -> A* {
-    return as.data();
-}
+template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { return as.data(); }
 
 } // namespace efp
 
