@@ -159,50 +159,124 @@ public:
     // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
     // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-    Vcq() : buffer_{} {
-        // read_ = buffer_.data();
-        // write_ = buffer_.data();
-        // middle_ = buffer_.data() + ct_capacity;
+    // Vcq() : buffer_{} {
+    //     read_ = buffer_;
+    //     write_ = buffer_;
+    //     middle_ = buffer_ + ct_capacity;
+    // }
+
+    Vcq() {
+        // Buffers are uninitialized
+
         read_ = buffer_;
         write_ = buffer_;
         middle_ = buffer_ + ct_capacity;
     }
 
-    Vcq(const Vcq& other) : buffer_{} {
+    // Vcq(const Vcq& other) {
+    //     for (size_t i = 0; i <  * 2; ++i) {
+    //         new (buffer_ + i) A(other.buffer_[i]);
+    //     }
+
+    //     read_ = buffer_ + (other.read_ - other.buffer_);
+    //     write_ = buffer_ + (other.write_ - other.buffer_);
+    //     middle_ = buffer_ + ct_capacity;
+    // }
+
+    Vcq(const Vcq& other) {
+        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            new (buffer_ + j) A(other.buffer_[i]);
+            new (middle_ + j) A(other.buffer_[i]);
+        }
 
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
-
-        for (size_t i = 0; i < ct_capacity * 2; ++i) {
-            new (buffer_ + i) A(other.buffer_[i]);
-        }
     }
 
+    // Vcq& operator=(const Vcq& other) {
+    //     buffer_ = other.buffer_;
+    //     read_ = buffer_ + (other.read_ - other.buffer_);
+    //     write_ = buffer_ + (other.write_ - other.buffer_);
+    //     middle_ = buffer_ + ct_capacity;
+    //     return *this;
+    // }
+
     Vcq& operator=(const Vcq& other) {
-        buffer_ = other.buffer_;
+        for (size_t i = read_ - buffer_; i < size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            (buffer_ + j)->~A();
+            (middle_ + j)->~A();
+        }
+
+        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            new (buffer_ + j) A(other.buffer_[i]);
+            new (middle_ + j) A(other.buffer_[i]);
+        }
+
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+        middle_ = buffer_ + ct_capacity; // ?
+        return *this;
+    }
+
+    // Vcq(Vcq&& other) noexcept : buffer_{std::move(other.buffer_)} {
+    //     read_ = buffer_ + (other.read_ - other.buffer_);
+    //     write_ = buffer_ + (other.write_ - other.buffer_);
+    //     middle_ = buffer_ + ct_capacity;
+    // }
+
+    Vcq(Vcq&& other) noexcept {
+        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            new (buffer_ + j) A(std::move(other.buffer_[i]));
+            new (middle_ + j) A(std::move(other.buffer_[i]));
+        }
+
+        read_ = buffer_ + (other.read_ - other.buffer_);
+        write_ = buffer_ + (other.write_ - other.buffer_);
+        middle_ = buffer_ + ct_capacity;
+    }
+
+    // Vcq operator=(Vcq&& other) noexcept {
+    //     buffer_ = std::move(other.buffer_);
+    //     read_ = buffer_ + (other.read_ - other.buffer_);
+    //     write_ = buffer_ + (other.write_ - other.buffer_);
+    // }
+
+    Vcq& operator=(Vcq&& other) noexcept {
+        for (size_t i = read_ - buffer_; i < size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            (buffer_ + j)->~A();
+            (middle_ + j)->~A();
+        }
+
+        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            new (buffer_ + j) A(std::move(other.buffer_[i]));
+            new (middle_ + j) A(std::move(other.buffer_[i]));
+        }
+
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
         return *this;
     }
 
-    Vcq(Vcq&& other) noexcept : buffer_{std::move(other.buffer_)} {
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-        middle_ = buffer_ + ct_capacity;
-    }
-
-    Vcq operator=(Vcq&& other) noexcept {
-        buffer_ = std::move(other.buffer_);
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-    }
+    // ~Vcq() {
+    //     for (size_t i = 0; i < size_; ++i) {
+    //         read_[i].~A();
+    //         (read_ + ct_capacity)[i].~A();
+    //     }
+    // }
 
     ~Vcq() {
-        for (size_t i = 0; i < size_; ++i) {
-            read_[i].~A();
-            (read_ + ct_capacity)[i].~A();
+        for (size_t i = read_ - buffer_; i < size_; ++i) {
+            const auto j = i < ct_capacity ? i : i - ct_capacity;
+            (buffer_ + j)->~A();
+            (middle_ + j)->~A();
         }
     }
 
@@ -210,12 +284,32 @@ public:
 
     const A& operator[](const SizeType index) const { return read_[index]; }
 
-    void push_back(const A& value) {
-        // write_[0] = value;
-        // write_[ct_capacity] = value;
+    // void push_back(const A& value) {
+    //     // write_[0] = value;
+    //     // write_[ct_capacity] = value;
 
-        write_->~A();
-        (write_ + ct_capacity)->~A();
+    //     write_->~A();
+    //     (write_ + ct_capacity)->~A();
+
+    //     new (write_) A{value};
+    //     new (write_ + ct_capacity) A{value};
+
+    //     ++write_;
+    //     write_ -= ct_capacity * (write_ == middle_);
+
+    //     if (size_ < ct_capacity) {
+    //         ++size_;
+    //     } else {
+    //         read_++;
+    //         read_ -= ct_capacity * (read_ == middle_);
+    //     }
+    // }
+
+    void push_back(const A& value) {
+        if (size_ == ct_capacity) { // Has to destroy the oldest element if the buffer is full
+            write_->~A();
+            (write_ + ct_capacity)->~A();
+        }
 
         new (write_) A{value};
         new (write_ + ct_capacity) A{value};
@@ -232,8 +326,21 @@ public:
     }
     // ! Undefined if empty
 
+    // A pop_front() {
+    //     A value = std::move(*read_);
+    //     read_->~A();
+    //     (read_ + ct_capacity)->~A();
+    //     size_--;
+
+    //     read_++;
+    //     read_ -= ct_capacity * (read_ == middle_);
+
+    //     return value;
+    // }
+
     A pop_front() {
-        A value = std::move(*read_);
+        A value{std::move(*read_)};
+
         read_->~A();
         (read_ + ct_capacity)->~A();
         size_--;
@@ -262,7 +369,8 @@ public:
 
 private:
     // Array<A, ct_capacity * 2> buffer_ = {};
-    A buffer_[ct_capacity * 2];
+    // A buffer_[ct_capacity * 2];
+    RawStorage<A, 2 * ct_capacity> buffer_;
 
     size_t size_ = 0;
     A* read_;

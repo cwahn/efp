@@ -120,6 +120,105 @@ TEST_CASE("Vcb") {
     }
 }
 
+TEST_CASE("Vcq Rule of 5", "Vcq") {
+    // use MockHW and MockRaii to check if the rule of 5 is followed
+    SECTION("New Construction", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                CHECK(MockHW::remaining_resource_count() == 0);
+                // CHECK(MockHW::resource_state_to_string() == "1, 2, 3, 4, 5, 6");
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Copy Construction", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                CHECK(MockHW::resource_state_to_string() == "");
+                vcq.push_back(MockRaii{});
+                CHECK(MockHW::resource_state_to_string() == "");
+
+                Vcq<MockRaii, 3> vcq_copy = vcq;
+                // CHECK(MockHW::remaining_resource_count() == 8);
+                // CHECK(MockHW::resource_state_to_string() == "");
+            }
+            CHECK(MockHW::is_sound());
+            CHECK(MockHW::resource_state_to_string() == "");
+            CHECK(MockHW::remaining_resource_count() == 0);
+            CHECK(MockHW::double_free_count() == 0);
+        }
+    }
+
+    SECTION("Copy Assignment", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                CHECK(MockHW::remaining_resource_count() == 6);
+
+                Vcq<MockRaii, 3> vcq_copy;
+                CHECK(MockHW::remaining_resource_count() == 12);
+
+                vcq_copy = vcq;
+                CHECK(MockHW::remaining_resource_count() == 12);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move Construction", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                CHECK(MockHW::remaining_resource_count() == 6);
+
+                Vcq<MockRaii, 3> vcq_move = std::move(vcq);
+                CHECK(MockHW::remaining_resource_count() == 6);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move Assignment", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                CHECK(MockHW::remaining_resource_count() == 6);
+
+                Vcq<MockRaii, 3> vcq_move;
+                CHECK(MockHW::remaining_resource_count() == 12);
+
+                vcq_move = std::move(vcq);
+                CHECK(MockHW::remaining_resource_count() == 6);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+}
+
 TEST_CASE("Vcq") {
     SECTION("Array") {
         Vcq<int, 3> vcq;
@@ -157,56 +256,6 @@ TEST_CASE("Vcq") {
         CHECK(vcq.pop_front() == 7);
         CHECK(vcq.pop_front() == 8);
     }
-
-    SECTION("Non-Trivially Copiable") {
-        // NonTrivial::reset();
-        // CHECK(NonTrivial::construction_cnt == 0);
-        // CHECK(NonTrivial::destruction_cnt == 0);
-
-        // Vcq<NonTrivial, 3> vcq;
-        // CHECK(NonTrivial::construction_cnt == 6);
-        // CHECK(NonTrivial::destruction_cnt == 0);
-
-        // vcq.push_back(NonTrivial{});
-        // CHECK(NonTrivial::construction_cnt == 9);
-        // CHECK(NonTrivial::destruction_cnt == 3);
-
-        // vcq.push_back(NonTrivial{});
-        // CHECK(NonTrivial::construction_cnt == 12);
-        // CHECK(NonTrivial::destruction_cnt == 6);
-
-        // const auto a = vcq.pop_front();
-        // CHECK(NonTrivial::construction_cnt == 13);
-        // CHECK(NonTrivial::destruction_cnt == 8);
-    }
 }
-
-// TEST_CASE("BufferArrVec")
-// {
-//     SECTION("0")
-//     {
-//         BufferArrVec<int, 3> as;
-//         CHECK(IsSame<Element<decltype(as)>, int>::value == true);
-//         CHECK(length(as) == 0);
-//         CHECK(length(as) == 0);
-//         CHECK(IsIntegralConst<decltype(length(as))>::value == false);
-//         CHECK(as.empty() == false);
-
-//         as.push_back(1);
-//         CHECK(as[2] == 1);
-//         CHECK(length(as) == 1);
-
-//         as.push_back(2);
-//         CHECK(as[1] == 1);
-//         CHECK(as[2] == 2);
-//         as.push_back(3);
-//         as.push_back(4);
-
-//         CHECK(as[0] == 2);
-//         CHECK(as[1] == 3);
-//         CHECK(as[2] == 4);
-//         CHECK(length(as) == 3);
-//     }
-// }
 
 #endif
