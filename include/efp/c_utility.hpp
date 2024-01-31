@@ -7,8 +7,7 @@ namespace efp {
 // FunctionPosize_terTypeImpl
 
 template <typename, typename...>
-struct FunctionPosize_terTypeImpl {
-};
+struct FunctionPosize_terTypeImpl {};
 
 template <typename F, typename... Args>
 struct FunctionPosize_terTypeImpl<F, Tuple<Args...>> {
@@ -25,14 +24,11 @@ using FunctionPosize_terType = typename FunctionPosize_terTypeImpl<F, Arguments<
 template <typename F>
 struct LambdaPosize_ter {
     template <typename Tpl>
-    struct Helper {
-    };
+    struct Helper {};
 
     template <typename... Args>
     struct Helper<Tuple<Args...>> {
-        static Return<F> call(Args... args) {
-            return (Return<F>)(*(F*)inner_ptr)(args...);
-        }
+        static Return<F> call(Args... args) { return (Return<F>)(*(F*)inner_ptr)(args...); }
     };
 
     static void* inner_ptr;

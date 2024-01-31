@@ -1,56 +1,56 @@
 #ifndef TEST_COMMON_HPP_
 #define TEST_COMMON_HPP_
 
+#include <algorithm>
 #include <array>
 #include <vector>
-#include <algorithm>
 
 #include "efp.hpp"
 
 using namespace efp;
 
-const Array<double, 3> array_3{1., 2., 3.};
-const Array<double, 5> array_5{1., 2., 3., 4., 5.};
+const Array<double, 3> array_3 {1., 2., 3.};
+const Array<double, 5> array_5 {1., 2., 3., 4., 5.};
 
-const ArrVec<double, 3> arrvec_3{1., 2., 3.};
-const ArrVec<double, 5> arrvec_5{1., 2., 3., 4., 5.};
+const ArrVec<double, 3> arrvec_3 {1., 2., 3.};
+const ArrVec<double, 5> arrvec_5 {1., 2., 3., 4., 5.};
 
-const Vector<double> vector_3{1., 2., 3.};
-const Vector<double> vector_5{1., 2., 3., 4., 5.};
+const Vector<double> vector_3 {1., 2., 3.};
+const Vector<double> vector_5 {1., 2., 3., 4., 5.};
 
-const ArrayView<const double, 3> array_view_3{data(array_3)};
-const ArrayView<const double, 5> array_view_5{data(array_5)};
+const ArrayView<const double, 3> array_view_3 {data(array_3)};
+const ArrayView<const double, 5> array_view_5 {data(array_5)};
 
-const ArrVecView<const double, 3> arrvec_view_3{data(vector_3), 3};
-const ArrVecView<const double, 5> arrvec_view_5{data(vector_5), 5};
+const ArrVecView<const double, 3> arrvec_view_3 {data(vector_3), 3};
+const ArrVecView<const double, 5> arrvec_view_5 {data(vector_5), 5};
 
-const VectorView<const double> vector_view_3{data(vector_3), 3};
-const VectorView<const double> vector_view_5{data(vector_5), 5};
+const VectorView<const double> vector_view_3 {data(vector_3), 3};
+const VectorView<const double> vector_view_5 {data(vector_5), 5};
 
 const double c_array_3[3] = {1., 2., 3.};
 const double c_array_5[5] = {1., 2., 3., 4., 5.};
 
-const std::array<double, 3> stl_array_3{1., 2., 3.};
-const std::array<double, 5> stl_array_5{1., 2., 3., 4., 5.};
+const std::array<double, 3> stl_array_3 {1., 2., 3.};
+const std::array<double, 5> stl_array_5 {1., 2., 3., 4., 5.};
 
-const std::vector<double> stl_vector_3{1., 2., 3.};
-const std::vector<double> stl_vector_5{1., 2., 3., 4., 5.};
+const std::vector<double> stl_vector_3 {1., 2., 3.};
+const std::vector<double> stl_vector_5 {1., 2., 3., 4., 5.};
 
 // Thread local side effectful
 
 class MockHW {
-public:
+  public:
     struct Resource {
         int id;
         int value;
     };
 
-private:
+  private:
     static thread_local int _next_id;
     static thread_local std::vector<Resource> _resources;
     static thread_local int _double_free_cnt;
 
-public:
+  public:
     MockHW() {}
 
     // Optional: Method to reset the manager for reuse or testing
@@ -67,23 +67,32 @@ public:
     }
 
     static void release(Resource resource) {
-        auto it = std::find_if(_resources.begin(), _resources.end(), [resource](const Resource& r) {
-            return r.id == resource.id;
-        });
+        auto it = std::find_if(
+            _resources.begin(),
+            _resources.end(),
+            [resource](const Resource& r) { return r.id == resource.id; }
+        );
 
         if (it != _resources.end()) {
             _resources.erase(it);
         } else {
-            // This resource has already been released, incrementing double-free counter
+            // This resource has already been released, incrementing double-free
+            // counter
             ++_double_free_cnt;
         }
     }
 
-    static int double_free_count() { return _double_free_cnt; }
+    static int double_free_count() {
+        return _double_free_cnt;
+    }
 
-    static int remaining_resource_count() { return _resources.size(); }
+    static int remaining_resource_count() {
+        return _resources.size();
+    }
 
-    static bool is_leak_free() { return _resources.empty(); }
+    static bool is_leak_free() {
+        return _resources.empty();
+    }
 
     // Concatenate the values of all resources into a decimal int
     static int resource_state_to_int() {
@@ -99,10 +108,12 @@ public:
             return std::to_string(resource.id);
         };
         const auto strings = map(to_str, _resources);
-        return intercalate(std::string{", "}, strings);
+        return intercalate(std::string {", "}, strings);
     }
 
-    static bool is_sound() { return _double_free_cnt == 0 && _resources.empty(); }
+    static bool is_sound() {
+        return _double_free_cnt == 0 && _resources.empty();
+    }
 };
 
 thread_local int MockHW::_next_id = 1;
@@ -113,7 +124,7 @@ thread_local int MockHW::_double_free_cnt = 0;
 class MockRaii {
     MockHW::Resource _resource;
 
-public:
+  public:
     MockRaii() : _resource(MockHW::acquire()) {}
 
     ~MockRaii() {
@@ -140,7 +151,9 @@ public:
         return *this;
     }
 
-    MockRaii(MockRaii&& other) : _resource(other._resource) { other._resource.id = 0; }
+    MockRaii(MockRaii&& other) : _resource(other._resource) {
+        other._resource.id = 0;
+    }
 
     MockRaii& operator=(MockRaii&& other) {
         if (this != &other) {
@@ -154,7 +167,9 @@ public:
         return *this;
     }
 
-    MockHW::Resource resource() const { return _resource; }
+    MockHW::Resource resource() const {
+        return _resource;
+    }
 };
 
 TEST_CASE("MockHW and MockRaii", "MockHW") {
@@ -162,7 +177,7 @@ TEST_CASE("MockHW and MockRaii", "MockHW") {
         // Test with MockRaii and MockHW
         MockHW::reset();
         {
-            Enum<int, MockRaii> a = MockRaii{};
+            Enum<int, MockRaii> a = MockRaii {};
             CHECK(MockHW::remaining_resource_count() == 1);
             CHECK(MockHW::resource_state_to_int() == 1);
 
@@ -170,7 +185,7 @@ TEST_CASE("MockHW and MockRaii", "MockHW") {
             CHECK(MockHW::remaining_resource_count() == 2);
             CHECK(MockHW::resource_state_to_int() == 12);
 
-            Enum<int, MockRaii> c = MockRaii{};
+            Enum<int, MockRaii> c = MockRaii {};
             CHECK(MockHW::remaining_resource_count() == 3);
             CHECK(MockHW::resource_state_to_int() == 123);
 
