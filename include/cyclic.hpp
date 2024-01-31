@@ -184,8 +184,10 @@ public:
     // }
 
     Vcq(const Vcq& other) {
-        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // ! Error
+        const auto read_offset = other.read_ - other.buffer_;
+        for (size_t i = 0; i < other.size_; ++i) {
+            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             new (buffer_ + j) A(other.buffer_[i]);
             new (middle_ + j) A(other.buffer_[i]);
         }
@@ -205,14 +207,27 @@ public:
     // }
 
     Vcq& operator=(const Vcq& other) {
-        for (size_t i = read_ - buffer_; i < size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = read_ - buffer_; i < size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     (buffer_ + j)->~A();
+        //     (middle_ + j)->~A();
+        // }
+        const auto read_offset = read_ - buffer_;
+        for (size_t i = 0; i < size_; ++i) {
+            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (buffer_ + j)->~A();
             (middle_ + j)->~A();
         }
 
-        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     new (buffer_ + j) A(other.buffer_[i]);
+        //     new (middle_ + j) A(other.buffer_[i]);
+        // }
+        const auto read_offset_other = other.read_ - other.buffer_;
+        for (size_t i = 0; i < other.size_; ++i) {
+            const auto j =
+                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
             new (buffer_ + j) A(other.buffer_[i]);
             new (middle_ + j) A(other.buffer_[i]);
         }
@@ -231,8 +246,15 @@ public:
     // }
 
     Vcq(Vcq&& other) noexcept {
-        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     new (buffer_ + j) A(std::move(other.buffer_[i]));
+        //     new (middle_ + j) A(std::move(other.buffer_[i]));
+        // }
+        const auto read_offset_other = other.read_ - other.buffer_;
+        for (size_t i = 0; i < other.size_; ++i) {
+            const auto j =
+                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
             new (buffer_ + j) A(std::move(other.buffer_[i]));
             new (middle_ + j) A(std::move(other.buffer_[i]));
         }
@@ -250,14 +272,27 @@ public:
     // }
 
     Vcq& operator=(Vcq&& other) noexcept {
-        for (size_t i = read_ - buffer_; i < size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = read_ - buffer_; i < size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     (buffer_ + j)->~A();
+        //     (middle_ + j)->~A();
+        // }
+        const auto read_offset = read_ - buffer_;
+        for (size_t i = 0; i < size_; ++i) {
+            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (buffer_ + j)->~A();
             (middle_ + j)->~A();
         }
 
-        for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     new (buffer_ + j) A(std::move(other.buffer_[i]));
+        //     new (middle_ + j) A(std::move(other.buffer_[i]));
+        // }
+        const auto read_offset_other = other.read_ - other.buffer_;
+        for (size_t i = 0; i < other.size_; ++i) {
+            const auto j =
+                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
             new (buffer_ + j) A(std::move(other.buffer_[i]));
             new (middle_ + j) A(std::move(other.buffer_[i]));
         }
@@ -277,8 +312,14 @@ public:
     // }
 
     ~Vcq() {
-        for (size_t i = read_ - buffer_; i < size_; ++i) {
-            const auto j = i < ct_capacity ? i : i - ct_capacity;
+        // for (size_t i = read_ - buffer_; i < size_; ++i) {
+        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
+        //     (buffer_ + j)->~A();
+        //     (middle_ + j)->~A();
+        // }
+        const auto read_offset = read_ - buffer_;
+        for (size_t i = 0; i < size_; ++i) {
+            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (buffer_ + j)->~A();
             (middle_ + j)->~A();
         }

@@ -149,63 +149,142 @@ TEST_CASE("Vcq Rule of 5", "Vcq") {
                 vcq.push_back(MockRaii{});
 
                 Vcq<MockRaii, 3> vcq_copy = vcq;
-                CHECK(MockHW::is_sound());
             }
+            CHECK(MockHW::is_sound());
         }
 
-        SECTION("Copy Assignment", "Vcq") {
-            SECTION("Trivially Copiable") {
-                // todo with int
-            }
-            SECTION("Non-Trivially Copiable") {
-                {
-                    MockHW::reset();
-                    Vcq<MockRaii, 3> vcq;
-                    vcq.push_back(MockRaii{});
-                    vcq.push_back(MockRaii{});
+        SECTION("Trivially Copiable Full") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable Full") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                // CHECK(MockHW::resource_state_to_string() == "");
+                vcq.push_back(MockRaii{});
+                // CHECK(MockHW::resource_state_to_string() == "");
+                vcq.push_back(MockRaii{});
+                // CHECK(MockHW::resource_state_to_string() == "");
+                vcq.push_back(MockRaii{});
+                // CHECK(MockHW::resource_state_to_string() == "");
 
-                    Vcq<MockRaii, 3> vcq_copy;
-
-                    vcq_copy = vcq;
-                }
-                CHECK(MockHW::is_sound());
+                Vcq<MockRaii, 3> vcq_copy = vcq;
+                CHECK(vcq.size() == 3);
+                // CHECK(MockHW::resource_state_to_string() == "");
             }
+            CHECK(MockHW::is_sound());
+            // CHECK(MockHW::resource_state_to_string() == "");
+        }
+    }
+
+    SECTION("Copy Assignment", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+
+                Vcq<MockRaii, 3> vcq_copy;
+
+                vcq_copy = vcq;
+            }
+            CHECK(MockHW::is_sound());
         }
 
-        SECTION("Move Construction", "Vcq") {
-            SECTION("Trivially Copiable") {
-                // todo with int
-            }
-            SECTION("Non-Trivially Copiable") {
-                {
-                    MockHW::reset();
-                    Vcq<MockRaii, 3> vcq;
-                    vcq.push_back(MockRaii{});
-                    vcq.push_back(MockRaii{});
+        SECTION("Trivially Copiable Full") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable Full") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
 
-                    Vcq<MockRaii, 3> vcq_move = std::move(vcq);
-                }
-                CHECK(MockHW::is_sound());
+                Vcq<MockRaii, 3> vcq_copy;
+
+                vcq_copy = vcq;
             }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move Construction", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+
+                Vcq<MockRaii, 3> vcq_move = std::move(vcq);
+            }
+            CHECK(MockHW::is_sound());
         }
 
-        SECTION("Move Assignment", "Vcq") {
-            SECTION("Trivially Copiable") {
-                // todo with int
-            }
-            SECTION("Non-Trivially Copiable") {
-                {
-                    MockHW::reset();
-                    Vcq<MockRaii, 3> vcq;
-                    vcq.push_back(MockRaii{});
-                    vcq.push_back(MockRaii{});
+        SECTION("Trivially Copiable Full") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable Full") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
 
-                    Vcq<MockRaii, 3> vcq_move;
-
-                    vcq_move = std::move(vcq);
-                }
-                CHECK(MockHW::is_sound());
+                Vcq<MockRaii, 3> vcq_move = std::move(vcq);
             }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move Assignment", "Vcq") {
+        SECTION("Trivially Copiable") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+
+                Vcq<MockRaii, 3> vcq_move;
+
+                vcq_move = std::move(vcq);
+            }
+            CHECK(MockHW::is_sound());
+        }
+
+        SECTION("Trivially Copiable Full") {
+            // todo with int
+        }
+        SECTION("Non-Trivially Copiable Full") {
+            {
+                MockHW::reset();
+                Vcq<MockRaii, 3> vcq;
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+                vcq.push_back(MockRaii{});
+
+                Vcq<MockRaii, 3> vcq_move;
+
+                vcq_move = std::move(vcq);
+            }
+            CHECK(MockHW::is_sound());
         }
     }
 }
