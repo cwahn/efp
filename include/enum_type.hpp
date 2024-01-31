@@ -1,7 +1,7 @@
 #ifndef SUM_TYPE_HPP_
 #define SUM_TYPE_HPP_
 
-#include "sfinae.hpp"
+#include "meta.hpp"
 
 namespace efp {
 // Is WildCard
@@ -238,6 +238,9 @@ namespace detail {
 
         EnumBase& operator=(const EnumBase& other) {
             if (this != &other) {
+                // Should distroy the current variant
+                detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this);
+
                 _index = other._index;
                 detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
             }
@@ -247,12 +250,19 @@ namespace detail {
         EnumBase(EnumBase&& other) noexcept
             : _index(other._index) {
             detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
+            // Destructor calling will be done for the moved object.
+            // Behavior is up to each variant.
         }
 
         EnumBase& operator=(EnumBase&& other) noexcept {
             if (this != &other) {
+                // Should distroy the current variant
+                detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this);
+
                 _index = other._index;
                 detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
+                // Destructor calling will be done for the moved object.
+                // Behavior is up to each
             }
             return *this;
         }

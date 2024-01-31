@@ -5,7 +5,7 @@
 // However, actual capacity does means the length of memory safe to access.
 
 #include "cpp_core.hpp"
-#include "sfinae.hpp"
+#include "meta.hpp"
 #include "trait.hpp"
 
 // todo Move and copy assigment operator sort out

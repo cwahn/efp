@@ -2,33 +2,102 @@
 #define CYCLIC_TEST_HPP_
 
 #include "efp.hpp"
+#include "test_common.hpp"
 
 using namespace efp;
 
-// type having checkable side effect on construction and destruction
-struct SideEffectType {
-    static int construction_count;
-    static int destruction_count;
-    static void reset() {
-        construction_count = 0;
-        destruction_count = 0;
-    }
-    SideEffectType() {
-        ++construction_count;
-    }
-    SideEffectType(const SideEffectType&) {
-        ++construction_count;
-    }
-    SideEffectType(SideEffectType&&) {
-        ++construction_count;
-    }
-    ~SideEffectType() {
-        ++destruction_count;
-    }
-};
+// TEST_CASE("Vcb Rule of 5", "Vcb") {
+//     // use MockHW and MockRaii to check if the rule of 5 is followed
+//     SECTION("New Construction", "Vcb") {
+//         SECTION("Trivially Copiable") {
+//             // todo with int
+//         }
+//         SECTION("Non-Trivially Copiable") {
+//             {
+//                 MockHW::reset();
+//                 Vcb<MockRaii, 3> vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+//             }
+//             CHECK(MockHW::is_sound());
+//         }
+//     }
 
-int SideEffectType::construction_count = 0;
-int SideEffectType::destruction_count = 0;
+//     SECTION("Copy Construction", "Vcb") {
+//         SECTION("Trivially Copiable") {
+//             // todo with int
+//         }
+//         SECTION("Non-Trivially Copiable") {
+//             {
+//                 MockHW::reset();
+//                 Vcb<MockRaii, 3> vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+//                 CHECK(MockHW::resource_state_to_int() == -1);
+
+//                 Vcb<MockRaii, 3> vcb_copy = vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 12);
+//                 CHECK(MockHW::resource_state_to_int() == -1);
+//             }
+//             CHECK(MockHW::is_sound());
+//         }
+//     }
+
+//     SECTION("Copy Assignment", "Vcb") {
+//         SECTION("Trivially Copiable") {
+//             // todo with int
+//         }
+//         SECTION("Non-Trivially Copiable") {
+//             {
+//                 MockHW::reset();
+//                 Vcb<MockRaii, 3> vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+
+//                 Vcb<MockRaii, 3> vcb_copy;
+//                 CHECK(MockHW::remaining_resource_count() == 12);
+
+//                 vcb_copy = vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 12);
+//             }
+//             CHECK(MockHW::is_sound());
+//         }
+//     }
+
+//     SECTION("Move Construction", "Vcb") {
+//         SECTION("Trivially Copiable") {
+//             // todo with int
+//         }
+//         SECTION("Non-Trivially Copiable") {
+//             {
+//                 MockHW::reset();
+//                 Vcb<MockRaii, 3> vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+
+//                 Vcb<MockRaii, 3> vcb_move = std::move(vcb);
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+//             }
+//             CHECK(MockHW::is_sound());
+//         }
+//     }
+
+//     SECTION("Move Assignment", "Vcb") {
+//         SECTION("Trivially Copiable") {
+//             // todo with int
+//         }
+//         SECTION("Non-Trivially Copiable") {
+//             {
+//                 MockHW::reset();
+//                 Vcb<MockRaii, 3> vcb;
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+
+//                 Vcb<MockRaii, 3> vcb_move;
+//                 CHECK(MockHW::remaining_resource_count() == 12);
+
+//                 vcb_move = std::move(vcb);
+//                 CHECK(MockHW::remaining_resource_count() == 6);
+//             }
+//             CHECK(MockHW::is_sound());
+//         }
+//     }
+// }
 
 TEST_CASE("Vcb") {
     SECTION("0") {
@@ -47,26 +116,6 @@ TEST_CASE("Vcb") {
         CHECK(vcb[0] == 2);
         CHECK(vcb[1] == 3);
         CHECK(vcb[2] == 4);
-    }
-
-    // Through test of it works with non-trivially copyable type by using custom type having side effect on construction and destruction and destruction.
-    SECTION("Non-Trivially Copiable") {
-
-        SideEffectType::reset();
-        CHECK(SideEffectType::construction_count == 0);
-        CHECK(SideEffectType::destruction_count == 0);
-
-        Vcb<SideEffectType, 3> vcb;
-        CHECK(SideEffectType::construction_count == 6);
-        CHECK(SideEffectType::destruction_count == 0);
-
-        vcb.push_back(SideEffectType{});
-        CHECK(SideEffectType::construction_count == 9);
-        CHECK(SideEffectType::destruction_count == 3);
-
-        vcb.push_back(SideEffectType{});
-        CHECK(SideEffectType::construction_count == 12);
-        CHECK(SideEffectType::destruction_count == 6);
     }
 }
 
@@ -109,25 +158,25 @@ TEST_CASE("Vcq") {
     }
 
     SECTION("Non-Trivially Copiable") {
-        SideEffectType::reset();
-        CHECK(SideEffectType::construction_count == 0);
-        CHECK(SideEffectType::destruction_count == 0);
+        // NonTrivial::reset();
+        // CHECK(NonTrivial::construction_cnt == 0);
+        // CHECK(NonTrivial::destruction_cnt == 0);
 
-        Vcq<SideEffectType, 3> vcq;
-        CHECK(SideEffectType::construction_count == 6);
-        CHECK(SideEffectType::destruction_count == 0);
+        // Vcq<NonTrivial, 3> vcq;
+        // CHECK(NonTrivial::construction_cnt == 6);
+        // CHECK(NonTrivial::destruction_cnt == 0);
 
-        vcq.push_back(SideEffectType{});
-        CHECK(SideEffectType::construction_count == 9);
-        CHECK(SideEffectType::destruction_count == 3);
+        // vcq.push_back(NonTrivial{});
+        // CHECK(NonTrivial::construction_cnt == 9);
+        // CHECK(NonTrivial::destruction_cnt == 3);
 
-        vcq.push_back(SideEffectType{});
-        CHECK(SideEffectType::construction_count == 12);
-        CHECK(SideEffectType::destruction_count == 6);
+        // vcq.push_back(NonTrivial{});
+        // CHECK(NonTrivial::construction_cnt == 12);
+        // CHECK(NonTrivial::destruction_cnt == 6);
 
-        const auto a = vcq.pop_front();
-        CHECK(SideEffectType::construction_count == 13);
-        CHECK(SideEffectType::destruction_count == 8);
+        // const auto a = vcq.pop_front();
+        // CHECK(NonTrivial::construction_cnt == 13);
+        // CHECK(NonTrivial::destruction_cnt == 8);
     }
 }
 

@@ -1,7 +1,7 @@
 #ifndef ENUM_TYPE_TEST_HPP_
 #define ENUM_TYPE_TEST_HPP_
 
-#include "catch2/catch_test_macros.hpp"
+// #include "catch2/catch_test_macros.hpp"
 
 #include "efp.hpp"
 #include "test_common.hpp"
@@ -11,7 +11,124 @@ using namespace efp;
 struct None {
 };
 
-TEST_CASE("Copy constructor", "Enum") {
+TEST_CASE("Enum Rule of 5", "Enum") {
+    // use MockHW and MockRaii to check if the rule of 5 is followed
+    SECTION("New constructor", "Enum") {
+        SECTION("Trivially copyable") {
+            Enum<int, double> a = 42;
+            CHECK(a.index() == 0);
+            CHECK(a.get<int>() == 42);
+        }
+
+        SECTION("Non-trivially copyable") {
+            {
+                MockHW::reset();
+                Enum<int, MockRaii> a = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 1);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Copy Constructor") {
+        SECTION("Trivially copyable") {
+            Enum<int, double> a = 42;
+            Enum<int, double> b = a;
+
+            CHECK(a.index() == b.index());
+            CHECK(a.get<int>() == b.get<int>());
+        }
+
+        SECTION("Non-trivially copyable") {
+            {
+                MockHW::reset();
+                Enum<int, MockRaii> a = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 1);
+
+                Enum<int, MockRaii> b = a;
+                CHECK(MockHW::resource_state_to_int() == 12);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Copy Assignment") {
+        SECTION("Trivially copyable") {
+            Enum<int, double> a = 42;
+            Enum<int, double> b = 0;
+            b = a;
+
+            CHECK(a.index() == b.index());
+            CHECK(a.get<int>() == b.get<int>());
+        }
+
+        SECTION("Non-trivially copyable") {
+            {
+                MockHW::reset();
+                Enum<int, MockRaii> a = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 1);
+
+                Enum<int, MockRaii> b = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 12);
+
+                b = a;
+                CHECK(MockHW::resource_state_to_int() == 13);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move constructor") {
+        SECTION("Trivially copyable") {
+            Enum<int, double> a = 42;
+            const auto a_index = a.index();
+            Enum<int, double> b = std::move(a);
+
+            CHECK(b.index() == a_index);
+            CHECK(b.get<int>() == 42);
+        }
+
+        SECTION("Non-trivially copyable") {
+            {
+                MockHW::reset();
+                Enum<int, MockRaii> a = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 1);
+
+                Enum<int, MockRaii> b = std::move(a);
+                CHECK(MockHW::resource_state_to_int() == 1);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+
+    SECTION("Move Assignment") {
+        SECTION("Trivially copyable") {
+            Enum<int, double> a = 42;
+            Enum<int, double> b = 0;
+            b = std::move(a);
+
+            CHECK(b.index() == 0);
+            CHECK(b.get<int>() == 42);
+        }
+
+        SECTION("Non-trivially copyable") {
+            {
+                MockHW::reset();
+                Enum<int, MockRaii> a = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 1);
+
+                Enum<int, MockRaii> b = MockRaii{};
+                CHECK(MockHW::resource_state_to_int() == 12);
+
+                b = std::move(a);
+                CHECK(MockHW::resource_state_to_int() == 1);
+            }
+            CHECK(MockHW::is_sound());
+        }
+    }
+}
+
+TEST_CASE("Copy constructor") {
     SECTION("Trivially copyable") {
         Enum<int, double> a = 42;
         Enum<int, double> b = a;
@@ -21,101 +138,96 @@ TEST_CASE("Copy constructor", "Enum") {
     }
 
     SECTION("Non-trivially copyable") {
-        Enum<std::string, None> a = std::string("Hello");
-        Enum<std::string, None> b = a;
-
-        CHECK(a.index() == b.index());
-        CHECK(a.get<std::string>() == b.get<std::string>());
-
-        // todo check if memroy allocation and freeing is done correctly
-    }
-}
-
-TEST_CASE("Copy Assignment", "Enum") {
-    SECTION("Trivially copyable") {
-        Enum<int, double> a = 42;
-        Enum<int, double> b = 0;
-        b = a;
-
-        CHECK(a.index() == b.index());
-        CHECK(a.get<int>() == b.get<int>());
-    }
-
-    SECTION("Non-trivially copyable") {
-        Enum<std::string, None> a = std::string("Hello");
-        Enum<std::string, None> b = std::string("World");
-        b = a;
-
-        CHECK(a.index() == b.index());
-        CHECK(a.get<std::string>() == b.get<std::string>());
-
-        // todo check if memroy allocation and freeing is done correctly
-    }
-}
-
-TEST_CASE("Move constructor", "Enum") {
-    SECTION("Trivially copyable") {
-        Enum<int, double> a = 42;
-        const auto a_index = a.index();
-        Enum<int, double> b = std::move(a);
-
-        CHECK(b.index() == a_index);
-        CHECK(b.get<int>() == 42);
-    }
-
-    SECTION("Non-trivially copyable") {
-        Enum<std::string, None> a = std::string("Hello");
-        const auto a_index = a.index();
-        Enum<std::string, None> b = std::move(a);
-
-        CHECK(b.index() == a_index);
-        CHECK(b.get<std::string>() == "Hello");
-
-        // todo check if memroy allocation and freeing is done correctly
-    }
-}
-
-TEST_CASE("Move Assignment", "Enum") {
-    SECTION("Trivially copyable") {
-        Enum<int, double> a = 42;
-        Enum<int, double> b = 0;
-        b = std::move(a);
-
-        CHECK(b.index() == 0);
-        CHECK(b.get<int>() == 42);
-    }
-
-    SECTION("Non-trivially copyable") {
-        Enum<std::string, None> a = std::string("Hello");
-        Enum<std::string, None> b = std::string("World");
-        b = std::move(a);
-
-        CHECK(b.index() == 0);
-        CHECK(b.get<std::string>() == "Hello");
-
-        // todo check if memroy allocation and freeing is done correctly
-    }
-}
-
-TEST_CASE("Destroctor", "Enum") {
-    // test with custom type having side effect on destruction
-    struct A {
-        bool& side_effect;
-        A(bool& side_effect)
-            : side_effect(side_effect) {}
-        ~A() {
-            side_effect = true;
-        }
-    };
-
-    SECTION("Destructor with side effect") {
-        bool side_effect = false;
         {
-            Enum<int, A> a = A{side_effect};
+            MockHW::reset();
+            Enum<int, MockRaii> a = MockRaii{};
+            CHECK(MockHW::resource_state_to_int() == 1);
+
+            Enum<int, MockRaii> b = a;
+            CHECK(MockHW::resource_state_to_int() == 12);
+
+            a = b;
+            CHECK(MockHW::resource_state_to_int() == 23);
+
+            Enum<int, MockRaii> c = Enum<int, MockRaii>{std::move(a)};
+            CHECK(MockHW::resource_state_to_int() == 23);
         }
-        CHECK(side_effect == true);
+        CHECK(MockHW::is_leak_free() == true);
+        CHECK(MockHW::double_free_count() == 0);
+        CHECK(MockHW::resource_state_to_int() == 0);
     }
 }
+
+// TEST_CASE("Copy Assignment", "Enum") {
+//     SECTION("Trivially copyable") {
+//         Enum<int, double> a = 42;
+//         Enum<int, double> b = 0;
+//         b = a;
+
+//         CHECK(a.index() == b.index());
+//         CHECK(a.get<int>() == b.get<int>());
+//     }
+
+//     SECTION("Non-trivially copyable") {
+//         Enum<std::string, None> a = std::string("Hello");
+//         Enum<std::string, None> b = std::string("World");
+//         b = a;
+
+//         CHECK(a.index() == b.index());
+//         CHECK(a.get<std::string>() == b.get<std::string>());
+
+//         // todo check if memroy allocation and freeing is done correctly
+//     }
+// }
+
+// TEST_CASE("Move constructor", "Enum") {
+//     SECTION("Trivially copyable") {
+//         Enum<int, double> a = 42;
+//         const auto a_index = a.index();
+//         Enum<int, double> b = std::move(a);
+
+//         CHECK(b.index() == a_index);
+//         CHECK(b.get<int>() == 42);
+//     }
+
+//     SECTION("Non-trivially copyable") {
+//         Enum<std::string, None> a = std::string("Hello");
+//         const auto a_index = a.index();
+//         Enum<std::string, None> b = std::move(a);
+
+//         CHECK(b.index() == a_index);
+//         CHECK(b.get<std::string>() == "Hello");
+
+//         // todo check if memroy allocation and freeing is done correctly
+//     }
+// }
+
+// TEST_CASE("Move Assignment", "Enum") {
+//     SECTION("Trivially copyable") {
+//         Enum<int, double> a = 42;
+//         Enum<int, double> b = 0;
+//         b = std::move(a);
+
+//         CHECK(b.index() == 0);
+//         CHECK(b.get<int>() == 42);
+//     }
+
+//     SECTION("Non-trivially copyable") {
+//         Enum<std::string, None> a = std::string("Hello");
+//         Enum<std::string, None> b = std::string("World");
+//         b = std::move(a);
+
+//         CHECK(b.index() == 0);
+//         CHECK(b.get<std::string>() == "Hello");
+
+//         // todo check if memroy allocation and freeing is done correctly
+//     }
+// }
+
+// TEST_CASE("Destroctor", "Enum") {
+//     SECTION("Destructor with side effect") {
+//     }
+// }
 
 TEST_CASE("Equality", "Enum") {
     SECTION("Same type") {

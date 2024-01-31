@@ -1,5 +1,5 @@
-#ifndef SFINAE_TEST_HPP_
-#define SFINAE_TEST_HPP_
+#ifndef META_TEST_HPP_
+#define META_TEST_HPP_
 
 #include "catch2/catch_test_macros.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef SFINAE_HPP_
-#define SFINAE_HPP_
+#ifndef META_HPP_
+#define META_HPP_
 
 #include "limits.hpp"
 
@@ -1244,6 +1244,13 @@ struct DebugType; // Intentionally undefined
 
 template <typename A, typename... Args>
 using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
+
+// AlignedStorage
+
+template <size_t Len, size_t Align>
+struct AlignedStorage {
+    alignas(Align) char data[Len];
+};
 
 } // namespace efp
 

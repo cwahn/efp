@@ -1,7 +1,7 @@
 #ifndef EFP_TRAIT_HPP_
 #define EFP_TRAIT_HPP_
 
-#include "sfinae.hpp"
+#include "meta.hpp"
 
 // Type-level function traits could be implemneted for external types
 // Method requirements could be satisfied by actual implementation or inheritance

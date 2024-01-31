@@ -1,7 +1,7 @@
 #ifndef SM_HPP_
 #define SM_HPP_
 
-#include "sfinae.hpp"
+#include "meta.hpp"
 
 namespace efp {
 // I found no good reason to make state external.

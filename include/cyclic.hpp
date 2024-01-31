@@ -30,40 +30,48 @@ public:
         data_ = buffer_;
     }
 
-    Vcb(const Vcb& other)
-        : buffer_{} {
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_ + (other.data_ - other.buffer_);
-
+    Vcb(const Vcb& other) {
         for (size_t i = 0; i < ct_size * 2; ++i) {
             new (buffer_ + i) A(other.buffer_[i]);
         }
+        middle_ = buffer_ + ct_size;
+        data_ = buffer_ + (other.data_ - other.buffer_);
     }
 
     Vcb& operator=(const Vcb& other) {
-        buffer_ = other.buffer_;
+        // buffer_ = other.buffer_;
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            (buffer_ + i)->~A();
+            new (buffer_ + i) A(other.buffer_[i]);
+        }
         middle_ = buffer_ + ct_size;
         data_ = buffer_ + (other.data_ - other.buffer_);
         return *this;
     }
 
-    Vcb(Vcb&& other)
-        : buffer_{std::move(other.buffer_)} {
+    Vcb(Vcb&& other) {
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            new (buffer_ + i) A(std::move(other.buffer_[i]));
+        }
+
         middle_ = buffer_ + ct_size;
         data_ = buffer_ + (other.data_ - other.buffer_);
     }
 
     Vcb operator=(Vcb&& other) {
-        buffer_ = std::move(other.buffer_);
+        // buffer_ = std::move(other.buffer_);
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            (buffer_ + i)->~A();
+            new (buffer_ + i) A(std::move(other.buffer_[i]));
+        }
         middle_ = buffer_ + ct_size;
         data_ = buffer_ + (other.data_ - other.buffer_);
         return *this;
     }
 
     ~Vcb() {
-        for (size_t i = 0; i < ct_size; ++i) {
-            data_[i].~A();
-            (data_ + ct_size)[i].~A();
+        for (size_t i = 0; i < ct_size * 2; ++i) {
+            (buffer_ + i)->~A();
         }
     }
 
