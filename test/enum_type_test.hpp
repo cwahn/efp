@@ -8,8 +8,7 @@
 
 using namespace efp;
 
-struct None {
-};
+struct None {};
 
 TEST_CASE("Enum Rule of 5", "Enum") {
     // use MockHW and MockRaii to check if the rule of 5 is followed
@@ -128,107 +127,6 @@ TEST_CASE("Enum Rule of 5", "Enum") {
     }
 }
 
-TEST_CASE("Copy constructor") {
-    SECTION("Trivially copyable") {
-        Enum<int, double> a = 42;
-        Enum<int, double> b = a;
-
-        CHECK(a.index() == b.index());
-        CHECK(a.get<int>() == b.get<int>());
-    }
-
-    SECTION("Non-trivially copyable") {
-        {
-            MockHW::reset();
-            Enum<int, MockRaii> a = MockRaii{};
-            CHECK(MockHW::resource_state_to_int() == 1);
-
-            Enum<int, MockRaii> b = a;
-            CHECK(MockHW::resource_state_to_int() == 12);
-
-            a = b;
-            CHECK(MockHW::resource_state_to_int() == 23);
-
-            Enum<int, MockRaii> c = Enum<int, MockRaii>{std::move(a)};
-            CHECK(MockHW::resource_state_to_int() == 23);
-        }
-        CHECK(MockHW::is_leak_free() == true);
-        CHECK(MockHW::double_free_count() == 0);
-        CHECK(MockHW::resource_state_to_int() == 0);
-    }
-}
-
-// TEST_CASE("Copy Assignment", "Enum") {
-//     SECTION("Trivially copyable") {
-//         Enum<int, double> a = 42;
-//         Enum<int, double> b = 0;
-//         b = a;
-
-//         CHECK(a.index() == b.index());
-//         CHECK(a.get<int>() == b.get<int>());
-//     }
-
-//     SECTION("Non-trivially copyable") {
-//         Enum<std::string, None> a = std::string("Hello");
-//         Enum<std::string, None> b = std::string("World");
-//         b = a;
-
-//         CHECK(a.index() == b.index());
-//         CHECK(a.get<std::string>() == b.get<std::string>());
-
-//         // todo check if memroy allocation and freeing is done correctly
-//     }
-// }
-
-// TEST_CASE("Move constructor", "Enum") {
-//     SECTION("Trivially copyable") {
-//         Enum<int, double> a = 42;
-//         const auto a_index = a.index();
-//         Enum<int, double> b = std::move(a);
-
-//         CHECK(b.index() == a_index);
-//         CHECK(b.get<int>() == 42);
-//     }
-
-//     SECTION("Non-trivially copyable") {
-//         Enum<std::string, None> a = std::string("Hello");
-//         const auto a_index = a.index();
-//         Enum<std::string, None> b = std::move(a);
-
-//         CHECK(b.index() == a_index);
-//         CHECK(b.get<std::string>() == "Hello");
-
-//         // todo check if memroy allocation and freeing is done correctly
-//     }
-// }
-
-// TEST_CASE("Move Assignment", "Enum") {
-//     SECTION("Trivially copyable") {
-//         Enum<int, double> a = 42;
-//         Enum<int, double> b = 0;
-//         b = std::move(a);
-
-//         CHECK(b.index() == 0);
-//         CHECK(b.get<int>() == 42);
-//     }
-
-//     SECTION("Non-trivially copyable") {
-//         Enum<std::string, None> a = std::string("Hello");
-//         Enum<std::string, None> b = std::string("World");
-//         b = std::move(a);
-
-//         CHECK(b.index() == 0);
-//         CHECK(b.get<std::string>() == "Hello");
-
-//         // todo check if memroy allocation and freeing is done correctly
-//     }
-// }
-
-// TEST_CASE("Destroctor", "Enum") {
-//     SECTION("Destructor with side effect") {
-//     }
-// }
-
 TEST_CASE("Equality", "Enum") {
     SECTION("Same type") {
         Enum<int, double> a = 42;
@@ -253,7 +151,9 @@ TEST_CASE("WildCard") {
     SECTION("Void return") {
         bool wild_card_work = false;
 
-        const auto wc = [&]() { wild_card_work = true; };
+        const auto wc = [&]() {
+            wild_card_work = true;
+        };
 
         const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
         wrapped(42);
@@ -262,7 +162,9 @@ TEST_CASE("WildCard") {
     }
 
     SECTION("Non-void return") {
-        const auto wc = [&]() { return 42; };
+        const auto wc = [&]() {
+            return 42;
+        };
 
         const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
 
@@ -302,8 +204,7 @@ TEST_CASE("enum_type") {
 TEST_CASE("Enum Exteneded Constructor") {
     SECTION("Explicit constructor") {
         struct A {
-            A(bool arg)
-                : value(arg) {}
+            A(bool arg) : value(arg) {}
             bool value;
         };
         struct B {};
@@ -364,10 +265,7 @@ TEST_CASE("Enum Exteneded Constructor") {
 }
 
 struct TemplateBranch {
-    template <typename A>
-    int operator()(const A& a) {
-        return a * 2;
-    }
+    template <typename A> int operator()(const A& a) { return a * 2; }
 };
 
 TEST_CASE("enum_match") {
@@ -376,8 +274,12 @@ TEST_CASE("enum_match") {
         double b = 0.;
 
         a.match(
-            [&](int x) { b += x; },
-            [&](double x) { b++; });
+            [&](int x) {
+                b += x;
+            },
+            [&](double x) {
+                b++;
+            });
 
         //! Non-exhaustive match will not compile
 
@@ -393,8 +295,12 @@ TEST_CASE("enum_match") {
         double b = 0.;
 
         a.match(
-            [&](int x) { b += x; },
-            [&](double x) { b++; });
+            [&](int x) {
+                b += x;
+            },
+            [&](double x) {
+                b++;
+            });
 
         CHECK(b == 1.);
     }
@@ -403,8 +309,12 @@ TEST_CASE("enum_match") {
         Enum<Unit, int> a = unit;
 
         int b = a.match(
-            [&](Unit x) { return -1; },
-            [&](int x) { return 1; });
+            [&](Unit x) {
+                return -1;
+            },
+            [&](int x) {
+                return 1;
+            });
 
         CHECK(b == -1);
     }
@@ -413,8 +323,12 @@ TEST_CASE("enum_match") {
         Enum<Unit, int> a = 42;
 
         int b = a.match(
-            [&](Unit x) { return -1; },
-            [&](int x) { return x; });
+            [&](Unit x) {
+                return -1;
+            },
+            [&](int x) {
+                return x;
+            });
 
         CHECK(b == 42);
     }
@@ -424,9 +338,15 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) { return b * 0; },
-            [&](int x) { return b * 1; },
-            [&](double x) { return b * 2; });
+            [&](bool x) {
+                return b * 0;
+            },
+            [&](int x) {
+                return b * 1;
+            },
+            [&](double x) {
+                return b * 2;
+            });
 
         CHECK(b == 42);
     }
@@ -436,11 +356,21 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) { return b * 0; },
-            [&](int x) { return b * 1; },
-            [&](double x) { return b * 2; },
-            [&](float x) { return b * 3; },
-            [&](long x) { return b * 4; });
+            [&](bool x) {
+                return b * 0;
+            },
+            [&](int x) {
+                return b * 1;
+            },
+            [&](double x) {
+                return b * 2;
+            },
+            [&](float x) {
+                return b * 3;
+            },
+            [&](long x) {
+                return b * 4;
+            });
 
         CHECK(b == 42);
     }
@@ -452,23 +382,28 @@ TEST_CASE("enum_match") {
         struct ErrorState {};
         struct TerminatedState {};
 
-        using MajorState = efp::Enum<
-            InitState,
-            AState,
-            BState,
-            ErrorState,
-            TerminatedState>;
+        using MajorState = efp::Enum<InitState, AState, BState, ErrorState, TerminatedState>;
 
         MajorState a{InitState{}};
 
         int b = 42;
 
         int c = a.match(
-            [&](InitState x) { return b * 0; },
-            [&](AState x) { return b * 1; },
-            [&](BState x) { return b * 2; },
-            [&](ErrorState x) { return b * 3; },
-            [&](TerminatedState x) { return b * 4; });
+            [&](InitState x) {
+                return b * 0;
+            },
+            [&](AState x) {
+                return b * 1;
+            },
+            [&](BState x) {
+                return b * 2;
+            },
+            [&](ErrorState x) {
+                return b * 3;
+            },
+            [&](TerminatedState x) {
+                return b * 4;
+            });
 
         CHECK(b == 42);
     }
@@ -478,8 +413,11 @@ TEST_CASE("enum_match") {
         double b = 0.;
 
         a.match(
-            [&](int x) { b += 1; },
-            [&]() {});
+            [&](int x) {
+                b += 1;
+            },
+            [&]() {
+            });
 
         CHECK(b == 0.);
 
@@ -493,7 +431,9 @@ TEST_CASE("enum_match") {
     SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
 
-        CHECK(a.match([]() { return 42; }) == 42);
+        CHECK(a.match([]() {
+            return 42;
+        }) == 42);
     }
 
     SECTION("non-trivial0") {
@@ -502,8 +442,12 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) { return b * 0; },
-            [&](std::string x) { return 42; });
+            [&](bool x) {
+                return b * 0;
+            },
+            [&](std::string x) {
+                return 42;
+            });
 
         CHECK(b == 42);
     }
@@ -514,8 +458,12 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) { return b * 0; },
-            [&](const std::string& x) { return 42; });
+            [&](bool x) {
+                return b * 0;
+            },
+            [&](const std::string& x) {
+                return 42;
+            });
 
         CHECK(b == 42);
     }
@@ -529,9 +477,7 @@ TEST_CASE("enum_match") {
 }
 
 // A test function to be pointed to
-int enum_test_function() {
-    return 42;
-}
+int enum_test_function() { return 42; }
 
 TEST_CASE("Function Pointer in Enum") {
     SECTION("Storing and retrieving function pointer") {
@@ -547,7 +493,9 @@ TEST_CASE("Function Pointer in Enum") {
 
     SECTION("Storing and retrieving lambda") {
         // ! For some reason this does not work with const qualifier
-        auto enum_test_lambda = [&]() { return 84; };
+        auto enum_test_lambda = [&]() {
+            return 84;
+        };
 
         // Create an Enum instance holding a lambda
         Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);

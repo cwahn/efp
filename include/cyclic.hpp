@@ -50,7 +50,7 @@ public:
         return *this;
     }
 
-    Vcb(Vcb&& other) {
+    Vcb(Vcb&& other) noexcept {
         for (size_t i = 0; i < ct_size * 2; ++i) {
             new (_buffer + i) A(std::move(other._buffer[i]));
         }
@@ -59,7 +59,7 @@ public:
         data_ = _buffer + (other.data_ - other._buffer);
     }
 
-    Vcb operator=(Vcb&& other) {
+    Vcb operator=(Vcb&& other) noexcept {
         for (size_t i = 0; i < ct_size * 2; ++i) {
             (_buffer + i)->~A();
             new (_buffer + i) A(std::move(other._buffer[i]));
