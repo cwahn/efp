@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <array>
 
-#include "sequence.hpp"
+#include "efp/sequence.hpp"
 
 namespace efp {
 template <typename A, size_t n>
@@ -29,7 +29,7 @@ public:
             new (_buffer + i) A{};
         }
         // _buffer + ct_capacity = _buffer + ct_size;
-        data_ = _buffer;
+        _data = _buffer;
     }
 
     Vcb(const Vcb& other) {
@@ -37,7 +37,7 @@ public:
             new (_buffer + i) A(other._buffer[i]);
         }
         // _buffer + ct_capacity = _buffer + ct_size;
-        data_ = _buffer + (other.data_ - other._buffer);
+        _data = _buffer + (other._data - other._buffer);
     }
 
     Vcb& operator=(const Vcb& other) {
@@ -46,7 +46,7 @@ public:
             new (_buffer + i) A(other._buffer[i]);
         }
         // _buffer + ct_capacity = _buffer + ct_size;
-        data_ = _buffer + (other.data_ - other._buffer);
+        _data = _buffer + (other._data - other._buffer);
         return *this;
     }
 
@@ -56,7 +56,7 @@ public:
         }
 
         // _buffer + ct_capacity = _buffer + ct_size;
-        data_ = _buffer + (other.data_ - other._buffer);
+        _data = _buffer + (other._data - other._buffer);
     }
 
     Vcb operator=(Vcb&& other) noexcept {
@@ -66,7 +66,7 @@ public:
         }
 
         // _buffer + ct_capacity = _buffer + ct_size;
-        data_ = _buffer + (other.data_ - other._buffer);
+        _data = _buffer + (other._data - other._buffer);
         return *this;
     }
 
@@ -76,41 +76,41 @@ public:
         }
     }
 
-    A& operator[](const SizeType index) { return data_[index]; }
+    A& operator[](const SizeType index) { return _data[index]; }
 
-    const A& operator[](const SizeType index) const { return data_[index]; }
+    const A& operator[](const SizeType index) const { return _data[index]; }
 
     void push_back(A value) {
-        data_->~A();
-        (data_ + ct_size)->~A();
+        _data->~A();
+        (_data + ct_size)->~A();
 
-        new (data_) A{value};
-        new (data_ + ct_size) A{value};
+        new (_data) A{value};
+        new (_data + ct_size) A{value};
 
-        ++data_;
-        data_ -= ct_size * (data_ == _buffer + ct_capacity);
+        ++_data;
+        _data -= ct_size * (_data == _buffer + ct_capacity);
     }
 
     constexpr SizeType size() const { return ct_size; }
 
-    A* data() { return data_; }
+    A* data() { return _data; }
 
-    const A* data() const { return data_; }
+    const A* data() const { return _data; }
 
     bool empty() const { return false; }
 
-    const A* begin() const { return data_; }
+    const A* begin() const { return _data; }
 
-    A* begin() { return data_; }
+    A* begin() { return _data; }
 
-    const A* end() const { return data_ + ct_size; }
+    const A* end() const { return _data + ct_size; }
 
-    A* end() { return data_ + ct_size; }
+    A* end() { return _data + ct_size; }
 
 private:
     RawStorage<A, 2 * ct_size> _buffer;
     // A* _buffer + ct_capacity;
-    A* data_;
+    A* _data;
 };
 
 // template <typename A, size_t n>
@@ -363,7 +363,7 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 //         : _buffer{}, _size{0}
 //     {
 //         _buffer + ct_capacity = _buffer.data() + N;
-//         data_ = _buffer.data();
+//         _data = _buffer.data();
 //     }
 
 //     A &operator[](const SizeType index)
@@ -378,11 +378,11 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 
 //     void push_back(A value)
 //     {
-//         data_[0] = value;
-//         data_[N] = value;
+//         _data[0] = value;
+//         _data[N] = value;
 
-//         data_++;
-//         data_ -= N * (data_ == _buffer + ct_capacity);
+//         _data++;
+//         _data -= N * (_data == _buffer + ct_capacity);
 //         _size = _size + (_size < N);
 //     }
 
@@ -393,12 +393,12 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 
 //     A *data()
 //     {
-//         return data_;
+//         return _data;
 //     }
 
 //     const A *data() const
 //     {
-//         return data_;
+//         return _data;
 //     }
 
 //     bool empty()
@@ -408,18 +408,18 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 
 //     A *begin()
 //     {
-//         return data_;
+//         return _data;
 //     }
 
 //     A *end()
 //     {
-//         return data_ + N;
+//         return _data + N;
 //     }
 
 // private:
 //     std::array<A, N * 2> _buffer;
 //     A *_buffer + ct_capacity;
-//     A *data_;
+//     A *_data;
 //     SizeType _size;
 // };
 

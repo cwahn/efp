@@ -1,7 +1,7 @@
 #ifndef C_UTILITY_HPP_
 #define C_UTILITY_HPP_
 
-#include "prelude.hpp"
+#include "efp/prelude.hpp"
 
 namespace efp {
 // FunctionPosize_terTypeImpl

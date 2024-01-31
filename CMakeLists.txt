@@ -36,6 +36,7 @@ endif()
 include(CTest)
 
 find_package(Catch2 QUIET)
+
 if(NOT Catch2_FOUND)
     # message("Catch2 not found on the system.\nBuild from source.")
     FetchContent_Declare(
@@ -53,3 +54,4 @@ add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
 add_subdirectory("./test")
+add_subdirectory("./example")

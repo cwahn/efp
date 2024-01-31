@@ -4,9 +4,9 @@
 // ct_capacity is compile time bound of length. It does not mean safety of access.
 // However, actual capacity does means the length of memory safe to access.
 
-#include "cpp_core.hpp"
+#include "efp/cpp_core.hpp"
 #include "meta.hpp"
-#include "trait.hpp"
+#include "efp/trait.hpp"
 
 // todo Move and copy assigment operator sort out
 
@@ -21,47 +21,47 @@ public:
 
     Array() {
         for (size_t i = 0; i < ct_size; ++i) {
-            new (&data_[i]) Element();
+            new (&_data[i]) Element();
         }
     }
 
     Array(const Array& other) {
         for (size_t i = 0; i < ct_size; ++i) {
-            new (&data_[i]) Element(other.data_[i]);
+            new (&_data[i]) Element(other._data[i]);
         }
     }
 
     Array(Array&& other) noexcept {
         for (size_t i = 0; i < ct_size; ++i) {
-            new (&data_[i]) Element(efp::move(other.data_[i])); // Move-construct each element
+            new (&_data[i]) Element(efp::move(other._data[i])); // Move-construct each element
         }
     }
 
     template <typename... Arg>
     Array(const Arg&... args)
-        : data_{args...} {
+        : _data{args...} {
     }
 
     Array& operator=(const Array& other) {
         if (this != &other) {
             for (size_t i = 0; i < ct_size; ++i) {
-                data_[i] = other.data_[i]; // Use assignment for each element
+                _data[i] = other._data[i]; // Use assignment for each element
             }
         }
         return *this;
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const Array& other) const {
         for (size_t i = 0; i < ct_size; ++i) {
-            if (data_[i] != other.data_[i]) {
+            if (_data[i] != other._data[i]) {
                 return false;
             }
         }
@@ -90,27 +90,27 @@ public:
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + ct_size;
+        return _data + ct_size;
     }
 
     const Element* end() const {
-        return data_ + ct_size;
+        return _data + ct_size;
     }
 
     bool empty() const {
@@ -118,7 +118,7 @@ public:
     }
 
 private:
-    A data_[ct_size];
+    A _data[ct_size];
 };
 
 // template <typename A, size_t ct_size>
@@ -180,7 +180,7 @@ public:
     ArrVec(const ArrVec& other)
         : _size{other._size} {
         for (size_t i = 0; i < _size; ++i) {
-            new (&data_[i]) Element(other.data_[i]);
+            new (&_data[i]) Element(other._data[i]);
         }
     }
 
@@ -188,13 +188,13 @@ public:
         : _size{other._size} {
         other._size = 0;
         for (size_t i = 0; i < _size; ++i) {
-            data_[i] = efp::move(other.data_[i]);
+            _data[i] = efp::move(other._data[i]);
         }
     }
 
     template <typename... Arg>
     ArrVec(const Arg&... args)
-        : data_{args...},
+        : _data{args...},
           _size(sizeof...(args)) {
     }
 
@@ -203,13 +203,13 @@ public:
     ArrVec(const ArrVec<Element, ct_size_>& as)
         : _size(ct_size_) {
         for (size_t i = 0; i < ct_size_; ++i) {
-            new (&data_[i]) Element(as[i]);
+            new (&_data[i]) Element(as[i]);
         }
     }
 
     ~ArrVec() {
         for (size_t i = 0; i < _size; ++i) {
-            data_[i].~Element();
+            _data[i].~Element();
         }
     }
 
@@ -217,7 +217,7 @@ public:
         if (this != &other) {
             resize(other.size());
             for (size_t i = 0; i < _size; ++i) {
-                data_[i] = other.data_[i];
+                _data[i] = other._data[i];
             }
         }
         return *this;
@@ -227,13 +227,13 @@ public:
         if (this != &other) {
             // Destroy existing elements
             for (size_t i = 0; i < _size; ++i) {
-                data_[i].~Element();
+                _data[i].~Element();
             }
 
             // Move data from the source object
             _size = other._size;
             for (size_t i = 0; i < _size; ++i) {
-                new (&data_[i]) Element(efp::move(other.data_[i]));
+                new (&_data[i]) Element(efp::move(other._data[i]));
             }
 
             // Reset the source object
@@ -243,11 +243,11 @@ public:
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const ArrVec& other) const {
@@ -256,7 +256,7 @@ public:
         }
 
         for (size_t i = 0; i < _size; ++i) {
-            if (data_[i] != other.data_[i]) {
+            if (_data[i] != other._data[i]) {
                 return false;
             }
         }
@@ -290,7 +290,7 @@ public:
         if (_size >= ct_capacity) {
             throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
-            new (&data_[_size]) Element(value);
+            new (&_data[_size]) Element(value);
             ++_size;
         }
     }
@@ -299,7 +299,7 @@ public:
         if (_size >= ct_capacity) {
             throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
-            new (&data_[_size]) Element(efp::move(value));
+            new (&_data[_size]) Element(efp::move(value));
             ++_size;
         }
     }
@@ -310,11 +310,11 @@ public:
         }
 
         for (size_t i = _size; i > index; --i) {
-            new (&data_[i]) Element(efp::move(data_[i - 1]));
-            data_[i - 1].~Element();
+            new (&_data[i]) Element(efp::move(_data[i - 1]));
+            _data[i - 1].~Element();
         }
 
-        new (&data_[index]) Element(value);
+        new (&_data[index]) Element(value);
 
         ++_size;
     }
@@ -324,13 +324,13 @@ public:
             std::runtime_error("ArrVec::pop_back: size must be greater than 0");
         }
 
-        data_[_size - 1].~Element();
+        _data[_size - 1].~Element();
         --_size;
     }
 
     void clear() {
         for (size_t i = 0; i < _size; ++i) {
-            data_[i].~Element();
+            _data[i].~Element();
         }
         _size = 0;
     }
@@ -339,36 +339,36 @@ public:
         if (index < 0 || index >= _size) {
             throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
         }
-        data_[index].~Element();
+        _data[index].~Element();
         for (size_t i = index; i < _size - 1; ++i) {
-            new (&data_[i]) Element(efp::move(data_[i + 1]));
-            data_[i + 1].~Element();
+            new (&_data[i]) Element(efp::move(_data[i + 1]));
+            _data[i + 1].~Element();
         }
         --_size;
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + _size;
+        return _data + _size;
     }
 
     const Element* end() const {
-        return data_ + _size;
+        return _data + _size;
     }
 
     bool empty() const {
@@ -376,7 +376,7 @@ public:
     }
 
 private:
-    Element data_[ct_capacity];
+    Element _data[ct_capacity];
     size_t _size;
 };
 
@@ -428,63 +428,63 @@ public:
     using CtCapacity = Size<dyn>;
 
     Vector()
-        : data_{nullptr}, _size{0}, capacity_{0} {}
+        : _data{nullptr}, _size{0}, _capacity{0} {}
 
     Vector(const Vector& other)
-        : data_{nullptr}, _size{0}, capacity_{0} {
-        if (other.data_) {
+        : _data{nullptr}, _size{0}, _capacity{0} {
+        if (other._data) {
             _size = other._size;
-            capacity_ = other.capacity_;
-            data_ = new Element[capacity_];
+            _capacity = other._capacity;
+            _data = new Element[_capacity];
 
-            // memcpy(data_, other.data_, sizeof(A) * _size);
+            // memcpy(_data, other._data, sizeof(A) * _size);
             for (size_t i = 0; i < other._size; ++i) {
-                new (&data_[i]) Element(other.data_[i]);
+                new (&_data[i]) Element(other._data[i]);
             }
         }
     }
 
     Vector(Vector&& other)
-        : data_{other.data_}, _size{other._size}, capacity_{other.capacity_} {
-        other.data_ = nullptr;
+        : _data{other._data}, _size{other._size}, _capacity{other._capacity} {
+        other._data = nullptr;
     }
 
     template <typename... Args>
     Vector(const Args&... args)
-        : data_{new Element[sizeof...(args)]},
-          capacity_(sizeof...(args)),
+        : _data{new Element[sizeof...(args)]},
+          _capacity(sizeof...(args)),
           _size(sizeof...(args)) {
         size_t i = 0;
         for (auto arg : std::initializer_list<Common<Args...>>{args...})
-            data_[i++] = arg;
+            _data[i++] = arg;
     }
 
     // Constructor from Array
     template <size_t ct_size_>
     Vector(const Array<Element, ct_size_>& as)
-        : data_(new Element[ct_size_]),
+        : _data(new Element[ct_size_]),
           _size(ct_size_),
-          capacity_(ct_size_) {
+          _capacity(ct_size_) {
         for (size_t i = 0; i < _size; ++i) {
-            new (&data_[i]) Element(as[i]);
+            new (&_data[i]) Element(as[i]);
         }
     }
 
     // Constructor from ArrVec
     template <size_t ct_cap_>
     Vector(const ArrVec<Element, ct_cap_>& as)
-        : data_(new Element[length(as)]),
+        : _data(new Element[length(as)]),
           _size(length(as)),
-          capacity_(ct_cap_) {
+          _capacity(ct_cap_) {
         for (size_t i = 0; i < _size; ++i) {
-            new (&data_[i]) Element(as[i]);
+            new (&_data[i]) Element(as[i]);
         }
     }
 
     ~Vector() {
-        if (data_) {
-            delete[] data_;
-            data_ = nullptr;
+        if (_data) {
+            delete[] _data;
+            _data = nullptr;
         }
     }
 
@@ -493,41 +493,41 @@ public:
         if (this != &other) {
             Element* newData = nullptr;
             if (other._size > 0) {
-                newData = new Element[other.capacity_];
+                newData = new Element[other._capacity];
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other.data_[i];
+                    newData[i] = other._data[i];
                 }
             }
 
-            data_ = newData;
+            _data = newData;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
         }
         return *this;
     }
 
     Vector& operator=(Vector&& other) noexcept {
         if (this != &other) {
-            delete[] data_;
+            delete[] _data;
 
-            data_ = other.data_;
+            _data = other._data;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
 
-            other.data_ = nullptr;
+            other._data = nullptr;
             other._size = 0;
-            other.capacity_ = 0;
+            other._capacity = 0;
         }
         return *this;
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const Vector& other) const {
@@ -536,7 +536,7 @@ public:
         }
 
         for (size_t i = 0; i < _size; ++i) {
-            if (data_[i] != other.data_[i]) {
+            if (_data[i] != other._data[i]) {
                 return false;
             }
         }
@@ -549,7 +549,7 @@ public:
     }
 
     size_t capacity() const {
-        return capacity_;
+        return _capacity;
     }
 
     void resize(size_t length) {
@@ -557,7 +557,7 @@ public:
             throw std::runtime_error("Vector::resize: length must be greater than or equal to 0");
         }
 
-        if (length > capacity_) {
+        if (length > _capacity) {
             reserve(length);
         }
 
@@ -565,36 +565,36 @@ public:
     }
 
     void reserve(size_t new_capacity) {
-        if (new_capacity > capacity_) {
+        if (new_capacity > _capacity) {
             Element* new_data = new Element[new_capacity];
 
             for (size_t i = 0; i < _size; ++i) {
-                new (&new_data[i]) Element(efp::move(data_[i]));
-                data_[i].~Element();
+                new (&new_data[i]) Element(efp::move(_data[i]));
+                _data[i].~Element();
             }
 
-            delete[] data_;
+            delete[] _data;
 
-            data_ = new_data;
-            capacity_ = new_capacity;
+            _data = new_data;
+            _capacity = new_capacity;
         }
     }
 
     void push_back(const Element& value) {
-        if (_size >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+        if (_size >= _capacity) {
+            reserve(_capacity == 0 ? 1 : 2 * _capacity);
         }
 
-        new (&data_[_size]) Element(value);
+        new (&_data[_size]) Element(value);
         ++_size;
     }
 
     void push_back(Element&& value) {
-        if (_size >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+        if (_size >= _capacity) {
+            reserve(_capacity == 0 ? 1 : 2 * _capacity);
         }
 
-        new (&data_[_size]) Element(efp::move(value));
+        new (&_data[_size]) Element(efp::move(value));
         ++_size;
     }
 
@@ -602,13 +602,13 @@ public:
         if (index < 0 || index > _size) {
             throw std::runtime_error("Vector::insert: index must be less than or equal to size");
         }
-        if (_size >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+        if (_size >= _capacity) {
+            reserve(_capacity == 0 ? 1 : 2 * _capacity);
         }
         for (size_t i = _size; i > index; --i) {
-            data_[i] = efp::move(data_[i - 1]);
+            _data[i] = efp::move(_data[i - 1]);
         }
-        new (&data_[index]) Element(value);
+        new (&_data[index]) Element(value);
         ++_size;
     }
 
@@ -617,10 +617,10 @@ public:
             throw std::runtime_error("Vector::erase: index must be less than or equal to size");
         }
 
-        data_[index].~Element();
+        _data[index].~Element();
         for (size_t i = index; i < _size - 1; ++i) {
-            new (&data_[i]) Element(efp::move(data_[i + 1]));
-            data_[i + 1].~Element();
+            new (&_data[i]) Element(efp::move(_data[i + 1]));
+            _data[i + 1].~Element();
         }
 
         --_size;
@@ -628,7 +628,7 @@ public:
 
     void clear() {
         for (size_t i = 0; i < _size; ++i) {
-            data_[i].~Element();
+            _data[i].~Element();
         }
         _size = 0;
     }
@@ -637,32 +637,32 @@ public:
         if (_size == 0) {
             throw std::runtime_error("Vector::pop_back: size must be greater than 0");
         }
-        data_[_size - 1].~Element();
+        _data[_size - 1].~Element();
         --_size;
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + _size;
+        return _data + _size;
     }
 
     const Element* end() const {
-        return data_ + _size;
+        return _data + _size;
     }
 
     bool empty() const {
@@ -670,9 +670,9 @@ public:
     }
 
 private:
-    Element* data_;
+    Element* _data;
     size_t _size;
-    size_t capacity_;
+    size_t _capacity;
 };
 
 template <typename A>
@@ -723,28 +723,28 @@ public:
     using CtCapacity = Size<ct_size>;
 
     ArrayView()
-        : data_(nullptr) {
+        : _data(nullptr) {
     }
 
     // ! length will not be used
     ArrayView(Element* data, size_t length = Size<ct_size>{})
-        : data_(data) {
+        : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
-        if (ct_size > 0 && data_ == nullptr) {
+        if (ct_size > 0 && _data == nullptr) {
             throw std::runtime_error("ArrayView::ArrayView: data must not be nullptr for a non-empty view");
         }
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const ArrayView& other) const {
-        return data_ == other.data_;
+        return _data == other._data;
     }
 
     size_t size() const {
@@ -768,27 +768,27 @@ public:
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + ct_size;
+        return _data + ct_size;
     }
 
     const Element* end() const {
-        return data_ + ct_size;
+        return _data + ct_size;
     }
 
     bool empty() const {
@@ -796,7 +796,7 @@ public:
     }
 
 private:
-    Element* data_;
+    Element* _data;
 };
 
 template <typename A, size_t n>
@@ -847,13 +847,13 @@ public:
     using CtCapacity = Size<ct_capacity>;
 
     ArrVecView()
-        : data_(nullptr), _size(0) {
+        : _data(nullptr), _size(0) {
     }
 
     ArrVecView(Element* data, size_t size)
-        : data_(data), _size(size) {
+        : _data(data), _size(size) {
         // Ensure that data is not nullptr for a non-empty view.
-        if (size > 0 && data_ == nullptr) {
+        if (size > 0 && _data == nullptr) {
             throw std::runtime_error("ArrVecView::ArrVecView: data must not be nullptr for a non-empty view");
         }
     }
@@ -861,27 +861,27 @@ public:
     // Constructor from ArrayView
     template <size_t ct_size_>
     ArrVecView(const ArrayView<Element, ct_size_>& as)
-        : data_(as.data()), _size(length(as)) {
+        : _data(as.data()), _size(length(as)) {
     }
 
     ArrVecView& operator=(const ArrVecView& other) {
         if (this != &other) {
-            data_ = other.data_;
+            _data = other._data;
             _size = other._size;
         }
         return *this;
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const ArrVecView& other) const {
-        return (data_ == other.data_) &&
+        return (_data == other._data) &&
                (_size == other._size);
     }
 
@@ -894,27 +894,27 @@ public:
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + _size;
+        return _data + _size;
     }
 
     const Element* end() const {
-        return data_ + _size;
+        return _data + _size;
     }
 
     bool empty() const {
@@ -922,7 +922,7 @@ public:
     }
 
 private:
-    Element* data_;
+    Element* _data;
     size_t _size;
 };
 
@@ -974,13 +974,13 @@ public:
     using CtCapacity = Size<dyn>;
 
     VectorView()
-        : data_{nullptr}, _size{0}, capacity_{0} {
+        : _data{nullptr}, _size{0}, _capacity{0} {
     }
 
     VectorView(Element* data, size_t size)
-        : data_(data), _size(size), capacity_(size) {
+        : _data(data), _size(size), _capacity(size) {
         // Ensure that data is not nullptr for a non-empty view.
-        if (size > 0 && data_ == nullptr) {
+        if (size > 0 && _data == nullptr) {
             throw std::runtime_error("VectorView::VectorView: data must not be nullptr for a non-empty view");
         }
     }
@@ -988,36 +988,36 @@ public:
     // Constructor from ArrayView
     template <size_t ct_size_>
     VectorView(const ArrayView<Element, ct_size_>& as)
-        : data_(as.data()), _size(length(as)) {
+        : _data(as.data()), _size(length(as)) {
     }
 
     // Constructor from ArrVecView
     template <size_t ct_cap_>
     VectorView(const ArrVecView<Element, ct_cap_>& as)
-        : data_(as.data()), _size(length(as)) {
+        : _data(as.data()), _size(length(as)) {
     }
 
     VectorView& operator=(const VectorView& other) {
         if (this != &other) {
-            data_ = other.data_;
+            _data = other._data;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
         }
         return *this;
     }
 
     Element& operator[](size_t index) {
-        return data_[index];
+        return _data[index];
     }
 
     const Element& operator[](size_t index) const {
-        return data_[index];
+        return _data[index];
     }
 
     bool operator==(const VectorView& other) const {
-        return (data_ == other.data_) &&
+        return (_data == other._data) &&
                (_size == other._size) &&
-               (capacity_ == other.capacity_);
+               (_capacity == other._capacity);
     }
 
     size_t size() const {
@@ -1025,31 +1025,31 @@ public:
     }
 
     size_t capacity() const {
-        return capacity_;
+        return _capacity;
     }
 
     const Element* data() const {
-        return data_;
+        return _data;
     }
 
     Element* data() {
-        return data_;
+        return _data;
     }
 
     Element* begin() {
-        return data_;
+        return _data;
     }
 
     const Element* begin() const {
-        return data_;
+        return _data;
     }
 
     Element* end() {
-        return data_ + _size;
+        return _data + _size;
     }
 
     const Element* end() const {
-        return data_ + _size;
+        return _data + _size;
     }
 
     bool empty() const {
@@ -1057,9 +1057,9 @@ public:
     }
 
 private:
-    Element* data_;
+    Element* _data;
     size_t _size;
-    size_t capacity_;
+    size_t _capacity;
 };
 
 // template <typename A>

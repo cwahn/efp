@@ -1,9 +1,9 @@
 #ifndef IO_HPP_
 #define IO_HPP_
 
-#include "cpp_core.hpp"
-#include "prelude.hpp"
-#include "string.hpp"
+#include "efp/cpp_core.hpp"
+#include "efp/prelude.hpp"
+#include "efp/string.hpp"
 
 namespace efp {
 class File {

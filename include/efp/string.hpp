@@ -1,8 +1,8 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-#include "prelude.hpp"
-#include "sequence.hpp"
+#include "efp/prelude.hpp"
+#include "efp/sequence.hpp"
 
 namespace efp {
 // CString
@@ -14,16 +14,12 @@ private:
 
 public:
     // const char pointer with nullptr.
-    CString(const char* ptr)
-        : ptr_(ptr) {}
+    CString(const char* ptr) : ptr_(ptr) {}
 
     CString(const CString&) = delete;
     CString& operator=(const CString&) = delete;
 
-    CString(CString&& other) noexcept
-        : ptr_(other.ptr_) {
-        other.ptr_ = nullptr;
-    }
+    CString(CString&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullptr; }
 
     CString& operator=(CString&& other) noexcept {
         if (this != &other) {
@@ -35,13 +31,9 @@ public:
         return *this;
     }
 
-    ~CString() {
-        delete[] ptr_;
-    }
+    ~CString() { delete[] ptr_; }
 
-    operator const char*() const {
-        return ptr_;
-    }
+    operator const char*() const { return ptr_; } 
 
     // Equality operator for comparing with another CString
     bool operator==(const CString& other) const {
@@ -85,53 +77,49 @@ public:
     static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
     static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-    Vector()
-        : data_{nullptr}, _size{0}, capacity_{0} {}
+    Vector() : _data{nullptr}, _size{0}, _capacity{0} {}
 
-    Vector(const Vector& other)
-        : data_{nullptr}, _size{0}, capacity_{0} {
-        if (other.data_) {
+    Vector(const Vector& other) : _data{nullptr}, _size{0}, _capacity{0} {
+        if (other._data) {
             _size = other._size;
-            capacity_ = other.capacity_;
-            data_ = new char[capacity_];
+            _capacity = other._capacity;
+            _data = new char[_capacity];
 
-            // memcpy(data_, other.data_, sizeof(char) * _size);
+            // memcpy(_data, other._data, sizeof(char) * _size);
             for (size_t i = 0; i < other._size; ++i) {
-                new (&data_[i]) char(other.data_[i]);
+                new (&_data[i]) char(other._data[i]);
             }
         }
     }
 
-    Vector(Vector&& other)
-        : data_{other.data_}, _size{other._size}, capacity_{other.capacity_} {
-        other.data_ = nullptr;
+    Vector(Vector&& other) : _data{other._data}, _size{other._size}, _capacity{other._capacity} {
+        other._data = nullptr;
         other._size = 0;
-        other.capacity_ = 0;
+        other._capacity = 0;
     }
 
     // ! Varadic constructor is not working for String
     // template <typename... Args>
     // Sequence(const Args &...args)
-    //     : data_{new char[sizeof...(args)]},
-    //       capacity_(sizeof...(args)),
+    //     : _data{new char[sizeof...(args)]},
+    //       _capacity(sizeof...(args)),
     //       _size(sizeof...(args))
     // {
     //     size_t i = 0;
     //     for (auto arg : std::initializer_list<char>{args...})
-    //         data_[i++] = arg;
+    //         _data[i++] = arg;
     // }
 
-    Vector(const char* c_str)
-        : data_{nullptr}, _size{0}, capacity_{0} {
+    Vector(const char* c_str) : _data{nullptr}, _size{0}, _capacity{0} {
         for (size_t i = 0; c_str[i] != '\0'; ++i) {
             push_back(c_str[i]);
         }
     }
 
     ~Vector() {
-        if (data_) {
-            delete[] data_;
-            data_ = nullptr;
+        if (_data) {
+            delete[] _data;
+            _data = nullptr;
         }
     }
 
@@ -140,31 +128,31 @@ public:
         if (this != &other) {
             char* newData = nullptr;
             if (other._size > 0) {
-                newData = new char[other.capacity_];
+                newData = new char[other._capacity];
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other.data_[i];
+                    newData[i] = other._data[i];
                 }
             }
 
-            data_ = newData;
+            _data = newData;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
         }
         return *this;
     }
 
     Vector& operator=(Vector&& other) noexcept {
         if (this != &other) {
-            delete[] data_;
+            delete[] _data;
 
-            data_ = other.data_;
+            _data = other._data;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
 
-            other.data_ = nullptr;
+            other._data = nullptr;
             other._size = 0;
-            other.capacity_ = 0;
+            other._capacity = 0;
         }
         return *this;
     }
@@ -173,27 +161,23 @@ public:
         if (this != &other) {
             char* newData = nullptr;
             if (other._size > 0) {
-                newData = new char[other.capacity_];
+                newData = new char[other._capacity];
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other.data_[i];
+                    newData[i] = other._data[i];
                 }
             }
 
-            data_ = newData;
+            _data = newData;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
         }
         return *this;
     }
 
-    char& operator[](int index) {
-        return data_[index];
-    }
+    char& operator[](int index) { return _data[index]; }
 
-    const char& operator[](int index) const {
-        return data_[index];
-    }
+    const char& operator[](int index) const { return _data[index]; }
 
     bool operator==(const Vector& other) const {
         if (_size != other._size) {
@@ -201,7 +185,7 @@ public:
         }
 
         for (size_t i = 0; i < _size; ++i) {
-            if (data_[i] != other.data_[i]) {
+            if (_data[i] != other._data[i]) {
                 return false;
             }
         }
@@ -212,35 +196,31 @@ public:
     // Specialized equality comparison operator with const char *
     bool operator==(const char* c_str) const {
         // Check if both are null pointers
-        if (data_ == nullptr && c_str == nullptr)
+        if (_data == nullptr && c_str == nullptr)
             return true;
 
         // If one is null and the other is not, they can't be equal
-        if (data_ == nullptr || c_str == nullptr)
+        if (_data == nullptr || c_str == nullptr)
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (strncmp(data_, c_str, _size) != 0)
+        if (strncmp(_data, c_str, _size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
         return c_str[_size] == '\0';
     }
 
-    size_t size() const {
-        return _size;
-    }
+    size_t size() const { return _size; }
 
-    size_t capacity() const {
-        return capacity_;
-    }
+    size_t capacity() const { return _capacity; }
 
     void resize(int length) {
         if (length < 0) {
             throw std::runtime_error("length must be greater or equal than 0.");
         }
 
-        if (length > capacity_) {
+        if (length > _capacity) {
             reserve(length);
         }
 
@@ -248,35 +228,35 @@ public:
     }
 
     void reserve(int new_capacity) {
-        if (new_capacity > capacity_) {
+        if (new_capacity > _capacity) {
             char* new_data = new char[new_capacity];
 
             for (size_t i = 0; i < _size; ++i) {
-                new_data[i] = data_[i];
+                new_data[i] = _data[i];
             }
 
-            delete[] data_;
+            delete[] _data;
 
-            data_ = new_data;
-            capacity_ = new_capacity;
+            _data = new_data;
+            _capacity = new_capacity;
         }
     }
 
     void push_back(const char& value) {
-        if (_size >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+        if (_size >= _capacity) {
+            reserve(_capacity == 0 ? 1 : 2 * _capacity);
         }
 
-        new (&data_[_size]) char{value};
+        new (&_data[_size]) char{value};
         ++_size;
     }
 
     void push_back(char&& value) {
-        if (_size >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+        if (_size >= _capacity) {
+            reserve(_capacity == 0 ? 1 : 2 * _capacity);
         }
 
-        new (&data_[_size]) char(efp::move(value));
+        new (&_data[_size]) char(efp::move(value));
         ++_size;
     }
 
@@ -286,7 +266,7 @@ public:
         }
 
         for (size_t i = index; i < _size - 1; ++i) {
-            new (&data_[i]) char(efp::move(data_[i + 1]));
+            new (&_data[i]) char(efp::move(_data[i + 1]));
         }
 
         --_size;
@@ -308,42 +288,31 @@ public:
     // todo Interface with StringView
 
     void append_mut(const Vector& string) {
-        for_each([&](char c) { push_back(c); },
-                 string);
+        for_each(
+            [&](char c) {
+                push_back(c);
+            },
+            string);
     }
 
-    const char* data() const {
-        return data_;
-    }
+    const char* data() const { return _data; }
 
-    char* data() {
-        return data_;
-    }
+    char* data() { return _data; }
 
-    char* begin() {
-        return data_;
-    }
+    char* begin() { return _data; }
 
-    const char* begin() const {
-        return data_;
-    }
+    const char* begin() const { return _data; }
 
-    char* end() {
-        return data_ + _size;
-    }
+    char* end() { return _data + _size; }
 
-    const char* end() const {
-        return data_ + _size;
-    }
+    const char* end() const { return _data + _size; }
 
-    bool empty() const {
-        return _size == 0;
-    }
+    bool empty() const { return _size == 0; }
 
 private:
-    char* data_;
+    char* _data;
     size_t _size;
-    size_t capacity_;
+    size_t _capacity;
 };
 
 // using String = Sequence<char, dyn, dyn>;
@@ -360,58 +329,49 @@ public:
     static constexpr size_t ct_size = dyn;
     static constexpr size_t ct_capacity = dyn;
 
-    VectorView()
-        : data_(nullptr), _size(0), capacity_(0) {}
+    VectorView() : _data(nullptr), _size(0), _capacity(0) {}
 
-    VectorView(Element* data, size_t size)
-        : data_(data), _size(size), capacity_(size) {
+    VectorView(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
         // Ensure that data is not nullptr for a non-empty view.
-        if (size > 0 && data_ == nullptr) {
+        if (size > 0 && _data == nullptr) {
             throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
         }
     }
 
     // StringView could be constructed from string literal
-    VectorView(Element* data)
-        : data_(data), _size(strlen(data)), capacity_(_size) {
+    VectorView(Element* data) : _data(data), _size(strlen(data)), _capacity(_size) {
         // Ensure that data is not nullptr for a non-empty view.
     }
 
     VectorView& operator=(const VectorView& other) {
         if (this != &other) {
-            data_ = other.data_;
+            _data = other._data;
             _size = other._size;
-            capacity_ = other.capacity_;
+            _capacity = other._capacity;
         }
         return *this;
     }
 
-    Element& operator[](size_t index) {
-        return data_[index];
-    }
+    Element& operator[](size_t index) { return _data[index]; }
 
-    const Element& operator[](size_t index) const {
-        return data_[index];
-    }
+    const Element& operator[](size_t index) const { return _data[index]; }
 
     bool operator==(const VectorView& other) const {
-        return (data_ == other.data_) &&
-               (_size == other._size) &&
-               (capacity_ == other.capacity_);
+        return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
     }
 
     // Specialized equality comparison operator with const char *
     bool operator==(const char* c_str) const {
         // Check if both are null pointers
-        if (data_ == nullptr && c_str == nullptr)
+        if (_data == nullptr && c_str == nullptr)
             return true;
 
         // If one is null and the other is not, they can't be equal
-        if (data_ == nullptr || c_str == nullptr)
+        if (_data == nullptr || c_str == nullptr)
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (strncmp(data_, c_str, _size) != 0)
+        if (strncmp(_data, c_str, _size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
@@ -421,51 +381,33 @@ public:
     const CString c_str() const {
         const size_t _size = size();
         char* extended_buffer = new char[_size + 1];
-        memcpy(extended_buffer, data_, _size);
+        memcpy(extended_buffer, _data, _size);
         extended_buffer[_size] = '\0';
         return CString(extended_buffer);
     }
 
-    size_t size() const {
-        return _size;
-    }
+    size_t size() const { return _size; }
 
-    size_t capacity() const {
-        return capacity_;
-    }
+    size_t capacity() const { return _capacity; }
 
-    const Element* data() const {
-        return data_;
-    }
+    const Element* data() const { return _data; }
 
-    Element* data() {
-        return data_;
-    }
+    Element* data() { return _data; }
 
-    Element* begin() {
-        return data_;
-    }
+    Element* begin() { return _data; }
 
-    const Element* begin() const {
-        return data_;
-    }
+    const Element* begin() const { return _data; }
 
-    Element* end() {
-        return data_ + _size;
-    }
+    Element* end() { return _data + _size; }
 
-    const Element* end() const {
-        return data_ + _size;
-    }
+    const Element* end() const { return _data + _size; }
 
-    bool empty() const {
-        return _size == 0;
-    }
+    bool empty() const { return _size == 0; }
 
 private:
-    Element* data_;
+    Element* _data;
     size_t _size;
-    size_t capacity_;
+    size_t _capacity;
 };
 
 // using StringView = SequenceView<const char, dyn, dyn>;
@@ -491,8 +433,11 @@ using StringView = VectorView<const char>;
 // todo STL only
 
 inline std::ostream& operator<<(std::ostream& os, const String& string) {
-    for_each([&](char c) { os << c; },
-             string);
+    for_each(
+        [&](char c) {
+            os << c;
+        },
+        string);
     return os;
 }
 }; // namespace efp

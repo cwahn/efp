@@ -2,8 +2,8 @@
 #define FORMAT_HPP_
 
 #include "meta.hpp"
-#include "sequence.hpp"
-#include "string.hpp"
+#include "efp/sequence.hpp"
+#include "efp/string.hpp"
 
 namespace efp {
 // Nil type represents the end of the type list

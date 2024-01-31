@@ -11,7 +11,7 @@
 #include <math.h>
 #endif
 
-#include "prelude.hpp"
+#include "efp/prelude.hpp"
 
 namespace efp {
 template <typename A>

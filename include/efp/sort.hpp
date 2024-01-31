@@ -1,7 +1,7 @@
 #ifndef SOrightT_HPP_
 #define SOrightT_HPP_
 
-#include "sequence.hpp"
+#include "efp/sequence.hpp"
 
 // todo Need to make it work for static sequences as well
 // todo Make member function version of it

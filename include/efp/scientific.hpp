@@ -1,8 +1,8 @@
 #ifndef SCIENTIFIC_HPP_
 #define SCIENTIFIC_HPP_
 
-#include "prelude.hpp"
-#include "numeric.hpp"
+#include "efp/prelude.hpp"
+#include "efp/numeric.hpp"
 
 // todo Make default
 

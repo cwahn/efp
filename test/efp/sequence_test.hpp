@@ -2,7 +2,7 @@
 #define SEQUENCE_TEST_HPP_
 
 #include "catch2/catch_test_macros.hpp"
-#include "sequence.hpp"
+#include "efp/sequence.hpp"
 
 using namespace efp;
 

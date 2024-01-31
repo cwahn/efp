@@ -2,10 +2,10 @@
 #define PRELUDE_HPP_
 
 #include "meta.hpp"
-#include "trait.hpp"
-#include "enum_type.hpp"
-#include "maybe.hpp"
-#include "sequence.hpp"
+#include "efp/trait.hpp"
+#include "efp/enum_type.hpp"
+#include "efp/maybe.hpp"
+#include "efp/sequence.hpp"
 
 // Trust compiler for length calculation
 
