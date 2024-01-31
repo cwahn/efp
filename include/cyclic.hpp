@@ -190,6 +190,7 @@ public:
             new (middle_ + j) A(other.buffer_[i]);
         }
 
+        size_ = other.size_;
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
@@ -216,6 +217,7 @@ public:
             new (middle_ + j) A(other.buffer_[i]);
         }
 
+        size_ = other.size_;
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity; // ?
@@ -235,6 +237,7 @@ public:
             new (middle_ + j) A(std::move(other.buffer_[i]));
         }
 
+        size_ = other.size_;
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
@@ -259,6 +262,7 @@ public:
             new (middle_ + j) A(std::move(other.buffer_[i]));
         }
 
+        size_ = other.size_;
         read_ = buffer_ + (other.read_ - other.buffer_);
         write_ = buffer_ + (other.write_ - other.buffer_);
         middle_ = buffer_ + ct_capacity;
@@ -368,8 +372,6 @@ public:
     A* end() { return write_ > read_ ? write_ : write_ + ct_capacity; }
 
 private:
-    // Array<A, ct_capacity * 2> buffer_ = {};
-    // A buffer_[ct_capacity * 2];
     RawStorage<A, 2 * ct_capacity> buffer_;
 
     size_t size_ = 0;
