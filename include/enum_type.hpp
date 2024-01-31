@@ -238,6 +238,7 @@ namespace detail {
 
         EnumBase& operator=(const EnumBase& other) {
             if (this != &other) {
+                _index = other._index;
                 detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
             }
             return *this;
@@ -250,6 +251,7 @@ namespace detail {
 
         EnumBase& operator=(EnumBase&& other) noexcept {
             if (this != &other) {
+                _index = other._index;
                 detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
             }
             return *this;
