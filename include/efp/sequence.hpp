@@ -5,7 +5,7 @@
 // However, actual capacity does means the length of memory safe to access.
 
 #include "efp/cpp_core.hpp"
-#include "meta.hpp"
+#include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
 // todo Move and copy assigment operator sort out

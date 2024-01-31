@@ -1,7 +1,7 @@
-#ifndef SUM_TYPE_HPP_
-#define SUM_TYPE_HPP_
+#ifndef ENUM_HPP_
+#define ENUM_HPP_
 
-#include "meta.hpp"
+#include "efp/meta.hpp"
 
 namespace efp {
 // Is WildCard

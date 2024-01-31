@@ -2,7 +2,7 @@
 #define SEQUENCE_TEST_HPP_
 
 #include "catch2/catch_test_macros.hpp"
-#include "efp/sequence.hpp"
+#include "efp.hpp"
 
 using namespace efp;
 
@@ -24,14 +24,16 @@ static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequ
 // todo STL only
 
 static_assert(IsSequence<std::array<int, 3>>::value, "std::array<int, 3> should satisfy IsSequence");
-// static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
-// static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
-// static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by std::array");
+// static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by
+// std::array"); static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by
+// std::array"); static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by
+// std::array");
 
 static_assert(IsSequence<std::vector<int>>::value, "std::vector<int> should satisfy IsSequence");
-// static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by std::array");
-// static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by std::array");
-// static_assert(IsSequenceImplData<std::vector<int>>::value, "IsSequenceImplData should be satisfied by std::array");
+// static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by
+// std::array"); static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by
+// std::array"); static_assert(IsSequenceImplData<std::vector<int>>::value, "IsSequenceImplData should be satisfied by
+// std::array");
 
 TEST_CASE("Initialization") {
     SECTION("Array Default Constructor") {
@@ -123,9 +125,7 @@ Array<int, 3>* n_array_nrvo_p = nullptr;
 ArrVec<int, 3>* n_arrvec_nrvo_p = nullptr;
 Vector<int>* n_vector_nrvo_p = nullptr;
 
-Array<int, 3> array_rvo() {
-    return Array<int, 3>{1, 2, 3};
-};
+Array<int, 3> array_rvo() { return Array<int, 3>{1, 2, 3}; };
 
 Array<int, 3> array_nrvo() {
     Array<int, 3> result{0, 0, 0};
@@ -150,9 +150,7 @@ Array<int, 3> n_array_nrvo() {
     return runtime_con ? result : n_result;
 };
 
-ArrVec<int, 3> array_vector_rvo() {
-    return ArrVec<int, 3>{1, 2, 3};
-};
+ArrVec<int, 3> array_vector_rvo() { return ArrVec<int, 3>{1, 2, 3}; };
 
 ArrVec<int, 3> array_vector_nrvo() {
     ArrVec<int, 3> result{0, 0, 0};
@@ -177,9 +175,7 @@ ArrVec<int, 3> n_array_vector_nrvo() {
     return runtime_con ? result : n_result;
 };
 
-Vector<int> vector_rvo() {
-    return Vector<int>{1, 2, 3};
-};
+Vector<int> vector_rvo() { return Vector<int>{1, 2, 3}; };
 
 Vector<int> vector_nrvo() {
     Vector<int> result{0, 0, 0};

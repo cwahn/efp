@@ -1,9 +1,9 @@
 #ifndef MAYBE_HPP_
 #define MAYBE_HPP_
 
-#include "meta.hpp"
+#include "efp/meta.hpp"
 #include "efp/trait.hpp"
-#include "efp/enum_type.hpp"
+#include "efp/enum.hpp"
 
 namespace efp {
 struct Nothing {
