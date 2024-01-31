@@ -26,52 +26,53 @@ public:
 
     Vcb() {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            new (buffer_ + i) A{};
+            new (_buffer + i) A{};
         }
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_;
+        // _buffer + ct_capacity = _buffer + ct_size;
+        data_ = _buffer;
     }
 
     Vcb(const Vcb& other) {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            new (buffer_ + i) A(other.buffer_[i]);
+            new (_buffer + i) A(other._buffer[i]);
         }
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_ + (other.data_ - other.buffer_);
+        // _buffer + ct_capacity = _buffer + ct_size;
+        data_ = _buffer + (other.data_ - other._buffer);
     }
 
     Vcb& operator=(const Vcb& other) {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            (buffer_ + i)->~A();
-            new (buffer_ + i) A(other.buffer_[i]);
+            (_buffer + i)->~A();
+            new (_buffer + i) A(other._buffer[i]);
         }
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_ + (other.data_ - other.buffer_);
+        // _buffer + ct_capacity = _buffer + ct_size;
+        data_ = _buffer + (other.data_ - other._buffer);
         return *this;
     }
 
     Vcb(Vcb&& other) {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            new (buffer_ + i) A(std::move(other.buffer_[i]));
+            new (_buffer + i) A(std::move(other._buffer[i]));
         }
 
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_ + (other.data_ - other.buffer_);
+        // _buffer + ct_capacity = _buffer + ct_size;
+        data_ = _buffer + (other.data_ - other._buffer);
     }
 
     Vcb operator=(Vcb&& other) {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            (buffer_ + i)->~A();
-            new (buffer_ + i) A(std::move(other.buffer_[i]));
+            (_buffer + i)->~A();
+            new (_buffer + i) A(std::move(other._buffer[i]));
         }
-        middle_ = buffer_ + ct_size;
-        data_ = buffer_ + (other.data_ - other.buffer_);
+
+        // _buffer + ct_capacity = _buffer + ct_size;
+        data_ = _buffer + (other.data_ - other._buffer);
         return *this;
     }
 
     ~Vcb() {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            (buffer_ + i)->~A();
+            (_buffer + i)->~A();
         }
     }
 
@@ -87,7 +88,7 @@ public:
         new (data_ + ct_size) A{value};
 
         ++data_;
-        data_ -= ct_size * (data_ == middle_);
+        data_ -= ct_size * (data_ == _buffer + ct_capacity);
     }
 
     constexpr SizeType size() const { return ct_size; }
@@ -107,8 +108,8 @@ public:
     A* end() { return data_ + ct_size; }
 
 private:
-    RawStorage<A, 2 * ct_size> buffer_;
-    A* middle_;
+    RawStorage<A, 2 * ct_size> _buffer;
+    // A* _buffer + ct_capacity;
     A* data_;
 };
 
@@ -159,266 +160,161 @@ public:
     // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
     // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-    // Vcq() : buffer_{} {
-    //     read_ = buffer_;
-    //     write_ = buffer_;
-    //     middle_ = buffer_ + ct_capacity;
-    // }
-
     Vcq() {
         // Buffers are uninitialized
 
-        read_ = buffer_;
-        write_ = buffer_;
-        middle_ = buffer_ + ct_capacity;
+        _size = 0;
+        _read = _buffer;
+        _write = _buffer;
+        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
-
-    // Vcq(const Vcq& other) {
-    //     for (size_t i = 0; i <  * 2; ++i) {
-    //         new (buffer_ + i) A(other.buffer_[i]);
-    //     }
-
-    //     read_ = buffer_ + (other.read_ - other.buffer_);
-    //     write_ = buffer_ + (other.write_ - other.buffer_);
-    //     middle_ = buffer_ + ct_capacity;
-    // }
 
     Vcq(const Vcq& other) {
-        // ! Error
-        const auto read_offset = other.read_ - other.buffer_;
-        for (size_t i = 0; i < other.size_; ++i) {
+
+        const auto read_offset = other._read - other._buffer;
+        for (size_t i = 0; i < other._size; ++i) {
             const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
-            new (buffer_ + j) A(other.buffer_[i]);
-            new (middle_ + j) A(other.buffer_[i]);
+            new (_buffer + j) A(other._buffer[i]);
+            new (_buffer + ct_capacity + j) A(other._buffer[i]);
         }
 
-        size_ = other.size_;
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-        middle_ = buffer_ + ct_capacity;
+        _size = other._size;
+        _read = _buffer + (other._read - other._buffer);
+        _write = _buffer + (other._write - other._buffer);
+        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
-
-    // Vcq& operator=(const Vcq& other) {
-    //     buffer_ = other.buffer_;
-    //     read_ = buffer_ + (other.read_ - other.buffer_);
-    //     write_ = buffer_ + (other.write_ - other.buffer_);
-    //     middle_ = buffer_ + ct_capacity;
-    //     return *this;
-    // }
 
     Vcq& operator=(const Vcq& other) {
-        // for (size_t i = read_ - buffer_; i < size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     (buffer_ + j)->~A();
-        //     (middle_ + j)->~A();
-        // }
-        const auto read_offset = read_ - buffer_;
-        for (size_t i = 0; i < size_; ++i) {
+
+        const auto read_offset = _read - _buffer;
+        for (size_t i = 0; i < _size; ++i) {
             const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
-            (buffer_ + j)->~A();
-            (middle_ + j)->~A();
+            (_buffer + j)->~A();
+            (_buffer + ct_capacity + j)->~A();
         }
 
-        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     new (buffer_ + j) A(other.buffer_[i]);
-        //     new (middle_ + j) A(other.buffer_[i]);
-        // }
-        const auto read_offset_other = other.read_ - other.buffer_;
-        for (size_t i = 0; i < other.size_; ++i) {
+        const auto read_offset_other = other._read - other._buffer;
+        for (size_t i = 0; i < other._size; ++i) {
             const auto j =
                 read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
-            new (buffer_ + j) A(other.buffer_[i]);
-            new (middle_ + j) A(other.buffer_[i]);
+            new (_buffer + j) A(other._buffer[i]);
+            new (_buffer + ct_capacity + j) A(other._buffer[i]);
         }
 
-        size_ = other.size_;
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-        middle_ = buffer_ + ct_capacity; // ?
+        _size = other._size;
+        _read = _buffer + (other._read - other._buffer);
+        _write = _buffer + (other._write - other._buffer);
+        // _buffer + ct_capacity = _buffer + ct_capacity; // ?
         return *this;
     }
-
-    // Vcq(Vcq&& other) noexcept : buffer_{std::move(other.buffer_)} {
-    //     read_ = buffer_ + (other.read_ - other.buffer_);
-    //     write_ = buffer_ + (other.write_ - other.buffer_);
-    //     middle_ = buffer_ + ct_capacity;
-    // }
 
     Vcq(Vcq&& other) noexcept {
-        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     new (buffer_ + j) A(std::move(other.buffer_[i]));
-        //     new (middle_ + j) A(std::move(other.buffer_[i]));
-        // }
-        const auto read_offset_other = other.read_ - other.buffer_;
-        for (size_t i = 0; i < other.size_; ++i) {
+        const auto read_offset_other = other._read - other._buffer;
+        for (size_t i = 0; i < other._size; ++i) {
             const auto j =
                 read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
-            new (buffer_ + j) A(std::move(other.buffer_[i]));
-            new (middle_ + j) A(std::move(other.buffer_[i]));
+            new (_buffer + j) A(std::move(other._buffer[i]));
+            new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
         }
 
-        size_ = other.size_;
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-        middle_ = buffer_ + ct_capacity;
+        _size = other._size;
+        _read = _buffer + (other._read - other._buffer);
+        _write = _buffer + (other._write - other._buffer);
+        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
 
-    // Vcq operator=(Vcq&& other) noexcept {
-    //     buffer_ = std::move(other.buffer_);
-    //     read_ = buffer_ + (other.read_ - other.buffer_);
-    //     write_ = buffer_ + (other.write_ - other.buffer_);
-    // }
-
     Vcq& operator=(Vcq&& other) noexcept {
-        // for (size_t i = read_ - buffer_; i < size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     (buffer_ + j)->~A();
-        //     (middle_ + j)->~A();
-        // }
-        const auto read_offset = read_ - buffer_;
-        for (size_t i = 0; i < size_; ++i) {
+        const auto read_offset = _read - _buffer;
+        for (size_t i = 0; i < _size; ++i) {
             const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
-            (buffer_ + j)->~A();
-            (middle_ + j)->~A();
+            (_buffer + j)->~A();
+            (_buffer + ct_capacity + j)->~A();
         }
 
-        // for (size_t i = other.read_ - other.buffer_; i < other.size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     new (buffer_ + j) A(std::move(other.buffer_[i]));
-        //     new (middle_ + j) A(std::move(other.buffer_[i]));
-        // }
-        const auto read_offset_other = other.read_ - other.buffer_;
-        for (size_t i = 0; i < other.size_; ++i) {
+        const auto read_offset_other = other._read - other._buffer;
+        for (size_t i = 0; i < other._size; ++i) {
             const auto j =
                 read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
-            new (buffer_ + j) A(std::move(other.buffer_[i]));
-            new (middle_ + j) A(std::move(other.buffer_[i]));
+            new (_buffer + j) A(std::move(other._buffer[i]));
+            new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
         }
 
-        size_ = other.size_;
-        read_ = buffer_ + (other.read_ - other.buffer_);
-        write_ = buffer_ + (other.write_ - other.buffer_);
-        middle_ = buffer_ + ct_capacity;
+        _size = other._size;
+        _read = _buffer + (other._read - other._buffer);
+        _write = _buffer + (other._write - other._buffer);
+        // _buffer + ct_capacity = _buffer + ct_capacity;
         return *this;
     }
 
-    // ~Vcq() {
-    //     for (size_t i = 0; i < size_; ++i) {
-    //         read_[i].~A();
-    //         (read_ + ct_capacity)[i].~A();
-    //     }
-    // }
-
     ~Vcq() {
-        // for (size_t i = read_ - buffer_; i < size_; ++i) {
-        //     const auto j = i < ct_capacity ? i : i - ct_capacity;
-        //     (buffer_ + j)->~A();
-        //     (middle_ + j)->~A();
-        // }
-        const auto read_offset = read_ - buffer_;
-        for (size_t i = 0; i < size_; ++i) {
+        const auto read_offset = _read - _buffer;
+        for (size_t i = 0; i < _size; ++i) {
             const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
-            (buffer_ + j)->~A();
-            (middle_ + j)->~A();
+            (_buffer + j)->~A();
+            (_buffer + ct_capacity + j)->~A();
         }
     }
 
-    A& operator[](const SizeType index) { return read_[index]; }
+    A& operator[](const SizeType index) { return _read[index]; }
 
-    const A& operator[](const SizeType index) const { return read_[index]; }
-
-    // void push_back(const A& value) {
-    //     // write_[0] = value;
-    //     // write_[ct_capacity] = value;
-
-    //     write_->~A();
-    //     (write_ + ct_capacity)->~A();
-
-    //     new (write_) A{value};
-    //     new (write_ + ct_capacity) A{value};
-
-    //     ++write_;
-    //     write_ -= ct_capacity * (write_ == middle_);
-
-    //     if (size_ < ct_capacity) {
-    //         ++size_;
-    //     } else {
-    //         read_++;
-    //         read_ -= ct_capacity * (read_ == middle_);
-    //     }
-    // }
+    const A& operator[](const SizeType index) const { return _read[index]; }
 
     void push_back(const A& value) {
-        if (size_ == ct_capacity) { // Has to destroy the oldest element if the buffer is full
-            write_->~A();
-            (write_ + ct_capacity)->~A();
+        if (_size == ct_capacity) { // Has to destroy the oldest element if the buffer is full
+            _write->~A();
+            (_write + ct_capacity)->~A();
         }
 
-        new (write_) A{value};
-        new (write_ + ct_capacity) A{value};
+        new (_write) A{value};
+        new (_write + ct_capacity) A{value};
 
-        ++write_;
-        write_ -= ct_capacity * (write_ == middle_);
+        ++_write;
+        _write -= ct_capacity * (_write == _buffer + ct_capacity);
 
-        if (size_ < ct_capacity) {
-            ++size_;
+        if (_size < ct_capacity) {
+            ++_size;
         } else {
-            read_++;
-            read_ -= ct_capacity * (read_ == middle_);
+            _read++;
+            _read -= ct_capacity * (_read == _buffer + ct_capacity);
         }
     }
     // ! Undefined if empty
 
-    // A pop_front() {
-    //     A value = std::move(*read_);
-    //     read_->~A();
-    //     (read_ + ct_capacity)->~A();
-    //     size_--;
-
-    //     read_++;
-    //     read_ -= ct_capacity * (read_ == middle_);
-
-    //     return value;
-    // }
-
     A pop_front() {
-        A value{std::move(*read_)};
+        A value{std::move(*_read)};
 
-        read_->~A();
-        (read_ + ct_capacity)->~A();
-        size_--;
+        _read->~A();
+        (_read + ct_capacity)->~A();
+        _size--;
 
-        read_++;
-        read_ -= ct_capacity * (read_ == middle_);
+        _read++;
+        _read -= ct_capacity * (_read == _buffer + ct_capacity);
 
         return value;
     }
 
-    constexpr SizeType size() const { return size_; }
+    constexpr SizeType size() const { return _size; }
 
-    bool empty() const { return size_ == 0; }
+    bool empty() const { return _size == 0; }
 
-    A* data() { return read_; }
+    A* data() { return _read; }
 
-    const A* data() const { return read_; }
+    const A* data() const { return _read; }
 
-    const A* begin() const { return read_; }
+    const A* begin() const { return _read; }
 
-    A* begin() { return read_; }
+    A* begin() { return _read; }
 
-    const A* end() const { return write_ > read_ ? write_ : write_ + ct_capacity; }
+    const A* end() const { return _write > _read ? _write : _write + ct_capacity; }
 
-    A* end() { return write_ > read_ ? write_ : write_ + ct_capacity; }
+    A* end() { return _write > _read ? _write : _write + ct_capacity; }
 
 private:
-    RawStorage<A, 2 * ct_capacity> buffer_;
+    RawStorage<A, 2 * ct_capacity> _buffer;
 
-    size_t size_ = 0;
-    A* read_;
-    A* write_;
-    A* middle_;
+    size_t _size = 0;
+    A* _read;
+    A* _write;
 };
 
 // template <typename A, size_t n>
@@ -464,10 +360,10 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 //     using SizeType = size_t;
 
 //     BufferArrVec()
-//         : buffer_{}, size_{0}
+//         : _buffer{}, _size{0}
 //     {
-//         middle_ = buffer_.data() + N;
-//         data_ = buffer_.data();
+//         _buffer + ct_capacity = _buffer.data() + N;
+//         data_ = _buffer.data();
 //     }
 
 //     A &operator[](const SizeType index)
@@ -486,13 +382,13 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 //         data_[N] = value;
 
 //         data_++;
-//         data_ -= N * (data_ == middle_);
-//         size_ = size_ + (size_ < N);
+//         data_ -= N * (data_ == _buffer + ct_capacity);
+//         _size = _size + (_size < N);
 //     }
 
 //     constexpr size_t size() const
 //     {
-//         return size_;
+//         return _size;
 //     }
 
 //     A *data()
@@ -521,10 +417,10 @@ template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { retur
 //     }
 
 // private:
-//     std::array<A, N * 2> buffer_;
-//     A *middle_;
+//     std::array<A, N * 2> _buffer;
+//     A *_buffer + ct_capacity;
 //     A *data_;
-//     SizeType size_;
+//     SizeType _size;
 // };
 
 // template <typename A, size_t N>
