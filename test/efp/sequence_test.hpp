@@ -162,6 +162,72 @@ TEST_CASE("ArrVec Rule of 5", "ArrVec") {
     }
 }
 
+TEST_CASE("Vector Rule of five", "Vector") {
+    SECTION("New Constructor") {
+        {
+            MockHW::reset();
+            Vector<MockRaii> a;
+            CHECK(MockHW::remaining_resource_count() == 0);
+            a.push_back(MockRaii {});
+            a.push_back(MockRaii {});
+            CHECK(MockHW::remaining_resource_count() == 2);
+        }
+        CHECK(MockHW::is_sound());
+    }
+
+    SECTION("Copy Constructor") {
+        {
+            MockHW::reset();
+            Vector<MockRaii> a;
+            a.push_back(MockRaii {});
+            a.push_back(MockRaii {});
+            Vector<MockRaii> b = a;
+            CHECK(MockHW::remaining_resource_count() == 4);
+        }
+        CHECK(MockHW::is_sound());
+    }
+
+    SECTION("Copy Assignment") {
+        {
+            MockHW::reset();
+            Vector<MockRaii> a;
+            a.push_back(MockRaii {});
+            a.push_back(MockRaii {});
+            Vector<MockRaii> b;
+            CHECK(MockHW::remaining_resource_count() == 2);
+            b = a;
+            CHECK(MockHW::remaining_resource_count() == 4);
+        }
+        CHECK(MockHW::is_sound());
+    }
+
+    SECTION ("Move Constructor") {
+        {
+            MockHW::reset();
+            Vector<MockRaii> a;
+            a.push_back(MockRaii {});
+            a.push_back(MockRaii {});
+            Vector<MockRaii> b = std::move(a);
+            CHECK(MockHW::remaining_resource_count() == 2);
+        }
+        CHECK(MockHW::is_sound());
+    }
+
+    SECTION("Move Assignment") {
+        {
+            MockHW::reset();
+            Vector<MockRaii> a;
+            a.push_back(MockRaii {});
+            a.push_back(MockRaii {});
+            Vector<MockRaii> b;
+            CHECK(MockHW::remaining_resource_count() == 2);
+            b = std::move(a);
+            CHECK(MockHW::remaining_resource_count() == 2);
+        }
+        CHECK(MockHW::is_sound());
+    }
+}
+
 TEST_CASE("Initialization") {
     SECTION("Array Default Constructor") {
         Array<int, 5> a;
