@@ -29,7 +29,6 @@ class Vcb
         for (size_t i = 0; i < ct_size * 2; ++i) {
             new (_buffer + i) A {};
         }
-        // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer;
     }
 
@@ -37,7 +36,6 @@ class Vcb
         for (size_t i = 0; i < ct_size * 2; ++i) {
             new (_buffer + i) A(other._buffer[i]);
         }
-        // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer + (other._data - other._buffer);
     }
 
@@ -46,7 +44,6 @@ class Vcb
             (_buffer + i)->~A();
             new (_buffer + i) A(other._buffer[i]);
         }
-        // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer + (other._data - other._buffer);
         return *this;
     }
@@ -56,7 +53,6 @@ class Vcb
             new (_buffer + i) A(std::move(other._buffer[i]));
         }
 
-        // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer + (other._data - other._buffer);
     }
 
@@ -66,7 +62,6 @@ class Vcb
             new (_buffer + i) A(std::move(other._buffer[i]));
         }
 
-        // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer + (other._data - other._buffer);
         return *this;
     }
@@ -134,15 +129,6 @@ class Vcb
     A* _data;
 };
 
-// template <typename A, size_t n>
-// class SequenceTrait<Vcb<A, n>>
-// {
-// public:
-//     using Element = A;
-//     static constexpr size_t ct_size = n;
-//     static constexpr size_t ct_capacity = n;
-// };
-
 template<typename A, size_t n>
 struct ElementImpl<Vcb<A, n>> {
     using Type = A;
@@ -205,7 +191,6 @@ class Vcq
         _size = 0;
         _read = _buffer;
         _write = _buffer;
-        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
 
     Vcq(const Vcq& other) {
@@ -220,7 +205,6 @@ class Vcq
         _size = other._size;
         _read = _buffer + (other._read - other._buffer);
         _write = _buffer + (other._write - other._buffer);
-        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
 
     Vcq& operator=(const Vcq& other) {
@@ -244,7 +228,6 @@ class Vcq
         _size = other._size;
         _read = _buffer + (other._read - other._buffer);
         _write = _buffer + (other._write - other._buffer);
-        // _buffer + ct_capacity = _buffer + ct_capacity; // ?
         return *this;
     }
 
@@ -261,7 +244,6 @@ class Vcq
         _size = other._size;
         _read = _buffer + (other._read - other._buffer);
         _write = _buffer + (other._write - other._buffer);
-        // _buffer + ct_capacity = _buffer + ct_capacity;
     }
 
     Vcq& operator=(Vcq&& other) noexcept {
@@ -285,7 +267,6 @@ class Vcq
         _size = other._size;
         _read = _buffer + (other._read - other._buffer);
         _write = _buffer + (other._write - other._buffer);
-        // _buffer + ct_capacity = _buffer + ct_capacity;
         return *this;
     }
 
@@ -432,166 +413,5 @@ constexpr auto data(Vcq<A, n>& as) -> A* {
 }
 
 }  // namespace efp
-
-// // BufferArrVec
-
-// template <typename A, size_t N>
-// class BufferArrVec
-// {
-// public:
-//     using Element = A;
-//     using SizeType = size_t;
-
-//     BufferArrVec()
-//         : _buffer{}, _size{0}
-//     {
-//         _buffer + ct_capacity = _buffer.data() + N;
-//         _data = _buffer.data();
-//     }
-
-//     A &operator[](const SizeType index)
-//     {
-//         return data()[index];
-//     }
-
-//     const A &operator[](const SizeType index) const
-//     {
-//         return data()[index];
-//     }
-
-//     void push_back(A value)
-//     {
-//         _data[0] = value;
-//         _data[N] = value;
-
-//         _data++;
-//         _data -= N * (_data == _buffer + ct_capacity);
-//         _size = _size + (_size < N);
-//     }
-
-//     constexpr size_t size() const
-//     {
-//         return _size;
-//     }
-
-//     A *data()
-//     {
-//         return _data;
-//     }
-
-//     const A *data() const
-//     {
-//         return _data;
-//     }
-
-//     bool empty()
-//     {
-//         return false;
-//     }
-
-//     A *begin()
-//     {
-//         return _data;
-//     }
-
-//     A *end()
-//     {
-//         return _data + N;
-//     }
-
-// private:
-//     std::array<A, N * 2> _buffer;
-//     A *_buffer + ct_capacity;
-//     A *_data;
-//     SizeType _size;
-// };
-
-// template <typename A, size_t N>
-// class DynVcb
-// {
-// public:
-//     DynVcb()
-//     {
-//         start = buffer.data();
-//         data = buffer.data() + N;
-//         len = 0;
-//     }
-
-//     void pushFront(A value)
-//     {
-//         data += N * (data == start);
-//         --data;
-//         data[0] = value;
-//         data[N] = value;
-
-//         len++;
-//     }
-
-//     void reset_len()
-//     {
-//         len = 0;
-//     }
-
-//     A *data;
-//     size_t len;
-//     size_t max_len = N;
-
-// private:
-//     std::array<A, N * 2> buffer;
-//     A *start;
-// };
-
-// template <typename A, size_t I_N, size_t O_N>
-// class FixedSizeBuffer
-// {
-// public:
-//     FixedSizeBuffer(DynVcb<A, I_N> *in_buffer)
-//         : in_buffer(in_buffer)
-//     {
-//     }
-
-//     void update()
-//     {
-//         A *in_data = in_buffer->data;
-//         size_t in_length = in_buffer->len;
-
-//         // for (size_t i = 0; i < in_length; i++)
-//         // {
-//         //     out_buffer.push_back(in_data[i]);
-//         // }
-
-//         for_each(
-//             [&](A x)
-//             { out_buffer.push_back(x) },
-//             in_data,
-//             in_length)
-//     }
-
-//     Vcb<A, O_N> out_buffer;
-
-// private:
-//     DynVcb *in_buffer;
-
-// }
-
-// template <typename A, size_t I_N>
-// class TrandLine
-// {
-// public:
-//     TrandLine(Vcb<A, I_N> *in_buffer)
-//         : in_buffer(in_buffer)
-//     {
-//     }
-
-//     void update()
-//     {
-//         A *in_data = in_buffer->data;
-
-//         for
-//     }
-
-// private:
-//     Vcb<A, I_N> *in_buffer;
-// }
 
 #endif

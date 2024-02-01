@@ -27,32 +27,32 @@ class File {
     }
 
     ~File() {
-        if (file_)
-            fclose(file_);
+        if (_file)
+            fclose(_file);
     }
 
     File(const File&) = delete;
 
     File& operator=(const File&) = delete;
 
-    File(File&& other) noexcept : file_(other.file_) {
-        other.file_ = nullptr;
+    File(File&& other) noexcept : _file(other._file) {
+        other._file = nullptr;
     }
 
     File& operator=(File&& other) noexcept {
         if (this != &other) {
-            file_ = other.file_;
-            other.file_ = nullptr;
+            _file = other._file;
+            other._file = nullptr;
         }
         return *this;
     }
 
     Maybe<String> read_line() {
-        if (file_) {
+        if (_file) {
             String buffer {};
             int ch;
 
-            while ((ch = fgetc(file_)) != '\n' && ch != EOF) {
+            while ((ch = fgetc(_file)) != '\n' && ch != EOF) {
                 buffer.push_back(static_cast<char>(ch));
             }
 
@@ -84,15 +84,15 @@ class File {
     }
 
     bool write(const char* data, int length = -1) {
-        if (file_ == nullptr)
+        if (_file == nullptr)
             return false;
 
-        if (strchr(mode_, 'b')) {
+        if (strchr(_mode, 'b')) {
             // Write binary data
             if (length == -1)
                 length = strlen(data);
 
-            int written = fwrite(data, sizeof(char), length, file_);
+            int written = fwrite(data, sizeof(char), length, _file);
 
             return written == length;
         } else {
@@ -101,7 +101,7 @@ class File {
                 length = strlen(data);
 
             for (size_t i = 0; i < length; ++i) {
-                if (fputc(data[i], file_) == EOF)
+                if (fputc(data[i], _file) == EOF)
                     return false;
             }
 
@@ -110,33 +110,33 @@ class File {
     }
 
     bool write(const String& data) {
-        if (file_ == nullptr)
+        if (_file == nullptr)
             return false;
 
-        if (strchr(mode_, 'b')) {
+        if (strchr(_mode, 'b')) {
             // Write binary data
-            int written = fwrite(data.data(), sizeof(char), data.size(), file_);
+            int written = fwrite(data.data(), sizeof(char), data.size(), _file);
             return written == data.size();
         } else {
-            return fputs(data.c_str(), file_) != EOF;
+            return fputs(data.c_str(), _file) != EOF;
         }
     }
 
     int flush() {
-        return fflush(file_);
+        return fflush(_file);
     }
 
     bool seek(long offset) {
-        return fseek(file_, offset, SEEK_SET) == 0;
+        return fseek(_file, offset, SEEK_SET) == 0;
     }
 
     int tell() {
-        return ftell(file_);
+        return ftell(_file);
     }
 
     bool close() {
-        if (file_ && fclose(file_) != EOF) {
-            file_ = nullptr;
+        if (_file && fclose(_file) != EOF) {
+            _file = nullptr;
             return true;
         }
 
@@ -144,13 +144,13 @@ class File {
     }
 
   private:
-    explicit File(FILE* file, const char* mode) : file_(file) {
-        strncpy(mode_, mode, sizeof(mode_) - 1);
-        mode_[sizeof(mode_) - 1] = '\0';
+    explicit File(FILE* file, const char* mode) : _file(file) {
+        strncpy(_mode, mode, sizeof(_mode) - 1);
+        _mode[sizeof(_mode) - 1] = '\0';
     }
 
-    FILE* file_;
-    char mode_[8];
+    FILE* _file;
+    char _mode[8];
 };
 
 };  // namespace efp
