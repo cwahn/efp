@@ -86,6 +86,12 @@ class Array {
         return *this;
     }
 
+    ~Array() {
+        for (size_t i = 0; i < ct_size; ++i) {
+            (_data + i)->~Element();
+        }
+    }
+
     // template<typename... Arg>
     // Array(const Arg&... args) : _data {args...} {}
 
@@ -262,9 +268,13 @@ class ArrVec {
 
     ArrVec& operator=(const ArrVec& other) {
         if (this != &other) {
-            resize(other.size());
             for (size_t i = 0; i < _size; ++i) {
-                (_data + i)->~Element();                   // Destroy each element
+                (_data + i)->~Element();
+            }
+
+            _size = other._size;
+
+            for (size_t i = 0; i < _size; ++i) {
                 new (_data + i) Element {other._data[i]};  // Copy-construct each element
             }
         }
@@ -620,256 +630,428 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
     return as.data();
 }
 
-template<typename A>
-class Vector {
-  public:
-    using Element = A;
-    using CtSize = Size<dyn>;
-    using CtCapacity = Size<dyn>;
+namespace detail {
+    template<typename A>
+    class VectorBase {
+      public:
+        using Element = A;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<dyn>;
 
-    Vector() : _data {nullptr}, _size {0}, _capacity {0} {}
+        VectorBase() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-    Vector(const Vector& other) : _data {nullptr}, _size {0}, _capacity {0} {
-        if (other._data) {
-            _size = other._size;
-            _capacity = other._capacity;
-            _data = new Element[_capacity];
+        // VectorBase(const VectorBase& other) : _data {nullptr}, _size {0}, _capacity {0} {
+        //     if (other._data) {
+        //         _size = other._size;
+        //         _capacity = other._capacity;
+        //         _data = new Element[_capacity];
 
-            // memcpy(_data, other._data, sizeof(A) * _size);
-            for (size_t i = 0; i < other._size; ++i) {
-                new (&_data[i]) Element(other._data[i]);
+        //         // memcpy(_data, other._data, sizeof(A) * _size);
+        //         for (size_t i = 0; i < other._size; ++i) {
+        //             new (&_data[i]) Element(other._data[i]);
+        //         }
+        //     }
+        // }
+
+        VectorBase(const VectorBase& other) :
+            _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
+            _size {other._size},
+            _capacity {other._size} {
+            if (other._data) {
+                for (size_t i = 0; i < _size; ++i) {
+                    new (_data + i) Element {other._data[i]};
+                }
             }
         }
-    }
 
-    Vector(Vector&& other) : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
-        other._data = nullptr;
-    }
+        // // todo copy_and_swap
+        // VectorBase& operator=(const VectorBase& other) noexcept {
+        //     if (this != &other) {
+        //         Element* newData = nullptr;
+        //         if (other._size > 0) {
+        //             newData = new Element[other._capacity];
 
-    template<typename... Args>
-    Vector(const Args&... args) :
-        _data {new Element[sizeof...(args)]},
-        _capacity(sizeof...(args)),
-        _size(sizeof...(args)) {
-        size_t i = 0;
-        for (auto arg : std::initializer_list<Common<Args...>> {args...})
-            _data[i++] = arg;
-    }
+        //             for (size_t i = 0; i < other._size; ++i) {
+        //                 newData[i] = other._data[i];
+        //             }
+        //         }
 
-    // Constructor from Array
-    template<size_t ct_size_>
-    Vector(const Array<Element, ct_size_>& as) :
-        _data(new Element[ct_size_]),
-        _size(ct_size_),
-        _capacity(ct_size_) {
-        for (size_t i = 0; i < _size; ++i) {
-            new (&_data[i]) Element(as[i]);
-        }
-    }
+        //         _data = newData;
+        //         _size = other._size;
+        //         _capacity = other._capacity;
+        //     }
+        //     return *this;
+        // }
 
-    // Constructor from ArrVec
-    template<size_t ct_cap_>
-    Vector(const ArrVec<Element, ct_cap_>& as) :
-        _data(new Element[length(as)]),
-        _size(length(as)),
-        _capacity(ct_cap_) {
-        for (size_t i = 0; i < _size; ++i) {
-            new (&_data[i]) Element(as[i]);
-        }
-    }
+        // todo copy_and_swap
+        VectorBase& operator=(const VectorBase& other) noexcept {
+            if (this != &other) {
+                for (size_t i = 0; i < _size; ++i) {
+                    _data[i].~Element();
+                }
 
-    ~Vector() {
-        if (_data) {
-            delete[] _data;
-            _data = nullptr;
-        }
-    }
-
-    // todo copy_and_swap
-    Vector& operator=(const Vector& other) noexcept {
-        if (this != &other) {
-            Element* newData = nullptr;
-            if (other._size > 0) {
-                newData = new Element[other._capacity];
+                if (_capacity < other._size) {
+                    resize(other._size);
+                }
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other._data[i];
+                    new (_data + i) Element {other._data[i]};
+                }
+            }
+            return *this;
+        }
+
+        // ! Duplicated CC
+        // VectorBase(const VectorBase& other) : _data {nullptr}, _size {0}, _capacity {0} {
+        //     if (other._data) {
+        //         _size = other._size;
+        //         _capacity = other._capacity;
+        //         _data = new Element[_capacity];
+
+        //         // memcpy(_data, other._data, sizeof(A) * _size);
+        //         for (size_t i = 0; i < other._size; ++i) {
+        //             new (&_data[i]) Element(other._data[i]);
+        //         }
+        //     }
+        // }
+
+        // VectorBase(VectorBase&& other) noexcept :
+        //     _data {other._data},
+        //     _size {other._size},
+        //     _capacity {other._capacity} {
+        //     other._data = nullptr;
+        // }
+
+        VectorBase(VectorBase&& other) noexcept :
+            _data {other._data},
+            _size {other._size},
+            _capacity {other._capacity} {
+            other._data = nullptr;
+        }
+
+        // VectorBase& operator=(VectorBase&& other) noexcept {
+        //     if (this != &other) {
+        //         delete[] _data;
+
+        //         _data = other._data;
+        //         _size = other._size;
+        //         _capacity = other._capacity;
+
+        //         other._data = nullptr;
+        //         other._size = 0;
+        //         other._capacity = 0;
+        //     }
+        //     return *this;
+        // }
+
+        VectorBase& operator=(VectorBase&& other) noexcept {
+            if (this != &other) {
+                // Destroy existing elements and deallocate memory
+                for (size_t i = 0; i < _size; ++i) {
+                    _data[i].~Element();
+                }
+                ::operator delete[](_data);
+
+                _data = other._data;
+                _size = other._size;
+                _capacity = other._capacity;
+
+                other._data = nullptr;
+                other._size = 0;
+                other._capacity = 0;
+            }
+            return *this;
+        }
+
+        // template<typename... Args>
+        // VectorBase(const Args&... args) :
+        //     _data {new Element[sizeof...(args)]},
+        //     _capacity(sizeof...(args)),
+        //     _size(sizeof...(args)) {
+        //     size_t i = 0;
+        //     for (auto arg : std::initializer_list<Common<Args...>> {args...})
+        //         _data[i++] = arg;
+        // }
+
+        template<typename... Args>
+        VectorBase(const Args&... args) :
+            _data {static_cast<Element*>(::operator new[](sizeof...(args) * sizeof(Element)))},
+            _capacity(sizeof...(args)),
+            _size(sizeof...(args)) {
+            size_t index = 0;
+            _construct_elements(index, args...);
+        }
+
+        // Constructor from Array
+        template<size_t ct_size_>
+        VectorBase(const Array<Element, ct_size_>& as) :
+            // _data(new Element[ct_size_]),
+            _data {::operator new[](ct_size_ * sizeof(Element))},
+            _size(ct_size_),
+            _capacity(ct_size_) {
+            for (size_t i = 0; i < _size; ++i) {
+                // new (&_data[i]) Element(as[i]);
+                new (_data + i) Element {as[i]};
+            }
+        }
+
+        // Constructor from ArrVec
+        template<size_t ct_cap_>
+        VectorBase(const ArrVec<Element, ct_cap_>& as) :
+            // _data(new Element[length(as)]),
+            _data {::operator new[](length(as) * sizeof(Element))},
+            _size(length(as)),
+            _capacity(ct_cap_) {
+            for (size_t i = 0; i < _size; ++i) {
+                // new (&_data[i]) Element(as[i]);
+                new (_data + i) Element {as[i]};
+            }
+        }
+
+        // ~VectorBase() {
+        //     if (_data) {
+        //         delete[] _data;
+        //         _data = nullptr;
+        //     }
+        // }
+
+        ~VectorBase() {
+            if (_data) {
+                for (size_t i = 0; i < _size; ++i) {
+                    (_data + i)->~Element();
+                }
+                ::operator delete[](_data);
+                _data = nullptr;
+            }
+        }
+
+        Element& operator[](size_t index) {
+            return _data[index];
+        }
+
+        const Element& operator[](size_t index) const {
+            return _data[index];
+        }
+
+        bool operator==(const VectorBase& other) const {
+            if (_size != other._size) {
+                return false;
+            }
+
+            for (size_t i = 0; i < _size; ++i) {
+                if (_data[i] != other._data[i]) {
+                    return false;
                 }
             }
 
-            _data = newData;
-            _size = other._size;
-            _capacity = other._capacity;
-        }
-        return *this;
-    }
-
-    Vector& operator=(Vector&& other) noexcept {
-        if (this != &other) {
-            delete[] _data;
-
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
-
-            other._data = nullptr;
-            other._size = 0;
-            other._capacity = 0;
-        }
-        return *this;
-    }
-
-    Element& operator[](size_t index) {
-        return _data[index];
-    }
-
-    const Element& operator[](size_t index) const {
-        return _data[index];
-    }
-
-    bool operator==(const Vector& other) const {
-        if (_size != other._size) {
-            return false;
+            return true;
         }
 
-        for (size_t i = 0; i < _size; ++i) {
-            if (_data[i] != other._data[i]) {
-                return false;
+        size_t size() const {
+            return _size;
+        }
+
+        size_t capacity() const {
+            return _capacity;
+        }
+
+        void resize(size_t length) {
+            if (length < 0) {
+                throw std::runtime_error(
+                    "VectorBase::resize: length must be greater than or equal to 0"
+                );
+            }
+
+            if (length > _capacity) {
+                reserve(length);
+            }
+
+            _size = length;
+        }
+
+        // void reserve(size_t new_capacity) {
+        //     if (new_capacity > _capacity) {
+        //         Element* new_data = new Element[new_capacity];
+
+        //         for (size_t i = 0; i < _size; ++i) {
+        //             new (&new_data[i]) Element(efp::move(_data[i]));
+        //             _data[i].~Element();
+        //         }
+
+        //         delete[] _data;
+
+        //         _data = new_data;
+        //         _capacity = new_capacity;
+        //     }
+        // }
+
+        void reserve(size_t new_capacity) {
+            if (new_capacity > _capacity) {
+                Element* new_data =
+                    static_cast<Element*>(::operator new[](new_capacity * sizeof(Element)));
+
+                for (size_t i = 0; i < _size; ++i) {
+                    new (new_data + i) Element {std::move(_data[i])};
+                }
+
+                ::operator delete[](_data);
+
+                _data = new_data;
+                _capacity = new_capacity;
             }
         }
 
-        return true;
-    }
+        void push_back(const Element& value) {
+            if (_size >= _capacity) {
+                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+            }
 
-    size_t size() const {
-        return _size;
-    }
-
-    size_t capacity() const {
-        return _capacity;
-    }
-
-    void resize(size_t length) {
-        if (length < 0) {
-            throw std::runtime_error("Vector::resize: length must be greater than or equal to 0");
+            new (_data + _size) Element {value};
+            ++_size;
         }
 
-        if (length > _capacity) {
-            reserve(length);
+        void push_back(Element&& value) {
+            if (_size >= _capacity) {
+                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+            }
+
+            new (_data + _size) Element {std::move(value)};
+            ++_size;
         }
 
-        _size = length;
-    }
+        // void insert(size_t index, const Element& value) {
+        //     if (index < 0 || index > _size) {
+        //         throw std::runtime_error(
+        //             "VectorBase::insert: index must be less than or equal to size"
+        //         );
+        //     }
+        //     if (_size >= _capacity) {
+        //         reserve(_capacity == 0 ? 1 : 2 * _capacity);
+        //     }
+        //     for (size_t i = _size; i > index; --i) {
+        //         _data[i] = efp::move(_data[i - 1]);
+        //     }
+        //     new (&_data[index]) Element(value);
+        //     ++_size;
+        // }
 
-    void reserve(size_t new_capacity) {
-        if (new_capacity > _capacity) {
-            Element* new_data = new Element[new_capacity];
+        void insert(size_t index, const Element& value) {
+            if (index < 0 || index > _size) {
+                throw std::runtime_error(
+                    "VectorBase::insert: index must be less than or equal to size"
+                );
+            }
 
+            if (_size >= _capacity) {
+                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+            }
+
+            for (size_t i = _size; i > index; --i) {
+                _data[i] = efp::move(_data[i - 1]);
+            }
+
+            new (_data + index) Element {value};
+            ++_size;
+        }
+
+        // void erase(size_t index) {
+        //     if (index < 0 || index >= _size) {
+        //         throw std::runtime_error(
+        //             "VectorBase::erase: index must be less than or equal to size"
+        //         );
+        //     }
+
+        //     _data[index].~Element();
+        //     for (size_t i = index; i < _size - 1; ++i) {
+        //         new (&_data[i]) Element(efp::move(_data[i + 1]));
+        //         _data[i + 1].~Element();
+        //     }
+
+        //     --_size;
+        // }
+
+        void erase(size_t index) {
+            if (index < 0 || index >= _size) {
+                throw std::runtime_error(
+                    "VectorBase::erase: index must be less than or equal to size"
+                );
+            }
+
+            (_data + index)->~Element();
+
+            for (size_t i = index; i < _size - 1; ++i) {
+                _data[i] = std::move(_data[i + 1]);
+            }
+
+            --_size;
+        }
+
+        void clear() {
             for (size_t i = 0; i < _size; ++i) {
-                new (&new_data[i]) Element(efp::move(_data[i]));
                 _data[i].~Element();
             }
-
-            delete[] _data;
-
-            _data = new_data;
-            _capacity = new_capacity;
-        }
-    }
-
-    void push_back(const Element& value) {
-        if (_size >= _capacity) {
-            reserve(_capacity == 0 ? 1 : 2 * _capacity);
+            _size = 0;
         }
 
-        new (&_data[_size]) Element(value);
-        ++_size;
-    }
-
-    void push_back(Element&& value) {
-        if (_size >= _capacity) {
-            reserve(_capacity == 0 ? 1 : 2 * _capacity);
+        void pop_back() {
+            if (_size == 0) {
+                throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
+            }
+            _data[_size - 1].~Element();
+            --_size;
         }
 
-        new (&_data[_size]) Element(efp::move(value));
-        ++_size;
-    }
-
-    void insert(size_t index, const Element& value) {
-        if (index < 0 || index > _size) {
-            throw std::runtime_error("Vector::insert: index must be less than or equal to size");
-        }
-        if (_size >= _capacity) {
-            reserve(_capacity == 0 ? 1 : 2 * _capacity);
-        }
-        for (size_t i = _size; i > index; --i) {
-            _data[i] = efp::move(_data[i - 1]);
-        }
-        new (&_data[index]) Element(value);
-        ++_size;
-    }
-
-    void erase(size_t index) {
-        if (index < 0 || index >= _size) {
-            throw std::runtime_error("Vector::erase: index must be less than or equal to size");
+        const Element* data() const {
+            return _data;
         }
 
-        _data[index].~Element();
-        for (size_t i = index; i < _size - 1; ++i) {
-            new (&_data[i]) Element(efp::move(_data[i + 1]));
-            _data[i + 1].~Element();
+        Element* data() {
+            return _data;
         }
 
-        --_size;
-    }
-
-    void clear() {
-        for (size_t i = 0; i < _size; ++i) {
-            _data[i].~Element();
+        Element* begin() {
+            return _data;
         }
-        _size = 0;
-    }
 
-    void pop_back() {
-        if (_size == 0) {
-            throw std::runtime_error("Vector::pop_back: size must be greater than 0");
+        const Element* begin() const {
+            return _data;
         }
-        _data[_size - 1].~Element();
-        --_size;
-    }
 
-    const Element* data() const {
-        return _data;
-    }
+        Element* end() {
+            return _data + _size;
+        }
 
-    Element* data() {
-        return _data;
-    }
+        const Element* end() const {
+            return _data + _size;
+        }
 
-    Element* begin() {
-        return _data;
-    }
+        bool empty() const {
+            return _size == 0;
+        }
 
-    const Element* begin() const {
-        return _data;
-    }
+      private:
+        template<typename Head, typename... Tail>
+        void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
+            new (_data + index++) Element {head};
+            _construct_elements(index, tail...);
+        }
 
-    Element* end() {
-        return _data + _size;
-    }
+        template<typename Last>
+        void _construct_elements(size_t& index, const Last& last) {
+            new (_data + index++) Element {last};
+        }
 
-    const Element* end() const {
-        return _data + _size;
-    }
+        Element* _data;
+        size_t _size;
+        size_t _capacity;
+    };
+}  // namespace detail
 
-    bool empty() const {
-        return _size == 0;
-    }
-
-  private:
-    Element* _data;
-    size_t _size;
-    size_t _capacity;
+template<typename A>
+class Vector: public detail::VectorBase<A> {
+  public:
+    using Base = detail::VectorBase<A>;
+    using Base::Base;
 };
 
 template<typename A>
