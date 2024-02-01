@@ -60,8 +60,8 @@ class Array {
                 (_data + i)->~Element();                   // Destroy each element
                 new (_data + i) Element {other._data[i]};  // Copy-construct each element
             }
-            return *this;
         }
+        return *this;
     }
 
     // Array(Array&& other) noexcept {
@@ -235,65 +235,133 @@ class ArrVec {
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
 
-    ArrVec() : _size {0} {}
+    ArrVec() : _size {0} {
+        // By definition none of the data in ArrVec of size 0 should be valid
+    }
 
+    // ArrVec(const ArrVec& other) : _size {other._size} {
+    //     for (size_t i = 0; i < _size; ++i) {
+    //         new (&_data[i]) Element(other._data[i]);
+    //     }
+    // }
     ArrVec(const ArrVec& other) : _size {other._size} {
         for (size_t i = 0; i < _size; ++i) {
-            new (&_data[i]) Element(other._data[i]);
+            new (_data + i) Element {other._data[i]};
         }
     }
 
-    ArrVec(ArrVec&& other) : _size {other._size} {
-        other._size = 0;
-        for (size_t i = 0; i < _size; ++i) {
-            _data[i] = efp::move(other._data[i]);
-        }
-    }
-
-    template<typename... Arg>
-    ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
-
-    // Constructor from array
-    template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
-    ArrVec(const ArrVec<Element, ct_size_>& as) : _size(ct_size_) {
-        for (size_t i = 0; i < ct_size_; ++i) {
-            new (&_data[i]) Element(as[i]);
-        }
-    }
-
-    ~ArrVec() {
-        for (size_t i = 0; i < _size; ++i) {
-            _data[i].~Element();
-        }
-    }
+    // ArrVec& operator=(const ArrVec& other) {
+    //     if (this != &other) {
+    //         resize(other.size());
+    //         for (size_t i = 0; i < _size; ++i) {
+    //             _data[i] = other._data[i];
+    //         }
+    //     }
+    //     return *this;
+    // }
 
     ArrVec& operator=(const ArrVec& other) {
         if (this != &other) {
             resize(other.size());
             for (size_t i = 0; i < _size; ++i) {
-                _data[i] = other._data[i];
+                (_data + i)->~Element();                   // Destroy each element
+                new (_data + i) Element {other._data[i]};  // Copy-construct each element
             }
         }
         return *this;
     }
 
+    // ArrVec(ArrVec&& other) : _size {other._size} {
+    //     other._size = 0;
+    //     for (size_t i = 0; i < _size; ++i) {
+    //         _data[i] = efp::move(other._data[i]);
+    //     }
+    // }
+
+    ArrVec(ArrVec&& other) noexcept : _size {other._size} {
+        other._size = 0;
+        for (size_t i = 0; i < _size; ++i) {
+            new (_data + i) Element {std::move(other._data[i])};
+        }
+    }
+
+    // ArrVec& operator=(ArrVec&& other) noexcept {
+    //     if (this != &other) {
+    //         // Destroy existing elements
+    //         for (size_t i = 0; i < _size; ++i) {
+    //             _data[i].~Element();
+    //         }
+
+    //         // Move data from the source object
+    //         _size = other._size;
+    //         for (size_t i = 0; i < _size; ++i) {
+    //             new (&_data[i]) Element(efp::move(other._data[i]));
+    //         }
+
+    //         // Reset the source object
+    //         other._size = 0;
+    //     }
+    //     return *this;
+    // }
+
     ArrVec& operator=(ArrVec&& other) noexcept {
         if (this != &other) {
             // Destroy existing elements
             for (size_t i = 0; i < _size; ++i) {
-                _data[i].~Element();
+                (_data + i)->~Element();
             }
 
             // Move data from the source object
             _size = other._size;
             for (size_t i = 0; i < _size; ++i) {
-                new (&_data[i]) Element(efp::move(other._data[i]));
+                new (_data + i) Element {std::move(other._data[i])};
             }
 
             // Reset the source object
             other._size = 0;
         }
         return *this;
+    }
+
+    // ~ArrVec() {
+    //     for (size_t i = 0; i < _size; ++i) {
+    //         _data[i].~Element();
+    //     }
+    // }
+
+    ~ArrVec() {
+        for (size_t i = 0; i < _size; ++i) {
+            (_data + i)->~Element();
+        }
+    }
+
+    // Constructor from array
+    // template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
+    // ArrVec(const ArrVec<Element, ct_size_>& as) : _size(ct_size_) {
+    //     for (size_t i = 0; i < ct_size_; ++i) {
+    //         new (&_data[i]) Element(as[i]);
+    //     }
+    // }
+
+    // Constructor from array
+    template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
+    ArrVec(const ArrVec<Element, ct_size_>& as) : _size(ct_size_) {
+        for (size_t i = 0; i < ct_size_; ++i) {
+            new (_data + i) Element {as[i]};
+        }
+    }
+
+    // template<typename... Arg>
+    // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
+
+    template<typename... Arg>
+    ArrVec(const Arg&... args) : _size(sizeof...(args)) {
+        static_assert(
+            sizeof...(args) <= ct_capacity,
+            "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
+        );
+        size_t index = 0;
+        _construct_elements(index, args...);
     }
 
     Element& operator[](size_t index) {
@@ -350,10 +418,20 @@ class ArrVec {
                 "ArrVec::push_back: size must be less than or equal to ct_capacity"
             );
         } else {
-            new (&_data[_size]) Element(value);
-            ++_size;
+            new (_data + _size++) Element {value};
         }
     }
+
+    // void push_back(Element&& value) {
+    //     if (_size >= ct_capacity) {
+    //         throw std::runtime_error(
+    //             "ArrVec::push_back: size must be less than or equal to ct_capacity"
+    //         );
+    //     } else {
+    //         new (&_data[_size]) Element(efp::move(value));
+    //         ++_size;
+    //     }
+    // }
 
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
@@ -361,10 +439,26 @@ class ArrVec {
                 "ArrVec::push_back: size must be less than or equal to ct_capacity"
             );
         } else {
-            new (&_data[_size]) Element(efp::move(value));
-            ++_size;
+            new (_data + _size++) Element {std::move(value)};
         }
     }
+
+    // void insert(size_t index, const Element& value) {
+    //     if (index < 0 || index > _size || _size == ct_capacity) {
+    //         throw std::runtime_error(
+    //             "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
+    //         );
+    //     }
+
+    //     for (size_t i = _size; i > index; --i) {
+    //         new (&_data[i]) Element(efp::move(_data[i - 1]));
+    //         _data[i - 1].~Element();
+    //     }
+
+    //     new (&_data[index]) Element(value);
+
+    //     ++_size;
+    // }
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > _size || _size == ct_capacity) {
@@ -374,39 +468,69 @@ class ArrVec {
         }
 
         for (size_t i = _size; i > index; --i) {
-            new (&_data[i]) Element(efp::move(_data[i - 1]));
-            _data[i - 1].~Element();
+            new (_data + i) Element(efp::move(_data[i - 1]));
+            (_data + i - 1)->~Element();
         }
 
-        new (&_data[index]) Element(value);
+        // new (&_data[index]) Element(value);
+        new (_data + index) Element(value);
 
         ++_size;
     }
 
+    // void pop_back() {
+    //     if (_size == 0) {
+    //         std::runtime_error("ArrVec::pop_back: size must be greater than 0");
+    //     }
+
+    //     _data[_size - 1].~Element();
+    //     --_size;
+    // }
+
     void pop_back() {
         if (_size == 0) {
-            std::runtime_error("ArrVec::pop_back: size must be greater than 0");
+            throw std::runtime_error("ArrVec::pop_back: size must be greater than 0");
         }
 
-        _data[_size - 1].~Element();
-        --_size;
+        (_data + _size-- - 1)->~Element();
     }
+
+    // void clear() {
+    //     for (size_t i = 0; i < _size; ++i) {
+    //         _data[i].~Element();
+    //     }
+    //     _size = 0;
+    // }
 
     void clear() {
         for (size_t i = 0; i < _size; ++i) {
-            _data[i].~Element();
+            (_data + i)->~Element();
         }
         _size = 0;
     }
+
+    // void erase(size_t index) {
+    //     if (index < 0 || index >= _size) {
+    //         throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
+    //     }
+    //     _data[index].~Element();
+    //     for (size_t i = index; i < _size - 1; ++i) {
+    //         new (&_data[i]) Element(efp::move(_data[i + 1]));
+    //         _data[i + 1].~Element();
+    //     }
+    //     --_size;
+    // }
 
     void erase(size_t index) {
         if (index < 0 || index >= _size) {
             throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
         }
-        _data[index].~Element();
+
+        (_data + index)->~Element();
+
         for (size_t i = index; i < _size - 1; ++i) {
-            new (&_data[i]) Element(efp::move(_data[i + 1]));
-            _data[i + 1].~Element();
+            new (_data + i) Element {efp::move(_data[i + 1])};
+            (_data + i + 1)->~Element();
         }
         --_size;
     }
@@ -440,7 +564,19 @@ class ArrVec {
     }
 
   private:
-    Element _data[ct_capacity];
+    template<typename Head, typename... Tail>
+    void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
+        new (_data + index++) Element {head};
+        _construct_elements(index, tail...);
+    }
+
+    template<typename Last>
+    void _construct_elements(size_t& index, const Last& last) {
+        new (_data + index++) Element {last};
+    }
+
+    // Element _data[ct_capacity];
+    RawStorage<Element, ct_capacity> _data;
     size_t _size;
 };
 
