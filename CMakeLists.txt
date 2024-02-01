@@ -50,6 +50,14 @@ endif()
 include(Catch)
 enable_testing()
 
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+
+if(ENABLE_ASAN)
+    # Add the -fsanitize=address flag to the compiler and linker
+    add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
+endif()
+
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 

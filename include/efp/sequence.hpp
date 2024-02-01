@@ -12,43 +12,91 @@
 
 namespace efp {
 
-template <typename A, size_t ct_size>
+template<typename A, size_t ct_size>
 class Array {
-public:
+  public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
 
+    // Array() {
+    //     // By definition all of the data in Array should be valid
+    //     for (size_t i = 0; i < ct_size; ++i) {
+    //         new (&_data[i]) Element();
+    //     }
+    // }
+
     Array() {
+        // By definition all of the data in Array should be valid
         for (size_t i = 0; i < ct_size; ++i) {
-            new (&_data[i]) Element();
+            new (_data + i) Element {};
         }
     }
+
+    // Array(const Array& other) {
+    //     for (size_t i = 0; i < ct_size; ++i) {
+    //         new (&_data[i]) Element(other._data[i]);
+    //     }
+    // }
 
     Array(const Array& other) {
         for (size_t i = 0; i < ct_size; ++i) {
-            new (&_data[i]) Element(other._data[i]);
+            new (_data + i) Element {other._data[i]};
         }
     }
 
-    Array(Array&& other) noexcept {
-        for (size_t i = 0; i < ct_size; ++i) {
-            new (&_data[i]) Element(efp::move(other._data[i])); // Move-construct each element
-        }
-    }
-
-    template <typename... Arg>
-    Array(const Arg&... args)
-        : _data{args...} {
-    }
+    // Array& operator=(const Array& other) {
+    //     if (this != &other) {
+    //         for (size_t i = 0; i < ct_size; ++i) {
+    //             _data[i] = other._data[i];  // Use assignment for each element
+    //         }
+    //     }
+    //     return *this;
+    // }
 
     Array& operator=(const Array& other) {
         if (this != &other) {
             for (size_t i = 0; i < ct_size; ++i) {
-                _data[i] = other._data[i]; // Use assignment for each element
+                (_data + i)->~Element();                   // Destroy each element
+                new (_data + i) Element {other._data[i]};  // Copy-construct each element
+            }
+            return *this;
+        }
+    }
+
+    // Array(Array&& other) noexcept {
+    //     for (size_t i = 0; i < ct_size; ++i) {
+    //         new (&_data[i]) Element(efp::move(other._data[i]));  // Move-construct each element
+    //     }
+    // }
+
+    Array(Array&& other) noexcept {
+        for (size_t i = 0; i < ct_size; ++i) {
+            new (_data + i) Element {std::move(other._data[i])};  // Move-construct each element
+        }
+    }
+
+    Array& operator=(Array&& other) noexcept {
+        if (this != &other) {
+            for (size_t i = 0; i < ct_size; ++i) {
+                (_data + i)->~Element();                              // Destroy each element
+                new (_data + i) Element {std::move(other._data[i])};  // Move-construct each element
             }
         }
         return *this;
+    }
+
+    // template<typename... Arg>
+    // Array(const Arg&... args) : _data {args...} {}
+
+    template<typename... Arg>
+    Array(const Arg&... args) {
+        static_assert(
+            sizeof...(args) == ct_size,
+            "Array::Array: number of arguments must be equal to ct_size"
+        );
+        size_t index = 0;
+        _construct_elements(index, args...);
     }
 
     Element& operator[](size_t index) {
@@ -65,7 +113,6 @@ public:
                 return false;
             }
         }
-
         return true;
     }
 
@@ -85,7 +132,9 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error("Array::reserve: capacity must be less than or equal to ct_size");
+            throw std::runtime_error(
+                "Array::reserve: capacity must be less than or equal to ct_size"
+            );
         }
     }
 
@@ -117,39 +166,51 @@ public:
         return ct_size == 0;
     }
 
-private:
-    A _data[ct_size];
+  private:
+    template<typename Head, typename... Tail>
+    inline void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
+        new (_data + index++) Element {head};
+        _construct_elements(index, tail...);
+    }
+
+    template<typename Last>
+    inline void _construct_elements(size_t& index, const Last& last) {
+        new (_data + index) Element {last};
+    }
+
+    // A _data[ct_size];
+    RawStorage<A, ct_size> _data;
 };
 
 // template <typename A, size_t ct_size>
 // using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct ElementImpl<Array<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtSizeImpl<Array<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtCapacityImpl<Array<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto length(const Array<A, n>& as) -> Size<n> {
-    return Size<n>{};
+    return Size<n> {};
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, const Array<A, n>& as) -> const A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, Array<A, n>& as) -> A& {
     return as[i];
 }
@@ -157,51 +218,44 @@ constexpr auto nth(size_t i, Array<A, n>& as) -> A& {
 // static_assert(IsSame<decltype(nth(0, Array<int, 2>{0, 1, 2})), int &>::value, "Assert nth");
 // DebugType<decltype(nth(0, Array<int, 2>{0, 1, 2}))> _;
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(const Array<A, n>& as) -> const A* {
     return as.data();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(Array<A, n>& as) -> A* {
     return as.data();
 }
 
-template <typename A, size_t ct_capacity>
+template<typename A, size_t ct_capacity>
 class ArrVec {
-public:
+  public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
 
-    ArrVec()
-        : _size{0} {}
+    ArrVec() : _size {0} {}
 
-    ArrVec(const ArrVec& other)
-        : _size{other._size} {
+    ArrVec(const ArrVec& other) : _size {other._size} {
         for (size_t i = 0; i < _size; ++i) {
             new (&_data[i]) Element(other._data[i]);
         }
     }
 
-    ArrVec(ArrVec&& other)
-        : _size{other._size} {
+    ArrVec(ArrVec&& other) : _size {other._size} {
         other._size = 0;
         for (size_t i = 0; i < _size; ++i) {
             _data[i] = efp::move(other._data[i]);
         }
     }
 
-    template <typename... Arg>
-    ArrVec(const Arg&... args)
-        : _data{args...},
-          _size(sizeof...(args)) {
-    }
+    template<typename... Arg>
+    ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
 
     // Constructor from array
-    template <size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
-    ArrVec(const ArrVec<Element, ct_size_>& as)
-        : _size(ct_size_) {
+    template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
+    ArrVec(const ArrVec<Element, ct_size_>& as) : _size(ct_size_) {
         for (size_t i = 0; i < ct_size_; ++i) {
             new (&_data[i]) Element(as[i]);
         }
@@ -274,7 +328,9 @@ public:
 
     void resize(size_t length) {
         if (length > ct_capacity || length < 0) {
-            throw std::runtime_error("ArrVec::resize: length must be less than or equal to ct_capacity");
+            throw std::runtime_error(
+                "ArrVec::resize: length must be less than or equal to ct_capacity"
+            );
         }
 
         _size = length;
@@ -282,13 +338,17 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_capacity) {
-            throw std::runtime_error("ArrVec::reserve: capacity must be less than or equal to ct_capacity");
+            throw std::runtime_error(
+                "ArrVec::reserve: capacity must be less than or equal to ct_capacity"
+            );
         }
     }
 
     void push_back(const Element& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
+            throw std::runtime_error(
+                "ArrVec::push_back: size must be less than or equal to ct_capacity"
+            );
         } else {
             new (&_data[_size]) Element(value);
             ++_size;
@@ -297,7 +357,9 @@ public:
 
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error("ArrVec::push_back: size must be less than or equal to ct_capacity");
+            throw std::runtime_error(
+                "ArrVec::push_back: size must be less than or equal to ct_capacity"
+            );
         } else {
             new (&_data[_size]) Element(efp::move(value));
             ++_size;
@@ -306,7 +368,9 @@ public:
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > _size || _size == ct_capacity) {
-            throw std::runtime_error("ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity");
+            throw std::runtime_error(
+                "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
+            );
         }
 
         for (size_t i = _size; i > index; --i) {
@@ -375,63 +439,61 @@ public:
         return _size == 0;
     }
 
-private:
+  private:
     Element _data[ct_capacity];
     size_t _size;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct ElementImpl<ArrVec<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtSizeImpl<ArrVec<A, n>> {
     using Type = Size<dyn>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtCapacityImpl<ArrVec<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto length(const ArrVec<A, n>& as) -> size_t {
     return as.size();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, const ArrVec<A, n>& as) -> const A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, ArrVec<A, n>& as) -> A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(const ArrVec<A, n>& as) -> const A* {
     return as.data();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(ArrVec<A, n>& as) -> A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 class Vector {
-public:
+  public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<dyn>;
 
-    Vector()
-        : _data{nullptr}, _size{0}, _capacity{0} {}
+    Vector() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-    Vector(const Vector& other)
-        : _data{nullptr}, _size{0}, _capacity{0} {
+    Vector(const Vector& other) : _data {nullptr}, _size {0}, _capacity {0} {
         if (other._data) {
             _size = other._size;
             _capacity = other._capacity;
@@ -444,38 +506,37 @@ public:
         }
     }
 
-    Vector(Vector&& other)
-        : _data{other._data}, _size{other._size}, _capacity{other._capacity} {
+    Vector(Vector&& other) : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
         other._data = nullptr;
     }
 
-    template <typename... Args>
-    Vector(const Args&... args)
-        : _data{new Element[sizeof...(args)]},
-          _capacity(sizeof...(args)),
-          _size(sizeof...(args)) {
+    template<typename... Args>
+    Vector(const Args&... args) :
+        _data {new Element[sizeof...(args)]},
+        _capacity(sizeof...(args)),
+        _size(sizeof...(args)) {
         size_t i = 0;
-        for (auto arg : std::initializer_list<Common<Args...>>{args...})
+        for (auto arg : std::initializer_list<Common<Args...>> {args...})
             _data[i++] = arg;
     }
 
     // Constructor from Array
-    template <size_t ct_size_>
-    Vector(const Array<Element, ct_size_>& as)
-        : _data(new Element[ct_size_]),
-          _size(ct_size_),
-          _capacity(ct_size_) {
+    template<size_t ct_size_>
+    Vector(const Array<Element, ct_size_>& as) :
+        _data(new Element[ct_size_]),
+        _size(ct_size_),
+        _capacity(ct_size_) {
         for (size_t i = 0; i < _size; ++i) {
             new (&_data[i]) Element(as[i]);
         }
     }
 
     // Constructor from ArrVec
-    template <size_t ct_cap_>
-    Vector(const ArrVec<Element, ct_cap_>& as)
-        : _data(new Element[length(as)]),
-          _size(length(as)),
-          _capacity(ct_cap_) {
+    template<size_t ct_cap_>
+    Vector(const ArrVec<Element, ct_cap_>& as) :
+        _data(new Element[length(as)]),
+        _size(length(as)),
+        _capacity(ct_cap_) {
         for (size_t i = 0; i < _size; ++i) {
             new (&_data[i]) Element(as[i]);
         }
@@ -669,69 +730,68 @@ public:
         return _size == 0;
     }
 
-private:
+  private:
     Element* _data;
     size_t _size;
     size_t _capacity;
 };
 
-template <typename A>
+template<typename A>
 struct ElementImpl<Vector<A>> {
     using Type = A;
 };
 
-template <typename A>
+template<typename A>
 struct CtSizeImpl<Vector<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 struct CtCapacityImpl<Vector<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 constexpr auto length(const Vector<A>& as) -> size_t {
     return as.size();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, const Vector<A>& as) -> const A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, Vector<A>& as) -> A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(const Vector<A>& as) -> const A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(Vector<A>& as) -> A* {
     return as.data();
 }
 
-template <typename A, size_t ct_size>
+template<typename A, size_t ct_size>
 class ArrayView {
-public:
+  public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
 
-    ArrayView()
-        : _data(nullptr) {
-    }
+    ArrayView() : _data(nullptr) {}
 
     // ! length will not be used
-    ArrayView(Element* data, size_t length = Size<ct_size>{})
-        : _data(data) {
+    ArrayView(Element* data, size_t length = Size<ct_size> {}) : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && _data == nullptr) {
-            throw std::runtime_error("ArrayView::ArrayView: data must not be nullptr for a non-empty view");
+            throw std::runtime_error(
+                "ArrayView::ArrayView: data must not be nullptr for a non-empty view"
+            );
         }
     }
 
@@ -757,13 +817,17 @@ public:
 
     void resize(size_t length) {
         if (length > ct_size || length < 0) {
-            throw std::runtime_error("ArrayView::resize: length must be less than or equal to ct_size and greater than or equal to 0");
+            throw std::runtime_error(
+                "ArrayView::resize: length must be less than or equal to ct_size and greater than or equal to 0"
+            );
         }
     }
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error("ArrayView::reserve: capacity must be less than or equal to ct_size");
+            throw std::runtime_error(
+                "ArrayView::reserve: capacity must be less than or equal to ct_size"
+            );
         }
     }
 
@@ -795,74 +859,71 @@ public:
         return ct_size == 0;
     }
 
-private:
+  private:
     Element* _data;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct ElementImpl<ArrayView<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtSizeImpl<ArrayView<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtCapacityImpl<ArrayView<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto length(const ArrayView<A, n>& as) -> Size<n> {
-    return Size<n>{};
+    return Size<n> {};
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, const ArrayView<A, n>& as) -> const A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, ArrayView<A, n>& as) -> A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(const ArrayView<A, n>& as) -> const A* {
     return as.data();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(ArrayView<A, n>& as) -> A* {
     return as.data();
 }
 
-template <typename A, size_t ct_capacity>
+template<typename A, size_t ct_capacity>
 class ArrVecView {
-public:
+  public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
 
-    ArrVecView()
-        : _data(nullptr), _size(0) {
-    }
+    ArrVecView() : _data(nullptr), _size(0) {}
 
-    ArrVecView(Element* data, size_t size)
-        : _data(data), _size(size) {
+    ArrVecView(Element* data, size_t size) : _data(data), _size(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
-            throw std::runtime_error("ArrVecView::ArrVecView: data must not be nullptr for a non-empty view");
+            throw std::runtime_error(
+                "ArrVecView::ArrVecView: data must not be nullptr for a non-empty view"
+            );
         }
     }
 
     // Constructor from ArrayView
-    template <size_t ct_size_>
-    ArrVecView(const ArrayView<Element, ct_size_>& as)
-        : _data(as.data()), _size(length(as)) {
-    }
+    template<size_t ct_size_>
+    ArrVecView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
 
     ArrVecView& operator=(const ArrVecView& other) {
         if (this != &other) {
@@ -881,8 +942,7 @@ public:
     }
 
     bool operator==(const ArrVecView& other) const {
-        return (_data == other._data) &&
-               (_size == other._size);
+        return (_data == other._data) && (_size == other._size);
     }
 
     size_t size() const {
@@ -921,81 +981,76 @@ public:
         return _size == 0;
     }
 
-private:
+  private:
     Element* _data;
     size_t _size;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct ElementImpl<ArrVecView<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtSizeImpl<ArrVecView<A, n>> {
     using Type = Size<dyn>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtCapacityImpl<ArrVecView<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto length(const ArrVecView<A, n>& as) -> size_t {
     return as.size();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, const ArrVecView<A, n>& as) -> const A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, ArrVecView<A, n>& as) -> A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(const ArrVecView<A, n>& as) -> const A* {
     return as.data();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(ArrVecView<A, n>& as) -> A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 class VectorView {
-public:
+  public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<dyn>;
 
-    VectorView()
-        : _data{nullptr}, _size{0}, _capacity{0} {
-    }
+    VectorView() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-    VectorView(Element* data, size_t size)
-        : _data(data), _size(size), _capacity(size) {
+    VectorView(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
-            throw std::runtime_error("VectorView::VectorView: data must not be nullptr for a non-empty view");
+            throw std::runtime_error(
+                "VectorView::VectorView: data must not be nullptr for a non-empty view"
+            );
         }
     }
 
     // Constructor from ArrayView
-    template <size_t ct_size_>
-    VectorView(const ArrayView<Element, ct_size_>& as)
-        : _data(as.data()), _size(length(as)) {
-    }
+    template<size_t ct_size_>
+    VectorView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
 
     // Constructor from ArrVecView
-    template <size_t ct_cap_>
-    VectorView(const ArrVecView<Element, ct_cap_>& as)
-        : _data(as.data()), _size(length(as)) {
-    }
+    template<size_t ct_cap_>
+    VectorView(const ArrVecView<Element, ct_cap_>& as) : _data(as.data()), _size(length(as)) {}
 
     VectorView& operator=(const VectorView& other) {
         if (this != &other) {
@@ -1015,9 +1070,7 @@ public:
     }
 
     bool operator==(const VectorView& other) const {
-        return (_data == other._data) &&
-               (_size == other._size) &&
-               (_capacity == other._capacity);
+        return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
     }
 
     size_t size() const {
@@ -1056,7 +1109,7 @@ public:
         return _size == 0;
     }
 
-private:
+  private:
     Element* _data;
     size_t _size;
     size_t _capacity;
@@ -1065,49 +1118,49 @@ private:
 // template <typename A>
 // using VectorView = SequenceView<A, dyn, dyn>;
 
-template <typename A>
+template<typename A>
 struct ElementImpl<VectorView<A>> {
     using Type = A;
 };
 
-template <typename A>
+template<typename A>
 struct CtSizeImpl<VectorView<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 struct CtCapacityImpl<VectorView<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 constexpr auto length(const VectorView<A>& as) -> size_t {
     return as.size();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, const VectorView<A>& as) -> const A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, VectorView<A>& as) -> A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(const VectorView<A>& as) -> const A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(VectorView<A>& as) -> A* {
     return as.data();
 }
 
 // todo STL only
 
-template <typename A>
+template<typename A>
 auto operator<<(std::ostream& os, const A& seq)
     -> EnableIf<IsSequence<A>::value && !IsSame<A, std::string>::value, std::ostream&> {
     static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
@@ -1126,128 +1179,128 @@ auto operator<<(std::ostream& os, const A& seq)
 
 // Sequence trait implementation for std::array
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct ElementImpl<std::array<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtSizeImpl<std::array<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 struct CtCapacityImpl<std::array<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto length(const std::array<A, n>& as) -> Size<n> {
-    return Size<n>{};
+    return Size<n> {};
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, const std::array<A, n>& as) -> const A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto nth(size_t i, std::array<A, n>& as) -> A& {
     return as[i];
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(const std::array<A, n>& as) -> const A* {
     return as.data();
 }
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 constexpr auto data(std::array<A, n>& as) -> A* {
     return as.data();
 }
 
 // Sequence trait implementation for std::vector
-template <typename A>
+template<typename A>
 struct ElementImpl<std::vector<A>> {
     using Type = A;
 };
 
-template <typename A>
+template<typename A>
 struct CtSizeImpl<std::vector<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 struct CtCapacityImpl<std::vector<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 constexpr auto length(const std::vector<A>& as) -> size_t {
     return as.size();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, const std::vector<A>& as) -> const A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, std::vector<A>& as) -> A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(const std::vector<A>& as) -> const A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(std::vector<A>& as) -> A* {
     return as.data();
 }
 
 // Sequence trait implementation for std::basic_string
-template <typename A>
+template<typename A>
 struct ElementImpl<std::basic_string<A>> {
     using Type = A;
 };
 
-template <typename A>
+template<typename A>
 struct CtSizeImpl<std::basic_string<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 struct CtCapacityImpl<std::basic_string<A>> {
     using Type = Size<dyn>;
 };
 
-template <typename A>
+template<typename A>
 constexpr auto length(const std::basic_string<A>& as) -> size_t {
     return as.size();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, const std::basic_string<A>& as) -> const A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto nth(size_t i, std::basic_string<A>& as) -> A& {
     return as[i];
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(const std::basic_string<A>& as) -> const A* {
     return as.data();
 }
 
-template <typename A>
+template<typename A>
 constexpr auto data(std::basic_string<A>& as) -> A* {
     return as.data();
 }
 
-}; // namespace efp
+};  // namespace efp
 
 #endif
