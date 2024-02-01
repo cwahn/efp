@@ -47,7 +47,6 @@ TEST_CASE("Array Rule of five", "Array") {
             CHECK(MockHW::remaining_resource_count() == 3);
         }
         CHECK(MockHW::is_sound());
-        CHECK(MockHW::resource_state_to_string() == "");
     }
 
     SECTION("Copy Constructor") {
@@ -201,7 +200,7 @@ TEST_CASE("Vector Rule of five", "Vector") {
         CHECK(MockHW::is_sound());
     }
 
-    SECTION ("Move Constructor") {
+    SECTION("Move Constructor") {
         {
             MockHW::reset();
             Vector<MockRaii> a;

@@ -101,33 +101,31 @@ class MockHW {
         return result;
     }
 
-    // static String resource_state_to_string() {
-    //     const auto to_str = [](const Resource& resource) {
-    //         return std::to_string(resource.id);
-    //     };
-    //     const auto strings = map(to_str, _resources);
-    //     return intercalate(std::string {", "}, strings);
-    // }
-
-    static std::string resource_state_to_string() {
-        std::vector<std::string> strings;
-        std::transform(
-            _resources.begin(),
-            _resources.end(),
-            std::back_inserter(strings),
-            [](const Resource& resource) { return std::to_string(resource.id); }
-        );
-
-        std::string result;
-        for (size_t i = 0; i < strings.size(); ++i) {
-            result += strings[i];
-            if (i != strings.size() - 1) {
-                result += ", ";
-            }
-        }
-
-        return result;
+    static String resource_state_to_string() {
+        const auto to_str = [](const Resource& resource) { return std::to_string(resource.id); };
+        const auto strings = map(to_str, _resources);
+        return intercalate(std::string {", "}, strings);
     }
+
+    // static std::string resource_state_to_string() {
+    //     std::vector<std::string> strings;
+    //     std::transform(
+    //         _resources.begin(),
+    //         _resources.end(),
+    //         std::back_inserter(strings),
+    //         [](const Resource& resource) { return std::to_string(resource.id); }
+    //     );
+
+    //     std::string result;
+    //     for (size_t i = 0; i < strings.size(); ++i) {
+    //         result += strings[i];
+    //         if (i != strings.size() - 1) {
+    //             result += ", ";
+    //         }
+    //     }
+
+    //     return result;
+    // }
 
     static bool is_sound() {
         return _double_free_cnt == 0 && _resources.empty();
