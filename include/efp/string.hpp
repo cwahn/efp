@@ -9,17 +9,19 @@ namespace efp {
 // Owned C-style null operator including const char*
 // Not safe to build from regular const char *
 class CString {
-private:
+  private:
     const char* ptr_;
 
-public:
+  public:
     // const char pointer with nullptr.
     CString(const char* ptr) : ptr_(ptr) {}
 
     CString(const CString&) = delete;
     CString& operator=(const CString&) = delete;
 
-    CString(CString&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullptr; }
+    CString(CString&& other) noexcept : ptr_(other.ptr_) {
+        other.ptr_ = nullptr;
+    }
 
     CString& operator=(CString&& other) noexcept {
         if (this != &other) {
@@ -31,9 +33,13 @@ public:
         return *this;
     }
 
-    ~CString() { delete[] ptr_; }
+    ~CString() {
+        delete[] ptr_;
+    }
 
-    operator const char*() const { return ptr_; } 
+    operator const char*() const {
+        return ptr_;
+    }
 
     // Equality operator for comparing with another CString
     bool operator==(const CString& other) const {
@@ -64,39 +70,40 @@ public:
     }
 };
 
-template <>
+template<>
 // class Sequence<char, dyn, dyn>
-class Vector<char>
-// : public SequenceBase<Sequence<char, dyn, dyn>>
-{
-public:
-    using Element = char;
-    static constexpr size_t ct_size = dyn;
-    static constexpr size_t ct_capacity = dyn;
+class Vector<char>: public detail::VectorBase<char> {
+  public:
+    using Base = detail::VectorBase<char>;
+    using Base::Base;
 
-    static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-    static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
+    // using Element = char;
+    // static constexpr size_t ct_size = dyn;
+    // static constexpr size_t ct_capacity = dyn;
 
-    Vector() : _data{nullptr}, _size{0}, _capacity{0} {}
+    // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
+    // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
-    Vector(const Vector& other) : _data{nullptr}, _size{0}, _capacity{0} {
-        if (other._data) {
-            _size = other._size;
-            _capacity = other._capacity;
-            _data = new char[_capacity];
+    // Vector() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-            // memcpy(_data, other._data, sizeof(char) * _size);
-            for (size_t i = 0; i < other._size; ++i) {
-                new (&_data[i]) char(other._data[i]);
-            }
-        }
-    }
+    // Vector(const Vector& other) : _data {nullptr}, _size {0}, _capacity {0} {
+    //     if (other._data) {
+    //         _size = other._size;
+    //         _capacity = other._capacity;
+    //         _data = new char[_capacity];
 
-    Vector(Vector&& other) : _data{other._data}, _size{other._size}, _capacity{other._capacity} {
-        other._data = nullptr;
-        other._size = 0;
-        other._capacity = 0;
-    }
+    //         // memcpy(_data, other._data, sizeof(char) * _size);
+    //         for (size_t i = 0; i < other._size; ++i) {
+    //             new (&_data[i]) char(other._data[i]);
+    //         }
+    //     }
+    // }
+
+    // Vector(Vector&& other) : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
+    //     other._data = nullptr;
+    //     other._size = 0;
+    //     other._capacity = 0;
+    // }
 
     // ! Varadic constructor is not working for String
     // template <typename... Args>
@@ -110,87 +117,105 @@ public:
     //         _data[i++] = arg;
     // }
 
-    Vector(const char* c_str) : _data{nullptr}, _size{0}, _capacity{0} {
-        for (size_t i = 0; c_str[i] != '\0'; ++i) {
-            push_back(c_str[i]);
-        }
+    // Vector(const char* c_str)
+    //     : _size {strlen(c_str)}, _capacity {_size},
+    //       _data {static_cast<char*>(::operator new[](_capacity * sizeof(char)))} {
+    //     // for (size_t i = 0; c_str[i] != '\0'; ++i) {
+    //     //     push_back(c_str[i]);
+    //     // }
+    //     memcpy(_data, c_str, _size);
+    // }
+
+    Vector(const char* c_str) {
+        _capacity = strlen(c_str);
+        _data = static_cast<char*>(::operator new[](_capacity * sizeof(char)));
+        _size = _capacity;
+        memcpy(_data, c_str, _size);
     }
 
-    ~Vector() {
-        if (_data) {
-            delete[] _data;
-            _data = nullptr;
-        }
-    }
+    // ~Vector() {
+    //     if (_data) {
+    //         delete[] _data;
+    //         _data = nullptr;
+    //     }
+    // }
 
-    // todo copy_and_swap
-    Vector& operator=(const Vector& other) noexcept {
-        if (this != &other) {
-            char* newData = nullptr;
-            if (other._size > 0) {
-                newData = new char[other._capacity];
+    // // todo copy_and_swap
+    // Vector& operator=(const Vector& other) noexcept {
+    //     if (this != &other) {
+    //         char* newData = nullptr;
+    //         if (other._size > 0) {
+    //             newData = new char[other._capacity];
 
-                for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other._data[i];
-                }
-            }
+    //             for (size_t i = 0; i < other._size; ++i) {
+    //                 newData[i] = other._data[i];
+    //             }
+    //         }
 
-            _data = newData;
-            _size = other._size;
-            _capacity = other._capacity;
-        }
-        return *this;
-    }
+    //         _data = newData;
+    //         _size = other._size;
+    //         _capacity = other._capacity;
+    //     }
+    //     return *this;
+    // }
 
-    Vector& operator=(Vector&& other) noexcept {
-        if (this != &other) {
-            delete[] _data;
+    // Vector& operator=(Vector&& other) noexcept {
+    //     if (this != &other) {
+    //         delete[] _data;
 
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
+    //         _data = other._data;
+    //         _size = other._size;
+    //         _capacity = other._capacity;
 
-            other._data = nullptr;
-            other._size = 0;
-            other._capacity = 0;
-        }
-        return *this;
-    }
+    //         other._data = nullptr;
+    //         other._size = 0;
+    //         other._capacity = 0;
+    //     }
+    //     return *this;
+    // }
 
-    Vector assign_impl(const Vector& other) {
-        if (this != &other) {
-            char* newData = nullptr;
-            if (other._size > 0) {
-                newData = new char[other._capacity];
+    // Vector assign_impl(const Vector& other) {
+    //     if (this != &other) {
+    //         char* newData = nullptr;
+    //         if (other._size > 0) {
+    //             newData = new char[other._capacity];
 
-                for (size_t i = 0; i < other._size; ++i) {
-                    newData[i] = other._data[i];
-                }
-            }
+    //             for (size_t i = 0; i < other._size; ++i) {
+    //                 newData[i] = other._data[i];
+    //             }
+    //         }
 
-            _data = newData;
-            _size = other._size;
-            _capacity = other._capacity;
-        }
-        return *this;
-    }
+    //         _data = newData;
+    //         _size = other._size;
+    //         _capacity = other._capacity;
+    //     }
+    //     return *this;
+    // }
 
-    char& operator[](int index) { return _data[index]; }
+    // char& operator[](int index) {
+    //     return _data[index];
+    // }
 
-    const char& operator[](int index) const { return _data[index]; }
+    // const char& operator[](int index) const {
+    //     return _data[index];
+    // }
+
+    // bool operator==(const Vector& other) const {
+    //     if (_size != other._size) {
+    //         return false;
+    //     }
+
+    //     for (size_t i = 0; i < _size; ++i) {
+    //         if (_data[i] != other._data[i]) {
+    //             return false;
+    //         }
+    //     }
+
+    //     return true;
+    // }
 
     bool operator==(const Vector& other) const {
-        if (_size != other._size) {
-            return false;
-        }
-
-        for (size_t i = 0; i < _size; ++i) {
-            if (_data[i] != other._data[i]) {
-                return false;
-            }
-        }
-
-        return true;
+        return Base::operator==(other);
     }
 
     // Specialized equality comparison operator with const char *
@@ -211,73 +236,77 @@ public:
         return c_str[_size] == '\0';
     }
 
-    size_t size() const { return _size; }
+    // size_t size() const {
+    //     return _size;
+    // }
 
-    size_t capacity() const { return _capacity; }
+    // size_t capacity() const {
+    //     return _capacity;
+    // }
 
-    void resize(int length) {
-        if (length < 0) {
-            throw std::runtime_error("length must be greater or equal than 0.");
-        }
+    // void resize(int length) {
+    //     if (length < 0) {
+    //         throw std::runtime_error("length must be greater or equal than 0.");
+    //     }
 
-        if (length > _capacity) {
-            reserve(length);
-        }
+    //     if (length > _capacity) {
+    //         reserve(length);
+    //     }
 
-        _size = length;
-    }
+    //     _size = length;
+    // }
 
-    void reserve(int new_capacity) {
-        if (new_capacity > _capacity) {
-            char* new_data = new char[new_capacity];
+    // void reserve(int new_capacity) {
+    //     if (new_capacity > _capacity) {
+    //         char* new_data = new char[new_capacity];
 
-            for (size_t i = 0; i < _size; ++i) {
-                new_data[i] = _data[i];
-            }
+    //         for (size_t i = 0; i < _size; ++i) {
+    //             new_data[i] = _data[i];
+    //         }
 
-            delete[] _data;
+    //         delete[] _data;
 
-            _data = new_data;
-            _capacity = new_capacity;
-        }
-    }
+    //         _data = new_data;
+    //         _capacity = new_capacity;
+    //     }
+    // }
 
-    void push_back(const char& value) {
-        if (_size >= _capacity) {
-            reserve(_capacity == 0 ? 1 : 2 * _capacity);
-        }
+    // void push_back(const char& value) {
+    //     if (_size >= _capacity) {
+    //         reserve(_capacity == 0 ? 1 : 2 * _capacity);
+    //     }
 
-        new (&_data[_size]) char{value};
-        ++_size;
-    }
+    //     new (&_data[_size]) char {value};
+    //     ++_size;
+    // }
 
-    void push_back(char&& value) {
-        if (_size >= _capacity) {
-            reserve(_capacity == 0 ? 1 : 2 * _capacity);
-        }
+    // void push_back(char&& value) {
+    //     if (_size >= _capacity) {
+    //         reserve(_capacity == 0 ? 1 : 2 * _capacity);
+    //     }
 
-        new (&_data[_size]) char(efp::move(value));
-        ++_size;
-    }
+    //     new (&_data[_size]) char(efp::move(value));
+    //     ++_size;
+    // }
 
-    void erase(int index) {
-        if (index < 0 || index >= _size) {
-            throw std::runtime_error("Vector<char>::erase: index out of range");
-        }
+    // void erase(int index) {
+    //     if (index < 0 || index >= _size) {
+    //         throw std::runtime_error("Vector<char>::erase: index out of range");
+    //     }
 
-        for (size_t i = index; i < _size - 1; ++i) {
-            new (&_data[i]) char(efp::move(_data[i + 1]));
-        }
+    //     for (size_t i = index; i < _size - 1; ++i) {
+    //         new (&_data[i]) char(efp::move(_data[i + 1]));
+    //     }
 
-        --_size;
-    }
+    //     --_size;
+    // }
 
     const CString c_str() const {
         const size_t _size = size();
         char* extended_buffer = new char[_size + 1];
         memcpy(extended_buffer, data(), _size);
         extended_buffer[_size] = '\0';
-        return CString(extended_buffer); // Mark for deletion.
+        return CString(extended_buffer);  // Mark for deletion.
     }
 
     // String append(const String &string) const
@@ -288,43 +317,53 @@ public:
     // todo Interface with StringView
 
     void append_mut(const Vector& string) {
-        for_each(
-            [&](char c) {
-                push_back(c);
-            },
-            string);
+        for_each([&](char c) { push_back(c); }, string);
     }
 
-    const char* data() const { return _data; }
+    // const char* data() const {
+    //     return _data;
+    // }
 
-    char* data() { return _data; }
+    // char* data() {
+    //     return _data;
+    // }
 
-    char* begin() { return _data; }
+    // char* begin() {
+    //     return _data;
+    // }
 
-    const char* begin() const { return _data; }
+    // const char* begin() const {
+    //     return _data;
+    // }
 
-    char* end() { return _data + _size; }
+    // char* end() {
+    //     return _data + _size;
+    // }
 
-    const char* end() const { return _data + _size; }
+    // const char* end() const {
+    //     return _data + _size;
+    // }
 
-    bool empty() const { return _size == 0; }
+    // bool empty() const {
+    //     return _size == 0;
+    // }
 
-private:
-    char* _data;
-    size_t _size;
-    size_t _capacity;
+    //   private:
+    //     char* _data;
+    //     size_t _size;
+    //     size_t _capacity;
 };
 
 // using String = Sequence<char, dyn, dyn>;
 using String = Vector<char>;
 
 // VectorView<const char> specialization for StringView
-template <>
+template<>
 // class SequenceView<const char, dyn, dyn>
 class VectorView<const char>
 // : public SequenceBase<SequenceView<const char, dyn, dyn>>
 {
-public:
+  public:
     using Element = const char;
     static constexpr size_t ct_size = dyn;
     static constexpr size_t ct_capacity = dyn;
@@ -352,9 +391,13 @@ public:
         return *this;
     }
 
-    Element& operator[](size_t index) { return _data[index]; }
+    Element& operator[](size_t index) {
+        return _data[index];
+    }
 
-    const Element& operator[](size_t index) const { return _data[index]; }
+    const Element& operator[](size_t index) const {
+        return _data[index];
+    }
 
     bool operator==(const VectorView& other) const {
         return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
@@ -386,25 +429,43 @@ public:
         return CString(extended_buffer);
     }
 
-    size_t size() const { return _size; }
+    size_t size() const {
+        return _size;
+    }
 
-    size_t capacity() const { return _capacity; }
+    size_t capacity() const {
+        return _capacity;
+    }
 
-    const Element* data() const { return _data; }
+    const Element* data() const {
+        return _data;
+    }
 
-    Element* data() { return _data; }
+    Element* data() {
+        return _data;
+    }
 
-    Element* begin() { return _data; }
+    Element* begin() {
+        return _data;
+    }
 
-    const Element* begin() const { return _data; }
+    const Element* begin() const {
+        return _data;
+    }
 
-    Element* end() { return _data + _size; }
+    Element* end() {
+        return _data + _size;
+    }
 
-    const Element* end() const { return _data + _size; }
+    const Element* end() const {
+        return _data + _size;
+    }
 
-    bool empty() const { return _size == 0; }
+    bool empty() const {
+        return _size == 0;
+    }
 
-private:
+  private:
     Element* _data;
     size_t _size;
     size_t _capacity;
@@ -432,14 +493,10 @@ using StringView = VectorView<const char>;
 
 // todo STL only
 
-inline std::ostream& operator<<(std::ostream& os, const String& string) {
-    for_each(
-        [&](char c) {
-            os << c;
-        },
-        string);
-    return os;
-}
-}; // namespace efp
+// inline std::ostream& operator<<(std::ostream& os, const String& string) {
+//     for_each([&](char c) { os << c; }, string);
+//     return os;
+// }
+};  // namespace efp
 
 #endif

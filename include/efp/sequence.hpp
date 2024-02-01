@@ -653,10 +653,9 @@ namespace detail {
         //     }
         // }
 
-        VectorBase(const VectorBase& other) :
-            _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
-            _size {other._size},
-            _capacity {other._size} {
+        VectorBase(const VectorBase& other)
+            : _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
+              _size {other._size}, _capacity {other._size} {
             if (other._data) {
                 for (size_t i = 0; i < _size; ++i) {
                     new (_data + i) Element {other._data[i]};
@@ -722,11 +721,11 @@ namespace detail {
         //     other._data = nullptr;
         // }
 
-        VectorBase(VectorBase&& other) noexcept :
-            _data {other._data},
-            _size {other._size},
-            _capacity {other._capacity} {
+        VectorBase(VectorBase&& other) noexcept
+            : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
             other._data = nullptr;
+            other._capacity = 0;
+            other._size = 0;
         }
 
         // VectorBase& operator=(VectorBase&& other) noexcept {
@@ -774,21 +773,19 @@ namespace detail {
         // }
 
         template<typename... Args>
-        VectorBase(const Args&... args) :
-            _data {static_cast<Element*>(::operator new[](sizeof...(args) * sizeof(Element)))},
-            _capacity(sizeof...(args)),
-            _size(sizeof...(args)) {
+        VectorBase(const Args&... args)
+            : _data {static_cast<Element*>(::operator new[](sizeof...(args) * sizeof(Element)))},
+              _capacity(sizeof...(args)), _size(sizeof...(args)) {
             size_t index = 0;
             _construct_elements(index, args...);
         }
 
         // Constructor from Array
         template<size_t ct_size_>
-        VectorBase(const Array<Element, ct_size_>& as) :
-            // _data(new Element[ct_size_]),
-            _data {::operator new[](ct_size_ * sizeof(Element))},
-            _size(ct_size_),
-            _capacity(ct_size_) {
+        VectorBase(const Array<Element, ct_size_>& as)
+            :  // _data(new Element[ct_size_]),
+              _data {::operator new[](ct_size_ * sizeof(Element))}, _size(ct_size_),
+              _capacity(ct_size_) {
             for (size_t i = 0; i < _size; ++i) {
                 // new (&_data[i]) Element(as[i]);
                 new (_data + i) Element {as[i]};
@@ -797,11 +794,10 @@ namespace detail {
 
         // Constructor from ArrVec
         template<size_t ct_cap_>
-        VectorBase(const ArrVec<Element, ct_cap_>& as) :
-            // _data(new Element[length(as)]),
-            _data {::operator new[](length(as) * sizeof(Element))},
-            _size(length(as)),
-            _capacity(ct_cap_) {
+        VectorBase(const ArrVec<Element, ct_cap_>& as)
+            :  // _data(new Element[length(as)]),
+              _data {::operator new[](length(as) * sizeof(Element))}, _size(length(as)),
+              _capacity(ct_cap_) {
             for (size_t i = 0; i < _size; ++i) {
                 // new (&_data[i]) Element(as[i]);
                 new (_data + i) Element {as[i]};
@@ -1029,7 +1025,7 @@ namespace detail {
             return _size == 0;
         }
 
-      private:
+      protected:
         template<typename Head, typename... Tail>
         void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
             new (_data + index++) Element {head};
@@ -1052,6 +1048,10 @@ class Vector: public detail::VectorBase<A> {
   public:
     using Base = detail::VectorBase<A>;
     using Base::Base;
+
+    bool operator==(const Vector& other) const {
+        return Base::operator==(other);
+    }
 };
 
 template<typename A>

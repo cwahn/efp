@@ -2,7 +2,6 @@
 #define PRELUDE_TEST_HPP_
 
 #include "catch2/catch_test_macros.hpp"
-
 #include "efp.hpp"
 
 using namespace efp;
@@ -40,8 +39,10 @@ TEST_CASE("compose") {
     SECTION("side-effect") {
         int i = 0;
 
-        auto i_plusplus = [&](int x) { i += x;
-        return i; };
+        auto i_plusplus = [&](int x) {
+            i += x;
+            return i;
+        };
 
         auto times_2 = [](int x) { return x * 2; };
 
@@ -64,7 +65,7 @@ TEST_CASE("compose") {
     SECTION("with normal functions") {
         auto composed = compose(half, add3);
 
-        CHECK(composed(4) == 3.5); // (4 + 3) / 2.0 = 7 / 2.0 = 3.5
+        CHECK(composed(4) == 3.5);  // (4 + 3) / 2.0 = 7 / 2.0 = 3.5
     }
 
     SECTION("with mixed normal and lambda functions") {
@@ -74,12 +75,12 @@ TEST_CASE("compose") {
 
         auto composed = compose(subtract_1, add3, multiply_by_2);
 
-        CHECK(composed(5) == 12); // ((5 * 2) + 3) - 1 = 10 + 3 - 1 = 12
+        CHECK(composed(5) == 12);  // ((5 * 2) + 3) - 1 = 10 + 3 - 1 = 12
     }
 }
 
 TEST_CASE("for_each") {
-    Array<int, 3> crtp_array{1, 2, 3};
+    Array<int, 3> crtp_array {1, 2, 3};
 
     int res_1 = 0;
     auto add_to_res_1 = [&](int x) { res_1 += x; };
@@ -92,7 +93,7 @@ TEST_CASE("map") {
     auto times_2 = [](int x) { return 2 * x; };
 
     SECTION("Array") {
-        CHECK(map(times_2, array_3) == Array<int, 3>{2, 4, 6});
+        CHECK(map(times_2, array_3) == Array<int, 3> {2, 4, 6});
     }
     SECTION("C array") {
         // ArrayView<double, 3> view{stl_array_3};
@@ -102,11 +103,11 @@ TEST_CASE("map") {
 }
 
 TEST_CASE("filter") {
-    Array<int, 3> array_3{1, 2, 3};
+    Array<int, 3> array_3 {1, 2, 3};
 
     auto is_even = [](int x) { return x % 2 == 0 ? true : false; };
 
-    ArrVec<int, 3> ref{};
+    ArrVec<int, 3> ref {};
     ref.resize(1);
     ref[0] = 2;
 
@@ -114,14 +115,14 @@ TEST_CASE("filter") {
 }
 
 TEST_CASE("foldl") {
-    ArrVec<int, 5> crtp_arrayvec{1, 2, 3, 4};
+    ArrVec<int, 5> crtp_arrayvec {1, 2, 3, 4};
     auto plus = [](int lhs, int rhs) { return lhs + rhs; };
 
     CHECK(foldl(plus, 0, crtp_arrayvec) == 10);
 }
 
 TEST_CASE("foldr") {
-    ArrVec<int, 5> crtp_arrayvec{1, 2, 3, 4};
+    ArrVec<int, 5> crtp_arrayvec {1, 2, 3, 4};
     auto plus = [](int lhs, int rhs) { return lhs + rhs; };
 
     CHECK(foldr(plus, 0, crtp_arrayvec) == 10);
@@ -131,97 +132,97 @@ TEST_CASE("from_function") {
     auto plus_one = [](int i) { return i + 1; };
 
     SECTION("Array") {
-        CHECK(from_function(Size<3>{}, plus_one) == Array<int, 3>{1, 2, 3});
+        CHECK(from_function(Size<3> {}, plus_one) == Array<int, 3> {1, 2, 3});
     }
 
     SECTION("Vector") {
-        CHECK(from_function(3, plus_one) == Vector<int>{1, 2, 3});
+        CHECK(from_function(3, plus_one) == Vector<int> {1, 2, 3});
     }
 
     SECTION("template") {
-        CHECK(from_function(Size<3>{}, id<int>) == Array<int, 3>{0, 1, 2});
+        CHECK(from_function(Size<3> {}, id<int>) == Array<int, 3> {0, 1, 2});
     }
 }
 
 TEST_CASE("append") {
     SECTION("Array") {
-        Array<double, 6> res{1., 2., 3., 1., 2., 3.};
+        Array<double, 6> res {1., 2., 3., 1., 2., 3.};
         CHECK(append(array_3, array_3) == res);
     }
 
     SECTION("ArrVec") {
-        ArrVec<double, 6> res{1., 2., 3., 1., 2., 3.};
+        ArrVec<double, 6> res {1., 2., 3., 1., 2., 3.};
         CHECK(append(arrvec_3, array_3) == res);
     }
 
     SECTION("Array") {
-        Vector<double> res{1., 2., 3., 1., 2., 3.};
+        Vector<double> res {1., 2., 3., 1., 2., 3.};
         CHECK(append(array_3, vector_3) == res);
     }
 }
 
 TEST_CASE("concat") {
     SECTION("Array of Array") {
-        Array<Array<int, 2>, 2> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        Array<Array<int, 2>, 2> ass {Array<int, 2> {1, 2}, Array<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Array<int, 4>{1, 2, 3, 4});
+        CHECK(res == Array<int, 4> {1, 2, 3, 4});
     }
 
     SECTION("ArrVec of ArrVec") {
-        ArrVec<ArrVec<int, 2>, 2> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        ArrVec<ArrVec<int, 2>, 2> ass {ArrVec<int, 2> {1, 2}, ArrVec<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+        CHECK(res == ArrVec<int, 4> {1, 2, 3, 4});
     }
 
     SECTION("Vector of Vector") {
-        Vector<Vector<int>> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        Vector<Vector<int>> ass {Vector<int> {1, 2}, Vector<int> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Vector<int>{1, 2, 3, 4});
+        CHECK(res == Vector<int> {1, 2, 3, 4});
     }
 
     SECTION("Array of ArrVec") {
-        Array<ArrVec<int, 2>, 2> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        Array<ArrVec<int, 2>, 2> ass {ArrVec<int, 2> {1, 2}, ArrVec<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+        CHECK(res == ArrVec<int, 4> {1, 2, 3, 4});
     }
 
     SECTION("Array of Vector") {
-        Array<Vector<int>, 2> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        Array<Vector<int>, 2> ass {Vector<int> {1, 2}, Vector<int> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Vector<int>{1, 2, 3, 4});
+        CHECK(res == Vector<int> {1, 2, 3, 4});
     }
 
     SECTION("ArrVec of Array") {
-        ArrVec<Array<int, 2>, 2> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        ArrVec<Array<int, 2>, 2> ass {Array<int, 2> {1, 2}, Array<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == ArrVec<int, 4>{1, 2, 3, 4});
+        CHECK(res == ArrVec<int, 4> {1, 2, 3, 4});
     }
 
     SECTION("Vector of Array") {
-        Vector<Array<int, 2>> ass{Array<int, 2>{1, 2}, Array<int, 2>{3, 4}};
+        Vector<Array<int, 2>> ass {Array<int, 2> {1, 2}, Array<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Vector<int>{1, 2, 3, 4});
+        CHECK(res == Vector<int> {1, 2, 3, 4});
     }
 
     SECTION("ArrVec of Vector") {
-        ArrVec<Vector<int>, 2> ass{Vector<int>{1, 2}, Vector<int>{3, 4}};
+        ArrVec<Vector<int>, 2> ass {Vector<int> {1, 2}, Vector<int> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Vector<int>{1, 2, 3, 4});
+        CHECK(res == Vector<int> {1, 2, 3, 4});
     }
 
     SECTION("Vector of ArrVec") {
-        Vector<ArrVec<int, 2>> ass{ArrVec<int, 2>{1, 2}, ArrVec<int, 2>{3, 4}};
+        Vector<ArrVec<int, 2>> ass {ArrVec<int, 2> {1, 2}, ArrVec<int, 2> {3, 4}};
         const auto res = concat(ass);
 
-        CHECK(res == Vector<int>{1, 2, 3, 4});
+        CHECK(res == Vector<int> {1, 2, 3, 4});
     }
 }
 
@@ -246,47 +247,46 @@ TEST_CASE("for_each_with_index") {
     auto product = [&](int i, int x0, int x1) { res[i] = x0 * x1; };
 
     for_each_with_index(product, array_3, vector_5);
-    CHECK(res == Array<int, 3>{1, 4, 9});
+    CHECK(res == Array<int, 3> {1, 4, 9});
 }
 
 TEST_CASE("cartesian_for_each") {
-    Vector<int> res{};
-    auto as = Array<int, 2>{1, 2};
-    auto bs = Array<int, 2>{1, 3};
+    Vector<int> res {};
+    auto as = Array<int, 2> {1, 2};
+    auto bs = Array<int, 2> {1, 3};
 
     auto push_res = [&](int x0, int x1) { res.push_back(10 * x0 + x1); };
 
     cartesian_for_each(push_res, as, bs);
-    CHECK(res == Vector<int>{11, 13, 21, 23});
+    CHECK(res == Vector<int> {11, 13, 21, 23});
 }
 
 TEST_CASE("map_with_index") {
     SECTION("array") {
         auto times = [](int lhs, int rhs) { return lhs * rhs; };
 
-        CHECK(map_with_index(times, array_3) == Array<int, 3>{0, 2, 6});
+        CHECK(map_with_index(times, array_3) == Array<int, 3> {0, 2, 6});
     }
 
     SECTION("vector") {
         auto times = [](double lhs, double rhs) { return lhs * rhs; };
 
-        CHECK(map_with_index(times, vector_3) == Vector<double>{0., 2., 6.});
+        CHECK(map_with_index(times, vector_3) == Vector<double> {0., 2., 6.});
     }
 
     SECTION("binary hetero") {
         auto product = [](int i, double a, double b) { return i * a * b; };
 
-        CHECK(map_with_index(product, array_3, vector_3) == Vector<double>{0., 4., 18.});
+        CHECK(map_with_index(product, array_3, vector_3) == Vector<double> {0., 4., 18.});
     }
 }
 
 TEST_CASE("cartesian_map") {
-    auto as = Array<int, 2>{1, 2};
-    auto bs = Array<int, 2>{1, 3};
+    auto as = Array<int, 2> {1, 2};
+    auto bs = Array<int, 2> {1, 3};
 
-    auto res = cartesian_map([](int a, int b) { return a * b; },
-                             as, bs);
-    CHECK(res == Array<int, 4>{1, 3, 2, 6});
+    auto res = cartesian_map([](int a, int b) { return a * b; }, as, bs);
+    CHECK(res == Array<int, 4> {1, 3, 2, 6});
 }
 
 TEST_CASE("cartesian_for_index") {
@@ -294,7 +294,7 @@ TEST_CASE("cartesian_for_index") {
     const auto f = [&](int a, int b) { return res.push_back(a * b); };
 
     cartesian_for_index(f, 2, 3);
-    CHECK(res == Vector<int>{0, 0, 0, 0, 1, 2});
+    CHECK(res == Vector<int> {0, 0, 0, 0, 1, 2});
     // Array<int, -2> invalid{};
 }
 
@@ -306,37 +306,37 @@ TEST_CASE("head") {
 
 TEST_CASE("tail") {
     SECTION("const") {
-        CHECK(tail(array_3) == ArrayView<const double, 2>{data(array_3) + 1});
-        CHECK(tail(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3) + 1, 2});
-        CHECK(tail(vector_3) == VectorView<const double>{data(vector_3) + 1, 2});
+        CHECK(tail(array_3) == ArrayView<const double, 2> {data(array_3) + 1});
+        CHECK(tail(arrvec_3) == ArrVecView<const double, 2> {data(arrvec_3) + 1, 2});
+        CHECK(tail(vector_3) == VectorView<const double> {data(vector_3) + 1, 2});
     }
 
     SECTION("non const") {
-        Array<double, 3> array{1., 2., 3.};
-        ArrVec<double, 3> arrvec{1., 2., 3.};
-        Vector<double> vector{1., 2., 3.};
+        Array<double, 3> array {1., 2., 3.};
+        ArrVec<double, 3> arrvec {1., 2., 3.};
+        Vector<double> vector {1., 2., 3.};
 
-        CHECK(tail(array) == ArrayView<double, 2>{data(array) + 1});
-        CHECK(tail(arrvec) == ArrVecView<double, 2>{data(arrvec) + 1, 2});
-        CHECK(tail(vector) == VectorView<double>{data(vector) + 1, 2});
+        CHECK(tail(array) == ArrayView<double, 2> {data(array) + 1});
+        CHECK(tail(arrvec) == ArrVecView<double, 2> {data(arrvec) + 1, 2});
+        CHECK(tail(vector) == VectorView<double> {data(vector) + 1, 2});
     }
 }
 
 TEST_CASE("init") {
     SECTION("const") {
-        CHECK(init(array_3) == ArrayView<const double, 2>{data(array_3)});
-        CHECK(init(arrvec_3) == ArrVecView<const double, 2>{data(arrvec_3), 2});
-        CHECK(init(vector_3) == VectorView<const double>{data(vector_3), 2});
+        CHECK(init(array_3) == ArrayView<const double, 2> {data(array_3)});
+        CHECK(init(arrvec_3) == ArrVecView<const double, 2> {data(arrvec_3), 2});
+        CHECK(init(vector_3) == VectorView<const double> {data(vector_3), 2});
     }
 
     SECTION("non const") {
-        Array<double, 3> array{1., 2., 3.};
-        ArrVec<double, 3> arrvec{1., 2., 3.};
-        Vector<double> vector{1., 2., 3.};
+        Array<double, 3> array {1., 2., 3.};
+        ArrVec<double, 3> arrvec {1., 2., 3.};
+        Vector<double> vector {1., 2., 3.};
 
-        CHECK(init(array) == ArrayView<double, 2>{data(array)});
-        CHECK(init(arrvec) == ArrVecView<double, 2>{data(arrvec), 2});
-        CHECK(init(vector) == VectorView<double>{data(vector), 2});
+        CHECK(init(array) == ArrayView<double, 2> {data(array)});
+        CHECK(init(arrvec) == ArrVecView<double, 2> {data(arrvec), 2});
+        CHECK(init(vector) == VectorView<double> {data(vector), 2});
     }
 }
 
@@ -349,16 +349,16 @@ TEST_CASE("last") {
 TEST_CASE("Test take_unsafe function") {
     // Tests with Array Type
     SECTION("Non-const Array with static zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = take_unsafe(Size<0>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = take_unsafe(Size<0> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
 
     SECTION("Non-const Array with static size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = take_unsafe(Size<2>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = take_unsafe(Size<2> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 2);
@@ -367,7 +367,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Const Array with static size equal to capacity") {
-        auto res = take_unsafe(Size<3>{}, array_3);
+        auto res = take_unsafe(Size<3> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
@@ -376,8 +376,8 @@ TEST_CASE("Test take_unsafe function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with static zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = take_unsafe(Size<0>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = take_unsafe(Size<0> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -385,8 +385,8 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Non-const ArrVec with static size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = take_unsafe(Size<2>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = take_unsafe(Size<2> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -396,7 +396,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Const ArrVec with static size equal to capacity") {
-        auto res = take_unsafe(Size<3>{}, arrvec_3);
+        auto res = take_unsafe(Size<3> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
         CHECK(data(res) == data(arrvec_3));
         CHECK(length(res) == 3);
@@ -405,8 +405,8 @@ TEST_CASE("Test take_unsafe function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with static zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = take_unsafe(Size<0>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = take_unsafe(Size<0> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -414,8 +414,8 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Non-const Vector with static size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = take_unsafe(Size<2>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = take_unsafe(Size<2> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -425,7 +425,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Const Vector with static size equal to capacity") {
-        auto res = take_unsafe(Size<3>{}, vector_3);
+        auto res = take_unsafe(Size<3> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
         CHECK(data(res) == data(vector_3));
         CHECK(length(res) == 3);
@@ -436,7 +436,7 @@ TEST_CASE("Test take_unsafe function") {
 
     // Tests with Array Type
     SECTION("Non-const Array with dynamic zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = take_unsafe(0, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -444,7 +444,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Non-const Array with dynamic size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = take_unsafe(2, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -463,7 +463,7 @@ TEST_CASE("Test take_unsafe function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with dynamic zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = take_unsafe(0, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -472,7 +472,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Non-const ArrVec with dynamic size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = take_unsafe(2, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -492,7 +492,7 @@ TEST_CASE("Test take_unsafe function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with dynamic zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = take_unsafe(0, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -501,7 +501,7 @@ TEST_CASE("Test take_unsafe function") {
     }
 
     SECTION("Non-const Vector with dynamic size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = take_unsafe(2, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -523,16 +523,16 @@ TEST_CASE("Test take_unsafe function") {
 TEST_CASE("Test take function") {
     // Tests with Array Type
     SECTION("Non-const Array with static zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = take(Size<0>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = take(Size<0> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 0>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 0);
     }
 
     SECTION("Non-const Array with static size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = take(Size<2>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = take(Size<2> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 2>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 2);
@@ -541,7 +541,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Const Array with static size larger than size") {
-        auto res = take(Size<5>{}, array_3);
+        auto res = take(Size<5> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 3>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
@@ -550,8 +550,8 @@ TEST_CASE("Test take function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with static zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = take(Size<0>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = take(Size<0> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 0>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -559,8 +559,8 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Non-const ArrVec with static size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = take(Size<2>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = take(Size<2> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 2>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -570,7 +570,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Const ArrVec with static size larger than size") {
-        auto res = take(Size<5>{}, arrvec_3);
+        auto res = take(Size<5> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 3>>::value);
         CHECK(data(res) == data(arrvec_3));
         CHECK(length(res) == 3);
@@ -579,8 +579,8 @@ TEST_CASE("Test take function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with static zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = take(Size<0>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = take(Size<0> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 0>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -588,8 +588,8 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Non-const Vector with static size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = take(Size<2>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = take(Size<2> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 2>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -599,7 +599,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Const Vector with static size larger than size") {
-        auto res = take(Size<5>{}, vector_3);
+        auto res = take(Size<5> {}, vector_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 5>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -611,7 +611,7 @@ TEST_CASE("Test take function") {
 
     // Tests with Array Type
     SECTION("Non-const Array with dynamic zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = take(0, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -619,7 +619,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Non-const Array with dynamic size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = take(2, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -638,7 +638,7 @@ TEST_CASE("Test take function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with dynamic zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = take(0, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -647,7 +647,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Non-const ArrVec with dynamic size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = take(2, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -667,7 +667,7 @@ TEST_CASE("Test take function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with dynamic zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = take(0, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -676,7 +676,7 @@ TEST_CASE("Test take function") {
     }
 
     SECTION("Non-const Vector with dynamic size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = take(2, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -698,16 +698,16 @@ TEST_CASE("Test take function") {
 TEST_CASE("Test drop_unsafe function") {
     // Tests with Array Type
     SECTION("Non-const Array with static zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = drop_unsafe(Size<0>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = drop_unsafe(Size<0> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
         CHECK(length(res) == 3);
     }
 
     SECTION("Non-const Array with static size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = drop_unsafe(Size<2>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = drop_unsafe(Size<2> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 1>>::value);
         CHECK(data(res) == data(array_3) + 2);
         CHECK(length(res) == 1);
@@ -715,7 +715,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Const Array with static size equal to capacity") {
-        auto res = drop_unsafe(Size<3>{}, array_3);
+        auto res = drop_unsafe(Size<3> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 0>>::value);
         CHECK(data(res) == data(array_3) + 3);
         CHECK(length(res) == 0);
@@ -723,8 +723,8 @@ TEST_CASE("Test drop_unsafe function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with static zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = drop_unsafe(Size<0>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = drop_unsafe(Size<0> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -735,8 +735,8 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Non-const ArrVec with static size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = drop_unsafe(Size<2>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = drop_unsafe(Size<2> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 1>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3) + 2);
@@ -745,7 +745,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Const ArrVec with static size equal to capacity") {
-        auto res = drop_unsafe(Size<3>{}, arrvec_3);
+        auto res = drop_unsafe(Size<3> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 0>>::value);
         CHECK(data(res) == data(arrvec_3) + 3);
         CHECK(length(res) == 0);
@@ -753,8 +753,8 @@ TEST_CASE("Test drop_unsafe function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with static zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = drop_unsafe(Size<0>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = drop_unsafe(Size<0> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -765,8 +765,8 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Non-const Vector with static size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = drop_unsafe(Size<2>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = drop_unsafe(Size<2> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3) + 2);
@@ -775,7 +775,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Const Vector with static size equal to capacity") {
-        auto res = drop_unsafe(Size<3>{}, vector_3);
+        auto res = drop_unsafe(Size<3> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<const double>>::value);
         CHECK(data(res) == data(vector_3) + 3);
         CHECK(length(res) == 0);
@@ -785,7 +785,7 @@ TEST_CASE("Test drop_unsafe function") {
 
     // Tests with Array Type
     SECTION("Non-const Array with dynamic zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = drop_unsafe(0, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -796,7 +796,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Non-const Array with dynamic size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = drop_unsafe(2, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3) + 2);
@@ -813,7 +813,7 @@ TEST_CASE("Test drop_unsafe function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with dynamic zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = drop_unsafe(0, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -825,7 +825,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Non-const ArrVec with dynamic size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = drop_unsafe(2, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -843,7 +843,7 @@ TEST_CASE("Test drop_unsafe function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with dynamic zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = drop_unsafe(0, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -855,7 +855,7 @@ TEST_CASE("Test drop_unsafe function") {
     }
 
     SECTION("Non-const Vector with dynamic size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = drop_unsafe(2, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -875,8 +875,8 @@ TEST_CASE("Test drop_unsafe function") {
 TEST_CASE("Test drop function") {
     // Tests with Array Type
     SECTION("Non-const Array with static zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = drop(Size<0>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = drop(Size<0> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(array_3));
@@ -887,8 +887,8 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const Array with static size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
-        auto res = drop(Size<2>{}, array_3);
+        auto array_3 = Array<double, 3> {1., 2., 3.};
+        auto res = drop(Size<2> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<double, 1>>::value);
         CHECK(data(res) == data(array_3) + 2);
         CHECK(length(res) == 1);
@@ -896,7 +896,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Const Array with static size larger than size") {
-        auto res = drop(Size<5>{}, array_3);
+        auto res = drop(Size<5> {}, array_3);
         CHECK(IsSame<decltype(res), ArrayView<const double, 0>>::value);
         CHECK(data(res) == data(array_3) + 3);
         CHECK(length(res) == 0);
@@ -904,8 +904,8 @@ TEST_CASE("Test drop function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with static zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = drop(Size<0>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = drop(Size<0> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3));
@@ -916,8 +916,8 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const ArrVec with static size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
-        auto res = drop(Size<2>{}, arrvec_3);
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
+        auto res = drop(Size<2> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 1>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(arrvec_3) + 2);
@@ -926,7 +926,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Const ArrVec with static size larger than size") {
-        auto res = drop(Size<5>{}, arrvec_3);
+        auto res = drop(Size<5> {}, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<const double, 0>>::value);
         CHECK(data(res) == data(arrvec_3) + 3);
         CHECK(length(res) == 0);
@@ -934,8 +934,8 @@ TEST_CASE("Test drop function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with static zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = drop(Size<0>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = drop(Size<0> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3));
@@ -946,8 +946,8 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const Vector with static size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
-        auto res = drop(Size<2>{}, vector_3);
+        auto vector_3 = Vector<double> {1., 2., 3.};
+        auto res = drop(Size<2> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3) + 2);
@@ -956,7 +956,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Const Vector with static size larger than size") {
-        auto res = drop(Size<5>{}, vector_3);
+        auto res = drop(Size<5> {}, vector_3);
         CHECK(IsSame<decltype(res), VectorView<const double>>::value);
         // DebugType<decltype(res)> _{};
         CHECK(data(res) == data(vector_3) + 3);
@@ -967,7 +967,7 @@ TEST_CASE("Test drop function") {
 
     // Tests with Array Type
     SECTION("Non-const Array with dynamic zero size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = drop(0, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3));
@@ -978,7 +978,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const Array with dynamic size smaller than size") {
-        auto array_3 = Array<double, 3>{1., 2., 3.};
+        auto array_3 = Array<double, 3> {1., 2., 3.};
         auto res = drop(2, array_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         CHECK(data(res) == data(array_3) + 2);
@@ -995,7 +995,7 @@ TEST_CASE("Test drop function") {
 
     // Tests with ArrVec Type
     SECTION("Non-const ArrVec with dynamic zero size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = drop(0, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -1007,7 +1007,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const ArrVec with dynamic size smaller than size") {
-        auto arrvec_3 = ArrVec<double, 3>{1., 2., 3.};
+        auto arrvec_3 = ArrVec<double, 3> {1., 2., 3.};
         auto res = drop(2, arrvec_3);
         CHECK(IsSame<decltype(res), ArrVecView<double, 3>>::value);
         // DebugType<decltype(res)> _{};
@@ -1025,7 +1025,7 @@ TEST_CASE("Test drop function") {
 
     // Tests with Vector Type
     SECTION("Non-const Vector with dynamic zero size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = drop(0, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -1037,7 +1037,7 @@ TEST_CASE("Test drop function") {
     }
 
     SECTION("Non-const Vector with dynamic size smaller than size") {
-        auto vector_3 = Vector<double>{1., 2., 3.};
+        auto vector_3 = Vector<double> {1., 2., 3.};
         auto res = drop(2, vector_3);
         CHECK(IsSame<decltype(res), VectorView<double>>::value);
         // DebugType<decltype(res)> _{};
@@ -1056,7 +1056,7 @@ TEST_CASE("Test drop function") {
 
 TEST_CASE("slice_unsafe") {
     SECTION("static") {
-        const auto slice_ = slice_unsafe(Size<1>{}, Size<3>{}, array_5);
+        const auto slice_ = slice_unsafe(Size<1> {}, Size<3> {}, array_5);
         CHECK(length(slice_) == 2);
         CHECK(IsStaticSize<decltype(slice_)>::value);
         CHECK(slice_[0] == 2.);
@@ -1109,20 +1109,20 @@ TEST_CASE("elem_index") {
 TEST_CASE("elem_indices") {
     SECTION("Array") {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., array_3_) == ArrVec<size_t, 3>{1u, 2u});
-        CHECK(elem_indices(9., array_3_) == ArrVec<size_t, 3>{});
+        CHECK(elem_indices(2., array_3_) == ArrVec<size_t, 3> {1u, 2u});
+        CHECK(elem_indices(9., array_3_) == ArrVec<size_t, 3> {});
     }
 
     SECTION("ArrVec") {
         const ArrVec<double, 3> arrvec_3_ = {1., 2., 2.};
-        CHECK(elem_indices(2., arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
-        CHECK(elem_indices(9., arrvec_3_) == ArrVec<size_t, 3>{});
+        CHECK(elem_indices(2., arrvec_3_) == ArrVec<size_t, 3> {1u, 2u});
+        CHECK(elem_indices(9., arrvec_3_) == ArrVec<size_t, 3> {});
     }
 
     SECTION("Vector") {
-        Vector<double> vector_3_ = {1, 2, 2};
-        CHECK(elem_indices(2., vector_3_) == Vector<size_t>{1u, 2u});
-        CHECK(elem_indices(9., vector_3_) == Vector<size_t>{});
+        Vector<double> vector_3_ = {1., 2., 2.};
+        CHECK(elem_indices(2., vector_3_) == Vector<size_t> {1u, 2u});
+        CHECK(elem_indices(9., vector_3_) == Vector<size_t> {});
     }
 }
 
@@ -1175,20 +1175,20 @@ TEST_CASE("find_indices") {
 
     SECTION("Array") {
         const Array<double, 3> array_3_ = {1., 2., 2.};
-        CHECK(find_indices(is_two, array_3_) == ArrVec<size_t, 3>{1u, 2u});
-        CHECK(find_indices(is_nine, array_3_) == ArrVec<size_t, 3>{});
+        CHECK(find_indices(is_two, array_3_) == ArrVec<size_t, 3> {1u, 2u});
+        CHECK(find_indices(is_nine, array_3_) == ArrVec<size_t, 3> {});
     }
 
     SECTION("ArrVec") {
-        const ArrVec<double, 3> arrvec_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<size_t, 3>{1u, 2u});
-        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<size_t, 3>{});
+        const ArrVec<double, 3> arrvec_3_ {1., 2., 2.};
+        CHECK(find_indices(is_two, arrvec_3_) == ArrVec<size_t, 3> {1u, 2u});
+        CHECK(find_indices(is_nine, arrvec_3_) == ArrVec<size_t, 3> {});
     }
 
     SECTION("Vector") {
-        const Vector<double> vector_3_{1., 2., 2.};
-        CHECK(find_indices(is_two, vector_3_) == Vector<size_t>{1u, 2u});
-        CHECK(find_indices(is_nine, vector_3_) == Vector<size_t>{});
+        const Vector<double> vector_3_ {1., 2., 2.};
+        CHECK(find_indices(is_two, vector_3_) == Vector<size_t> {1u, 2u});
+        CHECK(find_indices(is_nine, vector_3_) == Vector<size_t> {});
     }
 }
 
