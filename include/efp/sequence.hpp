@@ -19,13 +19,6 @@ class Array {
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
 
-    // Array() {
-    //     // By definition all of the data in Array should be valid
-    //     for (size_t i = 0; i < ct_size; ++i) {
-    //         new (&_data[i]) Element();
-    //     }
-    // }
-
     Array() {
         // By definition all of the data in Array should be valid
         for (size_t i = 0; i < ct_size; ++i) {
@@ -33,26 +26,11 @@ class Array {
         }
     }
 
-    // Array(const Array& other) {
-    //     for (size_t i = 0; i < ct_size; ++i) {
-    //         new (&_data[i]) Element(other._data[i]);
-    //     }
-    // }
-
     Array(const Array& other) {
         for (size_t i = 0; i < ct_size; ++i) {
             new (_data + i) Element {other._data[i]};
         }
     }
-
-    // Array& operator=(const Array& other) {
-    //     if (this != &other) {
-    //         for (size_t i = 0; i < ct_size; ++i) {
-    //             _data[i] = other._data[i];  // Use assignment for each element
-    //         }
-    //     }
-    //     return *this;
-    // }
 
     Array& operator=(const Array& other) {
         if (this != &other) {
@@ -63,12 +41,6 @@ class Array {
         }
         return *this;
     }
-
-    // Array(Array&& other) noexcept {
-    //     for (size_t i = 0; i < ct_size; ++i) {
-    //         new (&_data[i]) Element(efp::move(other._data[i]));  // Move-construct each element
-    //     }
-    // }
 
     Array(Array&& other) noexcept {
         for (size_t i = 0; i < ct_size; ++i) {
@@ -91,9 +63,6 @@ class Array {
             (_data + i)->~Element();
         }
     }
-
-    // template<typename... Arg>
-    // Array(const Arg&... args) : _data {args...} {}
 
     template<typename... Arg>
     Array(const Arg&... args) {
@@ -184,12 +153,8 @@ class Array {
         new (_data + index) Element {last};
     }
 
-    // A _data[ct_size];
     RawStorage<A, ct_size> _data;
 };
-
-// template <typename A, size_t ct_size>
-// using Array = EnableIf<ct_size != dyn, Sequence<A, ct_size, ct_size>>;
 
 template<typename A, size_t n>
 struct ElementImpl<Array<A, n>> {
@@ -640,19 +605,6 @@ namespace detail {
 
         VectorBase() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-        // VectorBase(const VectorBase& other) : _data {nullptr}, _size {0}, _capacity {0} {
-        //     if (other._data) {
-        //         _size = other._size;
-        //         _capacity = other._capacity;
-        //         _data = new Element[_capacity];
-
-        //         // memcpy(_data, other._data, sizeof(A) * _size);
-        //         for (size_t i = 0; i < other._size; ++i) {
-        //             new (&_data[i]) Element(other._data[i]);
-        //         }
-        //     }
-        // }
-
         VectorBase(const VectorBase& other)
             : _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
               _size {other._size}, _capacity {other._size} {
@@ -662,25 +614,6 @@ namespace detail {
                 }
             }
         }
-
-        // // todo copy_and_swap
-        // VectorBase& operator=(const VectorBase& other) noexcept {
-        //     if (this != &other) {
-        //         Element* newData = nullptr;
-        //         if (other._size > 0) {
-        //             newData = new Element[other._capacity];
-
-        //             for (size_t i = 0; i < other._size; ++i) {
-        //                 newData[i] = other._data[i];
-        //             }
-        //         }
-
-        //         _data = newData;
-        //         _size = other._size;
-        //         _capacity = other._capacity;
-        //     }
-        //     return *this;
-        // }
 
         // todo copy_and_swap
         VectorBase& operator=(const VectorBase& other) noexcept {
@@ -700,48 +633,12 @@ namespace detail {
             return *this;
         }
 
-        // ! Duplicated CC
-        // VectorBase(const VectorBase& other) : _data {nullptr}, _size {0}, _capacity {0} {
-        //     if (other._data) {
-        //         _size = other._size;
-        //         _capacity = other._capacity;
-        //         _data = new Element[_capacity];
-
-        //         // memcpy(_data, other._data, sizeof(A) * _size);
-        //         for (size_t i = 0; i < other._size; ++i) {
-        //             new (&_data[i]) Element(other._data[i]);
-        //         }
-        //     }
-        // }
-
-        // VectorBase(VectorBase&& other) noexcept :
-        //     _data {other._data},
-        //     _size {other._size},
-        //     _capacity {other._capacity} {
-        //     other._data = nullptr;
-        // }
-
         VectorBase(VectorBase&& other) noexcept
             : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
             other._data = nullptr;
             other._capacity = 0;
             other._size = 0;
         }
-
-        // VectorBase& operator=(VectorBase&& other) noexcept {
-        //     if (this != &other) {
-        //         delete[] _data;
-
-        //         _data = other._data;
-        //         _size = other._size;
-        //         _capacity = other._capacity;
-
-        //         other._data = nullptr;
-        //         other._size = 0;
-        //         other._capacity = 0;
-        //     }
-        //     return *this;
-        // }
 
         VectorBase& operator=(VectorBase&& other) noexcept {
             if (this != &other) {
@@ -762,16 +659,6 @@ namespace detail {
             return *this;
         }
 
-        // template<typename... Args>
-        // VectorBase(const Args&... args) :
-        //     _data {new Element[sizeof...(args)]},
-        //     _capacity(sizeof...(args)),
-        //     _size(sizeof...(args)) {
-        //     size_t i = 0;
-        //     for (auto arg : std::initializer_list<Common<Args...>> {args...})
-        //         _data[i++] = arg;
-        // }
-
         template<typename... Args>
         VectorBase(const Args&... args)
             : _data {static_cast<Element*>(::operator new[](sizeof...(args) * sizeof(Element)))},
@@ -783,11 +670,9 @@ namespace detail {
         // Constructor from Array
         template<size_t ct_size_>
         VectorBase(const Array<Element, ct_size_>& as)
-            :  // _data(new Element[ct_size_]),
-              _data {::operator new[](ct_size_ * sizeof(Element))}, _size(ct_size_),
+            : _data {::operator new[](ct_size_ * sizeof(Element))}, _size(ct_size_),
               _capacity(ct_size_) {
             for (size_t i = 0; i < _size; ++i) {
-                // new (&_data[i]) Element(as[i]);
                 new (_data + i) Element {as[i]};
             }
         }
@@ -795,21 +680,12 @@ namespace detail {
         // Constructor from ArrVec
         template<size_t ct_cap_>
         VectorBase(const ArrVec<Element, ct_cap_>& as)
-            :  // _data(new Element[length(as)]),
-              _data {::operator new[](length(as) * sizeof(Element))}, _size(length(as)),
+            : _data {::operator new[](length(as) * sizeof(Element))}, _size(length(as)),
               _capacity(ct_cap_) {
             for (size_t i = 0; i < _size; ++i) {
-                // new (&_data[i]) Element(as[i]);
                 new (_data + i) Element {as[i]};
             }
         }
-
-        // ~VectorBase() {
-        //     if (_data) {
-        //         delete[] _data;
-        //         _data = nullptr;
-        //     }
-        // }
 
         ~VectorBase() {
             if (_data) {
@@ -865,22 +741,6 @@ namespace detail {
             _size = length;
         }
 
-        // void reserve(size_t new_capacity) {
-        //     if (new_capacity > _capacity) {
-        //         Element* new_data = new Element[new_capacity];
-
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             new (&new_data[i]) Element(efp::move(_data[i]));
-        //             _data[i].~Element();
-        //         }
-
-        //         delete[] _data;
-
-        //         _data = new_data;
-        //         _capacity = new_capacity;
-        //     }
-        // }
-
         void reserve(size_t new_capacity) {
             if (new_capacity > _capacity) {
                 Element* new_data =
@@ -915,22 +775,6 @@ namespace detail {
             ++_size;
         }
 
-        // void insert(size_t index, const Element& value) {
-        //     if (index < 0 || index > _size) {
-        //         throw std::runtime_error(
-        //             "VectorBase::insert: index must be less than or equal to size"
-        //         );
-        //     }
-        //     if (_size >= _capacity) {
-        //         reserve(_capacity == 0 ? 1 : 2 * _capacity);
-        //     }
-        //     for (size_t i = _size; i > index; --i) {
-        //         _data[i] = efp::move(_data[i - 1]);
-        //     }
-        //     new (&_data[index]) Element(value);
-        //     ++_size;
-        // }
-
         void insert(size_t index, const Element& value) {
             if (index < 0 || index > _size) {
                 throw std::runtime_error(
@@ -949,22 +793,6 @@ namespace detail {
             new (_data + index) Element {value};
             ++_size;
         }
-
-        // void erase(size_t index) {
-        //     if (index < 0 || index >= _size) {
-        //         throw std::runtime_error(
-        //             "VectorBase::erase: index must be less than or equal to size"
-        //         );
-        //     }
-
-        //     _data[index].~Element();
-        //     for (size_t i = index; i < _size - 1; ++i) {
-        //         new (&_data[i]) Element(efp::move(_data[i + 1]));
-        //         _data[i + 1].~Element();
-        //     }
-
-        //     --_size;
-        // }
 
         void erase(size_t index) {
             if (index < 0 || index >= _size) {

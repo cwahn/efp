@@ -7,7 +7,7 @@
 // todo Make member function version of it
 
 namespace efp {
-template <typename A>
+template<typename A>
 void swap(A& a, A& b) {
     A temp = efp::move(a);
     a = efp::move(b);
@@ -15,7 +15,7 @@ void swap(A& a, A& b) {
 }
 
 // Merge function for merge sort
-template <typename A, typename F>
+template<typename A, typename F>
 void merge(Vector<A>& arr, size_t left, size_t middle, size_t right, const F& comp) {
     size_t n1 = middle - left + 1;
     size_t n2 = right - middle;
@@ -46,7 +46,7 @@ void merge(Vector<A>& arr, size_t left, size_t middle, size_t right, const F& co
 }
 
 // Merge sort using a comparison function
-template <typename A, typename F>
+template<typename A, typename F>
 void merge_sort_by(Vector<A>& arr, size_t left, size_t right, const F& comp) {
     if (left < right) {
         size_t middle = left + (right - left) / 2;
@@ -58,7 +58,7 @@ void merge_sort_by(Vector<A>& arr, size_t left, size_t right, const F& comp) {
 
 // Function to create a max heap using a comparison function
 
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
     size_t largest = i;
     size_t left = 2 * i + 1;
@@ -78,7 +78,7 @@ void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
 
 // Heapsort using a comparison function
 
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 void heapsort_by(Vector<A>& arr, const F& comp) {
     size_t n = arr.size();
     for (size_t i = n / 2 - 1; i != -1; i--) {
@@ -90,7 +90,7 @@ void heapsort_by(Vector<A>& arr, const F& comp) {
     }
 }
 
-template <typename A, typename F>
+template<typename A, typename F>
 void insertion_sort_by_(Vector<A>& arr, size_t left, size_t right, const F& comp) {
     for (size_t i = left + 1; i <= right; i++) {
         A key = efp::move(arr[i]);
@@ -106,7 +106,7 @@ void insertion_sort_by_(Vector<A>& arr, size_t left, size_t right, const F& comp
 }
 
 // General-purpose insertion sort that sorts the entire vector
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 void insertion_sort_by(Vector<A>& arr, const F& comp) {
     // Call the more specific insertion sort for the entire range of the vector
     if (arr.size() != 0)
@@ -115,7 +115,7 @@ void insertion_sort_by(Vector<A>& arr, const F& comp) {
 
 // Quicksort using a comparison function
 
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 size_t partition_by(Vector<A>& arr, size_t low, size_t high, const F& comp) {
     A pivot = arr[high];
     size_t i = (low - 1);
@@ -130,7 +130,7 @@ size_t partition_by(Vector<A>& arr, size_t low, size_t high, const F& comp) {
     return (i + 1);
 }
 
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 
 void quicksort_by(Vector<A>& arr, size_t low, size_t high, const F& comp) {
     if (low < high) {
@@ -143,7 +143,7 @@ void quicksort_by(Vector<A>& arr, size_t low, size_t high, const F& comp) {
 
 // Introsort using a comparison function
 
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 void size_trosort_by(Vector<A>& arr, const F& comp) {
     if (arr.size() <= 1)
         return;
@@ -152,7 +152,7 @@ void size_trosort_by(Vector<A>& arr, const F& comp) {
 }
 
 // Function to merge two sorted sub-vectors
-template <typename A, typename F>
+template<typename A, typename F>
 void timsort_merge(Vector<A>& arr, size_t start, size_t mid, size_t end, const F& comp) {
     size_t start2 = mid + 1;
 
@@ -185,10 +185,10 @@ void timsort_merge(Vector<A>& arr, size_t start, size_t mid, size_t end, const F
 }
 
 // Iterative Timsort function to sort the array[0...n-1] (similar to Python's and Java's)
-template <typename A, typename F = bool (*)(const A&, const A&)>
+template<typename A, typename F = bool (*)(const A&, const A&)>
 void timsort_by(Vector<A>& arr, const F& comp) {
     size_t n = arr.size();
-    const size_t RUN = 32; // This is a chosen run size.
+    const size_t RUN = 32;  // This is a chosen run size.
 
     // Sort individual sub-arrays of size RUN
     for (size_t i = 0; i < n; i += RUN)
@@ -213,54 +213,54 @@ void timsort_by(Vector<A>& arr, const F& comp) {
 
 // Default sort functions that call the sort_by functions with the default less-than comparison
 
-template <typename A>
+template<typename A>
 void quicksort(Vector<A>& arr) {
     if (arr.size() != 0)
         quicksort_by(arr, 0, arr.size() - 1, efp::lt_v<A>);
 }
 
-template <typename A>
+template<typename A>
 void heapsort(Vector<A>& arr) {
     heapsort_by(arr, efp::lt_v<A>);
 }
 
-template <typename A>
+template<typename A>
 void insertion_sort(Vector<A>& arr) {
     insertion_sort_by(arr, efp::lt_v<A>);
 }
 
-template <typename A>
+template<typename A>
 void size_trosort(Vector<A>& arr) {
     size_trosort_by(arr, efp::lt_v<A>);
 }
 
-template <typename A>
+template<typename A>
 void timsort(Vector<A>& arr) {
     timsort_by(arr, efp::lt_v<A>);
 }
 
 // General sorts
 
-template <typename A, typename F>
+template<typename A, typename F>
 void sort_by(Vector<A>& arr, const F& comp) {
     timsort_by(arr, comp);
 }
 
-template <typename A, typename F>
+template<typename A, typename F>
 void sort_unstable_by(Vector<A>& arr, const F& comp) {
     size_trosort_by(arr, comp);
 }
 
-template <typename A>
+template<typename A>
 void sort(Vector<A>& arr) {
     timsort_by(arr, efp::lt_v<A>);
 }
 
-template <typename A>
+template<typename A>
 void sort_unstable(Vector<A>& arr) {
     size_trosort_by(arr, efp::lt_v<A>);
 }
 
-} // namespace efp
+}  // namespace efp
 
 #endif

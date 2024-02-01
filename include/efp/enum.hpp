@@ -63,9 +63,8 @@ struct Overloaded<F, Fs...>: F, Overloaded<Fs...> {
     using Overloaded<Fs...>::operator();
 
     template<class G, class... Gs>
-    Overloaded(G&& g, Gs&&... gs) :
-        F {MatchBranch<G> {forward<G>(g)}},
-        Overloaded<Fs...>(forward<Gs>(gs)...) {}
+    Overloaded(G&& g, Gs&&... gs)
+        : F {MatchBranch<G> {forward<G>(g)}}, Overloaded<Fs...>(forward<Gs>(gs)...) {}
 };
 
 namespace detail {
@@ -295,8 +294,8 @@ namespace detail {
                 !(sizeof...(Tail) == 0 && Any<IsSame<As, Head>...>::value)
                     && IsUniquelyConstructible<Head, Tail...>::value,
                 void>>
-        EnumBase(Head&& head, Tail&&... args) :
-            _index(VariantIndex<DetermineVariant<Head, Tail...>>::value) {
+        EnumBase(Head&& head, Tail&&... args)
+            : _index(VariantIndex<DetermineVariant<Head, Tail...>>::value) {
             // Determine the appropriate variant type based on the argument
             using VariantType = DetermineVariant<
                 Head,

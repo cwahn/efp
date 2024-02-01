@@ -130,15 +130,11 @@ class Vector<char>: public detail::VectorBase<char> {
     }
 };
 
-// using String = Sequence<char, dyn, dyn>;
 using String = Vector<char>;
 
 // VectorView<const char> specialization for StringView
 template<>
-// class SequenceView<const char, dyn, dyn>
-class VectorView<const char>
-// : public SequenceBase<SequenceView<const char, dyn, dyn>>
-{
+class VectorView<const char> {
   public:
     using Element = const char;
     static constexpr size_t ct_size = dyn;

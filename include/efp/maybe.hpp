@@ -1,21 +1,20 @@
 #ifndef MAYBE_HPP_
 #define MAYBE_HPP_
 
+#include "efp/enum.hpp"
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
-#include "efp/enum.hpp"
 
 namespace efp {
-struct Nothing {
-};
+struct Nothing {};
 
 constexpr Nothing nothing;
 
 // Specialization of Enum for Maybe
 
-template <typename A>
-class Enum<Nothing, A> : public detail::EnumBase<Nothing, A> {
-public:
+template<typename A>
+class Enum<Nothing, A>: public detail::EnumBase<Nothing, A> {
+  public:
     using Base = detail::EnumBase<Nothing, A>;
     using Base::Base;
 
@@ -44,9 +43,8 @@ public:
         return has_value();
     }
 
-    template <typename F>
-    auto fmap(const F& f)
-        -> Enum<Nothing, CallReturn<F, A>> {
+    template<typename F>
+    auto fmap(const F& f) -> Enum<Nothing, CallReturn<F, A>> {
         if (has_value())
             return f(value());
         else
@@ -54,28 +52,25 @@ public:
     }
 };
 
-template <typename A>
+template<typename A>
 using Maybe = Enum<Nothing, A>;
 
-template <typename A>
-struct IsMaybe : False {
-};
+template<typename A>
+struct IsMaybe: False {};
 
-template <typename A>
-struct IsMaybe<Maybe<A>> : True {
-};
+template<typename A>
+struct IsMaybe<Maybe<A>>: True {};
 
 // Element specializetion for Maybe
-template <typename A>
+template<typename A>
 struct ElementImpl<Enum<Nothing, A>> {
     using Type = A;
 };
 
 // functor
 
-template <typename A, typename F>
-auto fmap(const F& f, const Maybe<A>& ma)
-    -> Maybe<CallReturn<F, A>> {
+template<typename A, typename F>
+auto fmap(const F& f, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
     if (ma)
         return f(ma.value());
     else
@@ -83,16 +78,13 @@ auto fmap(const F& f, const Maybe<A>& ma)
 }
 
 // applicative
-template <typename A>
-auto pure(const Element<A>& a)
-    -> EnableIf<
-        IsMaybe<A>::value, A> {
+template<typename A>
+auto pure(const Element<A>& a) -> EnableIf<IsMaybe<A>::value, A> {
     return a;
 }
 
-template <typename A, typename F>
-auto ap(const Maybe<F>& mf, const Maybe<A>& ma)
-    -> Maybe<CallReturn<F, A>> {
+template<typename A, typename F>
+auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
     if (mf && ma)
         return mf.value()(ma.value());
     else
@@ -101,11 +93,9 @@ auto ap(const Maybe<F>& mf, const Maybe<A>& ma)
 
 // monad
 
-template <typename A, typename F>
+template<typename A, typename F>
 auto bind(const Maybe<A>& ma, const F& f)
-    -> EnableIf<
-        IsMaybe<CallReturn<F, A>>::value,
-        CallReturn<F, A>>
+    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>>
 // todo test if monadic action
 {
     if (ma)
@@ -114,11 +104,9 @@ auto bind(const Maybe<A>& ma, const F& f)
         return nothing;
 }
 
-template <typename A, typename F>
+template<typename A, typename F>
 auto operator>>=(const Maybe<A>& ma, const F& f)
-    -> EnableIf<
-        IsMaybe<CallReturn<F, A>>::value,
-        CallReturn<F, A>>
+    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>>
 // todo test if monadic action
 {
     if (ma)
@@ -136,6 +124,6 @@ auto operator>>=(const Maybe<A>& ma, const F& f)
 //         return nothing;     \
 //     _tmp_.value()
 
-} // namespace efp
+}  // namespace efp
 
 #endif

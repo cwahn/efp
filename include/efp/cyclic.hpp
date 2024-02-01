@@ -2,17 +2,18 @@
 #define CYCLIC_HPP_
 
 #include <stdlib.h>
-#include <cstdint>
+
 #include <array>
+#include <cstdint>
 
 #include "efp/sequence.hpp"
 
 namespace efp {
-template <typename A, size_t n>
+template<typename A, size_t n>
 class Vcb
 // : public SequenceBase<Vcb<A, n>>
 {
-public:
+  public:
     using Element = A;
     using CtSize = Size<n>;
     using CtCapcity = Size<n>;
@@ -26,7 +27,7 @@ public:
 
     Vcb() {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            new (_buffer + i) A{};
+            new (_buffer + i) A {};
         }
         // _buffer + ct_capacity = _buffer + ct_size;
         _data = _buffer;
@@ -76,38 +77,58 @@ public:
         }
     }
 
-    A& operator[](const SizeType index) { return _data[index]; }
+    A& operator[](const SizeType index) {
+        return _data[index];
+    }
 
-    const A& operator[](const SizeType index) const { return _data[index]; }
+    const A& operator[](const SizeType index) const {
+        return _data[index];
+    }
 
     void push_back(A value) {
         _data->~A();
         (_data + ct_size)->~A();
 
-        new (_data) A{value};
-        new (_data + ct_size) A{value};
+        new (_data) A {value};
+        new (_data + ct_size) A {value};
 
         ++_data;
         _data -= ct_size * (_data == _buffer + ct_capacity);
     }
 
-    constexpr SizeType size() const { return ct_size; }
+    constexpr SizeType size() const {
+        return ct_size;
+    }
 
-    A* data() { return _data; }
+    A* data() {
+        return _data;
+    }
 
-    const A* data() const { return _data; }
+    const A* data() const {
+        return _data;
+    }
 
-    bool empty() const { return false; }
+    bool empty() const {
+        return false;
+    }
 
-    const A* begin() const { return _data; }
+    const A* begin() const {
+        return _data;
+    }
 
-    A* begin() { return _data; }
+    A* begin() {
+        return _data;
+    }
 
-    const A* end() const { return _data + ct_size; }
+    const A* end() const {
+        return _data + ct_size;
+    }
 
-    A* end() { return _data + ct_size; }
+    A* end() {
+        return _data + ct_size;
+    }
 
-private:
+  private:
     RawStorage<A, 2 * ct_size> _buffer;
     // A* _buffer + ct_capacity;
     A* _data;
@@ -122,33 +143,51 @@ private:
 //     static constexpr size_t ct_capacity = n;
 // };
 
-template <typename A, size_t n> struct ElementImpl<Vcb<A, n>> {
+template<typename A, size_t n>
+struct ElementImpl<Vcb<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n> struct CtSizeImpl<Vcb<A, n>> {
+template<typename A, size_t n>
+struct CtSizeImpl<Vcb<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n> struct CtCapacityImpl<Vcb<A, n>> {
+template<typename A, size_t n>
+struct CtCapacityImpl<Vcb<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n> constexpr auto length(const Vcb<A, n>& as) -> Size<n> { return Size<n>{}; }
+template<typename A, size_t n>
+constexpr auto length(const Vcb<A, n>& as) -> Size<n> {
+    return Size<n> {};
+}
 
-template <typename A, size_t n> constexpr auto nth(size_t i, const Vcb<A, n>& as) -> const A& { return as[i]; }
+template<typename A, size_t n>
+constexpr auto nth(size_t i, const Vcb<A, n>& as) -> const A& {
+    return as[i];
+}
 
-template <typename A, size_t n> constexpr auto nth(size_t i, Vcb<A, n>& as) -> A& { return as[i]; }
+template<typename A, size_t n>
+constexpr auto nth(size_t i, Vcb<A, n>& as) -> A& {
+    return as[i];
+}
 
-template <typename A, size_t n> constexpr auto data(const Vcb<A, n>& as) -> const A* { return as.data(); }
+template<typename A, size_t n>
+constexpr auto data(const Vcb<A, n>& as) -> const A* {
+    return as.data();
+}
 
-template <typename A, size_t n> constexpr auto data(Vcb<A, n>& as) -> A* { return as.data(); }
+template<typename A, size_t n>
+constexpr auto data(Vcb<A, n>& as) -> A* {
+    return as.data();
+}
 
-template <typename A, size_t n>
+template<typename A, size_t n>
 class Vcq
 // : public SequenceBase<Vcq<A, n>>
 {
-public:
+  public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapcity = Size<n>;
@@ -170,10 +209,10 @@ public:
     }
 
     Vcq(const Vcq& other) {
-
         const auto read_offset = other._read - other._buffer;
         for (size_t i = 0; i < other._size; ++i) {
-            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
+            const auto j =
+                read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             new (_buffer + j) A(other._buffer[i]);
             new (_buffer + ct_capacity + j) A(other._buffer[i]);
         }
@@ -185,18 +224,19 @@ public:
     }
 
     Vcq& operator=(const Vcq& other) {
-
         const auto read_offset = _read - _buffer;
         for (size_t i = 0; i < _size; ++i) {
-            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
+            const auto j =
+                read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (_buffer + j)->~A();
             (_buffer + ct_capacity + j)->~A();
         }
 
         const auto read_offset_other = other._read - other._buffer;
         for (size_t i = 0; i < other._size; ++i) {
-            const auto j =
-                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
+            const auto j = read_offset_other + i < ct_capacity
+                ? read_offset_other + i
+                : read_offset_other + i - ct_capacity;
             new (_buffer + j) A(other._buffer[i]);
             new (_buffer + ct_capacity + j) A(other._buffer[i]);
         }
@@ -211,8 +251,9 @@ public:
     Vcq(Vcq&& other) noexcept {
         const auto read_offset_other = other._read - other._buffer;
         for (size_t i = 0; i < other._size; ++i) {
-            const auto j =
-                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
+            const auto j = read_offset_other + i < ct_capacity
+                ? read_offset_other + i
+                : read_offset_other + i - ct_capacity;
             new (_buffer + j) A(std::move(other._buffer[i]));
             new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
         }
@@ -226,15 +267,17 @@ public:
     Vcq& operator=(Vcq&& other) noexcept {
         const auto read_offset = _read - _buffer;
         for (size_t i = 0; i < _size; ++i) {
-            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
+            const auto j =
+                read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (_buffer + j)->~A();
             (_buffer + ct_capacity + j)->~A();
         }
 
         const auto read_offset_other = other._read - other._buffer;
         for (size_t i = 0; i < other._size; ++i) {
-            const auto j =
-                read_offset_other + i < ct_capacity ? read_offset_other + i : read_offset_other + i - ct_capacity;
+            const auto j = read_offset_other + i < ct_capacity
+                ? read_offset_other + i
+                : read_offset_other + i - ct_capacity;
             new (_buffer + j) A(std::move(other._buffer[i]));
             new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
         }
@@ -249,24 +292,29 @@ public:
     ~Vcq() {
         const auto read_offset = _read - _buffer;
         for (size_t i = 0; i < _size; ++i) {
-            const auto j = read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
+            const auto j =
+                read_offset + i < ct_capacity ? read_offset + i : read_offset + i - ct_capacity;
             (_buffer + j)->~A();
             (_buffer + ct_capacity + j)->~A();
         }
     }
 
-    A& operator[](const SizeType index) { return _read[index]; }
+    A& operator[](const SizeType index) {
+        return _read[index];
+    }
 
-    const A& operator[](const SizeType index) const { return _read[index]; }
+    const A& operator[](const SizeType index) const {
+        return _read[index];
+    }
 
     void push_back(const A& value) {
-        if (_size == ct_capacity) { // Has to destroy the oldest element if the buffer is full
+        if (_size == ct_capacity) {  // Has to destroy the oldest element if the buffer is full
             _write->~A();
             (_write + ct_capacity)->~A();
         }
 
-        new (_write) A{value};
-        new (_write + ct_capacity) A{value};
+        new (_write) A {value};
+        new (_write + ct_capacity) A {value};
 
         ++_write;
         _write -= ct_capacity * (_write == _buffer + ct_capacity);
@@ -278,10 +326,11 @@ public:
             _read -= ct_capacity * (_read == _buffer + ct_capacity);
         }
     }
+
     // ! Undefined if empty
 
     A pop_front() {
-        A value{std::move(*_read)};
+        A value {std::move(*_read)};
 
         _read->~A();
         (_read + ct_capacity)->~A();
@@ -293,23 +342,39 @@ public:
         return value;
     }
 
-    constexpr SizeType size() const { return _size; }
+    constexpr SizeType size() const {
+        return _size;
+    }
 
-    bool empty() const { return _size == 0; }
+    bool empty() const {
+        return _size == 0;
+    }
 
-    A* data() { return _read; }
+    A* data() {
+        return _read;
+    }
 
-    const A* data() const { return _read; }
+    const A* data() const {
+        return _read;
+    }
 
-    const A* begin() const { return _read; }
+    const A* begin() const {
+        return _read;
+    }
 
-    A* begin() { return _read; }
+    A* begin() {
+        return _read;
+    }
 
-    const A* end() const { return _write > _read ? _write : _write + ct_capacity; }
+    const A* end() const {
+        return _write > _read ? _write : _write + ct_capacity;
+    }
 
-    A* end() { return _write > _read ? _write : _write + ct_capacity; }
+    A* end() {
+        return _write > _read ? _write : _write + ct_capacity;
+    }
 
-private:
+  private:
     RawStorage<A, 2 * ct_capacity> _buffer;
 
     size_t _size = 0;
@@ -326,29 +391,47 @@ private:
 //     static constexpr size_t ct_capacity = n;
 // };
 
-template <typename A, size_t n> struct ElementImpl<Vcq<A, n>> {
+template<typename A, size_t n>
+struct ElementImpl<Vcq<A, n>> {
     using Type = A;
 };
 
-template <typename A, size_t n> struct CtSizeImpl<Vcq<A, n>> {
+template<typename A, size_t n>
+struct CtSizeImpl<Vcq<A, n>> {
     using Type = Size<dyn>;
 };
 
-template <typename A, size_t n> struct CtCapacityImpl<Vcq<A, n>> {
+template<typename A, size_t n>
+struct CtCapacityImpl<Vcq<A, n>> {
     using Type = Size<n>;
 };
 
-template <typename A, size_t n> constexpr auto length(const Vcq<A, n>& as) -> size_t { return as.size(); }
+template<typename A, size_t n>
+constexpr auto length(const Vcq<A, n>& as) -> size_t {
+    return as.size();
+}
 
-template <typename A, size_t n> constexpr auto nth(size_t i, const Vcq<A, n>& as) -> const A& { return as[i]; }
+template<typename A, size_t n>
+constexpr auto nth(size_t i, const Vcq<A, n>& as) -> const A& {
+    return as[i];
+}
 
-template <typename A, size_t n> constexpr auto nth(size_t i, Vcq<A, n>& as) -> A& { return as[i]; }
+template<typename A, size_t n>
+constexpr auto nth(size_t i, Vcq<A, n>& as) -> A& {
+    return as[i];
+}
 
-template <typename A, size_t n> constexpr auto data(const Vcq<A, n>& as) -> const A* { return as.data(); }
+template<typename A, size_t n>
+constexpr auto data(const Vcq<A, n>& as) -> const A* {
+    return as.data();
+}
 
-template <typename A, size_t n> constexpr auto data(Vcq<A, n>& as) -> A* { return as.data(); }
+template<typename A, size_t n>
+constexpr auto data(Vcq<A, n>& as) -> A* {
+    return as.data();
+}
 
-} // namespace efp
+}  // namespace efp
 
 // // BufferArrVec
 

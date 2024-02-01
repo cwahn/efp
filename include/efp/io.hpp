@@ -7,12 +7,12 @@
 
 namespace efp {
 class File {
-public:
+  public:
     static Maybe<File> open(const char* path, const char* mode) {
         FILE* file = fopen(path, mode);
 
         if (file)
-            return File{file, mode};
+            return File {file, mode};
 
         return nothing;
     }
@@ -21,7 +21,7 @@ public:
         FILE* file = fopen(path.c_str(), mode);
 
         if (file)
-            return File{file, mode};
+            return File {file, mode};
 
         return nothing;
     }
@@ -35,8 +35,7 @@ public:
 
     File& operator=(const File&) = delete;
 
-    File(File&& other) noexcept
-        : file_(other.file_) {
+    File(File&& other) noexcept : file_(other.file_) {
         other.file_ = nullptr;
     }
 
@@ -50,7 +49,7 @@ public:
 
     Maybe<String> read_line() {
         if (file_) {
-            String buffer{};
+            String buffer {};
             int ch;
 
             while ((ch = fgetc(file_)) != '\n' && ch != EOF) {
@@ -68,7 +67,7 @@ public:
     }
 
     Vector<String> read_lines() {
-        Vector<String> lines{};
+        Vector<String> lines {};
 
         bool keep_read = true;
 
@@ -144,9 +143,8 @@ public:
         return false;
     }
 
-private:
-    explicit File(FILE* file, const char* mode)
-        : file_(file) {
+  private:
+    explicit File(FILE* file, const char* mode) : file_(file) {
         strncpy(mode_, mode, sizeof(mode_) - 1);
         mode_[sizeof(mode_) - 1] = '\0';
     }
@@ -155,6 +153,6 @@ private:
     char mode_[8];
 };
 
-}; // namespace efp
+};  // namespace efp
 
 #endif
