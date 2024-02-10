@@ -33,23 +33,6 @@ if(MSVC)
     endif()
 endif()
 
-include(CTest)
-
-find_package(Catch2 QUIET)
-
-if(NOT Catch2_FOUND)
-    # message("Catch2 not found on the system.\nBuild from source.")
-    FetchContent_Declare(
-        Catch2
-        URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.4.0.tar.gz
-        URL_HASH MD5=2c802a4938ed842e2942c60d1d231bb7
-    )
-    FetchContent_MakeAvailable(Catch2)
-endif()
-
-include(Catch)
-enable_testing()
-
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
 if(ENABLE_ASAN)
@@ -61,5 +44,9 @@ endif()
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
-add_subdirectory("./test")
-add_subdirectory("./example")
+
+# Check if this CMakeLists.txt is the top-most CMake project
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_subdirectory("./example")
+    add_subdirectory("./test")
+endif()
