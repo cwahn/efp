@@ -133,22 +133,25 @@ struct IsCtConst<A&&>: IsCtConst<A> {};
 template<typename T>
 struct AlwaysFalse: False {};
 
-// EnableIfImpl
+// // EnableIfImpl
 
-namespace detail {
-    template<bool cond, typename A = void>
-    struct EnableIfImpl {};
+// namespace detail {
+//     template<bool cond, typename A = void>
+//     struct EnableIfImpl {};
 
-    template<typename A>
-    struct EnableIfImpl<true, A> {
-        typedef A Type;
-    };
-}  // namespace detail
+//     template<typename A>
+//     struct EnableIfImpl<true, A> {
+//         typedef A Type;
+//     };
+// }  // namespace detail
 
 // EnableIf
 
 template<bool cond, typename A = void>
-using EnableIf = typename detail::EnableIfImpl<cond, A>::Type;
+using EnableIf = typename std::enable_if<cond, A>::type;
+
+// template<bool cond, typename A = void>
+// using EnableIf = typename detail::EnableIfImpl<cond, A>::Type;
 
 // Conditionl
 
