@@ -228,6 +228,13 @@ struct Max<Head>: Head {};
 
 constexpr auto size_of_ptr_v = sizeof(void*);
 
+// op_neg
+
+template<typename A>
+constexpr A neg(const A& a) {
+    return -a;
+}
+
 // op_eq
 
 template<typename A, typename B>
@@ -235,39 +242,45 @@ constexpr bool op_eq(const A& lhs, const B& rhs) {
     return lhs == rhs;
 }
 
-//  op_neq
+// op_neq
 
 template<typename A, typename B>
 constexpr bool op_neq(const A& lhs, const B& rhs) {
     return lhs != rhs;
 }
 
-//  op_gt
+// op_gt
 
 template<typename A, typename B>
 constexpr bool op_gt(const A& lhs, const B& rhs) {
     return lhs > rhs;
 }
 
-//  op_lt
+// op_lt
 
 template<typename A, typename B>
 constexpr bool op_lt(const A& lhs, const B& rhs) {
     return lhs < rhs;
 }
 
-//  op_geq
+// op_geq
 
 template<typename A, typename B>
 constexpr bool op_geq(const A& lhs, const B& rhs) {
     return lhs >= rhs;
 }
 
-//  op_leq
+// op_leq
 
 template<typename A, typename B>
 constexpr bool op_leq(const A& lhs, const B& rhs) {
     return lhs <= rhs;
+}
+
+// op_not
+
+constexpr bool op_not(const bool b) {
+    return !b;
 }
 
 // op_and
@@ -276,37 +289,23 @@ constexpr bool op_and(const bool lhs, const bool rhs) {
     return lhs && rhs;
 }
 
-// or_v
+// op_or
 
 constexpr bool op_or(const bool lhs, const bool rhs) {
     return lhs || rhs;
 }
 
-// max_v
-
-template<typename A>
-constexpr A max_v(const A& lhs, const A& rhs) {
-    return lhs > rhs ? lhs : rhs;
-}
-
-// min_v
-
-template<typename A>
-constexpr A min_v(const A& lhs, const A& rhs) {
-    return lhs < rhs ? lhs : rhs;
-}
-
-// plus_v
+// op_add
 
 template<typename A, typename B>
-constexpr auto plus_v(const A& lhs, const B& rhs) -> decltype(lhs + rhs) {
+constexpr auto op_add(const A& lhs, const B& rhs) -> decltype(lhs + rhs) {
     return lhs + rhs;
 }
 
-// times_v
+// op_mul
 
 template<typename A>
-constexpr A times_v(const A& lhs, const A& rhs) {
+constexpr A op_mul(const A& lhs, const A& rhs) {
     return lhs * rhs;
 }
 
@@ -323,6 +322,20 @@ constexpr auto bound_v(const A& lower, const B& upper, const C& x)
 // {
 //     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
 // }
+
+// max_v
+
+template<typename A>
+constexpr A max_v(const A& lhs, const A& rhs) {
+    return lhs > rhs ? lhs : rhs;
+}
+
+// min_v
+
+template<typename A>
+constexpr A min_v(const A& lhs, const A& rhs) {
+    return lhs < rhs ? lhs : rhs;
+}
 
 // Foldl
 
@@ -393,14 +406,14 @@ constexpr A minimum_v(A a, As... as) {
 
 template<typename A, typename... As>
 constexpr A sum_v(A a, As... as) {
-    return foldl_v(plus_v<A, A>, a, as...);
+    return foldl_v(op_add<A, A>, a, as...);
 }
 
 // product_v
 
 template<typename A, typename... As>
 constexpr A product_v(A a, As... as) {
-    return foldl_v(times_v<A>, a, as...);
+    return foldl_v(op_mul<A>, a, as...);
 }
 
 // IsSame
