@@ -911,21 +911,6 @@ struct IsDefaultConstructible<A, decltype(A())>: True {};
 
 // _foldl
 
-// template<typename F, typename A>
-// constexpr A _foldl(F f, A a) {
-//     return a;
-// }
-
-// template<typename F, typename A, typename B>
-// constexpr A _foldl(F f, A a, B b) {
-//     return f(a, b);
-// }
-
-// template<typename F, typename A, typename B, typename... Bs>
-// constexpr A _foldl(F f, A a, B b, Bs... bs) {
-//     return _foldl(f, f(a, b), bs...);
-// }
-
 template<typename F, typename A>
 constexpr A _foldl(F f, A a) {
     return a;
@@ -998,104 +983,20 @@ constexpr A _product(A a, As... as) {
 
 // InitializerList
 
-// template <class A>
-// class InitializerList
-// {
-// public:
-//     using value_type = A;
-//     using reference = const A &;
-//     using const_reference = const A &;
-//     using size_type = size_t;
-
-//     using iterator = const A *;
-//     using const_iterator = const A *;
-
-//     constexpr InitializerList() noexcept : array(nullptr), len(0) {}
-
-//     // Number of elements
-//     constexpr size_type size() const noexcept { return len; }
-
-//     // First element
-//     constexpr const_iterator begin() const noexcept { return array; }
-
-//     // One past the last element
-//     constexpr const_iterator end() const noexcept { return array + len; }
-
-// private:
-//     iterator array;
-//     size_type len;
-
-//     // The constructor is private and can only be called by the compiler
-//     // which will create an InitializerList using an array temporary.
-//     constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
-// };
-
 template<typename A>
 using InitializerList = std::initializer_list<A>;
 
 // Common
 
-// namespace detail {
-//     template<typename... As>
-//     struct CommonImpl {
-//         using Type = void;
-//     };
-
-//     template<typename A, typename... As>
-//     struct CommonImpl<A, As...> {
-//         using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
-//     };
-// }  // namespace detail
-
-// template<typename... As>
-// using Common = typename detail::CommonImpl<As...>::Type;
-
 template<typename... As>
-using Common = std::common_type<As...>;
+using Common = typename std::common_type<As...>::type;
+
+// DebugType
 
 template<typename A>
 struct DebugType;  // Intentionally undefined
 
-// namespace detail {
-//     template <typename, typename A, typename... Args>
-//     struct IsConstructibleImpl : False {};
-
-//     // Specialization that tests if the constructor exists.
-//     template <typename A, typename... Args>
-//     struct IsConstructibleImpl<Void<decltype(A(declval<Args>()...))>, A, Args...> : True {};
-// } // namespace detail
-
-// // Public interface to check if A can be constructed with Args...
-// template <typename A, typename... Args>
-// using IsConstructible = detail::IsConstructibleImpl<A, Args...>;
-
-// template <typename, typename A, typename... Args>
-// struct IsConstructible : False {};
-
-// // Specialization that tests if the constructor exists.
-// template <typename A, typename... Args>
-// struct IsConstructible<Void<decltype(A(declval<Args>()...))>, A, Args...> : True {};
-
-// Helper to test if a type T can be constructed with arguments Args...
-// template <typename T, typename... Args>
-// struct IsConstructibleImpl {
-// private:
-//     // Test function to check constructibility
-//     template <typename U, typename... UArgs,
-//               typename = decltype(U(std::declval<UArgs>()...))>
-//     static True test(int);
-
-//     // Fallback function when the above test fails
-//     template <typename, typename...>
-//     static False test(...);
-
-// public:
-//     static constexpr bool value = decltype(test<T, Args...>(0))::value;
-// };
-
-// // Public interface for IsConstructible
-// template <typename T, typename... Args>
-// struct IsConstructible : CtConst<bool, IsConstructibleImpl<T, Args...>::value> {};
+// IsConstructible
 
 template<typename A, typename... Args>
 using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
