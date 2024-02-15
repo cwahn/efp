@@ -405,6 +405,8 @@ namespace detail {
 template<uint8_t n, typename... Args>
 using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
+// Find
+
 namespace detail {
     // FindHelperValue
 
@@ -422,8 +424,6 @@ namespace detail {
     struct FindImpl<n, P, Head, Tail...>:
         Conditional<P<Head>::value, FindHelperValue<n>, FindImpl<n + 1, P, Tail...>> {};
 }  // namespace detail
-
-// Find
 
 template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
@@ -477,13 +477,11 @@ AddRvalueReference<T> declval() noexcept;
 // CallReturn
 
 // Check the C++ standard version
-#if __cplusplus >= 201703L
-
-// C++17 or later, use std::invoke_result
+#if __cplusplus >= 201703L  // C++17 or later, use std::invoke_result
 template<typename F, typename... Args>
 using CallReturn = typename std::invoke_result<F, Args...>::type;
 
-#else
+#else  // Before C++17, use the custom implementation
 
 namespace detail {
     // template<typename, typename...>
@@ -491,11 +489,10 @@ namespace detail {
 
     template<typename F, typename... Args>
     struct CallReturnImpl {
-        using Type = decltype(std::declval<F>()(std::declval<Args>()...));
+        using Type = decltype(declval<F>()(declval<Args>()...));
     };
 }  // namespace detail
 
-// Before C++17, use the custom implementation
 template<typename F, typename... Args>
 using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
 
@@ -520,6 +517,13 @@ class HasCallOperator {
 
 // IsInvocable
 
+#if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
+
+template<typename F, typename... Args>
+using IsInvocable = std::is_invocable<F, Args...>;
+
+#else  // If earlier than C++17, use custom IsInvocable
+
 template<typename F, typename... Args>
 struct IsInvocable {
   private:
@@ -533,24 +537,30 @@ struct IsInvocable {
     static constexpr bool value = decltype(check<F>(0))::value;
 };
 
+#endif
+
 // IsFunction
-// Base template
+
+// // Base template
+// template<typename T>
+// struct IsFunction: False {};
+
+// // Specializations for all kinds of function types
+// template<typename Ret, typename... Args>
+// struct IsFunction<Ret(Args...)>: True {};
+
+// // Add specializations for const, volatile, and const volatile member functions if needed
+// template<typename Ret, typename... Args>
+// struct IsFunction<Ret(Args...) const>: True {};
+
+// template<typename Ret, typename... Args>
+// struct IsFunction<Ret(Args...) volatile>: True {};
+
+// template<typename Ret, typename... Args>
+// struct IsFunction<Ret(Args...) const volatile>: True {};
+
 template<typename T>
-struct IsFunction: False {};
-
-// Specializations for all kinds of function types
-template<typename Ret, typename... Args>
-struct IsFunction<Ret(Args...)>: True {};
-
-// Add specializations for const, volatile, and const volatile member functions if needed
-template<typename Ret, typename... Args>
-struct IsFunction<Ret(Args...) const>: True {};
-
-template<typename Ret, typename... Args>
-struct IsFunction<Ret(Args...) volatile>: True {};
-
-template<typename Ret, typename... Args>
-struct IsFunction<Ret(Args...) const volatile>: True {};
+using IsFunction = std::is_function<T>;
 
 // FuncToFuncPtr
 
@@ -944,42 +954,48 @@ Return<F> apply(const F& f, const Tuple<As...>& tpl) {
 
 // PointerRemoved
 
-namespace detail {
-    template<typename A>
-    struct PointerRemovedImpl {
-        using Type = A;
-    };
+// namespace detail {
+//     template<typename A>
+//     struct PointerRemovedImpl {
+//         using Type = A;
+//     };
 
-    template<typename A>
-    struct PointerRemovedImpl<A*> {
-        using Type = A;
-    };
-}  // namespace detail
+//     template<typename A>
+//     struct PointerRemovedImpl<A*> {
+//         using Type = A;
+//     };
+// }  // namespace detail
+
+// template<typename A>
+// using PointerRemoved = typename detail::PointerRemovedImpl<A>::Type;
 
 template<typename A>
-using PointerRemoved = typename detail::PointerRemovedImpl<A>::Type;
+using PointerRemoved = typename std::remove_pointer<A>::type;
 
 // ReferenceRemoved
 
-namespace detail {
-    template<typename A>
-    struct ReferenceRemovedImpl {
-        using Type = A;
-    };
+// namespace detail {
+//     template<typename A>
+//     struct ReferenceRemovedImpl {
+//         using Type = A;
+//     };
 
-    template<typename A>
-    struct ReferenceRemovedImpl<A&> {
-        using Type = A;
-    };
+//     template<typename A>
+//     struct ReferenceRemovedImpl<A&> {
+//         using Type = A;
+//     };
 
-    template<typename A>
-    struct ReferenceRemovedImpl<A&&> {
-        using Type = A;
-    };
-}  // namespace detail
+//     template<typename A>
+//     struct ReferenceRemovedImpl<A&&> {
+//         using Type = A;
+//     };
+// }  // namespace detail
+
+// template<typename A>
+// using ReferenceRemoved = typename detail::ReferenceRemovedImpl<A>::Type;
 
 template<typename A>
-using ReferenceRemoved = typename detail::ReferenceRemovedImpl<A>::Type;
+using ReferenceRemoved = typename std::remove_reference<A>::type;
 
 // ConstRemoved
 
@@ -1070,6 +1086,13 @@ constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
     return static_cast<A&&>(a);
 }
 
+// move
+
+template<typename A>
+ReferenceRemoved<A>&& move(A&& a) {
+    return static_cast<ReferenceRemoved<A>&&>(a);
+}
+
 // IsDefaultConstructible
 
 template<typename A, typename = void>
@@ -1077,13 +1100,6 @@ struct IsDefaultConstructible: False {};
 
 template<typename A>
 struct IsDefaultConstructible<A, decltype(A())>: True {};
-
-// move
-
-template<typename A>
-ReferenceRemoved<A>&& move(A&& a) {
-    return static_cast<ReferenceRemoved<A>&&>(a);
-}
 
 // _foldl
 
