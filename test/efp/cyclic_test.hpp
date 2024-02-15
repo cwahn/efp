@@ -107,6 +107,7 @@ TEST_CASE("Vcb") {
         CHECK(vcb.size() == 3);
         CHECK(length(vcb) == 3);
         CHECK(IsIntegralConst<decltype(length(vcb))>::value == true);
+        // DebugType<decltype(length(vcb))>{};
         CHECK(vcb.empty() == false);
 
         vcb.push_back(1);

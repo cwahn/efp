@@ -22,6 +22,7 @@ inline bool operator!=(const Unit&, const Unit&) {
 
 // IntegralConst
 
+// ! deprecated direct implementation
 // template<typename A, A a>
 // struct IntegralConst {
 //     static constexpr A value = a;
@@ -53,35 +54,43 @@ struct IntegralConst: std::integral_constant<A, v> {
     }
 };
 
+// template<typename A, A a>
+// using IntegralConst = std::integral_constant<A, a>;
+
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<bool, lhs == rhs> operator==(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<bool, lhs == rhs> {};
+    return {};
 }
 
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<bool, lhs != rhs> operator!=(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<bool, lhs != rhs> {};
+    return {};
 }
 
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<A, lhs + rhs> operator+(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<A, lhs + rhs> {};
+    return {};
 }
 
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<A, lhs - rhs> operator-(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<A, lhs - rhs> {};
+    return {};
 }
 
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<A, lhs * rhs> operator*(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<A, lhs * rhs> {};
+    return {};
 }
 
 template<typename A, A lhs, A rhs>
 constexpr IntegralConst<A, lhs / rhs> operator/(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
-    return IntegralConst<A, lhs / rhs> {};
+    return {};
 }
+
+// Bool
+
+template<bool b>
+using Bool = IntegralConst<bool, b>;
 
 // True
 
@@ -91,11 +100,6 @@ using True = IntegralConst<bool, true>;
 
 using False = IntegralConst<bool, false>;
 
-// Bool
-
-template<bool b>
-using Bool = IntegralConst<bool, b>;
-
 // Int
 
 template<size_t n>
@@ -104,7 +108,7 @@ using Int = IntegralConst<int, n>;
 // Size
 
 template<size_t n>
-using Size = IntegralConst<size_t, n>;
+using Size = IntegralConst<std::size_t, n>;
 
 // IsIntegralConst
 
@@ -123,6 +127,8 @@ struct IsIntegralConst<A&>: IsIntegralConst<A> {};
 
 template<typename A>
 struct IsIntegralConst<A&&>: IsIntegralConst<A> {};
+
+// AlwaysFalse
 
 template<typename T>
 struct AlwaysFalse: False {};
