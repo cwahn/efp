@@ -216,27 +216,27 @@ void timsort_by(Vector<A>& arr, const F& comp) {
 template<typename A>
 void quicksort(Vector<A>& arr) {
     if (arr.size() != 0)
-        quicksort_by(arr, 0, arr.size() - 1, efp::lt_v<A>);
+        quicksort_by(arr, 0, arr.size() - 1, efp::op_lt<A>);
 }
 
 template<typename A>
 void heapsort(Vector<A>& arr) {
-    heapsort_by(arr, efp::lt_v<A>);
+    heapsort_by(arr, efp::op_lt<A>);
 }
 
 template<typename A>
 void insertion_sort(Vector<A>& arr) {
-    insertion_sort_by(arr, efp::lt_v<A>);
+    insertion_sort_by(arr, efp::op_lt<A>);
 }
 
 template<typename A>
 void size_trosort(Vector<A>& arr) {
-    size_trosort_by(arr, efp::lt_v<A>);
+    size_trosort_by(arr, efp::op_lt<A>);
 }
 
 template<typename A>
 void timsort(Vector<A>& arr) {
-    timsort_by(arr, efp::lt_v<A>);
+    timsort_by(arr, efp::op_lt<A>);
 }
 
 // General sorts
@@ -253,12 +253,12 @@ void sort_unstable_by(Vector<A>& arr, const F& comp) {
 
 template<typename A>
 void sort(Vector<A>& arr) {
-    timsort_by(arr, efp::lt_v<A>);
+    timsort_by(arr, efp::op_lt<A>);
 }
 
 template<typename A>
 void sort_unstable(Vector<A>& arr) {
-    size_trosort_by(arr, efp::lt_v<A>);
+    size_trosort_by(arr, efp::op_lt<A>);
 }
 
 }  // namespace efp

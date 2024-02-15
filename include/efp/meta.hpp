@@ -187,7 +187,7 @@ struct All<>: True {};
 
 // Recursive case: Check the first type, and recurse for the rest.
 template<typename Head, typename... Tail>
-struct All<Head, Tail...>: CtConst<bool, Head::value && All<Tail...>::value> {};
+struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
 
 // Any
 
@@ -200,7 +200,7 @@ struct Any<>: False {};
 
 // Recursive case: Check the first type, and recurse for the rest.
 template<typename Head, typename... Tail>
-struct Any<Head, Tail...>: CtConst<bool, Head::value || Any<Tail...>::value> {};
+struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
 
 // Min
 
@@ -225,69 +225,60 @@ template<typename Head>
 struct Max<Head>: Head {};
 
 // size_of_ptr_v
+
 constexpr auto size_of_ptr_v = sizeof(void*);
 
-// ConstParam_t
-// Pass by value if the size of type is leq to machine posize_ter size.
-
-// template <typename A>
-// using ConstParam_t = Conditional<
-//     sizeof(A) <= size_of_ptr_v,
-//     A,
-//     // const A &>;
-//     const typename std::remove_const<typename std::remove_reference<A>::Type>::Type &>;
-
-// eq_v
+// op_eq
 
 template<typename A, typename B>
-constexpr bool eq_v(const A& lhs, const B& rhs) {
+constexpr bool op_eq(const A& lhs, const B& rhs) {
     return lhs == rhs;
 }
 
-//  neq_v
+//  op_neq
 
 template<typename A, typename B>
-constexpr bool neq_v(const A& lhs, const B& rhs) {
+constexpr bool op_neq(const A& lhs, const B& rhs) {
     return lhs != rhs;
 }
 
-//  gt_v
+//  op_gt
 
 template<typename A, typename B>
-constexpr bool gt_v(const A& lhs, const B& rhs) {
+constexpr bool op_gt(const A& lhs, const B& rhs) {
     return lhs > rhs;
 }
 
-//  lt_v
+//  op_lt
 
 template<typename A, typename B>
-constexpr bool lt_v(const A& lhs, const B& rhs) {
+constexpr bool op_lt(const A& lhs, const B& rhs) {
     return lhs < rhs;
 }
 
-//  geq_v
+//  op_geq
 
 template<typename A, typename B>
-constexpr bool geq_v(const A& lhs, const B& rhs) {
+constexpr bool op_geq(const A& lhs, const B& rhs) {
     return lhs >= rhs;
 }
 
-//  leq_v
+//  op_leq
 
 template<typename A, typename B>
-constexpr bool leq_v(const A& lhs, const B& rhs) {
+constexpr bool op_leq(const A& lhs, const B& rhs) {
     return lhs <= rhs;
 }
 
-// and_v
+// op_and
 
-constexpr bool and_v(const bool lhs, const bool rhs) {
+constexpr bool op_and(const bool lhs, const bool rhs) {
     return lhs && rhs;
 }
 
 // or_v
 
-constexpr bool or_v(const bool lhs, const bool rhs) {
+constexpr bool op_or(const bool lhs, const bool rhs) {
     return lhs || rhs;
 }
 
@@ -372,14 +363,14 @@ constexpr A foldl_v(F f, A a, B b, Bs... bs) {
 
 template<typename... Args>
 constexpr bool all_v(Args... args) {
-    return foldl_v(and_v, true, args...);
+    return foldl_v(op_and, true, args...);
 }
 
 // any_v
 
 template<typename... Args>
 constexpr bool any_v(Args... args) {
-    return foldl_v(or_v, false, args...);
+    return foldl_v(op_or, false, args...);
 }
 
 // maximum_v
