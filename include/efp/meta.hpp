@@ -110,23 +110,23 @@ using Int = CtConst<int, n>;
 template<size_t n>
 using Size = CtConst<std::size_t, n>;
 
-// IsIntegralConst
+// IsCtConst
 
 template<typename A>
-struct IsIntegralConst {
+struct IsCtConst {
     static constexpr bool value = false;
 };
 
 template<typename A, A a>
-struct IsIntegralConst<CtConst<A, a>> {
+struct IsCtConst<CtConst<A, a>> {
     static constexpr bool value = true;
 };
 
 template<typename A>
-struct IsIntegralConst<A&>: IsIntegralConst<A> {};
+struct IsCtConst<A&>: IsCtConst<A> {};
 
 template<typename A>
-struct IsIntegralConst<A&&>: IsIntegralConst<A> {};
+struct IsCtConst<A&&>: IsCtConst<A> {};
 
 // AlwaysFalse
 

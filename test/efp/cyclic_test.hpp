@@ -106,7 +106,7 @@ TEST_CASE("Vcb") {
         CHECK(IsSame<Element<decltype(vcb)>, int>::value == true);
         CHECK(vcb.size() == 3);
         CHECK(length(vcb) == 3);
-        CHECK(IsIntegralConst<decltype(length(vcb))>::value == true);
+        CHECK(IsCtConst<decltype(length(vcb))>::value == true);
         // DebugType<decltype(length(vcb))>{};
         CHECK(vcb.empty() == false);
 
@@ -297,7 +297,7 @@ TEST_CASE("Vcq") {
         CHECK(vcq.size() == 0);
         CHECK(vcq.empty() == true);
         CHECK(length(vcq) == 0);
-        CHECK(IsIntegralConst<decltype(length(vcq))>::value == false);
+        CHECK(IsCtConst<decltype(length(vcq))>::value == false);
 
         vcq.push_back(1);
 
