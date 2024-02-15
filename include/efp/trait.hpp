@@ -14,7 +14,7 @@ template<typename A>
 struct ElementImpl {};
 
 template<typename A>
-using Element = typename ElementImpl<Cleaned<A>>::Type;
+using Element = typename ElementImpl<CVRefRemoved<A>>::Type;
 
 // Sequence traits
 // dyn
@@ -30,7 +30,7 @@ template<typename A>
 struct CtSizeImpl {};
 
 template<typename A>
-using CtSize = typename CtSizeImpl<Cleaned<A>>::Type;
+using CtSize = typename CtSizeImpl<CVRefRemoved<A>>::Type;
 
 // CtCapacity
 // Should be IntegralConstant<size_t> with compile time capcity.
@@ -40,7 +40,7 @@ template<typename A>
 struct CtCapacityImpl {};
 
 template<typename A>
-using CtCapacity = typename CtCapacityImpl<Cleaned<A>>::Type;
+using CtCapacity = typename CtCapacityImpl<CVRefRemoved<A>>::Type;
 
 template<typename As, size_t n, typename = Void<CtSize<As>>>
 constexpr auto length(const As& as) -> CtSize<As>;
@@ -80,15 +80,15 @@ template<typename A>
 struct IsSequenceImplNth<
     A,
     Void<
-        decltype(efp::nth(declval<size_t>(), declval<const Cleaned<A>>())),
-        decltype(efp::nth(declval<size_t>(), declval<Cleaned<A>>()))>>
+        decltype(efp::nth(declval<size_t>(), declval<const CVRefRemoved<A>>())),
+        decltype(efp::nth(declval<size_t>(), declval<CVRefRemoved<A>>()))>>
     // : All<
-    //       IsSame<decltype(nth(declval<size_t>(), declval<const Cleaned<A>>())), const Element<Cleaned<A>> &>,
-    //       IsSame<decltype(nth(declval<size_t>(), declval<Cleaned<A>>())), Element<Cleaned<A>> &>>
+    //       IsSame<decltype(nth(declval<size_t>(), declval<const CVRefRemoved<A>>())), const Element<CVRefRemoved<A>> &>,
+    //       IsSame<decltype(nth(declval<size_t>(), declval<CVRefRemoved<A>>())), Element<CVRefRemoved<A>> &>>
     :
     IsSame<
-        decltype(efp::nth(declval<size_t>(), declval<const Cleaned<A>>())),
-        const Element<Cleaned<A>>&>
+        decltype(efp::nth(declval<size_t>(), declval<const CVRefRemoved<A>>())),
+        const Element<CVRefRemoved<A>>&>
 
 {};
 

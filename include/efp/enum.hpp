@@ -30,12 +30,12 @@ struct detail::ReturnImpl<WildCardWrapper<F>> {
 namespace detail {
     template<typename F, typename = void>
     struct MatchBranchImpl {
-        using Type = Cleaned<F>;
+        using Type = CVRefRemoved<F>;
     };
 
     template<typename F>
     struct MatchBranchImpl<F, EnableIf<IsWildCard<F>::value, void>> {
-        using Type = WildCardWrapper<Cleaned<F>>;
+        using Type = WildCardWrapper<CVRefRemoved<F>>;
     };
 }  // namespace detail
 

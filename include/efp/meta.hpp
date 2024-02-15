@@ -999,59 +999,68 @@ using ReferenceRemoved = typename std::remove_reference<A>::type;
 
 // ConstRemoved
 
-namespace detail {
-    template<typename A>
-    struct ConstRemovedImpl {
-        using Type = A;
-    };
+// namespace detail {
+//     template<typename A>
+//     struct ConstRemovedImpl {
+//         using Type = A;
+//     };
 
-    template<typename A>
-    struct ConstRemovedImpl<const A> {
-        using Type = A;
-    };
-}  // namespace detail
+//     template<typename A>
+//     struct ConstRemovedImpl<const A> {
+//         using Type = A;
+//     };
+// }  // namespace detail
 
-template<typename A>
-using ConstRemoved = typename detail::ConstRemovedImpl<A>::Type;
-
-// VoletileRemovedImpl
-
-namespace detail {
-    template<typename A>
-    struct VoletileRemovedImpl {
-        using Type = A;
-    };
-
-    template<typename A>
-    struct VoletileRemovedImpl<const A> {
-        using Type = A;
-    };
-}  // namespace detail
-
-// VoletileRemoved
+// template<typename A>
+// using ConstRemoved = typename detail::ConstRemovedImpl<A>::Type;
 
 template<typename A>
-using VoletileRemoved = typename detail::VoletileRemovedImpl<A>::Type;
+using ConstRemoved = typename std::remove_const<A>::type;
+
+// // VoletileRemovedImpl
+
+// namespace detail {
+//     template<typename A>
+//     struct VoletileRemovedImpl {
+//         using Type = A;
+//     };
+
+//     template<typename A>
+//     struct VoletileRemovedImpl<const A> {
+//         using Type = A;
+//     };
+// }  // namespace detail
+
+// // VoletileRemoved
+
+// template<typename A>
+// using VoletileRemoved = typename detail::VoletileRemovedImpl<A>::Type;
+
+template<typename A>
+using VoletileRemoved = typename std::remove_volatile<A>::type;
 
 // CVRemoved
 
 template<typename A>
 using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
-// Cleaned
+// CVRefRemoved
 
 template<typename A>
-using Cleaned = CVRemoved<ReferenceRemoved<A>>;
+using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 
 // todo Decay
 
 // IsConst
 
-template<typename A>
-struct IsConst: False {};
+// template<typename A>
+// struct IsConst: False {};
+
+// template<typename A>
+// struct IsConst<const A>: True {};
 
 template<typename A>
-struct IsConst<const A>: True {};
+using IsConst = std::is_const<A>;
 
 // Void
 
