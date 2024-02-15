@@ -370,67 +370,6 @@ using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // * Maybe just recursive constexpr template function could be enough
 
-// _foldl
-
-template<typename F, typename A>
-constexpr A _foldl(F f, A a) {
-    return a;
-}
-
-template<typename F, typename A, typename B>
-constexpr A _foldl(F f, A a, B b) {
-    return f(a, b);
-}
-
-template<typename F, typename A, typename B, typename... Bs>
-constexpr A _foldl(F f, A a, B b, Bs... bs) {
-    return _foldl(f, f(a, b), bs...);
-}
-
-// _all
-
-template<typename... Args>
-constexpr bool _all(Args... args) {
-    return _foldl(op_and, true, args...);
-}
-
-// _any
-
-template<typename... Args>
-constexpr bool _any(Args... args) {
-    return _foldl(op_or, false, args...);
-}
-
-// _maximum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _maximum(A a, As... as) {
-    return _foldl(max_v<A>, a, as...);
-}
-
-// _minimum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _minimum(A a, As... as) {
-    return _foldl(min_v<A>, a, as...);
-}
-
-// _sum
-
-template<typename A, typename... As>
-constexpr A _sum(A a, As... as) {
-    return _foldl(op_add<A, A>, a, as...);
-}
-
-// _product
-
-template<typename A, typename... As>
-constexpr A _product(A a, As... as) {
-    return _foldl(op_mul<A, A>, a, as...);
-}
-
 // IsSame
 
 template<typename A, typename B>
@@ -466,72 +405,101 @@ namespace detail {
 template<uint8_t n, typename... Args>
 using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
-// FindHelperValue
-template<uint8_t n>
-struct FindHelperValue {
-    static constexpr uint8_t value = n;
-};
+namespace detail {
+    // FindHelperValue
 
-// FindHelper
+    template<uint8_t n>
+    struct FindHelperValue {
+        static constexpr uint8_t value = n;
+    };
 
-template<size_t n, template<class> class P, typename... Args>
-struct FindHelper {};
+    // FindImpl
 
-template<size_t n, template<class> class P, typename Head, typename... Tail>
-struct FindHelper<n, P, Head, Tail...>:
-    Conditional<P<Head>::value, FindHelperValue<n>, FindHelper<n + 1, P, Tail...>> {};
+    template<size_t n, template<class> class P, typename... Args>
+    struct FindImpl {};
+
+    template<size_t n, template<class> class P, typename Head, typename... Tail>
+    struct FindImpl<n, P, Head, Tail...>:
+        Conditional<P<Head>::value, FindHelperValue<n>, FindImpl<n + 1, P, Tail...>> {};
+}  // namespace detail
 
 // Find
 
 template<template<class> class P, typename... Args>
-struct Find: FindHelper<0, P, Args...> {};
+struct Find: detail::FindImpl<0, P, Args...> {};
 
-namespace detail {
-    template<class T>
-    struct TypeIdentity {
-        using Type = T;
-    };  // or use std::TypeIdentity (since C++20)
+// namespace detail {
+//     template<class T>
+//     struct TypeIdentity {
+//         using Type = T;
+//     };  // or use std::TypeIdentity (since C++20)
 
-    template<class T>  // Note that `cv void&` is a substitution failure
-    auto TryAddLvalueReference(int) -> TypeIdentity<T&>;
-    template<class T>  // Handle T = cv void case
-    auto TryAddLvalueReference(...) -> TypeIdentity<T>;
+//     template<class T>  // Note that `cv void&` is a substitution failure
+//     auto TryAddLvalueReference(int) -> TypeIdentity<T&>;
+//     template<class T>  // Handle T = cv void case
+//     auto TryAddLvalueReference(...) -> TypeIdentity<T>;
 
-    template<class T>
-    auto TryAddRvalueReference(int) -> TypeIdentity<T&&>;
-    template<class T>
-    auto TryAddRvalueReference(...) -> TypeIdentity<T>;
-}  // namespace detail
+//     template<class T>
+//     auto TryAddRvalueReference(int) -> TypeIdentity<T&&>;
+//     template<class T>
+//     auto TryAddRvalueReference(...) -> TypeIdentity<T>;
+// }  // namespace detail
+
+// // AddLvalueReference
+
+// template<class T>
+// struct AddLvalueReference: decltype(detail::TryAddLvalueReference<T>(0)) {};
+
+// // AddRvalueReference
+
+// template<class T>
+// struct AddRvalueReference: decltype(detail::TryAddRvalueReference<T>(0)) {};
+
+// template<typename T>
+// typename AddRvalueReference<T>::Type declval() noexcept {
+//     static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
+// }
 
 // AddLvalueReference
 
 template<class T>
-struct AddLvalueReference: decltype(detail::TryAddLvalueReference<T>(0)) {};
+using AddLvalueReference = typename std::add_lvalue_reference<T>::type;
 
 // AddRvalueReference
 
 template<class T>
-struct AddRvalueReference: decltype(detail::TryAddRvalueReference<T>(0)) {};
+using AddRvalueReference = typename std::add_rvalue_reference<T>::type;
 
+// declval
 template<typename T>
-typename AddRvalueReference<T>::Type declval() noexcept {
-    static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
-}
+AddRvalueReference<T> declval() noexcept;
 
 // CallReturn
 
+// Check the C++ standard version
+#if __cplusplus >= 201703L
+
+// C++17 or later, use std::invoke_result
+template<typename F, typename... Args>
+using CallReturn = typename std::invoke_result<F, Args...>::type;
+
+#else
+
 namespace detail {
-    template<typename, typename...>
-    struct CallReturnImpl;
+    // template<typename, typename...>
+    // struct CallReturnImpl {};
 
     template<typename F, typename... Args>
     struct CallReturnImpl {
-        using Type = decltype(declval<F>()(declval<Args>()...));
+        using Type = decltype(std::declval<F>()(std::declval<Args>()...));
     };
 }  // namespace detail
 
+// Before C++17, use the custom implementation
 template<typename F, typename... Args>
 using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
+
+#endif
 
 // HasCallOperator
 
@@ -1061,23 +1029,6 @@ using Cleaned = CVRemoved<ReferenceRemoved<A>>;
 
 // todo Decay
 
-// Common
-
-namespace detail {
-    template<typename... As>
-    struct CommonImpl {
-        using Type = void;
-    };
-
-    template<typename A, typename... As>
-    struct CommonImpl<A, As...> {
-        using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
-    };
-}  // namespace detail
-
-template<typename... As>
-using Common = typename detail::CommonImpl<As...>::Type;
-
 // IsConst
 
 template<typename A>
@@ -1109,12 +1060,12 @@ struct IsLvalueReference<A&>: True {};
 // Forward
 
 template<typename A>
-A&& forward(ReferenceRemoved<A>& a) noexcept {
+constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
     return static_cast<A&&>(a);
 }
 
 template<typename A>
-A&& forward(ReferenceRemoved<A>&& a) noexcept {
+constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
     static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
     return static_cast<A&&>(a);
 }
@@ -1132,6 +1083,93 @@ struct IsDefaultConstructible<A, decltype(A())>: True {};
 template<typename A>
 ReferenceRemoved<A>&& move(A&& a) {
     return static_cast<ReferenceRemoved<A>&&>(a);
+}
+
+// _foldl
+
+// template<typename F, typename A>
+// constexpr A _foldl(F f, A a) {
+//     return a;
+// }
+
+// template<typename F, typename A, typename B>
+// constexpr A _foldl(F f, A a, B b) {
+//     return f(a, b);
+// }
+
+// template<typename F, typename A, typename B, typename... Bs>
+// constexpr A _foldl(F f, A a, B b, Bs... bs) {
+//     return _foldl(f, f(a, b), bs...);
+// }
+
+template<typename F, typename A>
+constexpr A _foldl(F f, A a) {
+    return a;
+}
+
+#if __cplusplus >= 201703L
+// C++17 or later, use a loop for foldl
+template<typename F, typename A, typename... Bs>
+constexpr A _foldl(F f, A a, Bs... bs) {
+    // Convert parameter pack to array for iteration
+    A arr[] = {static_cast<A>(bs)...};
+
+    for (auto& element : arr) {
+        a = f(a, element);
+    }
+
+    return a;
+}
+#else
+// Before C++17, recursive implementation
+template<typename F, typename A, typename B, typename... Bs>
+constexpr A _foldl(F f, A a, B b, Bs... bs) {
+    return _foldl(f, f(forward<A>(a), forward<B>(b)), forward<Bs>(bs)...);
+}
+#endif
+
+// _all
+
+template<typename... Args>
+constexpr bool _all(Args... args) {
+    return _foldl(op_and, true, args...);
+}
+
+// _any
+
+template<typename... Args>
+constexpr bool _any(Args... args) {
+    return _foldl(op_or, false, args...);
+}
+
+// _maximum
+// cf) since the function is defined as foldr, the result follows the type of first argument.
+
+template<typename A, typename... As>
+constexpr A _maximum(A a, As... as) {
+    return _foldl(max_v<A>, a, as...);
+}
+
+// _minimum
+// cf) since the function is defined as foldr, the result follows the type of first argument.
+
+template<typename A, typename... As>
+constexpr A _minimum(A a, As... as) {
+    return _foldl(min_v<A>, a, as...);
+}
+
+// _sum
+
+template<typename A, typename... As>
+constexpr A _sum(A a, As... as) {
+    return _foldl(op_add<A, A>, a, as...);
+}
+
+// _product
+
+template<typename A, typename... As>
+constexpr A _product(A a, As... as) {
+    return _foldl(op_mul<A, A>, a, as...);
 }
 
 // InitializerList
@@ -1167,6 +1205,23 @@ ReferenceRemoved<A>&& move(A&& a) {
 //     // which will create an InitializerList using an array temporary.
 //     constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
 // };
+
+// Common
+
+namespace detail {
+    template<typename... As>
+    struct CommonImpl {
+        using Type = void;
+    };
+
+    template<typename A, typename... As>
+    struct CommonImpl<A, As...> {
+        using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
+    };
+}  // namespace detail
+
+template<typename... As>
+using Common = typename detail::CommonImpl<As...>::Type;
 
 template<typename A>
 struct DebugType;  // Intentionally undefined
