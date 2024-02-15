@@ -434,14 +434,17 @@ constexpr A _product(A a, As... as) {
 // IsSame
 
 template<typename A, typename B>
-struct IsSame {
-    static constexpr bool value = false;
-};
+using IsSame = std::is_same<A, B>;
 
-template<typename A>
-struct IsSame<A, A> {
-    static constexpr bool value = true;
-};
+// template<typename A, typename B>
+// struct IsSame {
+//     static constexpr bool value = false;
+// };
+
+// template<typename A>
+// struct IsSame<A, A> {
+//     static constexpr bool value = true;
+// };
 
 // PackAt
 
