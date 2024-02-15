@@ -1,7 +1,7 @@
 #ifndef META_HPP_
 #define META_HPP_
 
-#include "limits.hpp"
+#include "cpp_core.hpp"
 
 // Make it value as soon as possible and use constexpr function and avoid type_trait.
 
@@ -22,19 +22,35 @@ inline bool operator!=(const Unit&, const Unit&) {
 
 // IntegralConst
 
-template<typename A, A a>
-struct IntegralConst {
-    static constexpr A value = a;
-    using value_type = A;
+// template<typename A, A a>
+// struct IntegralConst {
+//     static constexpr A value = a;
+//     using value_type = A;
+//     using Type = IntegralConst;
+
+//     constexpr operator value_type() const noexcept {
+//         return value;
+//     }  // Conversion operator
+
+//     constexpr value_type operator()() const noexcept {
+//         return value;
+//     }  // Function call operator
+// };
+
+template<typename A, A v>
+struct IntegralConst: std::integral_constant<A, v> {
+    using ValueType = typename std::integral_constant<A, v>::value_type;
     using Type = IntegralConst;
 
-    constexpr operator value_type() const noexcept {
-        return value;
-    }  // Conversion operator
+    static constexpr A value = std::integral_constant<A, v>::value;
 
-    constexpr value_type operator()() const noexcept {
+    constexpr operator ValueType() const noexcept {
         return value;
-    }  // Function call operator
+    }
+
+    constexpr ValueType operator()() const noexcept {
+        return value;
+    }
 };
 
 template<typename A, A lhs, A rhs>

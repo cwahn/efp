@@ -11,6 +11,7 @@
     #include <math.h>
 #endif
 
+#include "efp/limits.hpp"
 #include "efp/prelude.hpp"
 
 namespace efp {
