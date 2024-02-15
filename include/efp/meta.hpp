@@ -3,59 +3,24 @@
 
 #include "cpp_core.hpp"
 
-// Make it value as soon as possible and use constexpr function and avoid type_trait.
-
 namespace efp {
-// True False type
 
-struct Unit {};
-
-constexpr Unit unit;
-
-inline bool operator==(const Unit&, const Unit&) {
-    return true;
-}
-
-inline bool operator!=(const Unit&, const Unit&) {
-    return false;
-}
-
-// CtConst
-
-// ! deprecated direct implementation
-// template<typename A, A a>
-// struct CtConst {
-//     static constexpr A value = a;
-//     using value_type = A;
-//     using Type = CtConst;
-
-//     constexpr operator value_type() const noexcept {
-//         return value;
-//     }  // Conversion operator
-
-//     constexpr value_type operator()() const noexcept {
-//         return value;
-//     }  // Function call operator
-// };
-
-template<typename A, A v>
-struct CtConst: std::integral_constant<A, v> {
-    using ValueType = typename std::integral_constant<A, v>::value_type;
-    using Type = CtConst;
-
-    static constexpr A value = std::integral_constant<A, v>::value;
-
-    constexpr operator ValueType() const noexcept {
-        return value;
+struct Unit {
+    constexpr bool operator==(const Unit&) const noexcept {
+        return true;
     }
 
-    constexpr ValueType operator()() const noexcept {
-        return value;
+    constexpr bool operator!=(const Unit&) const noexcept {
+        return false;
     }
 };
 
-// template<typename A, A a>
-// using CtConst = std::integral_constant<A, a>;
+constexpr Unit unit;
+
+// CtConst
+
+template<typename A, A v>
+using CtConst = std::integral_constant<A, v>;
 
 template<typename A, A lhs, A rhs>
 constexpr CtConst<bool, lhs == rhs> operator==(CtConst<A, lhs>, CtConst<A, rhs>) {
@@ -133,48 +98,15 @@ struct IsCtConst<A&&>: IsCtConst<A> {};
 template<typename T>
 struct AlwaysFalse: False {};
 
-// // EnableIfImpl
-
-// namespace detail {
-//     template<bool cond, typename A = void>
-//     struct EnableIfImpl {};
-
-//     template<typename A>
-//     struct EnableIfImpl<true, A> {
-//         typedef A Type;
-//     };
-// }  // namespace detail
-
 // EnableIf
 
 template<bool cond, typename A = void>
 using EnableIf = typename std::enable_if<cond, A>::type;
 
-// template<bool cond, typename A = void>
-// using EnableIf = typename detail::EnableIfImpl<cond, A>::Type;
-
 // Conditionl
 
 template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
-
-// namespace detail {
-//     template<bool cond, typename T, typename F>
-//     struct ConditionalImpl {};
-
-//     template<typename T, typename F>
-//     struct ConditionalImpl<true, T, F> {
-//         using Type = T;
-//     };
-
-//     template<typename T, typename F>
-//     struct ConditionalImpl<false, T, F> {
-//         using Type = F;
-//     };
-// }  // namespace detail
-
-// template<bool cond, typename T, typename F>
-// using Conditional = typename detail::ConditionalImpl<cond, T, F>::Type;
 
 // All
 
@@ -353,6 +285,7 @@ constexpr A min_v(const A& lhs, const A& rhs) {
 }
 
 // Foldl
+// Maybe just recursive constexpr template function could be enough
 
 namespace detail {
     template<template<class, class> class F, typename A, typename... Bs>
@@ -368,22 +301,10 @@ namespace detail {
 template<template<class, class> class F, typename A, typename... Bs>
 using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
-// * Maybe just recursive constexpr template function could be enough
-
 // IsSame
 
 template<typename A, typename B>
 using IsSame = std::is_same<A, B>;
-
-// template<typename A, typename B>
-// struct IsSame {
-//     static constexpr bool value = false;
-// };
-
-// template<typename A>
-// struct IsSame<A, A> {
-//     static constexpr bool value = true;
-// };
 
 // PackAt
 
@@ -428,51 +349,20 @@ namespace detail {
 template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
 
-// namespace detail {
-//     template<class T>
-//     struct TypeIdentity {
-//         using Type = T;
-//     };  // or use std::TypeIdentity (since C++20)
-
-//     template<class T>  // Note that `cv void&` is a substitution failure
-//     auto TryAddLvalueReference(int) -> TypeIdentity<T&>;
-//     template<class T>  // Handle T = cv void case
-//     auto TryAddLvalueReference(...) -> TypeIdentity<T>;
-
-//     template<class T>
-//     auto TryAddRvalueReference(int) -> TypeIdentity<T&&>;
-//     template<class T>
-//     auto TryAddRvalueReference(...) -> TypeIdentity<T>;
-// }  // namespace detail
-
-// // AddLvalueReference
-
-// template<class T>
-// struct AddLvalueReference: decltype(detail::TryAddLvalueReference<T>(0)) {};
-
-// // AddRvalueReference
-
-// template<class T>
-// struct AddRvalueReference: decltype(detail::TryAddRvalueReference<T>(0)) {};
-
-// template<typename T>
-// typename AddRvalueReference<T>::Type declval() noexcept {
-//     static_assert(AlwaysFalse<T>::value, "declval not allowed in an evaluated context");
-// }
-
-// AddLvalueReference
+// LvalueRefAdded
 
 template<class T>
-using AddLvalueReference = typename std::add_lvalue_reference<T>::type;
+using LvalueRefAdded = typename std::add_lvalue_reference<T>::type;
 
-// AddRvalueReference
+// RvalueRefAdded
 
 template<class T>
-using AddRvalueReference = typename std::add_rvalue_reference<T>::type;
+using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 
 // declval
+
 template<typename T>
-AddRvalueReference<T> declval() noexcept;
+RvalueRefAdded<T> declval() noexcept;
 
 // CallReturn
 
@@ -484,8 +374,6 @@ using CallReturn = typename std::invoke_result<F, Args...>::type;
 #else  // Before C++17, use the custom implementation
 
 namespace detail {
-    // template<typename, typename...>
-    // struct CallReturnImpl {};
 
     template<typename F, typename... Args>
     struct CallReturnImpl {
@@ -541,24 +429,6 @@ struct IsInvocable {
 
 // IsFunction
 
-// // Base template
-// template<typename T>
-// struct IsFunction: False {};
-
-// // Specializations for all kinds of function types
-// template<typename Ret, typename... Args>
-// struct IsFunction<Ret(Args...)>: True {};
-
-// // Add specializations for const, volatile, and const volatile member functions if needed
-// template<typename Ret, typename... Args>
-// struct IsFunction<Ret(Args...) const>: True {};
-
-// template<typename Ret, typename... Args>
-// struct IsFunction<Ret(Args...) volatile>: True {};
-
-// template<typename Ret, typename... Args>
-// struct IsFunction<Ret(Args...) const volatile>: True {};
-
 template<typename T>
 using IsFunction = std::is_function<T>;
 
@@ -604,35 +474,37 @@ namespace detail {
 template<typename A>
 using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
 
-// IndexSequence
-
 // TupleLeaf
 
-template<size_t index, typename A>
+template<std::size_t index, typename A>
 class TupleLeaf {
   public:
     using Element = A;
     static constexpr size_t idx = index;
 
-    TupleLeaf() {}
+    TupleLeaf() : _value {} {}
 
-    TupleLeaf(const A& value) : value_ {value} {}
+    // Lvalue constructor
+    TupleLeaf(const A& value) : _value(value) {}
 
-    TupleLeaf(A&& value) : value_ {value} {}
+    // Rvalue constructor, using std::move to ensure the object is moved
+    TupleLeaf(A&& value) : _value(move(value)) {}
 
     ~TupleLeaf() {}
 
     const A& get() const {
-        return value_;
+        return _value;
     }
 
     A& get() {
-        return value_;
+        return _value;
     }
 
   private:
-    A value_;
+    A _value;
 };
+
+// IndexSequence
 
 template<int... ns>
 struct IndexSequence {};
@@ -954,87 +826,20 @@ Return<F> apply(const F& f, const Tuple<As...>& tpl) {
 
 // PointerRemoved
 
-// namespace detail {
-//     template<typename A>
-//     struct PointerRemovedImpl {
-//         using Type = A;
-//     };
-
-//     template<typename A>
-//     struct PointerRemovedImpl<A*> {
-//         using Type = A;
-//     };
-// }  // namespace detail
-
-// template<typename A>
-// using PointerRemoved = typename detail::PointerRemovedImpl<A>::Type;
-
 template<typename A>
 using PointerRemoved = typename std::remove_pointer<A>::type;
 
 // ReferenceRemoved
-
-// namespace detail {
-//     template<typename A>
-//     struct ReferenceRemovedImpl {
-//         using Type = A;
-//     };
-
-//     template<typename A>
-//     struct ReferenceRemovedImpl<A&> {
-//         using Type = A;
-//     };
-
-//     template<typename A>
-//     struct ReferenceRemovedImpl<A&&> {
-//         using Type = A;
-//     };
-// }  // namespace detail
-
-// template<typename A>
-// using ReferenceRemoved = typename detail::ReferenceRemovedImpl<A>::Type;
 
 template<typename A>
 using ReferenceRemoved = typename std::remove_reference<A>::type;
 
 // ConstRemoved
 
-// namespace detail {
-//     template<typename A>
-//     struct ConstRemovedImpl {
-//         using Type = A;
-//     };
-
-//     template<typename A>
-//     struct ConstRemovedImpl<const A> {
-//         using Type = A;
-//     };
-// }  // namespace detail
-
-// template<typename A>
-// using ConstRemoved = typename detail::ConstRemovedImpl<A>::Type;
-
 template<typename A>
 using ConstRemoved = typename std::remove_const<A>::type;
 
-// // VoletileRemovedImpl
-
-// namespace detail {
-//     template<typename A>
-//     struct VoletileRemovedImpl {
-//         using Type = A;
-//     };
-
-//     template<typename A>
-//     struct VoletileRemovedImpl<const A> {
-//         using Type = A;
-//     };
-// }  // namespace detail
-
-// // VoletileRemoved
-
-// template<typename A>
-// using VoletileRemoved = typename detail::VoletileRemovedImpl<A>::Type;
+// VoletileRemoved
 
 template<typename A>
 using VoletileRemoved = typename std::remove_volatile<A>::type;
@@ -1052,12 +857,6 @@ using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 // todo Decay
 
 // IsConst
-
-// template<typename A>
-// struct IsConst: False {};
-
-// template<typename A>
-// struct IsConst<const A>: True {};
 
 template<typename A>
 using IsConst = std::is_const<A>;
@@ -1231,22 +1030,28 @@ constexpr A _product(A a, As... as) {
 //     constexpr InitializerList(const_iterator a, size_type l) : array(a), len(l) {}
 // };
 
+template<typename A>
+using InitializerList = std::initializer_list<A>;
+
 // Common
 
-namespace detail {
-    template<typename... As>
-    struct CommonImpl {
-        using Type = void;
-    };
+// namespace detail {
+//     template<typename... As>
+//     struct CommonImpl {
+//         using Type = void;
+//     };
 
-    template<typename A, typename... As>
-    struct CommonImpl<A, As...> {
-        using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
-    };
-}  // namespace detail
+//     template<typename A, typename... As>
+//     struct CommonImpl<A, As...> {
+//         using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
+//     };
+// }  // namespace detail
+
+// template<typename... As>
+// using Common = typename detail::CommonImpl<As...>::Type;
 
 template<typename... As>
-using Common = typename detail::CommonImpl<As...>::Type;
+using Common = std::common_type<As...>;
 
 template<typename A>
 struct DebugType;  // Intentionally undefined
