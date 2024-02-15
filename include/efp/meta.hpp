@@ -20,14 +20,14 @@ inline bool operator!=(const Unit&, const Unit&) {
     return false;
 }
 
-// IntegralConst
+// CtConst
 
 // ! deprecated direct implementation
 // template<typename A, A a>
-// struct IntegralConst {
+// struct CtConst {
 //     static constexpr A value = a;
 //     using value_type = A;
-//     using Type = IntegralConst;
+//     using Type = CtConst;
 
 //     constexpr operator value_type() const noexcept {
 //         return value;
@@ -39,9 +39,9 @@ inline bool operator!=(const Unit&, const Unit&) {
 // };
 
 template<typename A, A v>
-struct IntegralConst: std::integral_constant<A, v> {
+struct CtConst: std::integral_constant<A, v> {
     using ValueType = typename std::integral_constant<A, v>::value_type;
-    using Type = IntegralConst;
+    using Type = CtConst;
 
     static constexpr A value = std::integral_constant<A, v>::value;
 
@@ -55,60 +55,60 @@ struct IntegralConst: std::integral_constant<A, v> {
 };
 
 // template<typename A, A a>
-// using IntegralConst = std::integral_constant<A, a>;
+// using CtConst = std::integral_constant<A, a>;
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<bool, lhs == rhs> operator==(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<bool, lhs == rhs> operator==(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<bool, lhs != rhs> operator!=(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<bool, lhs != rhs> operator!=(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<A, lhs + rhs> operator+(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<A, lhs + rhs> operator+(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<A, lhs - rhs> operator-(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<A, lhs - rhs> operator-(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<A, lhs * rhs> operator*(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<A, lhs * rhs> operator*(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr IntegralConst<A, lhs / rhs> operator/(IntegralConst<A, lhs>, IntegralConst<A, rhs>) {
+constexpr CtConst<A, lhs / rhs> operator/(CtConst<A, lhs>, CtConst<A, rhs>) {
     return {};
 }
 
 // Bool
 
 template<bool b>
-using Bool = IntegralConst<bool, b>;
+using Bool = CtConst<bool, b>;
 
 // True
 
-using True = IntegralConst<bool, true>;
+using True = CtConst<bool, true>;
 
 // False
 
-using False = IntegralConst<bool, false>;
+using False = CtConst<bool, false>;
 
 // Int
 
 template<size_t n>
-using Int = IntegralConst<int, n>;
+using Int = CtConst<int, n>;
 
 // Size
 
 template<size_t n>
-using Size = IntegralConst<std::size_t, n>;
+using Size = CtConst<std::size_t, n>;
 
 // IsIntegralConst
 
@@ -118,7 +118,7 @@ struct IsIntegralConst {
 };
 
 template<typename A, A a>
-struct IsIntegralConst<IntegralConst<A, a>> {
+struct IsIntegralConst<CtConst<A, a>> {
     static constexpr bool value = true;
 };
 
@@ -181,7 +181,7 @@ struct All<>: True {};
 
 // Recursive case: Check the first type, and recurse for the rest.
 template<typename Head, typename... Tail>
-struct All<Head, Tail...>: IntegralConst<bool, Head::value && All<Tail...>::value> {};
+struct All<Head, Tail...>: CtConst<bool, Head::value && All<Tail...>::value> {};
 
 // Any
 
@@ -194,7 +194,7 @@ struct Any<>: False {};
 
 // Recursive case: Check the first type, and recurse for the rest.
 template<typename Head, typename... Tail>
-struct Any<Head, Tail...>: IntegralConst<bool, Head::value || Any<Tail...>::value> {};
+struct Any<Head, Tail...>: CtConst<bool, Head::value || Any<Tail...>::value> {};
 
 // Min
 
@@ -1182,7 +1182,7 @@ struct DebugType;  // Intentionally undefined
 
 // // Public interface for IsConstructible
 // template <typename T, typename... Args>
-// struct IsConstructible : IntegralConst<bool, IsConstructibleImpl<T, Args...>::value> {};
+// struct IsConstructible : CtConst<bool, IsConstructibleImpl<T, Args...>::value> {};
 
 template<typename A, typename... Args>
 using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
