@@ -155,23 +155,26 @@ using EnableIf = typename std::enable_if<cond, A>::type;
 
 // Conditionl
 
-namespace detail {
-    template<bool cond, typename T, typename F>
-    struct ConditionalImpl {};
-
-    template<typename T, typename F>
-    struct ConditionalImpl<true, T, F> {
-        using Type = T;
-    };
-
-    template<typename T, typename F>
-    struct ConditionalImpl<false, T, F> {
-        using Type = F;
-    };
-}  // namespace detail
-
 template<bool cond, typename T, typename F>
-using Conditional = typename detail::ConditionalImpl<cond, T, F>::Type;
+using Conditional = typename std::conditional<cond, T, F>::type;
+
+// namespace detail {
+//     template<bool cond, typename T, typename F>
+//     struct ConditionalImpl {};
+
+//     template<typename T, typename F>
+//     struct ConditionalImpl<true, T, F> {
+//         using Type = T;
+//     };
+
+//     template<typename T, typename F>
+//     struct ConditionalImpl<false, T, F> {
+//         using Type = F;
+//     };
+// }  // namespace detail
+
+// template<bool cond, typename T, typename F>
+// using Conditional = typename detail::ConditionalImpl<cond, T, F>::Type;
 
 // All
 
