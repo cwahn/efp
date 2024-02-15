@@ -18,36 +18,36 @@ using namespace efp;
 //     // CHECK((-1 > CtConst<size_t, 3>{}) ? (CtConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
 // }
 
-TEST_CASE("all_v") {
-    CHECK(all_v() == true);
-    CHECK(all_v(true) == true);
-    CHECK(all_v(false) == false);
-    CHECK(all_v(true, false) == false);
-    CHECK(all_v(false, true) == false);
+TEST_CASE("_all") {
+    CHECK(_all() == true);
+    CHECK(_all(true) == true);
+    CHECK(_all(false) == false);
+    CHECK(_all(true, false) == false);
+    CHECK(_all(false, true) == false);
 }
 
 TEST_CASE("any_v") {
-    CHECK(any_v() == false);
-    CHECK(any_v(true) == true);
-    CHECK(any_v(false) == false);
-    CHECK(any_v(true, false) == true);
-    CHECK(any_v(false, true) == true);
+    CHECK(_any() == false);
+    CHECK(_any(true) == true);
+    CHECK(_any(false) == false);
+    CHECK(_any(true, false) == true);
+    CHECK(_any(false, true) == true);
 }
 
-TEST_CASE("maximum_v") {
-    CHECK(maximum_v(0) == 0);
-    CHECK(maximum_v(0, 1) == 1);
-    CHECK(maximum_v(-1, 1) == 1);
-    CHECK(maximum_v(1., 2., 3) == 3.);
-    CHECK(maximum_v(-1., 2, 3.) == 3.);
+TEST_CASE("_maximum") {
+    CHECK(_maximum(0) == 0);
+    CHECK(_maximum(0, 1) == 1);
+    CHECK(_maximum(-1, 1) == 1);
+    CHECK(_maximum(1., 2., 3) == 3.);
+    CHECK(_maximum(-1., 2, 3.) == 3.);
 }
 
-TEST_CASE("minimum_v") {
-    CHECK(minimum_v(0) == 0);
-    CHECK(minimum_v(1, 0) == 0);
-    CHECK(minimum_v(1u, -1) == 1);
-    CHECK(minimum_v(1, 2., 3) == 1);
-    CHECK(minimum_v(1, 2, -3.) == -3);
+TEST_CASE("_minimum") {
+    CHECK(_minimum(0) == 0);
+    CHECK(_minimum(1, 0) == 0);
+    CHECK(_minimum(1u, -1) == 1);
+    CHECK(_minimum(1, 2., 3) == 1);
+    CHECK(_minimum(1, 2, -3.) == -3);
 }
 
 TEST_CASE("IsSame") {

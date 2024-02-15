@@ -68,7 +68,7 @@ size_t min_length(const As& as, const Ass&... ass) {
         All<IsSequence<As>, IsSequence<Ass>...>::value,
         "All types must be sequence types."
     );
-    return minimum_v(static_cast<size_t>(length(as)), length(ass)...);
+    return _minimum(static_cast<size_t>(length(as)), length(ass)...);
 }
 
 // for_each
@@ -230,10 +230,10 @@ void execute_pack(Args... args) {}
 template<typename... Ass>
 using AppendReturn = Conditional<
     All<IsStaticSize<Ass>...>::value,
-    Array<Common<Element<Ass>...>, sum_v(CtSize<Ass>::value...)>,
+    Array<Common<Element<Ass>...>, _sum(CtSize<Ass>::value...)>,
     Conditional<
         All<IsStaticCapacity<Ass>...>::value,
-        ArrVec<Common<Element<Ass>...>, sum_v(CtCapacity<Ass>::value...)>,
+        ArrVec<Common<Element<Ass>...>, _sum(CtCapacity<Ass>::value...)>,
         Vector<Common<Element<Ass>...>>>>;
 
 namespace detail {
@@ -260,7 +260,7 @@ auto append(const As& as, const Ass&... ass) -> AppendReturn<As, Ass...> {
     AppendReturn<As, Ass...> res {};
 
     if (CtSize<AppendReturn<As, Ass...>>::value == dyn) {
-        res.resize(sum_v(static_cast<size_t>(length(as)), length(ass)...));
+        res.resize(_sum(static_cast<size_t>(length(as)), length(ass)...));
     }
 
     size_t idx {0};
@@ -509,10 +509,10 @@ auto map_with_index(const F& f, const Ass&... ass) -> MapWithIndexReturn<F, Ass.
 template<typename F, typename... Ass>
 using CartesianMapReturn = Conditional<
     All<IsStaticSize<Ass>...>::value,
-    Array<CallReturn<F, Element<Ass>...>, product_v(CtSize<Ass>::value...)>,
+    Array<CallReturn<F, Element<Ass>...>, _product(CtSize<Ass>::value...)>,
     Conditional<
         All<IsStaticCapacity<Ass>...>::value,
-        ArrVec<CallReturn<F, Element<Ass>...>, product_v(CtCapacity<Ass>::value...)>,
+        ArrVec<CallReturn<F, Element<Ass>...>, _product(CtCapacity<Ass>::value...)>,
         Vector<CallReturn<F, Element<Ass>...>>>>;
 
 // cartesian_map
@@ -525,7 +525,7 @@ auto cartesian_map(const F& f, const Ass&... ass) -> CartesianMapReturn<F, Ass..
 
     auto res = CartesianMapReturn<F, Ass...> {};
     if (CtSize<CartesianMapReturn<F, Ass...>>::value == dyn) {
-        res.resize(product_v(static_cast<size_t>(length(ass))...));
+        res.resize(_product(static_cast<size_t>(length(ass))...));
     }
 
     size_t i = 0;

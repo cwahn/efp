@@ -272,14 +272,14 @@ namespace detail {
 
         // Function name or function type will be automatically converted to
         // function pointer type
-        template<typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As>::value...)>>
+        template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
         EnumBase(const A& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
             new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(a);
         }
 
         // Function name or function type will be automatically converted to
         // function pointer type
-        template<typename A, typename = EnableIf<any_v(IsSame<FuncToFuncPtr<A>, As>::value...)>>
+        template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
         EnumBase(A&& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
             new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(efp::move(a));
         }
@@ -324,7 +324,7 @@ namespace detail {
         }
 
         template<typename A>
-        auto get() const -> EnableIf<any_v(IsSame<A, As>::value...), A> {
+        auto get() const -> EnableIf<_any(IsSame<A, As>::value...), A> {
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -342,7 +342,7 @@ namespace detail {
         }
 
         template<typename A>
-        auto move() const -> EnableIf<any_v(IsSame<A, As>::value...), const A&&> {
+        auto move() const -> EnableIf<_any(IsSame<A, As>::value...), const A&&> {
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -351,7 +351,7 @@ namespace detail {
         }
 
         template<typename A>
-        auto move() -> EnableIf<any_v(IsSame<A, As>::value...), A&&> {
+        auto move() -> EnableIf<_any(IsSame<A, As>::value...), A&&> {
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -399,12 +399,12 @@ namespace detail {
         template<typename F>
         struct IsRelevantBranch {
             static constexpr bool value =
-                any_v(IsInvocable<F, As>::value...) || IsSame<Tuple<>, Arguments<F>>::value;
+                _any(IsInvocable<F, As>::value...) || IsSame<Tuple<>, Arguments<F>>::value;
         };
 
         template<typename... Fs>
         struct AreAllRelevantBranchs {
-            static constexpr bool value = all_v(IsRelevantBranch<Fs>::value...);
+            static constexpr bool value = _all(IsRelevantBranch<Fs>::value...);
         };
 
         template<typename F>
@@ -413,20 +413,20 @@ namespace detail {
         template<typename A, typename... Fs>
         struct IsVariantCovered {
             static constexpr bool value =
-                any_v(IsWildCard<Fs>::value...) || any_v(IsInvocable<Fs, A>::value...);
+                _any(IsWildCard<Fs>::value...) || _any(IsInvocable<Fs, A>::value...);
         };
 
         template<typename... Fs>
         struct IsExhaustive: False {
-            static constexpr bool value = all_v(IsVariantCovered<As, Fs...>::value...);
+            static constexpr bool value = _all(IsVariantCovered<As, Fs...>::value...);
         };
 
         template<typename... Fs>
         struct IsWellFormed {
             static constexpr bool value = true;
             // todo count and get last
-            // (!any_v(IsWildCard<Init>::value...) && IsWildCard<Last>::value)
-            // || !any_v(IsWildCard<Fs...>::value...);
+            // (!_any(IsWildCard<Init>::value...) && IsWildCard<Last>::value)
+            // || !_any(IsWildCard<Fs...>::value...);
         };
 
         template<typename... Fs>
@@ -442,7 +442,7 @@ namespace detail {
 
       private:
         // Member variables
-        alignas(maximum_v(alignof(As)...)) uint8_t _storage[maximum_v(sizeof(As)...)];
+        alignas(_maximum(alignof(As)...)) uint8_t _storage[_maximum(sizeof(As)...)];
         uint8_t _index;  // Current maxinum variant is 256
     };
 
@@ -931,7 +931,7 @@ class Enum: public detail::EnumBase<As...> {
 
 template<typename... As, typename... Fs>
 auto match(const Enum<As...>& x, const Fs&... fs) -> EnableIf<
-    all_v(Enum<As...>::template IsRelevantBranch<Fs>::value...)
+    _all(Enum<As...>::template IsRelevantBranch<Fs>::value...)
         && Enum<As...>::template IsExhaustive<Fs...>::value
         && Enum<As...>::template IsWellFormed<Fs...>::value,
     Common<Return<Fs>...>> {

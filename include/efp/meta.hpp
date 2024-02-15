@@ -231,7 +231,7 @@ constexpr auto size_of_ptr_v = sizeof(void*);
 // op_neg
 
 template<typename A>
-constexpr A neg(const A& a) {
+constexpr A op_neg(const A& a) {
     return -a;
 }
 
@@ -302,11 +302,32 @@ constexpr auto op_add(const A& lhs, const B& rhs) -> decltype(lhs + rhs) {
     return lhs + rhs;
 }
 
+// op_sub
+
+template<typename A, typename B>
+constexpr auto op_sub(const A& lhs, const B& rhs) -> decltype(lhs - rhs) {
+    return lhs - rhs;
+}
+
 // op_mul
 
-template<typename A>
-constexpr A op_mul(const A& lhs, const A& rhs) {
+template<typename A, typename B>
+constexpr A op_mul(const A& lhs, const B& rhs) {
     return lhs * rhs;
+}
+
+// op_div
+
+template<typename A, typename B>
+constexpr A op_div(const A& lhs, const B& rhs) {
+    return lhs / rhs;
+}
+
+// op_mod
+
+template<typename A, typename B>
+constexpr A op_mod(const A& lhs, const B& rhs) {
+    return lhs % rhs;
 }
 
 // bound_v
@@ -316,12 +337,6 @@ constexpr auto bound_v(const A& lower, const B& upper, const C& x)
     -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x)) {
     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
 }
-
-// template <typename A, typename B, typename C>
-// constexpr typename C::value_type bound_v(const A &lower, const B &upper, const C &x)
-// {
-//     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
-// }
 
 // max_v
 
@@ -355,65 +370,65 @@ using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // * Maybe just recursive constexpr template function could be enough
 
-// foldl_v
+// _foldl
 
 template<typename F, typename A>
-constexpr A foldl_v(F f, A a) {
+constexpr A _foldl(F f, A a) {
     return a;
 }
 
 template<typename F, typename A, typename B>
-constexpr A foldl_v(F f, A a, B b) {
+constexpr A _foldl(F f, A a, B b) {
     return f(a, b);
 }
 
 template<typename F, typename A, typename B, typename... Bs>
-constexpr A foldl_v(F f, A a, B b, Bs... bs) {
-    return foldl_v(f, f(a, b), bs...);
+constexpr A _foldl(F f, A a, B b, Bs... bs) {
+    return _foldl(f, f(a, b), bs...);
 }
 
-// all_v
+// _all
 
 template<typename... Args>
-constexpr bool all_v(Args... args) {
-    return foldl_v(op_and, true, args...);
+constexpr bool _all(Args... args) {
+    return _foldl(op_and, true, args...);
 }
 
-// any_v
+// _any
 
 template<typename... Args>
-constexpr bool any_v(Args... args) {
-    return foldl_v(op_or, false, args...);
+constexpr bool _any(Args... args) {
+    return _foldl(op_or, false, args...);
 }
 
-// maximum_v
+// _maximum
 // cf) since the function is defined as foldr, the result follows the type of first argument.
 
 template<typename A, typename... As>
-constexpr A maximum_v(A a, As... as) {
-    return foldl_v(max_v<A>, a, as...);
+constexpr A _maximum(A a, As... as) {
+    return _foldl(max_v<A>, a, as...);
 }
 
-// minimum_v
+// _minimum
 // cf) since the function is defined as foldr, the result follows the type of first argument.
 
 template<typename A, typename... As>
-constexpr A minimum_v(A a, As... as) {
-    return foldl_v(min_v<A>, a, as...);
+constexpr A _minimum(A a, As... as) {
+    return _foldl(min_v<A>, a, as...);
 }
 
-// sum_v
+// _sum
 
 template<typename A, typename... As>
-constexpr A sum_v(A a, As... as) {
-    return foldl_v(op_add<A, A>, a, as...);
+constexpr A _sum(A a, As... as) {
+    return _foldl(op_add<A, A>, a, as...);
 }
 
-// product_v
+// _product
 
 template<typename A, typename... As>
-constexpr A product_v(A a, As... as) {
-    return foldl_v(op_mul<A>, a, as...);
+constexpr A _product(A a, As... as) {
+    return _foldl(op_mul<A, A>, a, as...);
 }
 
 // IsSame
@@ -1053,7 +1068,7 @@ namespace detail {
 
     template<typename A, typename... As>
     struct CommonImpl<A, As...> {
-        using Type = EnableIf<all_v(IsSame<A, As>::value...), A>;
+        using Type = EnableIf<_all(IsSame<A, As>::value...), A>;
     };
 }  // namespace detail
 
