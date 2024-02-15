@@ -230,14 +230,14 @@ constexpr bool op_or(const bool lhs, const bool rhs) {
 // op_add
 
 template<typename A, typename B>
-constexpr auto op_add(const A& lhs, const B& rhs) -> decltype(lhs + rhs) {
+constexpr A op_add(const A& lhs, const B& rhs) {
     return lhs + rhs;
 }
 
 // op_sub
 
 template<typename A, typename B>
-constexpr auto op_sub(const A& lhs, const B& rhs) -> decltype(lhs - rhs) {
+constexpr A op_sub(const A& lhs, const B& rhs) {
     return lhs - rhs;
 }
 
@@ -270,17 +270,17 @@ constexpr auto bound_v(const A& lower, const B& upper, const C& x)
     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
 }
 
-// max_v
+// max
 
 template<typename A>
-constexpr A max_v(const A& lhs, const A& rhs) {
+constexpr A max(const A& lhs, const A& rhs) {
     return lhs > rhs ? lhs : rhs;
 }
 
-// min_v
+// min
 
 template<typename A>
-constexpr A min_v(const A& lhs, const A& rhs) {
+constexpr A min(const A& lhs, const A& rhs) {
     return lhs < rhs ? lhs : rhs;
 }
 
@@ -956,7 +956,7 @@ constexpr bool _any(Args... args) {
 
 template<typename A, typename... As>
 constexpr A _maximum(A a, As... as) {
-    return _foldl(max_v<A>, a, as...);
+    return _foldl(max<A>, a, as...);
 }
 
 // _minimum
@@ -964,7 +964,7 @@ constexpr A _maximum(A a, As... as) {
 
 template<typename A, typename... As>
 constexpr A _minimum(A a, As... as) {
-    return _foldl(min_v<A>, a, as...);
+    return _foldl(min<A>, a, as...);
 }
 
 // _sum

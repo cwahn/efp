@@ -2,7 +2,7 @@
 #define NUMERIC_HPP_
 
 // todo remove STL
-#include <complex>
+// #include <complex>
 
 #ifdef _MSC_VER
     #ifndef _USE_MATH_DEFINES
@@ -15,83 +15,83 @@
 #include "efp/prelude.hpp"
 
 namespace efp {
-template<typename A>
-using Complex = typename std::complex<A>;
+// template<typename A>
+// using Complex = typename std::complex<A>;
 
-template<typename A>
-struct IsComplex: False {};
+// template<typename A>
+// struct IsComplex: False {};
 
-template<typename A>
-struct IsComplex<Complex<A>>: True {};
+// template<typename A>
+// struct IsComplex<Complex<A>>: True {};
 
-template<typename A>
-struct ComplexBaseType {};
+// template<typename A>
+// struct ComplexBaseType {};
 
-template<typename A>
-struct ComplexBaseType<Complex<A>> {
-    using Type = A;
-};
+// template<typename A>
+// struct ComplexBaseType<Complex<A>> {
+//     using Type = A;
+// };
 
-template<typename A>
-using ComplexBase_t = typename ComplexBaseType<A>::Type;
+// template<typename A>
+// using ComplexBase_t = typename ComplexBaseType<A>::Type;
 
-template<typename A>
-struct AssertComplex {
-    using Type = Complex<A>;
-};
+// template<typename A>
+// struct AssertComplex {
+//     using Type = Complex<A>;
+// };
 
-template<typename A>
-struct AssertComplex<Complex<A>> {
-    using Type = Complex<A>;
-};
+// template<typename A>
+// struct AssertComplex<Complex<A>> {
+//     using Type = Complex<A>;
+// };
 
-template<typename A>
-using AssertComplex_t = typename AssertComplex<A>::Type;
+// template<typename A>
+// using AssertComplex_t = typename AssertComplex<A>::Type;
 
-template<typename A, typename B>
-constexpr A max(const A& lhs, const B& rhs) {
-    return max_v(lhs, rhs);
-}
+// template<bool to_complex, typename A>
+// auto complex_cast(const A& a) -> EnableIf<!to_complex && IsComplex<A>::value, ComplexBase_t<A>> {
+//     return a.real();
+// }
 
-template<bool to_complex, typename A>
-auto complex_cast(const A& a) -> EnableIf<!to_complex && IsComplex<A>::value, ComplexBase_t<A>> {
-    return a.real();
-}
+// template<bool to_complex, typename A>
+// auto complex_cast(const A& a) -> EnableIf<to_complex && !IsComplex<A>::value, Complex<A>> {
+//     return Complex<A> {a, 0};
+// }
 
-template<bool to_complex, typename A>
-auto complex_cast(const A& a) -> EnableIf<to_complex && !IsComplex<A>::value, Complex<A>> {
-    return Complex<A> {a, 0};
-}
+// template<bool to_complex, typename A>
+// auto complex_cast(const A& a) -> EnableIf<to_complex == IsComplex<A>::value, A> {
+//     return a;
+// }
 
-template<bool to_complex, typename A>
-auto complex_cast(const A& a) -> EnableIf<to_complex == IsComplex<A>::value, A> {
-    return a;
-}
+// template<typename A, typename B>
+// constexpr A max(const A& lhs, const B& rhs) {
+//     return max(lhs, rhs);
+// }
 
-template<typename A, typename B>
-constexpr A min(const A& lhs, const B& rhs) {
-    return min_v(lhs, rhs);
-}
+// template<typename A, typename B>
+// constexpr A min(const A& lhs, const B& rhs) {
+//     return min(lhs, rhs);
+// }
 
-template<typename A, typename B>
-constexpr A plus(const A& lhs, const B& rhs) {
-    return lhs + rhs;
-}
+// template<typename A, typename B>
+// constexpr A plus(const A& lhs, const B& rhs) {
+//     return lhs + rhs;
+// }
 
-template<typename A, typename B>
-constexpr A minus(const A& lhs, const B& rhs) {
-    return lhs - rhs;
-}
+// template<typename A, typename B>
+// constexpr A minus(const A& lhs, const B& rhs) {
+//     return lhs - rhs;
+// }
 
-template<typename A, typename B>
-constexpr A times(const A& lhs, const B& rhs) {
-    return lhs * rhs;
-}
+// template<typename A, typename B>
+// constexpr A times(const A& lhs, const B& rhs) {
+//     return lhs * rhs;
+// }
 
-template<typename A, typename B>
-constexpr A devide(const A& lhs, const B& rhs) {
-    return lhs / rhs;
-}
+// template<typename A, typename B>
+// constexpr A devide(const A& lhs, const B& rhs) {
+//     return lhs / rhs;
+// }
 
 template<typename A>
 constexpr A square(const A& a) {
@@ -130,10 +130,10 @@ constexpr A is_approx(const A& lhs, const B& rhs) {
         <= NumericLimits<MorePrecise_t>::epsilon();
 }
 
-template<typename A>
-constexpr Maybe<A> real_from_complex(const Complex<A>& a) {
-    return is_approx(abs(a.imag()), 0) ? Maybe<A> {a.real()} : Maybe<A> {nothing};
-}
+// template<typename A>
+// constexpr Maybe<A> real_from_complex(const Complex<A>& a) {
+//     return is_approx(abs(a.imag()), 0) ? Maybe<A> {a.real()} : Maybe<A> {nothing};
+// }
 
 // Reducings
 
@@ -154,12 +154,12 @@ constexpr Element<As> max_min(const As& as) {
 
 template<typename As>
 constexpr Element<As> sum(const As& as) {
-    return foldl(plus, 0, as);
+    return foldl(op_add, 0, as);
 }
 
 template<typename As>
 constexpr Element<As> product(const As& as) {
-    return foldl(times, 1, as);
+    return foldl(op_mul, 1, as);
 }
 }  // namespace efp
 

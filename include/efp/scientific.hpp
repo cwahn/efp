@@ -130,7 +130,7 @@ Tuple<R, R> linear_regression(const As& as, const Bs& bs) {
     const auto a_deviations = map(minus_mean_as, as);
     const auto b_deviations = map(minus_mean_bs, bs);
 
-    const auto ss_ab = sum(map(times<R, R>, a_deviations, b_deviations));
+    const auto ss_ab = sum(map(op_mul<R, R>, a_deviations, b_deviations));
     const auto ss_aa = sum(map(square<R>, a_deviations));
 
     const auto beta_1 = ss_ab / ss_aa;

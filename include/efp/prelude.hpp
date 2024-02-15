@@ -716,8 +716,8 @@ namespace detail {
 
     template<size_t n, typename As, bool is_const>
     struct TakeReturnImpl<Size<n>, As, is_const> {
-        static constexpr size_t bound_size = min_v(n, CtSize<As>::value);
-        static constexpr size_t bound_capacity = min_v(n, CtCapacity<As>::value);
+        static constexpr size_t bound_size = min(n, CtSize<As>::value);
+        static constexpr size_t bound_capacity = min(n, CtCapacity<As>::value);
 
         using Type = Conditional<
             IsStaticSize<As>::value,
@@ -747,7 +747,7 @@ auto take(N n, const As& as) -> TakeReturn<N, As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
     return TakeReturn<N, As, true>(
         data(as),
-        min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))
+        min(static_cast<size_t>(n), static_cast<size_t>(length(as)))
     );  // Safeguarding against n > length(as)
 }
 
@@ -756,7 +756,7 @@ auto take(N n, As& as) -> TakeReturn<N, As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
     return TakeReturn<N, As, false>(
         data(as),
-        min_v(static_cast<size_t>(n), static_cast<size_t>(length(as)))
+        min(static_cast<size_t>(n), static_cast<size_t>(length(as)))
     );  // Safeguarding against n > length(as)
 }
 

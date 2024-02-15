@@ -8,33 +8,33 @@
 
 using namespace efp;
 
-TEST_CASE("real_from_complex") {
-    SECTION("real") {
-        const Complex<int> a{1, 0};
-        const Complex<double> b{1., 0.};
+// TEST_CASE("real_from_complex") {
+//     SECTION("real") {
+//         const Complex<int> a{1, 0};
+//         const Complex<double> b{1., 0.};
 
-        CHECK(real_from_complex(a).value() == 1);
-        CHECK(is_approx(real_from_complex(b).value(), 1.));
-    }
+//         CHECK(real_from_complex(a).value() == 1);
+//         CHECK(is_approx(real_from_complex(b).value(), 1.));
+//     }
 
-    SECTION("not real") {
-        const Complex<int> a{1, 1};
-        const Complex<double> b{1., 1.};
+//     SECTION("not real") {
+//         const Complex<int> a{1, 1};
+//         const Complex<double> b{1., 1.};
 
-        CHECK(real_from_complex(a).is_nothing());
-        CHECK(real_from_complex(b).is_nothing());
-    }
-}
+//         CHECK(real_from_complex(a).is_nothing());
+//         CHECK(real_from_complex(b).is_nothing());
+//     }
+// }
 
-TEST_CASE("complex_cast") {
-    const int real_a{42};
-    const Complex<int> complex_a{42, 0};
+// TEST_CASE("complex_cast") {
+//     const int real_a{42};
+//     const Complex<int> complex_a{42, 0};
 
-    CHECK(complex_cast<true>(real_a) == complex_a);
-    CHECK(complex_cast<true>(complex_a) == complex_a);
-    CHECK(complex_cast<false>(real_a) == real_a);
-    CHECK(complex_cast<false>(complex_a) == real_a);
-}
+//     CHECK(complex_cast<true>(real_a) == complex_a);
+//     CHECK(complex_cast<true>(complex_a) == complex_a);
+//     CHECK(complex_cast<false>(real_a) == real_a);
+//     CHECK(complex_cast<false>(complex_a) == real_a);
+// }
 
 TEST_CASE("max_elem") {
     SECTION("c style ") {

@@ -409,7 +409,7 @@ TEST_CASE("detrend") {
 
         const auto ys_ref = from_function(n, [](int _) { return 0; });
 
-        auto ys = map(plus<double, double>, ys1, ys2);
+        auto ys = map(op_add<double, double>, ys1, ys2);
 
         auto detrended = detrend<double>(ys);
 
@@ -424,7 +424,7 @@ TEST_CASE("detrend") {
 
         const auto ys_ref = from_function(n, [](int _) { return 0; });
 
-        const auto ys = map(plus<double, double>, ys1, ys2);
+        const auto ys = map(op_add<double, double>, ys1, ys2);
 
         const auto detrended = detrend<double>(ys);
 
