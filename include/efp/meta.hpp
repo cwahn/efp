@@ -75,7 +75,7 @@ using Int = CtConst<int, n>;
 // Size
 
 template<size_t n>
-using Size = CtConst<std::size_t, n>;
+using Size = CtConst<size_t, n>;
 
 // IsCtConst
 
@@ -482,7 +482,7 @@ using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
 
 // TupleLeaf
 
-template<std::size_t index, typename A>
+template<size_t index, typename A>
 class TupleLeaf {
   public:
     using Element = A;
