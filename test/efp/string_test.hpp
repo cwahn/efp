@@ -145,10 +145,11 @@ TEST_CASE("StringView class functionality", "[StringView]") {
         CHECK_FALSE(view == "World");
     }
 
-    SECTION("Conversion to CString") {
-        StringView view("Hello");
-        CHECK(std::strcmp(view.c_str(), "Hello") == 0);
-    }
+    // ! StringView does not have a c_str method
+    // SECTION("Conversion to CString") {
+    //     StringView view("Hello");
+    //     CHECK(std::strcmp(view.c_str(), "Hello") == 0);
+    // }
 
     SECTION("Begin and End Iterators") {
         StringView view("Hello");

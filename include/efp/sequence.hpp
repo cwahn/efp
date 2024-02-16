@@ -761,7 +761,7 @@ namespace detail {
 
         void push_back(const Element& value) {
             if (_size + 1 >= _capacity) {
-                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+                reserve(_capacity == 0 ? 2 : 2 * _capacity);
             }
 
             new (_data + _size) Element {value};
@@ -770,7 +770,7 @@ namespace detail {
 
         void push_back(Element&& value) {
             if (_size + 1 >= _capacity) {
-                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+                reserve(_capacity == 0 ? 2 : 2 * _capacity);
             }
 
             new (_data + _size) Element {efp::move(value)};
@@ -785,7 +785,7 @@ namespace detail {
             }
 
             if (_size + 1 >= _capacity) {
-                reserve(_capacity == 0 ? 1 : 2 * _capacity);
+                reserve(_capacity == 0 ? 2 : 2 * _capacity);
             }
 
             for (size_t i = _size; i > index; --i) {

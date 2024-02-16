@@ -7,70 +7,72 @@
 #include "efp/sequence.hpp"
 
 namespace efp {
+
 // CString
 // Owned C-style null operator including const char*
 // Not safe to build from regular const char *
-class CString {
-  public:
-    // const char pointer with nullptr.
-    CString(const char* ptr) : _data(ptr) {}
 
-    CString(const CString&) = delete;
-    CString& operator=(const CString&) = delete;
+// class CString {
+//   public:
+//     // const char pointer with nullptr.
+//     CString(const char* ptr) : _data(ptr) {}
 
-    CString(CString&& other) noexcept : _data(other._data) {
-        other._data = nullptr;
-    }
+//     CString(const CString&) = delete;
+//     CString& operator=(const CString&) = delete;
 
-    CString& operator=(CString&& other) noexcept {
-        if (this != &other) {
-            delete[] _data;
+//     CString(CString&& other) noexcept : _data(other._data) {
+//         other._data = nullptr;
+//     }
 
-            _data = other._data;
-            other._data = nullptr;
-        }
-        return *this;
-    }
+//     CString& operator=(CString&& other) noexcept {
+//         if (this != &other) {
+//             delete[] _data;
 
-    ~CString() {
-        delete[] _data;
-    }
+//             _data = other._data;
+//             other._data = nullptr;
+//         }
+//         return *this;
+//     }
 
-    operator const char*() const {
-        return _data;
-    }
+//     ~CString() {
+//         delete[] _data;
+//     }
 
-    // Equality operator for comparing with another CString
-    bool operator==(const CString& other) const {
-        // If both are null, they are considered equal
-        if (_data == nullptr && other._data == nullptr)
-            return true;
+//     operator const char*() const {
+//         return _data;
+//     }
 
-        // If one is null and the other is not, they can't be equal
-        if (_data == nullptr || other._data == nullptr)
-            return false;
+//     // Equality operator for comparing with another CString
+//     bool operator==(const CString& other) const {
+//         // If both are null, they are considered equal
+//         if (_data == nullptr && other._data == nullptr)
+//             return true;
 
-        // Use strcmp to compare the strings
-        return strcmp(_data, other._data) == 0;
-    }
+//         // If one is null and the other is not, they can't be equal
+//         if (_data == nullptr || other._data == nullptr)
+//             return false;
 
-    // Equality operator for comparing with a C-style string
-    bool operator==(const char* c_str) const {
-        // If both are null, they are considered equal
-        if (_data == nullptr && c_str == nullptr)
-            return true;
+//         // Use strcmp to compare the strings
+//         return strcmp(_data, other._data) == 0;
+//     }
 
-        // If one is null and the other is not, they can't be equal
-        if (_data == nullptr || c_str == nullptr)
-            return false;
+//     // Equality operator for comparing with a C-style string
+//     bool operator==(const char* c_str) const {
+//         // If both are null, they are considered equal
+//         if (_data == nullptr && c_str == nullptr)
+//             return true;
 
-        // Use strcmp to compare the strings
-        return strcmp(_data, c_str) == 0;
-    }
+//         // If one is null and the other is not, they can't be equal
+//         if (_data == nullptr || c_str == nullptr)
+//             return false;
 
-  private:
-    const char* _data;
-};
+//         // Use strcmp to compare the strings
+//         return strcmp(_data, c_str) == 0;
+//     }
+
+//   private:
+//     const char* _data;
+// };
 
 namespace detail {
     template<typename T>
@@ -136,11 +138,16 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
     }
 
     // todo Change to hold one extra capacity for null character
-    const CString c_str() const {
-        Char* extended_buffer = new char[Base::_size + 1];
-        memcpy(extended_buffer, Base::_data, Base::_size);
-        extended_buffer[Base::_size] = '\0';
-        return CString(extended_buffer);  // Mark for deletion.
+    // const CString c_str() const {
+    //     Char* extended_buffer = new char[Base::_size + 1];
+    //     memcpy(extended_buffer, Base::_data, Base::_size);
+    //     extended_buffer[Base::_size] = '\0';
+    //     return CString(extended_buffer);  // Mark for deletion.
+    // }
+
+    const Char* c_str() const {
+        Base::_data[Base::_size] = '\0';
+        return Base::_data;
     }
 
     // String append(const String &string) const
@@ -228,14 +235,6 @@ class VectorView<const char> {
 
         // Check if the character at the position _size in c_str is the null character
         return c_str[_size] == '\0';
-    }
-
-    const CString c_str() const {
-        const size_t _size = size();
-        char* extended_buffer = new char[_size + 1];
-        memcpy(extended_buffer, _data, _size);
-        extended_buffer[_size] = '\0';
-        return CString(extended_buffer);
     }
 
     size_t size() const {
