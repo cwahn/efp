@@ -887,7 +887,7 @@ struct IsLvalueReference: False {};
 template<typename A>
 struct IsLvalueReference<A&>: True {};
 
-// Forward
+// forward
 
 template<typename A>
 constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
@@ -905,6 +905,15 @@ constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
 template<typename A>
 constexpr ReferenceRemoved<A>&& move(A&& a) {
     return static_cast<ReferenceRemoved<A>&&>(a);
+}
+
+// swap
+
+template<typename A>
+void swap(A& a, A& b) {
+    A temp = efp::move(a);
+    a = efp::move(b);
+    b = efp::move(temp);
 }
 
 // IsDefaultConstructible

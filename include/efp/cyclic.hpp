@@ -1,18 +1,12 @@
 #ifndef CYCLIC_HPP_
 #define CYCLIC_HPP_
 
-#include <stdlib.h>
-
-#include <array>
-#include <cstdint>
-
+#include "efp/cpp_core.hpp"
 #include "efp/sequence.hpp"
 
 namespace efp {
 template<typename A, size_t n>
-class Vcb
-// : public SequenceBase<Vcb<A, n>>
-{
+class Vcb {
   public:
     using Element = A;
     using CtSize = Size<n>;
@@ -170,9 +164,7 @@ constexpr auto data(Vcb<A, n>& as) -> A* {
 }
 
 template<typename A, size_t n>
-class Vcq
-// : public SequenceBase<Vcq<A, n>>
-{
+class Vcq {
   public:
     using Element = A;
     using CtSize = Size<dyn>;
@@ -362,15 +354,6 @@ class Vcq
     A* _read;
     A* _write;
 };
-
-// template <typename A, size_t n>
-// class SequenceTrait<Vcq<A, n>>
-// {
-// public:
-//     using Element = A;
-//     static constexpr size_t ct_size = dyn;
-//     static constexpr size_t ct_capacity = n;
-// };
 
 template<typename A, size_t n>
 struct ElementImpl<Vcq<A, n>> {

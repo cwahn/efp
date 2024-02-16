@@ -7,12 +7,6 @@
 // todo Make member function version of it
 
 namespace efp {
-template<typename A>
-void swap(A& a, A& b) {
-    A temp = efp::move(a);
-    a = efp::move(b);
-    b = efp::move(temp);
-}
 
 // Merge function for merge sort
 template<typename A, typename F>
@@ -77,7 +71,6 @@ void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
 }
 
 // Heapsort using a comparison function
-
 template<typename A, typename F = bool (*)(const A&, const A&)>
 void heapsort_by(Vector<A>& arr, const F& comp) {
     size_t n = arr.size();

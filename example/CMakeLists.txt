@@ -13,11 +13,6 @@ target_link_libraries(loop_efp
     PRIVATE
     efp)
 
-add_executable(trait_demo trait_demo.cpp)
-target_link_libraries(trait_demo
-    PRIVATE
-    efp)
-
 add_executable(io_demo io_demo.cpp)
 target_link_libraries(io_demo
     PRIVATE
