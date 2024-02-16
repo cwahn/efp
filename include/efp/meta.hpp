@@ -162,6 +162,10 @@ struct Max<Head>: Head {};
 
 constexpr auto size_of_ptr_v = sizeof(void*);
 
+// Operators
+// Make them works for a single type to disallow implicit type conversion
+// It's also the way Haskell and Rust do
+
 // op_neg
 
 template<typename A>
@@ -171,22 +175,12 @@ constexpr A op_neg(const A& a) {
 
 // op_eq
 
-// template<typename A, typename B>
-// constexpr bool op_eq(const A& lhs, const B& rhs) {
-//     return lhs == rhs;
-// }
-
 template<typename A>
 constexpr bool op_eq(const A& lhs, const A& rhs) {
     return lhs == rhs;
 }
 
 // op_neq
-
-// template<typename A, typename B>
-// constexpr bool op_neq(const A& lhs, const B& rhs) {
-//     return lhs != rhs;
-// }
 
 template<typename A>
 constexpr bool op_neq(const A& lhs, const A& rhs) {
@@ -195,22 +189,12 @@ constexpr bool op_neq(const A& lhs, const A& rhs) {
 
 // op_gt
 
-// template<typename A, typename B>
-// constexpr bool op_gt(const A& lhs, const B& rhs) {
-//     return lhs > rhs;
-// }
-
 template<typename A>
 constexpr bool op_gt(const A& lhs, const A& rhs) {
     return lhs > rhs;
 }
 
 // op_lt
-
-// template<typename A, typename B>
-// constexpr bool op_lt(const A& lhs, const B& rhs) {
-//     return lhs < rhs;
-// }
 
 template<typename A>
 constexpr bool op_lt(const A& lhs, const A& rhs) {
@@ -219,22 +203,12 @@ constexpr bool op_lt(const A& lhs, const A& rhs) {
 
 // op_geq
 
-// template<typename A, typename B>
-// constexpr bool op_geq(const A& lhs, const B& rhs) {
-//     return lhs >= rhs;
-// }
-
 template<typename A>
 constexpr bool op_geq(const A& lhs, const A& rhs) {
     return lhs >= rhs;
 }
 
 // op_leq
-
-// template<typename A, typename B>
-// constexpr bool op_leq(const A& lhs, const B& rhs) {
-//     return lhs <= rhs;
-// }
 
 template<typename A>
 constexpr bool op_leq(const A& lhs, const A& rhs) {
@@ -261,22 +235,12 @@ constexpr bool op_or(const bool lhs, const bool rhs) {
 
 // op_add
 
-// template<typename A, typename B>
-// constexpr A op_add(const A& lhs, const B& rhs) {
-//     return lhs + rhs;
-// }
-
 template<typename A>
 constexpr A op_add(const A& lhs, const A& rhs) {
     return lhs + rhs;
 }
 
 // op_sub
-
-// template<typename A, typename B>
-// constexpr A op_sub(const A& lhs, const B& rhs) {
-//     return lhs - rhs;
-// }
 
 template<typename A>
 constexpr A op_sub(const A& lhs, const A& rhs) {
@@ -285,11 +249,6 @@ constexpr A op_sub(const A& lhs, const A& rhs) {
 
 // op_mul
 
-// template<typename A, typename B>
-// constexpr A op_mul(const A& lhs, const B& rhs) {
-//     return lhs * rhs;
-// }
-
 template<typename A>
 constexpr A op_mul(const A& lhs, const A& rhs) {
     return lhs * rhs;
@@ -297,22 +256,12 @@ constexpr A op_mul(const A& lhs, const A& rhs) {
 
 // op_div
 
-// template<typename A, typename B>
-// constexpr A op_div(const A& lhs, const B& rhs) {
-//     return lhs / rhs;
-// }
-
 template<typename A>
 constexpr A op_div(const A& lhs, const A& rhs) {
     return lhs / rhs;
 }
 
 // op_mod
-
-// template<typename A, typename B>
-// constexpr A op_mod(const A& lhs, const B& rhs) {
-//     return lhs % rhs;
-// }
 
 template<typename A>
 constexpr A op_mod(const A& lhs, const A& rhs) {
@@ -419,7 +368,7 @@ using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 // declval
 
 template<typename T>
-RvalueRefAdded<T> declval() noexcept;
+constexpr RvalueRefAdded<T> declval() noexcept;
 
 // CallReturn
 
