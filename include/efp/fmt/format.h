@@ -4381,7 +4381,7 @@ class format_int {
     \endrst
    */
     auto str() const -> efp::String {
-        return efp::String(str_, size());
+        return efp::String(static_cast<const char *>(str_), size());
     }
 };
 

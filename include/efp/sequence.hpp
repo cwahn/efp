@@ -603,6 +603,24 @@ namespace detail {
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
 
+        // STL compatible types
+        using value_type = Element;
+        // using traits_type = Traits;
+        // using allocator_type = Allocator;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        // using pointer = typename std::allocator_traits<Allocator>::pointer;
+        using pointer = value_type*;
+        // using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+        using const_pointer = const value_type*;
+        using iterator =
+            value_type*;  // Simplification; actual implementation would be more complex
+        using const_iterator = const value_type*;  // Simplification
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
         VectorBase() : _data {nullptr}, _size {0}, _capacity {0} {}
 
         VectorBase(const VectorBase& other)
@@ -659,14 +677,23 @@ namespace detail {
             return *this;
         }
 
-        template<typename... Args>
-        VectorBase(const Args&... args)
-            // One extra space for BasicString
-            : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
-            )},
-              _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
+        // template<typename... Args>
+        // VectorBase(const Args&... args)
+        //     // One extra space for BasicString
+        //     : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
+        //     )},
+        //       _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
+        //     size_t index = 0;
+        //     _construct_elements(index, args...);
+        // }
+
+        VectorBase(InitializerList<Element> il)
+            : _data {static_cast<Element*>(::operator new[]((il.size() + 1) * sizeof(Element)))},
+              _size(il.size()), _capacity(il.size() + 1) {
             size_t index = 0;
-            _construct_elements(index, args...);
+            for (const auto& e : il) {
+                new (_data + index++) Element {e};
+            }
         }
 
         // Constructor from Array
