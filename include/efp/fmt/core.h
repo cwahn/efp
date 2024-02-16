@@ -253,8 +253,8 @@ FMT_BEGIN_NAMESPACE
 // using efp::ReferenceRemoved = typename std::remove_reference<T>::type;
 // template<typename T>
 // using  efp::ConstRemoved = typename std::remove_const<T>::type;
-template<typename T>
-using remove_cvref_t = typename std::remove_cv< efp::ReferenceRemoved<T>>::type;
+// template<typename T>
+// using  efp::CVRefRemoved = typename std::remove_cv< efp::ReferenceRemoved<T>>::type;
 
 template<typename T>
 struct type_identity {
@@ -829,7 +829,7 @@ template<
     typename Char,
     typename T,
     typename U,
-    FMT_ENABLE_IF(std::is_same< efp::ConstRemoved<T>, U>::value&& is_char<U>::value)>
+    FMT_ENABLE_IF(std::is_same<efp::ConstRemoved<T>, U>::value&& is_char<U>::value)>
 FMT_CONSTEXPR auto copy_str(T* begin, T* end, U* out) -> U* {
     if (is_constant_evaluated())
         return copy_str<Char, T*, U*>(begin, end, out);
@@ -1456,7 +1456,7 @@ class value {
 
     template<typename T>
     FMT_CONSTEXPR20 FMT_INLINE value(T& val) {
-        using value_type =  efp::ConstRemoved<T>;
+        using value_type = efp::ConstRemoved<T>;
         custom.value = const_cast<value_type*>(std::addressof(val));
         // Get the formatter type through the context to allow different contexts
         // have different extension points, e.g. `formatter<T>` for `format` and
@@ -1659,7 +1659,7 @@ struct arg_mapper {
         return map(format_as(val));
     }
 
-    template<typename T, typename U =  efp::ConstRemoved<T>>
+    template<typename T, typename U = efp::ConstRemoved<T>>
     struct formattable:
         efp::Bool<
             has_const_formatter<U, Context>()
@@ -1677,7 +1677,7 @@ struct arg_mapper {
 
     template<
         typename T,
-        typename U =  efp::ConstRemoved<T>,
+        typename U = efp::ConstRemoved<T>,
         FMT_ENABLE_IF(
             (std::is_class<U>::value || std::is_enum<U>::value || std::is_union<U>::value)
             && !is_string<U>::value && !is_char<U>::value && !is_named_arg<U>::value
@@ -1799,7 +1799,7 @@ struct type_is_unformattable_for;
 
 template<bool PACKED, typename Context, typename T, FMT_ENABLE_IF(PACKED)>
 FMT_CONSTEXPR FMT_INLINE auto make_arg(T& val) -> value<Context> {
-    using arg_type = remove_cvref_t<decltype(arg_mapper<Context>().map(val))>;
+    using arg_type = efp::CVRefRemoved<decltype(arg_mapper<Context>().map(val))>;
 
     constexpr bool formattable_char = !std::is_same<arg_type, unformattable_char>::value;
     static_assert(formattable_char, "Mixing character types is disallowed.");
@@ -2046,7 +2046,8 @@ class format_arg_store
     static constexpr size_t num_named_args = detail::count_named_args<Args...>();
     static const bool is_packed = num_args <= detail::max_packed_args;
 
-    using value_type = efp::Conditional<is_packed, detail::value<Context>, basic_format_arg<Context>>;
+    using value_type =
+        efp::Conditional<is_packed, detail::value<Context>, basic_format_arg<Context>>;
 
     detail::arg_data<value_type, typename Context::char_type, num_args, num_named_args> data_;
 
@@ -2079,7 +2080,7 @@ class format_arg_store
  */
 // Arguments are taken by lvalue references to avoid some lifetime issues.
 template<typename Context = format_context, typename... T>
-constexpr auto make_format_args(T&... args) -> format_arg_store<Context, remove_cvref_t<T>...> {
+constexpr auto make_format_args(T&... args) -> format_arg_store<Context, efp::CVRefRemoved<T>...> {
     return {args...};
 }
 
@@ -2850,7 +2851,7 @@ struct strip_named_arg {
 
 template<typename T>
 struct strip_named_arg<T, true> {
-    using type = remove_cvref_t<decltype(T::value)>;
+    using type = efp::CVRefRemoved<decltype(T::value)>;
 };
 
 template<typename T, typename ParseContext>
@@ -2985,7 +2986,7 @@ template<typename... Args, typename S, FMT_ENABLE_IF(is_compile_string<S>::value
 void check_format_string(S format_str) {
     using char_t = typename S::char_type;
     FMT_CONSTEXPR auto s = basic_string_view<char_t>(format_str);
-    using checker = format_string_checker<char_t, remove_cvref_t<Args>...>;
+    using checker = format_string_checker<char_t, efp::CVRefRemoved<Args>...>;
     FMT_CONSTEXPR bool error = (parse_format_string<true>(s, checker(s)), true);
     ignore_unused(error);
 }
@@ -3076,7 +3077,7 @@ class basic_format_string {
         );
 #ifdef FMT_HAS_CONSTEVAL
         if constexpr (detail::count_named_args<Args...>() == detail::count_statically_named_args<Args...>()) {
-            using checker = detail::format_string_checker<Char, remove_cvref_t<Args>...>;
+            using checker = detail::format_string_checker<Char, efp::CVRefRemoved<Args>...>;
             detail::parse_format_string<true>(str_, checker(s));
         }
 #else

@@ -1482,7 +1482,7 @@ template<
     typename Char,
     typename UInt,
     typename Iterator,
-    FMT_ENABLE_IF(!std::is_pointer<remove_cvref_t<Iterator>>::value)>
+    FMT_ENABLE_IF(!std::is_pointer< efp::CVRefRemoved<Iterator>>::value)>
 FMT_CONSTEXPR inline auto format_decimal(Iterator out, UInt value, int size)
     -> format_decimal_result<Iterator> {
     // Buffer is large enough to hold all digits (digits10 + 1).
@@ -2027,7 +2027,7 @@ inline auto find_escape(const char* begin, const char* end) -> find_escape_resul
         /* Use the hidden visibility as a workaround for a GCC bug (#1973). */ \
         /* Use a macro-like name to avoid shadowing warnings. */ \
         struct FMT_VISIBILITY("hidden") FMT_COMPILE_STRING: base { \
-            using char_type FMT_MAYBE_UNUSED = fmt::remove_cvref_t<decltype(s[0])>; \
+            using char_type FMT_MAYBE_UNUSED = efp::CVRefRemoved<decltype(s[0])>; \
             FMT_MAYBE_UNUSED FMT_CONSTEXPR explicit \
             operator fmt::basic_string_view<char_type>() const { \
                 return fmt::detail_exported::compile_string_to_view<char_type>(s); \
@@ -2783,7 +2783,7 @@ template<
     typename OutputIt,
     typename UInt,
     typename Char,
-    FMT_ENABLE_IF(!std::is_pointer<remove_cvref_t<OutputIt>>::value)>
+    FMT_ENABLE_IF(!std::is_pointer< efp::CVRefRemoved<OutputIt>>::value)>
 inline auto write_significand(
     OutputIt out,
     UInt significand,
@@ -4045,7 +4045,7 @@ template<
 FMT_CONSTEXPR auto write(OutputIt out, const T& value) -> efp::EnableIf<
     std::is_class<T>::value && !is_string<T>::value && !is_floating_point<T>::value
         && !std::is_same<T, Char>::value
-        && !std::is_same<T, remove_cvref_t<decltype(arg_mapper<Context>().map(value))>>::value,
+        && !std::is_same<T,  efp::CVRefRemoved<decltype(arg_mapper<Context>().map(value))>>::value,
     OutputIt> {
     return write<Char>(out, arg_mapper<Context>().map(value));
 }
@@ -4612,7 +4612,7 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
 #else
         typename std::iterator_traits<It>::value_type;
 #endif
-    formatter<remove_cvref_t<value_type>, Char> value_formatter_;
+    formatter< efp::CVRefRemoved<value_type>, Char> value_formatter_;
 
   public:
     template<typename ParseContext>
@@ -4830,7 +4830,7 @@ inline namespace literals {
     #if FMT_USE_NONTYPE_TEMPLATE_ARGS
 template<detail_exported::fixed_string Str>
 constexpr auto operator""_a() {
-    using char_t = remove_cvref_t<decltype(Str.data[0])>;
+    using char_t =  efp::CVRefRemoved<decltype(Str.data[0])>;
     return detail::udl_arg<char_t, sizeof(Str.data) / sizeof(char_t), Str>();
 }
     #else
