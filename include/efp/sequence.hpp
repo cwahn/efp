@@ -661,8 +661,10 @@ namespace detail {
 
         template<typename... Args>
         VectorBase(const Args&... args)
-            : _data {static_cast<Element*>(::operator new[](sizeof...(args) * sizeof(Element)))},
-              _capacity(sizeof...(args)), _size(sizeof...(args)) {
+            // One extra space for BasicString
+            : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
+            )},
+              _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
             size_t index = 0;
             _construct_elements(index, args...);
         }
@@ -670,7 +672,7 @@ namespace detail {
         // Constructor from Array
         template<size_t ct_size_>
         VectorBase(const Array<Element, ct_size_>& as)
-            : _data {::operator new[](ct_size_ * sizeof(Element))}, _size(ct_size_),
+            : _data {::operator new[]((ct_size_ + 1) * sizeof(Element))}, _size(ct_size_),
               _capacity(ct_size_) {
             for (size_t i = 0; i < _size; ++i) {
                 new (_data + i) Element {as[i]};
@@ -680,7 +682,7 @@ namespace detail {
         // Constructor from ArrVec
         template<size_t ct_cap_>
         VectorBase(const ArrVec<Element, ct_cap_>& as)
-            : _data {::operator new[](length(as) * sizeof(Element))}, _size(length(as)),
+            : _data {::operator new[]((length(as) + 1) * sizeof(Element))}, _size(length(as)),
               _capacity(ct_cap_) {
             for (size_t i = 0; i < _size; ++i) {
                 new (_data + i) Element {as[i]};
@@ -727,18 +729,18 @@ namespace detail {
             return _capacity;
         }
 
-        void resize(size_t length) {
-            if (length < 0) {
+        void resize(size_t new_size) {
+            if (new_size < 0) {
                 throw std::runtime_error(
                     "VectorBase::resize: length must be greater than or equal to 0"
                 );
             }
 
-            if (length > _capacity) {
-                reserve(length);
+            if (new_size + 1 > _capacity) {
+                reserve(new_size + 1);
             }
 
-            _size = length;
+            _size = new_size;
         }
 
         void reserve(size_t new_capacity) {
@@ -758,7 +760,7 @@ namespace detail {
         }
 
         void push_back(const Element& value) {
-            if (_size >= _capacity) {
+            if (_size + 1 >= _capacity) {
                 reserve(_capacity == 0 ? 1 : 2 * _capacity);
             }
 
@@ -767,7 +769,7 @@ namespace detail {
         }
 
         void push_back(Element&& value) {
-            if (_size >= _capacity) {
+            if (_size + 1 >= _capacity) {
                 reserve(_capacity == 0 ? 1 : 2 * _capacity);
             }
 
@@ -782,7 +784,7 @@ namespace detail {
                 );
             }
 
-            if (_size >= _capacity) {
+            if (_size + 1 >= _capacity) {
                 reserve(_capacity == 0 ? 1 : 2 * _capacity);
             }
 

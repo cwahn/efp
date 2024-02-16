@@ -260,7 +260,7 @@ TEST_CASE("Initialization") {
     SECTION("Vector Initialization") {
         Vector<int> a = {1, 2, 3};
         CHECK(a.size() == 3);
-        CHECK(a.capacity() == 3);
+        CHECK(a.capacity() == 4);
     }
 
     SECTION("Array Copy Constructor") {
@@ -303,7 +303,7 @@ TEST_CASE("Initialization") {
         Vector<int> b;
         b = a;
         CHECK(b.size() == 3);
-        CHECK(b.capacity() == 3);
+        CHECK(b.capacity() == 4);
     }
 }
 
