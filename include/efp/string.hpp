@@ -72,6 +72,15 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
         std::memcpy(Base::_data, c_str, Base::_size);
     }
 
+    Vector(size_t size, Char c) {
+        Base::_capacity = size;
+        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
+        Base::_size = size;
+        for (size_t i = 0; i < size; ++i) {
+            Base::_data[i] = c;
+        }
+    }
+
     bool operator==(const Vector& other) const {
         return Base::operator==(other);
     }

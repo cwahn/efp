@@ -610,9 +610,9 @@ using iterator_t = decltype(std::begin(efp::declval<T&>()));
 template<typename T>
 using sentinel_t = decltype(std::end(efp::declval<T&>()));
 
-// A workaround for std::string not having mutable data() until C++17.
+// A workaround for efp::String not having mutable data() until C++17.
 template<typename Char>
-inline auto get_data(std::basic_string<Char>& s) -> Char* {
+inline auto get_data(efp::BasicString<Char>& s) -> Char* {
     return &s[0];
 }
 
@@ -694,10 +694,17 @@ FMT_CONSTEXPR20 auto fill_n(T* out, Size count, char value) -> T* {
     return out + count;
 }
 
-#ifdef __cpp_char8_t
+// #ifdef __cpp_char8_t
+// using char8_type = char8_t;
+// #else
+// enum char8_type : unsigned char {};
+// #endif
+
+#if __cplusplus >= 202002L
 using char8_type = char8_t;
 #else
-enum char8_type : unsigned char {};
+// enum char8_type : unsigned char {};
+using char8_type = char;
 #endif
 
 template<typename OutChar, typename InputIt, typename OutputIt>
@@ -841,9 +848,13 @@ FMT_CONSTEXPR inline size_t compute_width(string_view s) {
     return num_code_points;
 }
 
+#if __cplusplus >= 202002L
+
 inline auto compute_width(basic_string_view<char8_type> s) -> size_t {
     return compute_width(string_view(reinterpret_cast<const char*>(s.data()), s.size()));
 }
+
+#endif
 
 template<typename Char>
 inline auto code_point_index(basic_string_view<Char> s, size_t n) -> size_t {
@@ -866,9 +877,9 @@ inline auto code_point_index(string_view s, size_t n) -> size_t {
     return result;
 }
 
-inline auto code_point_index(basic_string_view<char8_type> s, size_t n) -> size_t {
-    return code_point_index(string_view(reinterpret_cast<const char*>(s.data()), s.size()), n);
-}
+// inline auto code_point_index(basic_string_view<char8_type> s, size_t n) -> size_t {
+//     return code_point_index(string_view(reinterpret_cast<const char*>(s.data()), s.size()), n);
+// }
 
 template<typename T>
 struct is_integral: std::is_integral<T> {};
@@ -927,8 +938,7 @@ template<typename T>
 using is_floating_point = efp::Bool<std::is_floating_point<T>::value || is_float128<T>::value>;
 
 template<typename T, bool = std::is_floating_point<T>::value>
-struct is_fast_float:
-    efp::Bool<efp::NumericLimits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
+struct is_fast_float: efp::Bool<efp::NumericLimits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
 
 template<typename T>
 struct is_fast_float<T, false>: efp::False {};
@@ -986,7 +996,7 @@ enum { inline_buffer_size = 500 };
 
      The answer is 42.
 
-  The output can be converted to an ``std::string`` with ``to_string(out)``.
+  The output can be converted to an ``efp::String`` with ``to_string(out)``.
   \endrst
  */
 template<typename T, size_t SIZE = inline_buffer_size, typename Allocator = std::allocator<T>>
@@ -1185,9 +1195,9 @@ class loc_value {
 template<typename Locale>
 class format_facet: public Locale::facet {
   private:
-    std::string separator_;
-    std::string grouping_;
-    std::string decimal_point_;
+    efp::String separator_;
+    efp::String grouping_;
+    efp::String decimal_point_;
 
   protected:
     virtual auto do_put(appender out, loc_value val, const format_specs<>& specs) const -> bool;
@@ -1200,7 +1210,7 @@ class format_facet: public Locale::facet {
     explicit format_facet(
         string_view sep = "",
         std::initializer_list<unsigned char> g = {3},
-        std::string decimal_point = "."
+        efp::String decimal_point = "."
     )
         : separator_(sep.data(), sep.size()), grouping_(g.begin(), g.end()),
           decimal_point_(decimal_point) {}
@@ -1393,7 +1403,7 @@ constexpr auto digits10<uint128_t>() noexcept -> int {
 
 template<typename Char>
 struct thousands_sep_result {
-    std::string grouping;
+    efp::String grouping;
     Char thousands_sep;
 };
 
@@ -1574,8 +1584,8 @@ class to_utf8 {
         return &buffer_[0];
     }
 
-    std::string str() const {
-        return std::string(&buffer_[0], size());
+    efp::String str() const {
+        return efp::String(&buffer_[0], size());
     }
 
     // Performs conversion returning a bool instead of throwing exception on
@@ -2042,7 +2052,7 @@ inline auto find_escape(const char* begin, const char* end) -> find_escape_resul
   **Example**::
 
     // A compile-time error because 'd' is an invalid specifier for strings.
-    std::string s = fmt::format(FMT_STRING("{:d}"), "foo");
+    efp::String s = fmt::format(FMT_STRING("{:d}"), "foo");
   \endrst
  */
 #define FMT_STRING(s) FMT_STRING_IMPL(s, fmt::detail::compile_string, )
@@ -2209,11 +2219,12 @@ FMT_CONSTEXPR FMT_INLINE auto write_int(
 template<typename Char>
 class digit_grouping {
   private:
-    std::string grouping_;
-    std::basic_string<Char> thousands_sep_;
+    efp::String grouping_;
+    efp::BasicString<Char> thousands_sep_;
 
     struct next_state {
-        std::string::const_iterator group;
+        // efp::String::const_iterator group;
+        const char & group;
         int pos;
     };
 
@@ -2243,7 +2254,7 @@ class digit_grouping {
             thousands_sep_.assign(1, sep.thousands_sep);
     }
 
-    digit_grouping(std::string grouping, std::basic_string<Char> sep)
+    digit_grouping(efp::String grouping, efp::BasicString<Char> sep)
         : grouping_(efp::move(grouping)), thousands_sep_(efp::move(sep)) {}
 
     bool has_separator() const {
@@ -2348,9 +2359,9 @@ template<typename Char = char>
 struct loc_writer {
     buffer_appender<Char> out;
     const format_specs<Char>& specs;
-    std::basic_string<Char> sep;
-    std::string grouping;
-    std::basic_string<Char> decimal_point;
+    efp::BasicString<Char> sep;
+    efp::String grouping;
+    efp::BasicString<Char> decimal_point;
 
     template<typename T, FMT_ENABLE_IF(is_integer<T>::value)>
     auto operator()(T value) -> bool {
@@ -3639,8 +3650,8 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
             int shift = countl_zero(significand);
             FMT_ASSERT(shift >= num_bits<uint64_t>() - num_significand_bits<double>(), "");
             shift -= (num_bits<uint64_t>() - num_significand_bits<double>() - 2);
-            exponent = (efp::NumericLimits<double>::min_exponent - num_significand_bits<double>())
-                - shift;
+            exponent =
+                (efp::NumericLimits<double>::min_exponent - num_significand_bits<double>()) - shift;
             significand <<= shift;
         }
 
@@ -4240,7 +4251,7 @@ auto vformat(
     const Locale& loc,
     basic_string_view<Char> fmt,
     basic_format_args<buffer_context<type_identity_t<Char>>> args
-) -> std::basic_string<Char> {
+) -> efp::BasicString<Char> {
     auto buf = basic_memory_buffer<Char>();
     detail::vformat_to(buf, fmt, args, detail::locale_ref(loc));
     return {buf.data(), buf.size()};
@@ -4366,11 +4377,11 @@ class format_int {
 
     /**
     \rst
-    Returns the content of the output buffer as an ``std::string``.
+    Returns the content of the output buffer as an ``efp::String``.
     \endrst
    */
-    auto str() const -> std::string {
-        return std::string(str_, size());
+    auto str() const -> efp::String {
+        return efp::String(str_, size());
     }
 };
 
@@ -4398,7 +4409,7 @@ FMT_FORMAT_AS(unsigned short, unsigned);
 FMT_FORMAT_AS(long, detail::long_type);
 FMT_FORMAT_AS(unsigned long, detail::ulong_type);
 FMT_FORMAT_AS(Char*, const Char*);
-FMT_FORMAT_AS(std::basic_string<Char>, basic_string_view<Char>);
+FMT_FORMAT_AS(efp::BasicString<Char>, basic_string_view<Char>);
 FMT_FORMAT_AS(std::nullptr_t, const void*);
 FMT_FORMAT_AS(detail::std_string_view<Char>, basic_string_view<Char>);
 FMT_FORMAT_AS(void*, const void*);
@@ -4671,42 +4682,41 @@ auto join(Range&& range, string_view sep)
 
 /**
   \rst
-  Converts *value* to ``std::string`` using the default format for type *T*.
+  Converts *value* to ``efp::String`` using the default format for type *T*.
 
   **Example**::
 
     #include <fmt/format.h>
 
-    std::string answer = fmt::to_string(42);
+    efp::String answer = fmt::to_string(42);
   \endrst
  */
 template<typename T, FMT_ENABLE_IF(!std::is_integral<T>::value && !detail::has_format_as<T>::value)>
-inline auto to_string(const T& value) -> std::string {
+inline auto to_string(const T& value) -> efp::String {
     auto buffer = memory_buffer();
     detail::write<char>(appender(buffer), value);
     return {buffer.data(), buffer.size()};
 }
 
 template<typename T, FMT_ENABLE_IF(std::is_integral<T>::value)>
-FMT_NODISCARD inline auto to_string(T value) -> std::string {
+FMT_NODISCARD inline auto to_string(T value) -> efp::String {
     // The buffer should be large enough to store the number including the sign
     // or "false" for bool.
     constexpr int max_size = detail::digits10<T>() + 2;
     char buffer[max_size > 5 ? static_cast<unsigned>(max_size) : 5];
     char* begin = buffer;
-    return std::string(begin, detail::write<char>(begin, value));
+    return efp::String(begin, detail::write<char>(begin, value));
 }
 
 template<typename Char, size_t SIZE>
-FMT_NODISCARD auto to_string(const basic_memory_buffer<Char, SIZE>& buf)
-    -> std::basic_string<Char> {
+FMT_NODISCARD auto to_string(const basic_memory_buffer<Char, SIZE>& buf) -> efp::BasicString<Char> {
     auto size = buf.size();
-    detail::assume(size < std::basic_string<Char>().max_size());
-    return std::basic_string<Char>(buf.data(), size);
+    detail::assume(size < efp::BasicString<Char>().max_size());
+    return efp::BasicString<Char>(buf.data(), size);
 }
 
 template<typename T, FMT_ENABLE_IF(!std::is_integral<T>::value && detail::has_format_as<T>::value)>
-inline auto to_string(const T& value) -> std::string {
+inline auto to_string(const T& value) -> efp::String {
     return to_string(format_as(value));
 }
 
@@ -4841,12 +4851,12 @@ constexpr auto operator""_a(const char* s, size_t) -> detail::udl_arg<char> {
 #endif  // FMT_USE_USER_DEFINED_LITERALS
 
 template<typename Locale, FMT_ENABLE_IF(detail::is_locale<Locale>::value)>
-inline auto vformat(const Locale& loc, string_view fmt, format_args args) -> std::string {
+inline auto vformat(const Locale& loc, string_view fmt, format_args args) -> efp::String {
     return detail::vformat(loc, fmt, args);
 }
 
 template<typename Locale, typename... T, FMT_ENABLE_IF(detail::is_locale<Locale>::value)>
-inline auto format(const Locale& loc, format_string<T...> fmt, T&&... args) -> std::string {
+inline auto format(const Locale& loc, format_string<T...> fmt, T&&... args) -> efp::String {
     return fmt::vformat(loc, string_view(fmt), fmt::make_format_args(args...));
 }
 

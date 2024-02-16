@@ -139,7 +139,7 @@ format_facet<Locale>::format_facet(Locale& loc) {
     auto& numpunct = std::use_facet<std::numpunct<char>>(loc);
     grouping_ = numpunct.grouping();
     if (!grouping_.empty())
-        separator_ = std::string(1, numpunct.thousands_sep());
+        separator_ = efp::String(1, numpunct.thousands_sep());
 }
 
 template<>
@@ -1436,7 +1436,7 @@ FMT_FUNC void report_system_error(int error_code, const char* message) noexcept 
     report_error(format_system_error, error_code, message);
 }
 
-FMT_FUNC std::string vformat(string_view fmt, format_args args) {
+FMT_FUNC efp::String vformat(string_view fmt, format_args args) {
     // Don't optimize the "{}" case to keep the binary size small and because it
     // can be better optimized in fmt::format anyway.
     auto buffer = memory_buffer();

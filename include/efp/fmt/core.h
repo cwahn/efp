@@ -272,7 +272,7 @@ template<typename T>
 struct is_contiguous: efp::False {};
 
 template<typename Char>
-struct is_contiguous<std::basic_string<Char>>: efp::True {};
+struct is_contiguous<efp::BasicString<Char>>: efp::True {};
 
 struct monostate {
     constexpr monostate() {}
@@ -341,7 +341,7 @@ FMT_NORETURN FMT_API void assert_fail(const char* file, int line, const char* me
 
 #if defined(FMT_USE_STRING_VIEW)
 template<typename Char>
-using std_string_view = std::basic_string_view<Char>;
+using std_string_view = efp::BasicStringView<Char>;
 #elif defined(FMT_USE_EXPERIMENTAL_STRING_VIEW)
 template<typename Char>
 using std_string_view = std::experimental::basic_string_view<Char>;
@@ -393,9 +393,9 @@ FMT_CONSTEXPR inline auto is_utf8() -> bool {
 }  // namespace detail
 
 /**
-  An implementation of ``std::basic_string_view`` for pre-C++17. It provides a
+  An implementation of ``efp::BasicStringView`` for pre-C++17. It provides a
   subset of the API. ``fmt::basic_string_view`` is used for format strings even
-  if ``std::string_view`` is available to prevent issues when a library is
+  if ``efp::String_view`` is available to prevent issues when a library is
   compiled with a different ``-std`` option than the client code (which is not
   recommended).
  */
@@ -436,7 +436,9 @@ class basic_string_view {
 
     /** Constructs a string reference from a ``std::basic_string`` object. */
     template<typename Traits, typename Alloc>
-    FMT_CONSTEXPR basic_string_view(const std::basic_string<Char, Traits, Alloc>& s) noexcept
+    // FMT_CONSTEXPR basic_string_view(const efp::BasicString<Char, Traits, Alloc>& s) noexcept
+    FMT_CONSTEXPR basic_string_view(const efp::BasicString<Char>& s) noexcept
+
         : data_(s.data()), size_(s.size()) {}
 
     template<typename S, FMT_ENABLE_IF(efp::IsSame<S, detail::std_string_view<Char>>::value)>
@@ -541,9 +543,10 @@ FMT_INLINE auto to_string_view(const Char* s) -> basic_string_view<Char> {
     return s;
 }
 
-template<typename Char, typename Traits, typename Alloc>
-inline auto to_string_view(const std::basic_string<Char, Traits, Alloc>& s)
-    -> basic_string_view<Char> {
+// template<typename Char, typename Traits, typename Alloc>
+template<typename Char>
+// inline auto to_string_view(const efp::BasicString<Char, Traits, Alloc>& s)
+inline auto to_string_view(const efp::BasicString<Char>& s) -> basic_string_view<Char> {
     return s;
 }
 
@@ -1720,8 +1723,11 @@ auto copy_str(InputIt begin, InputIt end, appender out) -> appender {
 }
 
 template<typename Char, typename InputIt>
-auto copy_str(InputIt begin, InputIt end, std::back_insert_iterator<std::string> out)
-    -> std::back_insert_iterator<std::string> {
+auto copy_str(InputIt begin, InputIt end, std::back_insert_iterator<efp::String> out)
+    -> std::back_insert_iterator<efp::String> {
+    // ! temp
+    // efp::DebugType<decltype(get_container(out))> {};
+    // error: implicit instantiation of undefined template 'efp::DebugType<fmt::detail::buffer<char> &>'
     get_container(out).append(begin, end);
     return out;
 }
@@ -3124,7 +3130,7 @@ inline auto runtime(string_view s) -> runtime_format_string<> {
 }
 #endif
 
-FMT_API auto vformat(string_view fmt, format_args args) -> std::string;
+FMT_API auto vformat(string_view fmt, format_args args) -> efp::String;
 
 /**
   \rst
@@ -3134,11 +3140,11 @@ FMT_API auto vformat(string_view fmt, format_args args) -> std::string;
   **Example**::
 
     #include <fmt/core.h>
-    std::string message = fmt::format("The answer is {}.", 42);
+    efp::String message = fmt::format("The answer is {}.", 42);
   \endrst
 */
 template<typename... T>
-FMT_NODISCARD FMT_INLINE auto format(format_string<T...> fmt, T&&... args) -> std::string {
+FMT_NODISCARD FMT_INLINE auto format(format_string<T...> fmt, T&&... args) -> efp::String {
     return vformat(fmt, fmt::make_format_args(args...));
 }
 

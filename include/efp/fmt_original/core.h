@@ -17,6 +17,9 @@
 #include <string>
 #include <type_traits>
 
+// ! temp
+#include "efp/meta.hpp"
+
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
 #define FMT_VERSION 100101
 
@@ -1712,6 +1715,8 @@ enum : unsigned long long { has_named_args_bit = 1ULL << 62 };
 
 template<typename Char, typename InputIt>
 auto copy_str(InputIt begin, InputIt end, appender out) -> appender {
+    // ! temp
+    // efp::DebugType<decltype(get_container(out))> {};
     get_container(out).append(begin, end);
     return out;
 }
