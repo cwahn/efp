@@ -885,7 +885,7 @@ using is_signed = std::integral_constant<
     std::numeric_limits<T>::is_signed || std::is_same<T, int128_opt>::value>;
 
 template<typename T>
-using is_integer = bool_constant<
+using is_integer = efp::Bool<
     is_integral<T>::value && !std::is_same<T, bool>::value && !std::is_same<T, char>::value
     && !std::is_same<T, wchar_t>::value>;
 
@@ -925,17 +925,17 @@ template<typename T>
 using is_float128 = std::is_same<T, float128>;
 
 template<typename T>
-using is_floating_point = bool_constant<std::is_floating_point<T>::value || is_float128<T>::value>;
+using is_floating_point = efp::Bool<std::is_floating_point<T>::value || is_float128<T>::value>;
 
 template<typename T, bool = std::is_floating_point<T>::value>
 struct is_fast_float:
-    bool_constant<std::numeric_limits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
+    efp::Bool<std::numeric_limits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
 
 template<typename T>
 struct is_fast_float<T, false>: std::false_type {};
 
 template<typename T>
-using is_double_double = bool_constant<std::numeric_limits<T>::digits == 106>;
+using is_double_double = efp::Bool<std::numeric_limits<T>::digits == 106>;
 
 #ifndef FMT_USE_FULL_CACHE_DRAGONBOX
     #define FMT_USE_FULL_CACHE_DRAGONBOX 0

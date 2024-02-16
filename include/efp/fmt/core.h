@@ -247,8 +247,8 @@ FMT_BEGIN_NAMESPACE
 // using efp::EnableIf = typename std::enable_if<B, T>::type;
 // template<bool B, typename T, typename F>
 // using efp::Conditional = typename std::conditional<B, T, F>::type;
-template<bool B>
-using bool_constant = std::integral_constant<bool, B>;
+// template<bool B>
+// using efp::Bool = std::integral_constant<bool, B>;
 template<typename T>
 using remove_reference_t = typename std::remove_reference<T>::type;
 template<typename T>
@@ -1501,7 +1501,7 @@ template<typename T>
 using format_as_t = typename format_as_result<T>::type;
 
 template<typename T>
-struct has_format_as: bool_constant<!std::is_same<format_as_t<T>, void>::value> {};
+struct has_format_as: efp::Bool<!std::is_same<format_as_t<T>, void>::value> {};
 
 // Maps formatting arguments to core types.
 // arg_mapper reports errors by returning unformattable instead of using
@@ -1661,7 +1661,7 @@ struct arg_mapper {
 
     template<typename T, typename U = remove_const_t<T>>
     struct formattable:
-        bool_constant<
+        efp::Bool<
             has_const_formatter<U, Context>()
             || (has_formatter<U, Context>::value && !std::is_const<T>::value)> {};
 
@@ -2022,7 +2022,7 @@ using buffer_context = basic_format_context<detail::buffer_appender<Char>, Char>
 using format_context = buffer_context<char>;
 
 template<typename T, typename Char = char>
-using is_formattable = bool_constant<!std::is_base_of<
+using is_formattable = efp::Bool<!std::is_base_of<
     detail::unformattable,
     decltype(detail::arg_mapper<buffer_context<Char>>().map(std::declval<T&>()))>::value>;
 
