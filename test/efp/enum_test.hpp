@@ -81,7 +81,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Trivially copyable") {
             Enum<int, double> a = 42;
             const auto a_index = a.index();
-            Enum<int, double> b = std::move(a);
+            Enum<int, double> b = efp::move(a);
 
             CHECK(b.index() == a_index);
             CHECK(b.get<int>() == 42);
@@ -93,7 +93,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
                 Enum<int, MockRaii> a = MockRaii{};
                 CHECK(MockHW::resource_state_to_int() == 1);
 
-                Enum<int, MockRaii> b = std::move(a);
+                Enum<int, MockRaii> b = efp::move(a);
                 CHECK(MockHW::resource_state_to_int() == 1);
             }
             CHECK(MockHW::is_sound());
@@ -104,7 +104,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Trivially copyable") {
             Enum<int, double> a = 42;
             Enum<int, double> b = 0;
-            b = std::move(a);
+            b = efp::move(a);
 
             CHECK(b.index() == 0);
             CHECK(b.get<int>() == 42);
@@ -119,7 +119,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
                 Enum<int, MockRaii> b = MockRaii{};
                 CHECK(MockHW::resource_state_to_int() == 12);
 
-                b = std::move(a);
+                b = efp::move(a);
                 CHECK(MockHW::resource_state_to_int() == 1);
             }
             CHECK(MockHW::is_sound());

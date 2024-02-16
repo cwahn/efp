@@ -31,7 +31,7 @@ TEST_CASE("String class functionality", "[String]") {
 
     SECTION("Move Constructor") {
         String original("Hello");
-        String moved(std::move(original));
+        String moved(efp::move(original));
         CHECK(std::strcmp(moved.data(), "Hello") == 0);
         CHECK(original.empty());
     }
@@ -47,7 +47,7 @@ TEST_CASE("String class functionality", "[String]") {
     SECTION("Move Assignment Operator") {
         String str1("Hello");
         String str2;
-        str2 = std::move(str1);
+        str2 = efp::move(str1);
         CHECK(std::strcmp(str2.data(), "Hello") == 0);
         CHECK(str1.empty());
     }

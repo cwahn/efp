@@ -245,7 +245,7 @@ namespace detail {
         }
 
         EnumBase(EnumBase&& other) noexcept : _index(other._index) {
-            detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, std::move(other));
+            detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, efp::move(other));
             // Destructor calling will be done for the moved object.
             // Behavior is up to each variant.
         }
@@ -258,7 +258,7 @@ namespace detail {
                 _index = other._index;
                 detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>::impl(
                     *this,
-                    std::move(other)
+                    efp::move(other)
                 );
                 // Destructor calling will be done for the moved object.
                 // Behavior is up to each

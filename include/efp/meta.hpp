@@ -542,7 +542,7 @@ class TupleLeaf {
     // Lvalue constructor
     TupleLeaf(const A& value) : _value(value) {}
 
-    // Rvalue constructor, using std::move to ensure the object is moved
+    // Rvalue constructor, using efp::move to ensure the object is moved
     TupleLeaf(A&& value) : _value(move(value)) {}
 
     ~TupleLeaf() {}
@@ -952,7 +952,7 @@ constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
 // move
 
 template<typename A>
-ReferenceRemoved<A>&& move(A&& a) {
+constexpr ReferenceRemoved<A>&& move(A&& a) {
     return static_cast<ReferenceRemoved<A>&&>(a);
 }
 

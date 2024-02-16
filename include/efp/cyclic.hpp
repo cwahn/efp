@@ -50,7 +50,7 @@ class Vcb
 
     Vcb(Vcb&& other) noexcept {
         for (size_t i = 0; i < ct_size * 2; ++i) {
-            new (_buffer + i) A(std::move(other._buffer[i]));
+            new (_buffer + i) A(efp::move(other._buffer[i]));
         }
 
         _data = _buffer + (other._data - other._buffer);
@@ -59,7 +59,7 @@ class Vcb
     Vcb operator=(Vcb&& other) noexcept {
         for (size_t i = 0; i < ct_size * 2; ++i) {
             (_buffer + i)->~A();
-            new (_buffer + i) A(std::move(other._buffer[i]));
+            new (_buffer + i) A(efp::move(other._buffer[i]));
         }
 
         _data = _buffer + (other._data - other._buffer);
@@ -237,8 +237,8 @@ class Vcq
             const auto j = read_offset_other + i < ct_capacity
                 ? read_offset_other + i
                 : read_offset_other + i - ct_capacity;
-            new (_buffer + j) A(std::move(other._buffer[i]));
-            new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
+            new (_buffer + j) A(efp::move(other._buffer[i]));
+            new (_buffer + ct_capacity + j) A(efp::move(other._buffer[i]));
         }
 
         _size = other._size;
@@ -260,8 +260,8 @@ class Vcq
             const auto j = read_offset_other + i < ct_capacity
                 ? read_offset_other + i
                 : read_offset_other + i - ct_capacity;
-            new (_buffer + j) A(std::move(other._buffer[i]));
-            new (_buffer + ct_capacity + j) A(std::move(other._buffer[i]));
+            new (_buffer + j) A(efp::move(other._buffer[i]));
+            new (_buffer + ct_capacity + j) A(efp::move(other._buffer[i]));
         }
 
         _size = other._size;
@@ -311,7 +311,7 @@ class Vcq
     // ! Undefined if empty
 
     A pop_front() {
-        A value {std::move(*_read)};
+        A value {efp::move(*_read)};
 
         _read->~A();
         (_read + ct_capacity)->~A();

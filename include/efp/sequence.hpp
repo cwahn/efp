@@ -44,7 +44,7 @@ class Array {
 
     Array(Array&& other) noexcept {
         for (size_t i = 0; i < ct_size; ++i) {
-            new (_data + i) Element {std::move(other._data[i])};  // Move-construct each element
+            new (_data + i) Element {efp::move(other._data[i])};  // Move-construct each element
         }
     }
 
@@ -52,7 +52,7 @@ class Array {
         if (this != &other) {
             for (size_t i = 0; i < ct_size; ++i) {
                 (_data + i)->~Element();                              // Destroy each element
-                new (_data + i) Element {std::move(other._data[i])};  // Move-construct each element
+                new (_data + i) Element {efp::move(other._data[i])};  // Move-construct each element
             }
         }
         return *this;
@@ -256,7 +256,7 @@ class ArrVec {
     ArrVec(ArrVec&& other) noexcept : _size {other._size} {
         other._size = 0;
         for (size_t i = 0; i < _size; ++i) {
-            new (_data + i) Element {std::move(other._data[i])};
+            new (_data + i) Element {efp::move(other._data[i])};
         }
     }
 
@@ -289,7 +289,7 @@ class ArrVec {
             // Move data from the source object
             _size = other._size;
             for (size_t i = 0; i < _size; ++i) {
-                new (_data + i) Element {std::move(other._data[i])};
+                new (_data + i) Element {efp::move(other._data[i])};
             }
 
             // Reset the source object
@@ -414,7 +414,7 @@ class ArrVec {
                 "ArrVec::push_back: size must be less than or equal to ct_capacity"
             );
         } else {
-            new (_data + _size++) Element {std::move(value)};
+            new (_data + _size++) Element {efp::move(value)};
         }
     }
 
@@ -747,7 +747,7 @@ namespace detail {
                     static_cast<Element*>(::operator new[](new_capacity * sizeof(Element)));
 
                 for (size_t i = 0; i < _size; ++i) {
-                    new (new_data + i) Element {std::move(_data[i])};
+                    new (new_data + i) Element {efp::move(_data[i])};
                 }
 
                 ::operator delete[](_data);
@@ -771,7 +771,7 @@ namespace detail {
                 reserve(_capacity == 0 ? 1 : 2 * _capacity);
             }
 
-            new (_data + _size) Element {std::move(value)};
+            new (_data + _size) Element {efp::move(value)};
             ++_size;
         }
 
@@ -804,7 +804,7 @@ namespace detail {
             (_data + index)->~Element();
 
             for (size_t i = index; i < _size - 1; ++i) {
-                _data[i] = std::move(_data[i + 1]);
+                _data[i] = efp::move(_data[i + 1]);
             }
 
             --_size;

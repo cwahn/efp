@@ -74,7 +74,7 @@ TEST_CASE("Array Rule of five", "Array") {
         {
             MockHW::reset();
             Array<MockRaii, 3> a;
-            Array<MockRaii, 3> b = std::move(a);
+            Array<MockRaii, 3> b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 3);
         }
         CHECK(MockHW::is_sound());
@@ -85,7 +85,7 @@ TEST_CASE("Array Rule of five", "Array") {
             MockHW::reset();
             Array<MockRaii, 3> a;
             Array<MockRaii, 3> b;
-            b = std::move(a);
+            b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 3);
         }
         CHECK(MockHW::is_sound());
@@ -139,7 +139,7 @@ TEST_CASE("ArrVec Rule of 5", "ArrVec") {
             a.push_back(MockRaii {});
             a.push_back(MockRaii {});
             CHECK(MockHW::remaining_resource_count() == 2);
-            ArrVec<MockRaii, 3> b = std::move(a);
+            ArrVec<MockRaii, 3> b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 2);
         }
         CHECK(MockHW::is_sound());
@@ -154,7 +154,7 @@ TEST_CASE("ArrVec Rule of 5", "ArrVec") {
             CHECK(MockHW::remaining_resource_count() == 2);
             ArrVec<MockRaii, 3> b;
             CHECK(MockHW::remaining_resource_count() == 2);
-            b = std::move(a);
+            b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 2);
         }
         CHECK(MockHW::is_sound());
@@ -206,7 +206,7 @@ TEST_CASE("Vector Rule of five", "Vector") {
             Vector<MockRaii> a;
             a.push_back(MockRaii {});
             a.push_back(MockRaii {});
-            Vector<MockRaii> b = std::move(a);
+            Vector<MockRaii> b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 2);
         }
         CHECK(MockHW::is_sound());
@@ -220,7 +220,7 @@ TEST_CASE("Vector Rule of five", "Vector") {
             a.push_back(MockRaii {});
             Vector<MockRaii> b;
             CHECK(MockHW::remaining_resource_count() == 2);
-            b = std::move(a);
+            b = efp::move(a);
             CHECK(MockHW::remaining_resource_count() == 2);
         }
         CHECK(MockHW::is_sound());

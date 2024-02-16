@@ -72,7 +72,7 @@ TEST_CASE("Vcb Rule of 5", "Vcb") {
                 Vcb<MockRaii, 3> vcb;
                 CHECK(MockHW::remaining_resource_count() == 6);
 
-                Vcb<MockRaii, 3> vcb_move = std::move(vcb);
+                Vcb<MockRaii, 3> vcb_move = efp::move(vcb);
                 CHECK(MockHW::remaining_resource_count() == 6);
             }
             CHECK(MockHW::is_sound());
@@ -92,7 +92,7 @@ TEST_CASE("Vcb Rule of 5", "Vcb") {
                 Vcb<MockRaii, 3> vcb_move;
                 CHECK(MockHW::remaining_resource_count() == 12);
 
-                vcb_move = std::move(vcb);
+                vcb_move = efp::move(vcb);
                 CHECK(MockHW::remaining_resource_count() == 6);
             }
             CHECK(MockHW::is_sound());
@@ -228,7 +228,7 @@ TEST_CASE("Vcq Rule of 5", "Vcq") {
                 vcq.push_back(MockRaii{});
                 vcq.push_back(MockRaii{});
 
-                Vcq<MockRaii, 3> vcq_move = std::move(vcq);
+                Vcq<MockRaii, 3> vcq_move = efp::move(vcq);
             }
             CHECK(MockHW::is_sound());
         }
@@ -245,7 +245,7 @@ TEST_CASE("Vcq Rule of 5", "Vcq") {
                 vcq.push_back(MockRaii{});
                 vcq.push_back(MockRaii{});
 
-                Vcq<MockRaii, 3> vcq_move = std::move(vcq);
+                Vcq<MockRaii, 3> vcq_move = efp::move(vcq);
             }
             CHECK(MockHW::is_sound());
         }
@@ -264,7 +264,7 @@ TEST_CASE("Vcq Rule of 5", "Vcq") {
 
                 Vcq<MockRaii, 3> vcq_move;
 
-                vcq_move = std::move(vcq);
+                vcq_move = efp::move(vcq);
             }
             CHECK(MockHW::is_sound());
         }
@@ -283,7 +283,7 @@ TEST_CASE("Vcq Rule of 5", "Vcq") {
 
                 Vcq<MockRaii, 3> vcq_move;
 
-                vcq_move = std::move(vcq);
+                vcq_move = efp::move(vcq);
             }
             CHECK(MockHW::is_sound());
         }

@@ -209,7 +209,7 @@ TEST_CASE("MockHW and MockRaii", "MockHW") {
             CHECK(MockHW::remaining_resource_count() == 3);
             CHECK(MockHW::resource_state_to_int() == 234);
 
-            b = std::move(c);
+            b = efp::move(c);
             CHECK(MockHW::remaining_resource_count() == 2);
             CHECK(MockHW::resource_state_to_int() == 34);
         }
