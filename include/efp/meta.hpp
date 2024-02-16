@@ -5,6 +5,8 @@
 
 namespace efp {
 
+// Unit
+
 struct Unit {
     constexpr bool operator==(const Unit&) const noexcept {
         return true;
@@ -23,32 +25,32 @@ template<typename A, A v>
 using CtConst = std::integral_constant<A, v>;
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<bool, lhs == rhs> operator==(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator==(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<bool, lhs == rhs> {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<bool, lhs != rhs> operator!=(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator!=(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<bool, lhs != rhs> {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<A, lhs + rhs> operator+(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator+(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs + rhs> {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<A, lhs - rhs> operator-(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator-(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs - rhs> {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<A, lhs * rhs> operator*(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator*(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs * rhs> {
     return {};
 }
 
 template<typename A, A lhs, A rhs>
-constexpr CtConst<A, lhs / rhs> operator/(CtConst<A, lhs>, CtConst<A, rhs>) {
+constexpr auto operator/(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs / rhs> {
     return {};
 }
 
