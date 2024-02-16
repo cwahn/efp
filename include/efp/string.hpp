@@ -1,6 +1,8 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
+#include <cstring>
+
 #include "efp/prelude.hpp"
 #include "efp/sequence.hpp"
 
@@ -70,17 +72,40 @@ class CString {
     const char* _data;
 };
 
-template<>
-class Vector<char>: public detail::VectorBase<char> {
+namespace detail {
+    template<typename T>
+    struct IsCharType: False {};
+
+    // Specializations for character types
+    template<>
+    struct IsCharType<char>: True {};
+
+    template<>
+    struct IsCharType<wchar_t>: True {};
+
+    template<>
+    struct IsCharType<char16_t>: True {};
+
+    template<>
+    struct IsCharType<char32_t>: True {};
+
+#if __cplusplus >= 202002L
+    template<>
+    struct IsCharType<char8_t>: True {};  // C++20 char8_t support
+#endif
+}  // namespace detail
+
+template<typename Char>
+class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::VectorBase<Char> {
   public:
-    using Base = detail::VectorBase<char>;
+    using Base = detail::VectorBase<Char>;
     using Base::Base;
 
-    Vector(const char* c_str) {
-        _capacity = strlen(c_str);
-        _data = static_cast<char*>(::operator new[](_capacity * sizeof(char)));
-        _size = _capacity;
-        memcpy(_data, c_str, _size);
+    Vector(const Char* c_str) {
+        Base::_capacity = strlen(c_str);
+        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
+        Base::_size = Base::_capacity;
+        memcpy(Base::_data, c_str, Base::_size);
     }
 
     bool operator==(const Vector& other) const {
@@ -88,34 +113,33 @@ class Vector<char>: public detail::VectorBase<char> {
     }
 
     // Specialized equality comparison operator with const char *
-    bool operator==(const char* c_str) const {
+    bool operator==(const Char* c_str) const {
         // Check if both are null pointers
-        if (_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr)
             return true;
 
         // If one is null and the other is not, they can't be equal
-        if (_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr)
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (strncmp(_data, c_str, _size) != 0)
+        if (strncmp(Base::_data, c_str, Base::_size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
-        return c_str[_size] == '\0';
+        return c_str[Base::_size] == '\0';
     }
 
     // todo STL only
     operator std::string() const {
-        return std::string(_data, _size);
+        return std::string(Base::_data, Base::_size);
     }
 
     // todo Change to hold one extra capacity for null character
     const CString c_str() const {
-        const size_t _size = size();
-        char* extended_buffer = new char[_size + 1];
-        memcpy(extended_buffer, data(), _size);
-        extended_buffer[_size] = '\0';
+        Char* extended_buffer = new char[Base::_size + 1];
+        memcpy(extended_buffer, Base::_data, Base::_size);
+        extended_buffer[Base::_size] = '\0';
         return CString(extended_buffer);  // Mark for deletion.
     }
 
@@ -126,11 +150,21 @@ class Vector<char>: public detail::VectorBase<char> {
 
     // todo Interface with StringView
     void append_mut(const Vector& string) {
-        for_each([&](char c) { push_back(c); }, string);
+        for_each([&](Char c) { Base::push_back(c); }, string);
     }
 };
 
 using String = Vector<char>;
+
+using WString = Vector<wchar_t>;
+
+using U16String = Vector<char16_t>;
+
+using U32String = Vector<char32_t>;
+
+#if __cplusplus >= 202002L
+using U8String = Vector<char8_t>;
+#endif
 
 // VectorView<const char> specialization for StringView
 template<>

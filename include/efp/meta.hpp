@@ -948,7 +948,7 @@ constexpr A _foldl(F f, A a, Bs... bs) {
 // Before C++17, recursive implementation
 template<typename F, typename A, typename B, typename... Bs>
 constexpr A _foldl(F f, A a, B b, Bs... bs) {
-    return _foldl(f, f(forward<A>(a), forward<B>(b)), forward<Bs>(bs)...);
+    return _foldl(f, f(efp::forward<A>(a), efp::forward<B>(b)), efp::forward<Bs>(bs)...);
 }
 #endif
 

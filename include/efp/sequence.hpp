@@ -871,7 +871,7 @@ namespace detail {
     };
 }  // namespace detail
 
-template<typename A>
+template<typename A, typename = void>
 class Vector: public detail::VectorBase<A> {
   public:
     using Base = detail::VectorBase<A>;
