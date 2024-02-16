@@ -12,11 +12,12 @@
 #include <cstdio>   // std::FILE
 #include <cstring>  // std::strlen
 #include <iterator>
-#include <limits>
+// #include <limits>
 #include <memory>  // std::addressof
 // #include <string>
 #include <type_traits>
 
+#include "efp/limits.hpp"
 #include "efp/string.hpp"
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
@@ -2423,11 +2424,11 @@ parse_nonnegative_int(const Char*& begin, const Char* end, int error_value) noex
     } while (p != end && '0' <= *p && *p <= '9');
     auto num_digits = p - begin;
     begin = p;
-    if (num_digits <= std::numeric_limits<int>::digits10)
+    if (num_digits <= efp::NumericLimits<int>::digits10)
         return static_cast<int>(value);
     // Check for overflow.
-    const unsigned max = to_unsigned((std::numeric_limits<int>::max)());
-    return num_digits == std::numeric_limits<int>::digits10 + 1
+    const unsigned max = to_unsigned((efp::NumericLimits<int>::max)());
+    return num_digits == efp::NumericLimits<int>::digits10 + 1
             && prev * 10ull + unsigned(p[-1] - '0') <= max
         ? static_cast<int>(value)
         : error_value;
@@ -2456,7 +2457,7 @@ FMT_CONSTEXPR auto do_parse_arg_id(const Char* begin, const Char* end, Handler&&
     Char c = *begin;
     if (c >= '0' && c <= '9') {
         int index = 0;
-        constexpr int max = (std::numeric_limits<int>::max)();
+        constexpr int max = (efp::NumericLimits<int>::max)();
         if (c != '0')
             index = parse_nonnegative_int(begin, end, max);
         else

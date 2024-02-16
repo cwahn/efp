@@ -37,7 +37,7 @@
 #include <cstdint>           // uint32_t
 #include <cstring>           // std::memcpy
 #include <initializer_list>  // std::initializer_list
-#include <limits>            // std::numeric_limits
+#include <limits>            // efp::NumericLimits
 #include <memory>            // std::uninitialized_copy
 #include <stdexcept>         // std::runtime_error
 #include <system_error>      // std::system_error
@@ -526,18 +526,18 @@ using uintptr_t = uint128_t;
 #endif
 
 // Returns the largest possible value for type T. Same as
-// std::numeric_limits<T>::max() but shorter and not affected by the max macro.
+// efp::NumericLimits<T>::max() but shorter and not affected by the max macro.
 template<typename T>
 constexpr auto max_value() -> T {
-    return (std::numeric_limits<T>::max)();
+    return (efp::NumericLimits<T>::max)();
 }
 
 template<typename T>
 constexpr auto num_bits() -> int {
-    return std::numeric_limits<T>::digits;
+    return efp::NumericLimits<T>::digits;
 }
 
-// std::numeric_limits<T>::digits may return 0 for 128-bit ints.
+// efp::NumericLimits<T>::digits may return 0 for 128-bit ints.
 template<>
 constexpr auto num_bits<int128_opt>() -> int {
     return 128;
@@ -881,7 +881,7 @@ struct is_integral<uint128_t>: efp::True {};
 
 template<typename T>
 using is_signed = std::
-    integral_constant<bool, std::numeric_limits<T>::is_signed || efp::IsSame<T, int128_opt>::value>;
+    integral_constant<bool, efp::NumericLimits<T>::is_signed || efp::IsSame<T, int128_opt>::value>;
 
 template<typename T>
 using is_integer = efp::Bool<
@@ -928,13 +928,13 @@ using is_floating_point = efp::Bool<std::is_floating_point<T>::value || is_float
 
 template<typename T, bool = std::is_floating_point<T>::value>
 struct is_fast_float:
-    efp::Bool<std::numeric_limits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
+    efp::Bool<efp::NumericLimits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
 
 template<typename T>
 struct is_fast_float<T, false>: efp::False {};
 
 template<typename T>
-using is_double_double = efp::Bool<std::numeric_limits<T>::digits == 106>;
+using is_double_double = efp::Bool<efp::NumericLimits<T>::digits == 106>;
 
 #ifndef FMT_USE_FULL_CACHE_DRAGONBOX
     #define FMT_USE_FULL_CACHE_DRAGONBOX 0
@@ -1378,7 +1378,7 @@ FMT_CONSTEXPR20 inline auto count_digits(uint32_t n) -> int {
 
 template<typename Int>
 constexpr auto digits10() noexcept -> int {
-    return std::numeric_limits<Int>::digits10;
+    return efp::NumericLimits<Int>::digits10;
 }
 
 template<>
@@ -1731,7 +1731,7 @@ namespace dragonbox {
     struct float_info<
         T,
         efp::EnableIf<
-            std::numeric_limits<T>::digits == 64 || std::numeric_limits<T>::digits == 113
+            efp::NumericLimits<T>::digits == 64 || efp::NumericLimits<T>::digits == 113
             || is_float128<T>::value>> {
         using carrier_uint = detail::uint128_t;
         static const int exponent_bits = 15;
@@ -1758,17 +1758,17 @@ namespace dragonbox {
 template<typename Float>
 constexpr bool has_implicit_bit() {
     // An 80-bit FP number has a 64-bit significand an no implicit bit.
-    return std::numeric_limits<Float>::digits != 64;
+    return efp::NumericLimits<Float>::digits != 64;
 }
 
 // Returns the number of significand bits stored in Float. The implicit bit is
 // not counted since it is not stored.
 template<typename Float>
 constexpr int num_significand_bits() {
-    // std::numeric_limits may not support __float128.
+    // efp::NumericLimits may not support __float128.
     return is_float128<Float>()
         ? 112
-        : (std::numeric_limits<Float>::digits - (has_implicit_bit<Float>() ? 1 : 0));
+        : (efp::NumericLimits<Float>::digits - (has_implicit_bit<Float>() ? 1 : 0));
 }
 
 template<typename Float>
@@ -1780,8 +1780,8 @@ constexpr auto exponent_mask() -> typename dragonbox::float_info<Float>::carrier
 
 template<typename Float>
 constexpr auto exponent_bias() -> int {
-    // std::numeric_limits may not support __float128.
-    return is_float128<Float>() ? 16383 : std::numeric_limits<Float>::max_exponent - 1;
+    // efp::NumericLimits may not support __float128.
+    return is_float128<Float>() ? 16383 : efp::NumericLimits<Float>::max_exponent - 1;
 }
 
 // Writes the exponent exp in the form "[+-]d{2,3}" to buffer.
@@ -1829,7 +1829,7 @@ struct basic_fp {
     // Assigns n to this and return true iff predecessor is closer than successor.
     template<typename Float, FMT_ENABLE_IF(!is_double_double<Float>::value)>
     FMT_CONSTEXPR auto assign(Float n) -> bool {
-        static_assert(std::numeric_limits<Float>::digits <= 113, "unsupported FP");
+        static_assert(efp::NumericLimits<Float>::digits <= 113, "unsupported FP");
         // Assume Float is in the format [sign][exponent][significand].
         using carrier_uint = typename dragonbox::float_info<Float>::carrier_uint;
         const auto num_float_significand_bits = detail::num_significand_bits<Float>();
@@ -1854,7 +1854,7 @@ struct basic_fp {
 
     template<typename Float, FMT_ENABLE_IF(is_double_double<Float>::value)>
     FMT_CONSTEXPR auto assign(Float n) -> bool {
-        static_assert(std::numeric_limits<double>::is_iec559, "unsupported FP");
+        static_assert(efp::NumericLimits<double>::is_iec559, "unsupported FP");
         return assign(static_cast<double>(n));
     }
 };
@@ -3013,7 +3013,7 @@ struct has_isfinite<T, efp::EnableIf<sizeof(std::isfinite(T())) != 0>>: efp::Tru
 
 template<typename T, FMT_ENABLE_IF(std::is_floating_point<T>::value&& has_isfinite<T>::value)>
 FMT_CONSTEXPR20 bool isfinite(T value) {
-    constexpr T inf = T(std::numeric_limits<double>::infinity());
+    constexpr T inf = T(efp::NumericLimits<double>::infinity());
     if (is_constant_evaluated())
         return !detail::isnan(value) && value < inf && value > -inf;
     return std::isfinite(value);
@@ -3021,7 +3021,7 @@ FMT_CONSTEXPR20 bool isfinite(T value) {
 
 template<typename T, FMT_ENABLE_IF(!has_isfinite<T>::value)>
 FMT_CONSTEXPR bool isfinite(T value) {
-    T inf = T(std::numeric_limits<double>::infinity());
+    T inf = T(efp::NumericLimits<double>::infinity());
     // std::isfinite doesn't support __float128.
     return !detail::isnan(value) && value < inf && value > -inf;
 }
@@ -3030,7 +3030,7 @@ template<typename T, FMT_ENABLE_IF(is_floating_point<T>::value)>
 FMT_INLINE FMT_CONSTEXPR bool signbit(T value) {
     if (is_constant_evaluated()) {
 #ifdef __cpp_if_constexpr
-        if constexpr (std::numeric_limits<double>::is_iec559) {
+        if constexpr (efp::NumericLimits<double>::is_iec559) {
             auto bits = detail::bit_cast<uint64_t>(static_cast<double>(value));
             return (bits >> (num_bits<uint64_t>() - 1)) != 0;
         }
@@ -3639,7 +3639,7 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs,
             int shift = countl_zero(significand);
             FMT_ASSERT(shift >= num_bits<uint64_t>() - num_significand_bits<double>(), "");
             shift -= (num_bits<uint64_t>() - num_significand_bits<double>() - 2);
-            exponent = (std::numeric_limits<double>::min_exponent - num_significand_bits<double>())
+            exponent = (efp::NumericLimits<double>::min_exponent - num_significand_bits<double>())
                 - shift;
             significand <<= shift;
         }
@@ -4306,7 +4306,7 @@ class format_int {
   private:
     // Buffer should be large enough to hold all digits (digits10 + 1),
     // a sign and a null character.
-    enum { buffer_size = std::numeric_limits<unsigned long long>::digits10 + 3 };
+    enum { buffer_size = efp::NumericLimits<unsigned long long>::digits10 + 3 };
 
     mutable char buffer_[buffer_size];
     char* str_;

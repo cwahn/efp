@@ -1281,7 +1281,7 @@ namespace dragonbox {
             // Subnormal case; the interval is always regular.
             if (significand == 0)
                 return {0, 0};
-            exponent = std::numeric_limits<T>::min_exponent - num_significand_bits<T>() - 1;
+            exponent = efp::NumericLimits<T>::min_exponent - num_significand_bits<T>() - 1;
         }
 
         const bool include_left_endpoint = (significand % 2 == 0);
