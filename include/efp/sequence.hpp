@@ -1175,6 +1175,10 @@ constexpr auto data(ArrVecView<A, n>& as) -> const A* {
 }
 
 namespace detail {
+
+    // todo Custom allocator support
+    // VectorViewBase
+
     template<typename A>
     class VectorViewBase {
       public:

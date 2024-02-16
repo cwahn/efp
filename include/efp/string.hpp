@@ -214,10 +214,10 @@ using U8StringView = BasicStringView<char8_t>;
 
 #if defined(__STDC_HOSTED__)
 
-// inline std::ostream& operator<<(std::ostream& os, const String& string) {
-//     for_each([&](char c) { os << c; }, string);
-//     return os;
-// }
+    // inline std::ostream& operator<<(std::ostream& os, const String& string) {
+    //     for_each([&](char c) { os << c; }, string);
+    //     return os;
+    // }
 
 #endif
 
