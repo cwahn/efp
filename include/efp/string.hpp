@@ -132,109 +132,7 @@ using U32String = BasicString<char32_t>;
 using U8String = BasicString<char8_t>;
 #endif
 
-// todo BasicStringView
-
-// template<>
-// class VectorView<const char> {
-//   public:
-//     using Element = const char;
-//     static constexpr size_t ct_size = dyn;
-//     static constexpr size_t ct_capacity = dyn;
-
-//     VectorView() : _data(nullptr), _size(0), _capacity(0) {}
-
-//     VectorView(const Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
-//         // Ensure that data is not nullptr for a non-empty view.
-//         if (size > 0 && _data == nullptr) {
-//             throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
-//         }
-//     }
-
-//     // StringView could be constructed from string literal
-//     VectorView(const Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
-//         // Ensure that data is not nullptr for a non-empty view.
-//     }
-
-//     VectorView& operator=(const VectorView& other) {
-//         if (this != &other) {
-//             _data = other._data;
-//             _size = other._size;
-//             _capacity = other._capacity;
-//         }
-//         return *this;
-//     }
-
-//     const Element& operator[](size_t index) const {
-//         return _data[index];
-//     }
-
-//     const Element& operator[](size_t index) {
-//         return _data[index];
-//     }
-
-//     bool operator==(const VectorView& other) const {
-//         return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
-//     }
-
-//     // Specialized equality comparison operator with const char *
-//     bool operator==(const char* c_str) const {
-//         // Check if both are null pointers
-//         if (_data == nullptr && c_str == nullptr)
-//             return true;
-
-//         // If one is null and the other is not, they can't be equal
-//         if (_data == nullptr || c_str == nullptr)
-//             return false;
-
-//         // Compare the contents up to the size of the SequenceView
-//         if (std::strncmp(_data, c_str, _size) != 0)
-//             return false;
-
-//         // Check if the character at the position _size in c_str is the null character
-//         return c_str[_size] == '\0';
-//     }
-
-//     size_t size() const {
-//         return _size;
-//     }
-
-//     size_t capacity() const {
-//         return _capacity;
-//     }
-
-//     const Element* data() const {
-//         return _data;
-//     }
-
-//     const Element* data() {
-//         return _data;
-//     }
-
-//     const Element* begin() const {
-//         return _data;
-//     }
-
-//     const Element* begin() {
-//         return _data;
-//     }
-
-//     const Element* end() const {
-//         return _data + _size;
-//     }
-
-//     const Element* end() {
-//         return _data + _size;
-//     }
-
-//     bool empty() const {
-//         return _size == 0;
-//     }
-
-//   private:
-//     Element* _data;
-//     size_t _size;
-//     size_t _capacity;
-// };
+// BasicStringView specialization
 
 template<typename Char>
 class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
@@ -281,6 +179,7 @@ class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
 };
 
 // BasicSstringView
+
 template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
 using BasicStringView = VectorView<Char>;
 
@@ -313,12 +212,15 @@ using U8StringView = BasicStringView<char8_t>;
 //     return result;
 // }
 
-// todo STL only
+#if defined(__STDC_HOSTED__)
 
 // inline std::ostream& operator<<(std::ostream& os, const String& string) {
 //     for_each([&](char c) { os << c; }, string);
 //     return os;
 // }
+
+#endif
+
 };  // namespace efp
 
 #endif
