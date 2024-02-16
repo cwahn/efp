@@ -132,7 +132,8 @@ using U32String = BasicString<char32_t>;
 using U8String = BasicString<char8_t>;
 #endif
 
-// VectorView<const char> specialization for StringView
+// todo BasicStringView
+
 template<>
 class VectorView<const char> {
   public:

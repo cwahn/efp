@@ -1174,97 +1174,110 @@ constexpr auto data(ArrVecView<A, n>& as) -> A* {
     return as.data();
 }
 
-template<typename A>
-class VectorView {
+namespace detail {
+    template<typename A>
+    class VectorViewBase {
+      public:
+        using Element = A;
+        using CtSize = Size<dyn>;
+        using CtCapacity = Size<dyn>;
+
+        VectorViewBase() : _data {nullptr}, _size {0}, _capacity {0} {}
+
+        VectorViewBase(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
+            // Ensure that data is not nullptr for a non-empty view.
+            if (size > 0 && _data == nullptr) {
+                throw std::runtime_error(
+                    "VectorViewBase::VectorViewBase: data must not be nullptr for a non-empty view"
+                );
+            }
+        }
+
+        // Constructor from ArrayView
+        template<size_t ct_size_>
+        VectorViewBase(const ArrayView<Element, ct_size_>& as)
+            : _data(as.data()), _size(length(as)) {}
+
+        // Constructor from ArrVecView
+        template<size_t ct_cap_>
+        VectorViewBase(const ArrVecView<Element, ct_cap_>& as)
+            : _data(as.data()), _size(length(as)) {}
+
+        VectorViewBase& operator=(const VectorViewBase& other) {
+            if (this != &other) {
+                _data = other._data;
+                _size = other._size;
+                _capacity = other._capacity;
+            }
+            return *this;
+        }
+
+        Element& operator[](size_t index) {
+            return _data[index];
+        }
+
+        const Element& operator[](size_t index) const {
+            return _data[index];
+        }
+
+        bool operator==(const VectorViewBase& other) const {
+            return (_data == other._data) && (_size == other._size)
+                && (_capacity == other._capacity);
+        }
+
+        size_t size() const {
+            return _size;
+        }
+
+        size_t capacity() const {
+            return _capacity;
+        }
+
+        const Element* data() const {
+            return _data;
+        }
+
+        Element* data() {
+            return _data;
+        }
+
+        Element* begin() {
+            return _data;
+        }
+
+        const Element* begin() const {
+            return _data;
+        }
+
+        Element* end() {
+            return _data + _size;
+        }
+
+        const Element* end() const {
+            return _data + _size;
+        }
+
+        bool empty() const {
+            return _size == 0;
+        }
+
+      private:
+        Element* _data;
+        size_t _size;
+        size_t _capacity;
+    };
+}  // namespace detail
+
+template<typename A, typename = void>
+class VectorView: public detail::VectorViewBase<A> {
   public:
-    using Element = A;
-    using CtSize = Size<dyn>;
-    using CtCapacity = Size<dyn>;
-
-    VectorView() : _data {nullptr}, _size {0}, _capacity {0} {}
-
-    VectorView(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
-        // Ensure that data is not nullptr for a non-empty view.
-        if (size > 0 && _data == nullptr) {
-            throw std::runtime_error(
-                "VectorView::VectorView: data must not be nullptr for a non-empty view"
-            );
-        }
-    }
-
-    // Constructor from ArrayView
-    template<size_t ct_size_>
-    VectorView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
-
-    // Constructor from ArrVecView
-    template<size_t ct_cap_>
-    VectorView(const ArrVecView<Element, ct_cap_>& as) : _data(as.data()), _size(length(as)) {}
-
-    VectorView& operator=(const VectorView& other) {
-        if (this != &other) {
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
-        }
-        return *this;
-    }
-
-    Element& operator[](size_t index) {
-        return _data[index];
-    }
-
-    const Element& operator[](size_t index) const {
-        return _data[index];
-    }
+    using Base = detail::VectorViewBase<A>;
+    using Base::Base;
 
     bool operator==(const VectorView& other) const {
-        return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
+        return Base::operator==(other);
     }
-
-    size_t size() const {
-        return _size;
-    }
-
-    size_t capacity() const {
-        return _capacity;
-    }
-
-    const Element* data() const {
-        return _data;
-    }
-
-    Element* data() {
-        return _data;
-    }
-
-    Element* begin() {
-        return _data;
-    }
-
-    const Element* begin() const {
-        return _data;
-    }
-
-    Element* end() {
-        return _data + _size;
-    }
-
-    const Element* end() const {
-        return _data + _size;
-    }
-
-    bool empty() const {
-        return _size == 0;
-    }
-
-  private:
-    Element* _data;
-    size_t _size;
-    size_t _capacity;
 };
-
-// template <typename A>
-// using VectorView = SequenceView<A, dyn, dyn>;
 
 template<typename A>
 struct ElementImpl<VectorView<A>> {
