@@ -249,7 +249,7 @@ FMT_BEGIN_NAMESPACE
 // template<bool B, typename T, typename F>
 // using efp::Conditional = typename std::conditional<B, T, F>::type;
 // template<bool B>
-// using efp::Bool = std::integral_constant<bool, B>;
+// using efp::Bool = efp::CtConst<bool, B>;
 // template<typename T>
 // using efp::ReferenceRemoved = typename std::remove_reference<T>::type;
 // template<typename T>
@@ -605,11 +605,11 @@ enum class type {
 
 // Maps core type T to the corresponding type enum constant.
 template<typename T, typename Char>
-struct type_constant: std::integral_constant<type, type::custom_type> {};
+struct type_constant: efp::CtConst<type, type::custom_type> {};
 
 #define FMT_TYPE_CONSTANT(Type, constant) \
     template<typename Char> \
-    struct type_constant<Type, Char>: std::integral_constant<type, type::constant> {}
+    struct type_constant<Type, Char>: efp::CtConst<type, type::constant> {}
 
 FMT_TYPE_CONSTANT(int, int_type);
 FMT_TYPE_CONSTANT(unsigned, uint_type);
