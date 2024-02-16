@@ -134,110 +134,167 @@ using U8String = BasicString<char8_t>;
 
 // todo BasicStringView
 
-template<>
-class VectorView<const char> {
+// template<>
+// class VectorView<const char> {
+//   public:
+//     using Element = const char;
+//     static constexpr size_t ct_size = dyn;
+//     static constexpr size_t ct_capacity = dyn;
+
+//     VectorView() : _data(nullptr), _size(0), _capacity(0) {}
+
+//     VectorView(const Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
+//         // Ensure that data is not nullptr for a non-empty view.
+//         if (size > 0 && _data == nullptr) {
+//             throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
+//         }
+//     }
+
+//     // StringView could be constructed from string literal
+//     VectorView(const Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
+//         // Ensure that data is not nullptr for a non-empty view.
+//     }
+
+//     VectorView& operator=(const VectorView& other) {
+//         if (this != &other) {
+//             _data = other._data;
+//             _size = other._size;
+//             _capacity = other._capacity;
+//         }
+//         return *this;
+//     }
+
+//     const Element& operator[](size_t index) const {
+//         return _data[index];
+//     }
+
+//     const Element& operator[](size_t index) {
+//         return _data[index];
+//     }
+
+//     bool operator==(const VectorView& other) const {
+//         return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
+//     }
+
+//     // Specialized equality comparison operator with const char *
+//     bool operator==(const char* c_str) const {
+//         // Check if both are null pointers
+//         if (_data == nullptr && c_str == nullptr)
+//             return true;
+
+//         // If one is null and the other is not, they can't be equal
+//         if (_data == nullptr || c_str == nullptr)
+//             return false;
+
+//         // Compare the contents up to the size of the SequenceView
+//         if (std::strncmp(_data, c_str, _size) != 0)
+//             return false;
+
+//         // Check if the character at the position _size in c_str is the null character
+//         return c_str[_size] == '\0';
+//     }
+
+//     size_t size() const {
+//         return _size;
+//     }
+
+//     size_t capacity() const {
+//         return _capacity;
+//     }
+
+//     const Element* data() const {
+//         return _data;
+//     }
+
+//     const Element* data() {
+//         return _data;
+//     }
+
+//     const Element* begin() const {
+//         return _data;
+//     }
+
+//     const Element* begin() {
+//         return _data;
+//     }
+
+//     const Element* end() const {
+//         return _data + _size;
+//     }
+
+//     const Element* end() {
+//         return _data + _size;
+//     }
+
+//     bool empty() const {
+//         return _size == 0;
+//     }
+
+//   private:
+//     Element* _data;
+//     size_t _size;
+//     size_t _capacity;
+// };
+
+template<typename Char>
+class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
+    public detail::VectorViewBase<Char> {
   public:
-    using Element = const char;
-    static constexpr size_t ct_size = dyn;
-    static constexpr size_t ct_capacity = dyn;
+    using Base = detail::VectorViewBase<Char>;
+    using Base::Base;
 
-    VectorView() : _data(nullptr), _size(0), _capacity(0) {}
-
-    VectorView(const Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
-        // Ensure that data is not nullptr for a non-empty view.
-        if (size > 0 && _data == nullptr) {
-            throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
-        }
-    }
-
-    // StringView could be constructed from string literal
-    VectorView(const Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
-        // Ensure that data is not nullptr for a non-empty view.
-    }
-
-    VectorView& operator=(const VectorView& other) {
-        if (this != &other) {
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
-        }
-        return *this;
-    }
-
-    const Element& operator[](size_t index) const {
-        return _data[index];
-    }
-
-    const Element& operator[](size_t index) {
-        return _data[index];
+    VectorView(const Char* c_str) {
+        Base::_size = std::strlen(c_str);
+        Base::_data = c_str;
     }
 
     bool operator==(const VectorView& other) const {
-        return (_data == other._data) && (_size == other._size) && (_capacity == other._capacity);
+        return Base::operator==(other);
     }
 
     // Specialized equality comparison operator with const char *
-    bool operator==(const char* c_str) const {
+    bool operator==(const Char* c_str) const {
         // Check if both are null pointers
-        if (_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr)
             return true;
 
         // If one is null and the other is not, they can't be equal
-        if (_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr)
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (std::strncmp(_data, c_str, _size) != 0)
+        if (std::strncmp(Base::_data, c_str, Base::_size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
-        return c_str[_size] == '\0';
+        return c_str[Base::_size] == '\0';
     }
 
-    size_t size() const {
-        return _size;
+    // todo STL only
+    operator std::string() const {
+        return std::string(Base::_data, Base::_size);
     }
 
-    size_t capacity() const {
-        return _capacity;
+    const Char* c_str() const {
+        return Base::_data;
     }
-
-    const Element* data() const {
-        return _data;
-    }
-
-    const Element* data() {
-        return _data;
-    }
-
-    const Element* begin() const {
-        return _data;
-    }
-
-    const Element* begin() {
-        return _data;
-    }
-
-    const Element* end() const {
-        return _data + _size;
-    }
-
-    const Element* end() {
-        return _data + _size;
-    }
-
-    bool empty() const {
-        return _size == 0;
-    }
-
-  private:
-    Element* _data;
-    size_t _size;
-    size_t _capacity;
 };
 
-// using StringView = SequenceView<const char, dyn, dyn>;
-using StringView = VectorView<const char>;
+// BasicSstringView
+template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
+using BasicStringView = VectorView<Char>;
+
+using StringView = BasicStringView<char>;
+
+using WStringView = BasicStringView<wchar_t>;
+
+using U16StringView = BasicStringView<char16_t>;
+
+using U32StringView = BasicStringView<char32_t>;
+
+#if __cplusplus >= 202002L
+using U8StringView = BasicStringView<char8_t>;
+#endif
 
 // inline String join(const String &delimeter, const Vector<String> &strings)
 // {

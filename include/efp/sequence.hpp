@@ -1262,7 +1262,7 @@ namespace detail {
             return _size == 0;
         }
 
-      private:
+      protected:
         const Element* _data;
         size_t _size;
         size_t _capacity;
