@@ -1731,7 +1731,7 @@ namespace dragonbox {
     template<typename T>
     struct float_info<
         T,
-        efp::EnableIf<
+        enable_if_t<
             std::numeric_limits<T>::digits == 64 || std::numeric_limits<T>::digits == 113
             || is_float128<T>::value>> {
         using carrier_uint = detail::uint128_t;
@@ -1740,7 +1740,7 @@ namespace dragonbox {
 
     // A double-double floating point number.
     template<typename T>
-    struct float_info<T, efp::EnableIf<is_double_double<T>::value>> {
+    struct float_info<T, enable_if_t<is_double_double<T>::value>> {
         using carrier_uint = detail::uint128_t;
     };
 
@@ -3010,7 +3010,7 @@ template<typename T, typename Enable = void>
 struct has_isfinite: std::false_type {};
 
 template<typename T>
-struct has_isfinite<T, efp::EnableIf<sizeof(std::isfinite(T())) != 0>>: std::true_type {};
+struct has_isfinite<T, enable_if_t<sizeof(std::isfinite(T())) != 0>>: std::true_type {};
 
 template<typename T, FMT_ENABLE_IF(std::is_floating_point<T>::value&& has_isfinite<T>::value)>
 FMT_CONSTEXPR20 bool isfinite(T value) {
@@ -4042,7 +4042,7 @@ template<
     typename OutputIt,
     typename T,
     typename Context = basic_format_context<OutputIt, Char>>
-FMT_CONSTEXPR auto write(OutputIt out, const T& value) -> efp::EnableIf<
+FMT_CONSTEXPR auto write(OutputIt out, const T& value) -> enable_if_t<
     std::is_class<T>::value && !is_string<T>::value && !is_floating_point<T>::value
         && !std::is_same<T, Char>::value
         && !std::is_same<T, remove_cvref_t<decltype(arg_mapper<Context>().map(value))>>::value,
@@ -4056,7 +4056,7 @@ template<
     typename T,
     typename Context = basic_format_context<OutputIt, Char>>
 FMT_CONSTEXPR auto write(OutputIt out, const T& value)
-    -> efp::EnableIf<mapped_type_constant<T, Context>::value == type::custom_type, OutputIt> {
+    -> enable_if_t<mapped_type_constant<T, Context>::value == type::custom_type, OutputIt> {
     auto formatter = typename Context::template formatter_type<T>();
     auto parse_ctx = typename Context::parse_context_type({});
     formatter.parse(parse_ctx);
@@ -4376,7 +4376,7 @@ class format_int {
 };
 
 template<typename T, typename Char>
-struct formatter<T, Char, efp::EnableIf<detail::has_format_as<T>::value>>:
+struct formatter<T, Char, enable_if_t<detail::has_format_as<T>::value>>:
     private formatter<detail::format_as_t<T>, Char> {
     using base = formatter<detail::format_as_t<T>, Char>;
     using base::parse;
@@ -4889,7 +4889,7 @@ template<typename FormatContext>
 FMT_CONSTEXPR FMT_INLINE auto formatter<
     T,
     Char,
-    efp::EnableIf<detail::type_constant<T, Char>::value != detail::type::custom_type>>::
+    enable_if_t<detail::type_constant<T, Char>::value != detail::type::custom_type>>::
     format(const T& val, FormatContext& ctx) const -> decltype(ctx.out()) {
     if (specs_.width_ref.kind != detail::arg_id_kind::none
         || specs_.precision_ref.kind != detail::arg_id_kind::none) {

@@ -14,10 +14,8 @@
 #include <iterator>
 #include <limits>
 #include <memory>  // std::addressof
-// #include <string>
+#include <string>
 #include <type_traits>
-
-#include "efp/string.hpp"
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
 #define FMT_VERSION 100101
@@ -242,9 +240,9 @@ FMT_GCC_PRAGMA("GCC optimize(\"Og\")")
 
 FMT_BEGIN_NAMESPACE
 
-// Implementations of efp::EnableIf and other metafunctions for older systems.
-// template<bool B, typename T = void>
-// using efp::EnableIf = typename std::enable_if<B, T>::type;
+// Implementations of enable_if_t and other metafunctions for older systems.
+template<bool B, typename T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
 template<bool B, typename T, typename F>
 using conditional_t = typename std::conditional<B, T, F>::type;
 template<bool B>
@@ -283,7 +281,7 @@ struct monostate {
 #ifdef FMT_DOC
     #define FMT_ENABLE_IF(...)
 #else
-    #define FMT_ENABLE_IF(...) efp::EnableIf<(__VA_ARGS__), int> = 0
+    #define FMT_ENABLE_IF(...) fmt::enable_if_t<(__VA_ARGS__), int> = 0
 #endif
 
 // This is defined in core.h instead of format.h to avoid injecting in std.
@@ -574,7 +572,7 @@ template<typename S, typename = void>
 struct char_t_impl {};
 
 template<typename S>
-struct char_t_impl<S, efp::EnableIf<is_string<S>::value>> {
+struct char_t_impl<S, enable_if_t<is_string<S>::value>> {
     using result = decltype(to_string_view(std::declval<S>()));
     using type = typename result::value_type;
 };
@@ -1099,7 +1097,7 @@ class iterator_buffer<T*, T> final: public buffer<T> {
 template<typename Container>
 class iterator_buffer<
     std::back_insert_iterator<Container>,
-    efp::EnableIf<is_contiguous<Container>::value, typename Container::value_type>>
+    enable_if_t<is_contiguous<Container>::value, typename Container::value_type>>
     final: public buffer<typename Container::value_type> {
   private:
     Container& container_;
@@ -1571,7 +1569,7 @@ struct arg_mapper {
 
     template<
         typename T,
-        efp::EnableIf<
+        enable_if_t<
             (std::is_same<T, wchar_t>::value ||
 #ifdef __cpp_char8_t
              std::is_same<T, char8_t>::value ||
@@ -3023,7 +3021,7 @@ template<typename T, typename Char>
 struct formatter<
     T,
     Char,
-    efp::EnableIf<detail::type_constant<T, Char>::value != detail::type::custom_type>> {
+    enable_if_t<detail::type_constant<T, Char>::value != detail::type::custom_type>> {
   private:
     detail::dynamic_format_specs<Char> specs_;
 

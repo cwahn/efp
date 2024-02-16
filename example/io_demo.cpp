@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "efp/cpp_core.hpp"
 #include "efp/io.hpp"
 
