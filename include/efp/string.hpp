@@ -1,8 +1,6 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-// todo Hosted only
-
 #if defined(__STDC_HOSTED__)
     #include <cstring>
 #endif
@@ -96,10 +94,13 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
         return c_str[Base::_size] == '\0';
     }
 
-    // todo STL only
+#if defined(__STDC_HOSTED__)
+
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
+
+#endif
 
     const Char* c_str() const {
         Base::_data[Base::_size] = '\0';
