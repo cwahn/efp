@@ -251,8 +251,8 @@ FMT_BEGIN_NAMESPACE
 // using efp::Bool = std::integral_constant<bool, B>;
 // template<typename T>
 // using efp::ReferenceRemoved = typename std::remove_reference<T>::type;
-template<typename T>
-using remove_const_t = typename std::remove_const<T>::type;
+// template<typename T>
+// using  efp::ConstRemoved = typename std::remove_const<T>::type;
 template<typename T>
 using remove_cvref_t = typename std::remove_cv< efp::ReferenceRemoved<T>>::type;
 
@@ -829,7 +829,7 @@ template<
     typename Char,
     typename T,
     typename U,
-    FMT_ENABLE_IF(std::is_same<remove_const_t<T>, U>::value&& is_char<U>::value)>
+    FMT_ENABLE_IF(std::is_same< efp::ConstRemoved<T>, U>::value&& is_char<U>::value)>
 FMT_CONSTEXPR auto copy_str(T* begin, T* end, U* out) -> U* {
     if (is_constant_evaluated())
         return copy_str<Char, T*, U*>(begin, end, out);
@@ -1456,7 +1456,7 @@ class value {
 
     template<typename T>
     FMT_CONSTEXPR20 FMT_INLINE value(T& val) {
-        using value_type = remove_const_t<T>;
+        using value_type =  efp::ConstRemoved<T>;
         custom.value = const_cast<value_type*>(std::addressof(val));
         // Get the formatter type through the context to allow different contexts
         // have different extension points, e.g. `formatter<T>` for `format` and
@@ -1659,7 +1659,7 @@ struct arg_mapper {
         return map(format_as(val));
     }
 
-    template<typename T, typename U = remove_const_t<T>>
+    template<typename T, typename U =  efp::ConstRemoved<T>>
     struct formattable:
         efp::Bool<
             has_const_formatter<U, Context>()
@@ -1677,7 +1677,7 @@ struct arg_mapper {
 
     template<
         typename T,
-        typename U = remove_const_t<T>,
+        typename U =  efp::ConstRemoved<T>,
         FMT_ENABLE_IF(
             (std::is_class<U>::value || std::is_enum<U>::value || std::is_union<U>::value)
             && !is_string<U>::value && !is_char<U>::value && !is_named_arg<U>::value
