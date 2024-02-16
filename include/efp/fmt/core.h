@@ -249,12 +249,12 @@ FMT_BEGIN_NAMESPACE
 // using efp::Conditional = typename std::conditional<B, T, F>::type;
 // template<bool B>
 // using efp::Bool = std::integral_constant<bool, B>;
-template<typename T>
-using remove_reference_t = typename std::remove_reference<T>::type;
+// template<typename T>
+// using efp::ReferenceRemoved = typename std::remove_reference<T>::type;
 template<typename T>
 using remove_const_t = typename std::remove_const<T>::type;
 template<typename T>
-using remove_cvref_t = typename std::remove_cv<remove_reference_t<T>>::type;
+using remove_cvref_t = typename std::remove_cv< efp::ReferenceRemoved<T>>::type;
 
 template<typename T>
 struct type_identity {
@@ -3069,7 +3069,7 @@ class basic_format_string {
     FMT_CONSTEVAL FMT_INLINE basic_format_string(const S& s) : str_(s) {
         static_assert(
             detail::count<
-                (std::is_base_of<detail::view, remove_reference_t<Args>>::value
+                (std::is_base_of<detail::view, efp::ReferenceRemoved<Args>>::value
                  && std::is_reference<Args>::value)...>()
                 == 0,
             "passing views as lvalues is disallowed"

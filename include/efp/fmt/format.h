@@ -648,7 +648,7 @@ constexpr auto reserve(Iterator& it, size_t) -> Iterator& {
 }
 
 template<typename OutputIt>
-using reserve_iterator = remove_reference_t<decltype(reserve(std::declval<OutputIt&>(), 0))>;
+using reserve_iterator = efp::ReferenceRemoved<decltype(reserve(std::declval<OutputIt&>(), 0))>;
 
 template<typename T, typename OutputIt>
 constexpr auto to_pointer(OutputIt, size_t) -> T* {
