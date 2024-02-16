@@ -943,7 +943,7 @@ class ArrayView {
         }
     }
 
-    Element& operator[](size_t index) {
+    const Element& operator[](size_t index) {
         return _data[index];
     }
 
@@ -983,11 +983,7 @@ class ArrayView {
         return _data;
     }
 
-    Element* data() {
-        return _data;
-    }
-
-    Element* begin() {
+    const Element* data() {
         return _data;
     }
 
@@ -995,11 +991,15 @@ class ArrayView {
         return _data;
     }
 
-    Element* end() {
-        return _data + ct_size;
+    const Element* begin() {
+        return _data;
     }
 
     const Element* end() const {
+        return _data + ct_size;
+    }
+
+    const Element* end() {
         return _data + ct_size;
     }
 
@@ -1037,7 +1037,7 @@ constexpr auto nth(size_t i, const ArrayView<A, n>& as) -> const A& {
 }
 
 template<typename A, size_t n>
-constexpr auto nth(size_t i, ArrayView<A, n>& as) -> A& {
+constexpr auto nth(size_t i, ArrayView<A, n>& as) -> const A& {
     return as[i];
 }
 
@@ -1047,7 +1047,7 @@ constexpr auto data(const ArrayView<A, n>& as) -> const A* {
 }
 
 template<typename A, size_t n>
-constexpr auto data(ArrayView<A, n>& as) -> A* {
+constexpr auto data(ArrayView<A, n>& as) -> const A* {
     return as.data();
 }
 
@@ -1081,7 +1081,7 @@ class ArrVecView {
         return *this;
     }
 
-    Element& operator[](size_t index) {
+    const Element& operator[](size_t index) {
         return _data[index];
     }
 
@@ -1105,25 +1105,25 @@ class ArrVecView {
         return _data;
     }
 
-    Element* data() {
-        return _data;
-    }
-
-    Element* begin() {
-        return _data;
-    }
+    // const Element* data() {
+    //     return _data;
+    // }
 
     const Element* begin() const {
         return _data;
     }
 
-    Element* end() {
-        return _data + _size;
-    }
+    // const Element* begin() {
+    //     return _data;
+    // }
 
     const Element* end() const {
         return _data + _size;
     }
+
+    // const Element* end() {
+    //     return _data + _size;
+    // }
 
     bool empty() const {
         return _size == 0;
@@ -1160,7 +1160,7 @@ constexpr auto nth(size_t i, const ArrVecView<A, n>& as) -> const A& {
 }
 
 template<typename A, size_t n>
-constexpr auto nth(size_t i, ArrVecView<A, n>& as) -> A& {
+constexpr auto nth(size_t i, ArrVecView<A, n>& as) -> const A& {
     return as[i];
 }
 
@@ -1170,7 +1170,7 @@ constexpr auto data(const ArrVecView<A, n>& as) -> const A* {
 }
 
 template<typename A, size_t n>
-constexpr auto data(ArrVecView<A, n>& as) -> A* {
+constexpr auto data(ArrVecView<A, n>& as) -> const A* {
     return as.data();
 }
 
@@ -1212,7 +1212,7 @@ namespace detail {
             return *this;
         }
 
-        Element& operator[](size_t index) {
+        const Element& operator[](size_t index) {
             return _data[index];
         }
 
@@ -1237,11 +1237,7 @@ namespace detail {
             return _data;
         }
 
-        Element* data() {
-            return _data;
-        }
-
-        Element* begin() {
+        const Element* data() {
             return _data;
         }
 
@@ -1249,11 +1245,15 @@ namespace detail {
             return _data;
         }
 
-        Element* end() {
-            return _data + _size;
+        const Element* begin() {
+            return _data;
         }
 
         const Element* end() const {
+            return _data + _size;
+        }
+
+        const Element* end() {
             return _data + _size;
         }
 
@@ -1305,7 +1305,7 @@ constexpr auto nth(size_t i, const VectorView<A>& as) -> const A& {
 }
 
 template<typename A>
-constexpr auto nth(size_t i, VectorView<A>& as) -> A& {
+constexpr auto nth(size_t i, VectorView<A>& as) -> const A& {
     return as[i];
 }
 
@@ -1315,7 +1315,7 @@ constexpr auto data(const VectorView<A>& as) -> const A* {
 }
 
 template<typename A>
-constexpr auto data(VectorView<A>& as) -> A* {
+constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
