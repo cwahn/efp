@@ -882,12 +882,12 @@ struct is_integral<uint128_t>: std::true_type {};
 template<typename T>
 using is_signed = std::integral_constant<
     bool,
-    std::numeric_limits<T>::is_signed || std::is_same<T, int128_opt>::value>;
+    std::numeric_limits<T>::is_signed || efp::IsSame<T, int128_opt>::value>;
 
 template<typename T>
 using is_integer = efp::Bool<
-    is_integral<T>::value && !std::is_same<T, bool>::value && !std::is_same<T, char>::value
-    && !std::is_same<T, wchar_t>::value>;
+    is_integral<T>::value && !efp::IsSame<T, bool>::value && !efp::IsSame<T, char>::value
+    && !efp::IsSame<T, wchar_t>::value>;
 
 #ifndef FMT_USE_FLOAT
     #define FMT_USE_FLOAT 1
@@ -922,7 +922,7 @@ using float128 = __float128;
 using float128 = void;
 #endif
 template<typename T>
-using is_float128 = std::is_same<T, float128>;
+using is_float128 = efp::IsSame<T, float128>;
 
 template<typename T>
 using is_floating_point = efp::Bool<std::is_floating_point<T>::value || is_float128<T>::value>;
@@ -1227,11 +1227,11 @@ constexpr auto is_negative(T) -> bool {
 
 template<typename T>
 FMT_CONSTEXPR auto is_supported_floating_point(T) -> bool {
-    if (std::is_same<T, float>())
+    if (efp::IsSame<T, float>())
         return FMT_USE_FLOAT;
-    if (std::is_same<T, double>())
+    if (efp::IsSame<T, double>())
         return FMT_USE_DOUBLE;
-    if (std::is_same<T, long double>())
+    if (efp::IsSame<T, long double>())
         return FMT_USE_LONG_DOUBLE;
     return true;
 }
@@ -1264,7 +1264,7 @@ constexpr const char* digits2(size_t value) {
 template<typename Char, typename Sign>
 constexpr Char sign(Sign s) {
 #if !FMT_GCC_VERSION || FMT_GCC_VERSION >= 604
-    static_assert(std::is_same<Sign, sign_t>::value, "");
+    static_assert(efp::IsSame<Sign, sign_t>::value, "");
 #endif
     return static_cast<Char>("\0-+ "[s]);
 }
@@ -1903,7 +1903,7 @@ FMT_CONSTEXPR inline fp operator*(fp x, fp y) {
 }
 
 template<typename T, bool doublish = num_bits<T>() == num_bits<double>()>
-using convert_float_result = efp::Conditional<std::is_same<T, float>::value || doublish, double, T>;
+using convert_float_result = efp::Conditional<efp::IsSame<T, float>::value || doublish, double, T>;
 
 template<typename T>
 constexpr auto convert_float(T value) -> convert_float_result<T> {
@@ -2150,7 +2150,7 @@ template<typename Char, typename OutputIt>
 FMT_CONSTEXPR auto
 write(OutputIt out, Char value, const format_specs<Char>& specs, locale_ref loc = {}) -> OutputIt {
     // char is formatted as unsigned char for consistency across platforms.
-    using unsigned_type = efp::Conditional<std::is_same<Char, char>::value, unsigned char, unsigned>;
+    using unsigned_type = efp::Conditional<efp::IsSame<Char, char>::value, unsigned char, unsigned>;
     return check_char_specs(specs) ? write_char(out, value, specs)
                                    : write(out, static_cast<unsigned_type>(value), specs, loc);
 }
@@ -2295,7 +2295,7 @@ auto write_int(
     const format_specs<Char>& specs,
     const digit_grouping<Char>& grouping
 ) -> OutputIt {
-    static_assert(std::is_same<uint64_or_128_t<UInt>, UInt>::value, "");
+    static_assert(efp::IsSame<uint64_or_128_t<UInt>, UInt>::value, "");
     int num_digits = count_digits(value);
     char digits[40];
     format_decimal(digits, value, num_digits);
@@ -2376,7 +2376,7 @@ template<typename Char, typename OutputIt, typename T>
 FMT_CONSTEXPR FMT_INLINE auto
 write_int(OutputIt out, write_int_arg<T> arg, const format_specs<Char>& specs, locale_ref)
     -> OutputIt {
-    static_assert(std::is_same<T, uint32_or_64_or_128_t<T>>::value, "");
+    static_assert(efp::IsSame<T, uint32_or_64_or_128_t<T>>::value, "");
     auto abs_value = arg.abs_value;
     auto prefix = arg.prefix;
     switch (specs.type) {
@@ -2440,8 +2440,8 @@ template<
     typename OutputIt,
     typename T,
     FMT_ENABLE_IF(
-        is_integral<T>::value && !std::is_same<T, bool>::value
-        && std::is_same<OutputIt, buffer_appender<Char>>::value
+        is_integral<T>::value && !efp::IsSame<T, bool>::value
+        && efp::IsSame<OutputIt, buffer_appender<Char>>::value
     )>
 FMT_CONSTEXPR FMT_INLINE auto
 write(OutputIt out, T value, const format_specs<Char>& specs, locale_ref loc) -> OutputIt {
@@ -2456,8 +2456,8 @@ template<
     typename OutputIt,
     typename T,
     FMT_ENABLE_IF(
-        is_integral<T>::value && !std::is_same<T, bool>::value
-        && !std::is_same<OutputIt, buffer_appender<Char>>::value
+        is_integral<T>::value && !efp::IsSame<T, bool>::value
+        && !efp::IsSame<OutputIt, buffer_appender<Char>>::value
     )>
 FMT_CONSTEXPR FMT_INLINE auto
 write(OutputIt out, T value, const format_specs<Char>& specs, locale_ref loc) -> OutputIt {
@@ -2558,7 +2558,7 @@ template<
     typename OutputIt,
     typename T,
     FMT_ENABLE_IF(
-        is_integral<T>::value && !std::is_same<T, bool>::value && !std::is_same<T, Char>::value
+        is_integral<T>::value && !efp::IsSame<T, bool>::value && !efp::IsSame<T, Char>::value
     )>
 FMT_CONSTEXPR auto write(OutputIt out, T value) -> OutputIt {
     auto abs_value = static_cast<uint32_or_64_or_128_t<T>>(value);
@@ -3112,9 +3112,9 @@ class bigint {
 
     template<
         typename UInt,
-        FMT_ENABLE_IF(std::is_same<UInt, uint64_t>::value || std::is_same<UInt, uint128_t>::value)>
+        FMT_ENABLE_IF(efp::IsSame<UInt, uint64_t>::value || efp::IsSame<UInt, uint128_t>::value)>
     FMT_CONSTEXPR20 void multiply(UInt value) {
-        using half_uint = efp::Conditional<std::is_same<UInt, uint128_t>::value, uint64_t, uint32_t>;
+        using half_uint = efp::Conditional<efp::IsSame<UInt, uint128_t>::value, uint64_t, uint32_t>;
         const int shift = num_bits<half_uint>() - bigit_bits;
         const UInt lower = static_cast<half_uint>(value);
         const UInt upper = value >> num_bits<half_uint>();
@@ -3132,7 +3132,7 @@ class bigint {
 
     template<
         typename UInt,
-        FMT_ENABLE_IF(std::is_same<UInt, uint64_t>::value || std::is_same<UInt, uint128_t>::value)>
+        FMT_ENABLE_IF(efp::IsSame<UInt, uint64_t>::value || efp::IsSame<UInt, uint128_t>::value)>
     FMT_CONSTEXPR20 void assign(UInt n) {
         size_t num_bigits = 0;
         do {
@@ -3479,7 +3479,7 @@ FMT_CONSTEXPR20 void
 format_hexfloat(Float value, int precision, float_specs specs, buffer<char>& buf) {
     // float is passed as double to reduce the number of instantiations and to
     // simplify implementation.
-    static_assert(!std::is_same<Float, float>::value, "");
+    static_assert(!efp::IsSame<Float, float>::value, "");
 
     using info = dragonbox::float_info<Float>;
 
@@ -3578,7 +3578,7 @@ template<typename Float>
 FMT_CONSTEXPR20 auto format_float(Float value, int precision, float_specs specs, buffer<char>& buf)
     -> int {
     // float is passed as double to reduce the number of instantiations.
-    static_assert(!std::is_same<Float, float>::value, "");
+    static_assert(!efp::IsSame<Float, float>::value, "");
     FMT_ASSERT(value >= 0, "value is negative");
     auto converted_value = convert_float(value);
 
@@ -3925,7 +3925,7 @@ FMT_CONSTEXPR20 auto write_float(OutputIt out, T value, format_specs<Char> specs
     } else if (fspecs.format != float_format::fixed && precision == 0) {
         precision = 1;
     }
-    if (const_check(std::is_same<T, float>()))
+    if (const_check(efp::IsSame<T, float>()))
         fspecs.binary32 = true;
     int exp = format_float(convert_float(value), precision, fspecs, buffer);
     fspecs.precision = precision;
@@ -3957,7 +3957,7 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value) -> OutputIt {
     }
 
     constexpr auto specs = format_specs<Char>();
-    using floaty = efp::Conditional<std::is_same<T, long double>::value, double, T>;
+    using floaty = efp::Conditional<efp::IsSame<T, long double>::value, double, T>;
     using floaty_uint = typename dragonbox::float_info<floaty>::carrier_uint;
     floaty_uint mask = exponent_mask<floaty>();
     if ((bit_cast<floaty_uint>(value) & mask) == mask)
@@ -3999,7 +3999,7 @@ template<
     typename Char,
     typename OutputIt,
     typename T,
-    bool check = std::is_enum<T>::value && !std::is_same<T, Char>::value
+    bool check = std::is_enum<T>::value && !efp::IsSame<T, Char>::value
         && mapped_type_constant<T, basic_format_context<OutputIt, Char>>::value
             != type::custom_type,
     FMT_ENABLE_IF(check)>
@@ -4007,7 +4007,7 @@ FMT_CONSTEXPR auto write(OutputIt out, T value) -> OutputIt {
     return write<Char>(out, static_cast<underlying_t<T>>(value));
 }
 
-template<typename Char, typename OutputIt, typename T, FMT_ENABLE_IF(std::is_same<T, bool>::value)>
+template<typename Char, typename OutputIt, typename T, FMT_ENABLE_IF(efp::IsSame<T, bool>::value)>
 FMT_CONSTEXPR auto
 write(OutputIt out, T value, const format_specs<Char>& specs = {}, locale_ref = {}) -> OutputIt {
     return specs.type != presentation_type::none && specs.type != presentation_type::string
@@ -4030,7 +4030,7 @@ FMT_CONSTEXPR_CHAR_TRAITS auto write(OutputIt out, const Char* value) -> OutputI
     return out;
 }
 
-template<typename Char, typename OutputIt, typename T, FMT_ENABLE_IF(std::is_same<T, void>::value)>
+template<typename Char, typename OutputIt, typename T, FMT_ENABLE_IF(efp::IsSame<T, void>::value)>
 auto write(OutputIt out, const T* value, const format_specs<Char>& specs = {}, locale_ref = {})
     -> OutputIt {
     return write_ptr<Char>(out, bit_cast<uintptr_t>(value), &specs);
@@ -4044,8 +4044,8 @@ template<
     typename Context = basic_format_context<OutputIt, Char>>
 FMT_CONSTEXPR auto write(OutputIt out, const T& value) -> efp::EnableIf<
     std::is_class<T>::value && !is_string<T>::value && !is_floating_point<T>::value
-        && !std::is_same<T, Char>::value
-        && !std::is_same<T,  efp::CVRefRemoved<decltype(arg_mapper<Context>().map(value))>>::value,
+        && !efp::IsSame<T, Char>::value
+        && !efp::IsSame<T,  efp::CVRefRemoved<decltype(arg_mapper<Context>().map(value))>>::value,
     OutputIt> {
     return write<Char>(out, arg_mapper<Context>().map(value));
 }

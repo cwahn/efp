@@ -289,7 +289,7 @@ struct monostate {
 // This is defined in core.h instead of format.h to avoid injecting in std.
 // It is a template to avoid undesirable implicit conversions to std::byte.
 #ifdef __cpp_lib_byte
-template<typename T, FMT_ENABLE_IF(std::is_same<T, std::byte>::value)>
+template<typename T, FMT_ENABLE_IF(efp::IsSame<T, std::byte>::value)>
 inline auto format_as(T b) -> unsigned char {
     return static_cast<unsigned char>(b);
 }
@@ -427,7 +427,7 @@ class basic_string_view {
     basic_string_view(const Char* s)
         : data_(s), size_(
                         detail::const_check(
-                            std::is_same<Char, char>::value && !detail::is_constant_evaluated(true)
+                            efp::IsSame<Char, char>::value && !detail::is_constant_evaluated(true)
                         )
                             ? std::strlen(reinterpret_cast<const char*>(s))
                             : std::char_traits<Char>::length(s)
@@ -438,7 +438,7 @@ class basic_string_view {
     FMT_CONSTEXPR basic_string_view(const std::basic_string<Char, Traits, Alloc>& s) noexcept
         : data_(s.data()), size_(s.size()) {}
 
-    template<typename S, FMT_ENABLE_IF(std::is_same<S, detail::std_string_view<Char>>::value)>
+    template<typename S, FMT_ENABLE_IF(efp::IsSame<S, detail::std_string_view<Char>>::value)>
     FMT_CONSTEXPR basic_string_view(S s) noexcept : data_(s.data()), size_(s.size()) {}
 
     /** Returns a pointer to the string data. */
@@ -829,7 +829,7 @@ template<
     typename Char,
     typename T,
     typename U,
-    FMT_ENABLE_IF(std::is_same<efp::ConstRemoved<T>, U>::value&& is_char<U>::value)>
+    FMT_ENABLE_IF(efp::IsSame<efp::ConstRemoved<T>, U>::value&& is_char<U>::value)>
 FMT_CONSTEXPR auto copy_str(T* begin, T* end, U* out) -> U* {
     if (is_constant_evaluated())
         return copy_str<Char, T*, U*>(begin, end, out);
@@ -1229,7 +1229,7 @@ constexpr auto has_const_formatter() -> bool {
 
 template<typename T>
 using buffer_appender =
-    efp::Conditional<std::is_same<T, char>::value, appender, std::back_insert_iterator<buffer<T>>>;
+    efp::Conditional<efp::IsSame<T, char>::value, appender, std::back_insert_iterator<buffer<T>>>;
 
 // Maps an output iterator to a buffer.
 template<typename T, typename OutputIt>
@@ -1501,7 +1501,7 @@ template<typename T>
 using format_as_t = typename format_as_result<T>::type;
 
 template<typename T>
-struct has_format_as: efp::Bool<!std::is_same<format_as_t<T>, void>::value> {};
+struct has_format_as: efp::Bool<!efp::IsSame<format_as_t<T>, void>::value> {};
 
 // Maps formatting arguments to core types.
 // arg_mapper reports errors by returning unformattable instead of using
@@ -1564,7 +1564,7 @@ struct arg_mapper {
 
     template<
         typename T,
-        FMT_ENABLE_IF(std::is_same<T, char>::value || std::is_same<T, char_type>::value)>
+        FMT_ENABLE_IF(efp::IsSame<T, char>::value || efp::IsSame<T, char_type>::value)>
     FMT_CONSTEXPR FMT_INLINE auto map(T val) -> char_type {
         return val;
     }
@@ -1572,12 +1572,12 @@ struct arg_mapper {
     template<
         typename T,
         efp::EnableIf<
-            (std::is_same<T, wchar_t>::value ||
+            (efp::IsSame<T, wchar_t>::value ||
 #ifdef __cpp_char8_t
-             std::is_same<T, char8_t>::value ||
+             efp::IsSame<T, char8_t>::value ||
 #endif
-             std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value)
-                && !std::is_same<T, char_type>::value,
+             efp::IsSame<T, char16_t>::value || efp::IsSame<T, char32_t>::value)
+                && !efp::IsSame<T, char_type>::value,
             int> = 0>
     FMT_CONSTEXPR FMT_INLINE auto map(T) -> unformattable_char {
         return {};
@@ -1607,7 +1607,7 @@ struct arg_mapper {
         typename T,
         FMT_ENABLE_IF(
             is_string<T>::value && !std::is_pointer<T>::value
-            && std::is_same<char_type, char_t<T>>::value
+            && efp::IsSame<char_type, char_t<T>>::value
         )>
     FMT_CONSTEXPR FMT_INLINE auto map(const T& val) -> basic_string_view<char_type> {
         return to_string_view(val);
@@ -1617,7 +1617,7 @@ struct arg_mapper {
         typename T,
         FMT_ENABLE_IF(
             is_string<T>::value && !std::is_pointer<T>::value
-            && !std::is_same<char_type, char_t<T>>::value
+            && !efp::IsSame<char_type, char_t<T>>::value
         )>
     FMT_CONSTEXPR FMT_INLINE auto map(const T&) -> unformattable_char {
         return {};
@@ -1648,7 +1648,7 @@ struct arg_mapper {
         return {};
     }
 
-    template<typename T, std::size_t N, FMT_ENABLE_IF(!std::is_same<T, wchar_t>::value)>
+    template<typename T, std::size_t N, FMT_ENABLE_IF(!efp::IsSame<T, wchar_t>::value)>
     FMT_CONSTEXPR FMT_INLINE auto map(const T (&values)[N]) -> const T (&)[N] {
         return values;
     }
@@ -1801,16 +1801,16 @@ template<bool PACKED, typename Context, typename T, FMT_ENABLE_IF(PACKED)>
 FMT_CONSTEXPR FMT_INLINE auto make_arg(T& val) -> value<Context> {
     using arg_type = efp::CVRefRemoved<decltype(arg_mapper<Context>().map(val))>;
 
-    constexpr bool formattable_char = !std::is_same<arg_type, unformattable_char>::value;
+    constexpr bool formattable_char = !efp::IsSame<arg_type, unformattable_char>::value;
     static_assert(formattable_char, "Mixing character types is disallowed.");
 
     // Formatting of arbitrary pointers is disallowed. If you want to format a
     // pointer cast it to `void*` or `const void*`. In particular, this forbids
     // formatting of `[const] volatile char*` printed as bool by iostreams.
-    constexpr bool formattable_pointer = !std::is_same<arg_type, unformattable_pointer>::value;
+    constexpr bool formattable_pointer = !efp::IsSame<arg_type, unformattable_pointer>::value;
     static_assert(formattable_pointer, "Formatting of non-void pointers is disallowed.");
 
-    constexpr bool formattable = !std::is_same<arg_type, unformattable>::value;
+    constexpr bool formattable = !efp::IsSame<arg_type, unformattable>::value;
 #if defined(__cpp_if_constexpr)
     if constexpr (!formattable) {
         type_is_unformattable_for<T, typename Context::char_type> _;

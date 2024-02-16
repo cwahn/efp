@@ -82,12 +82,12 @@ inline void fwrite_fully(const void* ptr, size_t count, FILE* stream) {
 #ifndef FMT_STATIC_THOUSANDS_SEPARATOR
 template<typename Locale>
 locale_ref::locale_ref(const Locale& loc) : locale_(&loc) {
-    static_assert(std::is_same<Locale, std::locale>::value, "");
+    static_assert(efp::IsSame<Locale, std::locale>::value, "");
 }
 
 template<typename Locale>
 Locale locale_ref::get() const {
-    static_assert(std::is_same<Locale, std::locale>::value, "");
+    static_assert(efp::IsSame<Locale, std::locale>::value, "");
     return locale_ ? *static_cast<const std::locale*>(locale_) : std::locale();
 }
 
