@@ -169,43 +169,73 @@ constexpr A op_neg(const A& a) {
 
 // op_eq
 
-template<typename A, typename B>
-constexpr bool op_eq(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_eq(const A& lhs, const B& rhs) {
+//     return lhs == rhs;
+// }
+
+template<typename A>
+constexpr bool op_eq(const A& lhs, const A& rhs) {
     return lhs == rhs;
 }
 
 // op_neq
 
-template<typename A, typename B>
-constexpr bool op_neq(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_neq(const A& lhs, const B& rhs) {
+//     return lhs != rhs;
+// }
+
+template<typename A>
+constexpr bool op_neq(const A& lhs, const A& rhs) {
     return lhs != rhs;
 }
 
 // op_gt
 
-template<typename A, typename B>
-constexpr bool op_gt(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_gt(const A& lhs, const B& rhs) {
+//     return lhs > rhs;
+// }
+
+template<typename A>
+constexpr bool op_gt(const A& lhs, const A& rhs) {
     return lhs > rhs;
 }
 
 // op_lt
 
-template<typename A, typename B>
-constexpr bool op_lt(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_lt(const A& lhs, const B& rhs) {
+//     return lhs < rhs;
+// }
+
+template<typename A>
+constexpr bool op_lt(const A& lhs, const A& rhs) {
     return lhs < rhs;
 }
 
 // op_geq
 
-template<typename A, typename B>
-constexpr bool op_geq(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_geq(const A& lhs, const B& rhs) {
+//     return lhs >= rhs;
+// }
+
+template<typename A>
+constexpr bool op_geq(const A& lhs, const A& rhs) {
     return lhs >= rhs;
 }
 
 // op_leq
 
-template<typename A, typename B>
-constexpr bool op_leq(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr bool op_leq(const A& lhs, const B& rhs) {
+//     return lhs <= rhs;
+// }
+
+template<typename A>
+constexpr bool op_leq(const A& lhs, const A& rhs) {
     return lhs <= rhs;
 }
 
@@ -229,36 +259,61 @@ constexpr bool op_or(const bool lhs, const bool rhs) {
 
 // op_add
 
-template<typename A, typename B>
-constexpr A op_add(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr A op_add(const A& lhs, const B& rhs) {
+//     return lhs + rhs;
+// }
+
+template<typename A>
+constexpr A op_add(const A& lhs, const A& rhs) {
     return lhs + rhs;
 }
 
 // op_sub
 
-template<typename A, typename B>
-constexpr A op_sub(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr A op_sub(const A& lhs, const B& rhs) {
+//     return lhs - rhs;
+// }
+
+template<typename A>
+constexpr A op_sub(const A& lhs, const A& rhs) {
     return lhs - rhs;
 }
 
 // op_mul
 
-template<typename A, typename B>
-constexpr A op_mul(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr A op_mul(const A& lhs, const B& rhs) {
+//     return lhs * rhs;
+// }
+
+template<typename A>
+constexpr A op_mul(const A& lhs, const A& rhs) {
     return lhs * rhs;
 }
 
 // op_div
 
-template<typename A, typename B>
-constexpr A op_div(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr A op_div(const A& lhs, const B& rhs) {
+//     return lhs / rhs;
+// }
+
+template<typename A>
+constexpr A op_div(const A& lhs, const A& rhs) {
     return lhs / rhs;
 }
 
 // op_mod
 
-template<typename A, typename B>
-constexpr A op_mod(const A& lhs, const B& rhs) {
+// template<typename A, typename B>
+// constexpr A op_mod(const A& lhs, const B& rhs) {
+//     return lhs % rhs;
+// }
+
+template<typename A>
+constexpr A op_mod(const A& lhs, const A& rhs) {
     return lhs % rhs;
 }
 
@@ -971,14 +1026,14 @@ constexpr A _minimum(A a, As... as) {
 
 template<typename A, typename... As>
 constexpr A _sum(A a, As... as) {
-    return _foldl(op_add<A, A>, a, as...);
+    return _foldl(op_add<A>, a, as...);
 }
 
 // _product
 
 template<typename A, typename... As>
 constexpr A _product(A a, As... as) {
-    return _foldl(op_mul<A, A>, a, as...);
+    return _foldl(op_mul<A>, a, as...);
 }
 
 // InitializerList

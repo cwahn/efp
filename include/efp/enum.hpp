@@ -333,7 +333,7 @@ namespace detail {
         }
 
         template<uint8_t n>
-        auto get() -> EnableIf<op_lt(n, sizeof...(As)), PackAt<n, As...>> {
+            auto get() -> EnableIf < n<sizeof...(As), PackAt<n, As...>> {
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -360,7 +360,7 @@ namespace detail {
         }
 
         template<uint8_t n>
-        auto move() const -> EnableIf<op_lt(n, sizeof...(As)), PackAt<n, As...> const&&> {
+            auto move() const -> EnableIf < n<sizeof...(As), PackAt<n, As...> const&&> {
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -369,7 +369,7 @@ namespace detail {
         }
 
         template<uint8_t n>
-        auto move() -> EnableIf<op_lt(n, sizeof...(As)), PackAt<n, As...>&&> {
+            auto move() -> EnableIf < n<sizeof...(As), PackAt<n, As...>&&> {
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }

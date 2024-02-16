@@ -93,6 +93,8 @@ namespace efp {
 //     return lhs / rhs;
 // }
 
+// todo Move to hosted
+
 template<typename A>
 constexpr A square(const A& a) {
     return a * a;
@@ -154,12 +156,12 @@ constexpr Element<As> max_min(const As& as) {
 
 template<typename As>
 constexpr Element<As> sum(const As& as) {
-    return foldl(op_add, 0, as);
+    return foldl(op_add, static_cast<Element<As>>(0), as);
 }
 
 template<typename As>
 constexpr Element<As> product(const As& as) {
-    return foldl(op_mul, 1, as);
+    return foldl(op_mul, static_cast<Element<As>>(1), as);
 }
 }  // namespace efp
 
