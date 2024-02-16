@@ -331,7 +331,7 @@ template<typename Streambuf>
 class formatbuf: public Streambuf {
   private:
     using char_type = typename Streambuf::char_type;
-    using streamsize = decltype(std::declval<Streambuf>().sputn(nullptr, 0));
+    using streamsize = decltype(efp::declval<Streambuf>().sputn(nullptr, 0));
     using int_type = typename Streambuf::int_type;
     using traits_type = typename Streambuf::traits_type;
 
@@ -606,9 +606,9 @@ FMT_INLINE void assume(bool condition) {
 
 // An approximation of iterator_t for pre-C++20 systems.
 template<typename T>
-using iterator_t = decltype(std::begin(std::declval<T&>()));
+using iterator_t = decltype(std::begin(efp::declval<T&>()));
 template<typename T>
-using sentinel_t = decltype(std::end(std::declval<T&>()));
+using sentinel_t = decltype(std::end(efp::declval<T&>()));
 
 // A workaround for std::string not having mutable data() until C++17.
 template<typename Char>
@@ -648,7 +648,7 @@ constexpr auto reserve(Iterator& it, size_t) -> Iterator& {
 }
 
 template<typename OutputIt>
-using reserve_iterator = efp::ReferenceRemoved<decltype(reserve(std::declval<OutputIt&>(), 0))>;
+using reserve_iterator = efp::ReferenceRemoved<decltype(reserve(efp::declval<OutputIt&>(), 0))>;
 
 template<typename T, typename OutputIt>
 constexpr auto to_pointer(OutputIt, size_t) -> T* {

@@ -569,14 +569,14 @@ void to_string_view(...);
 // enable_if and MSVC 2015 fails to compile it as an alias template.
 // ADL is intentionally disabled as to_string_view is not an extension point.
 template<typename S>
-struct is_string: std::is_class<decltype(detail::to_string_view(std::declval<S>()))> {};
+struct is_string: std::is_class<decltype(detail::to_string_view(efp::declval<S>()))> {};
 
 template<typename S, typename = void>
 struct char_t_impl {};
 
 template<typename S>
 struct char_t_impl<S, efp::EnableIf<is_string<S>::value>> {
-    using result = decltype(to_string_view(std::declval<S>()));
+    using result = decltype(to_string_view(efp::declval<S>()));
     using type = typename result::value_type;
 };
 
@@ -1214,7 +1214,7 @@ namespace detail {
 
 template<typename Context, typename T>
 constexpr auto has_const_formatter_impl(T*)
-    -> decltype(typename Context::template formatter_type<T>().format(std::declval<const T&>(), std::declval<Context&>()), true) {
+    -> decltype(typename Context::template formatter_type<T>().format(efp::declval<const T&>(), efp::declval<Context&>()), true) {
     return true;
 }
 
@@ -1492,7 +1492,7 @@ using ulong_type = efp::Conditional<long_short, unsigned, unsigned long long>;
 template<typename T>
 struct format_as_result {
     template<typename U, FMT_ENABLE_IF(std::is_enum<U>::value || std::is_class<U>::value)>
-    static auto map(U*) -> decltype(format_as(std::declval<U>()));
+    static auto map(U*) -> decltype(format_as(efp::declval<U>()));
     static auto map(...) -> void;
 
     using type = decltype(map(static_cast<T*>(nullptr)));
@@ -1701,7 +1701,7 @@ struct arg_mapper {
 // A type constant after applying arg_mapper<Context>.
 template<typename T, typename Context>
 using mapped_type_constant = type_constant<
-    decltype(arg_mapper<Context>().map(std::declval<const T&>())),
+    decltype(arg_mapper<Context>().map(efp::declval<const T&>())),
     typename Context::char_type>;
 
 enum { packed_arg_bits = 4 };
@@ -1754,7 +1754,7 @@ struct is_output_iterator<
     T,
     void_t<
         typename std::iterator_traits<It>::iterator_category,
-        decltype(*std::declval<It>() = std::declval<T>())>>: efp::True {};
+        decltype(*efp::declval<It>() = efp::declval<T>())>>: efp::True {};
 
 template<typename It>
 struct is_back_insert_iterator: efp::False {};
@@ -2025,7 +2025,7 @@ using format_context = buffer_context<char>;
 template<typename T, typename Char = char>
 using is_formattable = efp::Bool<!std::is_base_of<
     detail::unformattable,
-    decltype(detail::arg_mapper<buffer_context<Char>>().map(std::declval<T&>()))>::value>;
+    decltype(detail::arg_mapper<buffer_context<Char>>().map(efp::declval<T&>()))>::value>;
 
 /**
   \rst
@@ -2861,7 +2861,7 @@ FMT_CONSTEXPR auto parse_format_specs(ParseContext& ctx) -> decltype(ctx.begin()
     using context = buffer_context<char_type>;
     using mapped_type = efp::Conditional<
         mapped_type_constant<T, context>::value != type::custom_type,
-        decltype(arg_mapper<context>().map(std::declval<const T&>())),
+        decltype(arg_mapper<context>().map(efp::declval<const T&>())),
         typename strip_named_arg<T>::type>;
 #if defined(__cpp_if_constexpr)
     if constexpr (std::is_default_constructible<formatter<mapped_type, char_type>>::value) {
