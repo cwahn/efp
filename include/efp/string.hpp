@@ -143,7 +143,7 @@ class VectorView<const char> {
 
     VectorView() : _data(nullptr), _size(0), _capacity(0) {}
 
-    VectorView(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
+    VectorView(const Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
             throw std::runtime_error("VectorView<const char>::VectorView: data is nullptr");
@@ -151,7 +151,7 @@ class VectorView<const char> {
     }
 
     // StringView could be constructed from string literal
-    VectorView(Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
+    VectorView(const Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
         // Ensure that data is not nullptr for a non-empty view.
     }
 
@@ -164,11 +164,11 @@ class VectorView<const char> {
         return *this;
     }
 
-    Element& operator[](size_t index) {
+    const Element& operator[](size_t index) const {
         return _data[index];
     }
 
-    const Element& operator[](size_t index) const {
+    const Element& operator[](size_t index) {
         return _data[index];
     }
 
@@ -206,11 +206,7 @@ class VectorView<const char> {
         return _data;
     }
 
-    Element* data() {
-        return _data;
-    }
-
-    Element* begin() {
+    const Element* data() {
         return _data;
     }
 
@@ -218,11 +214,15 @@ class VectorView<const char> {
         return _data;
     }
 
-    Element* end() {
-        return _data + _size;
+    const Element* begin() {
+        return _data;
     }
 
     const Element* end() const {
+        return _data + _size;
+    }
+
+    const Element* end() {
         return _data + _size;
     }
 

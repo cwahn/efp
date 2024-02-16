@@ -934,7 +934,7 @@ class ArrayView {
     ArrayView() : _data(nullptr) {}
 
     // ! length will not be used
-    ArrayView(Element* data, size_t length = Size<ct_size> {}) : _data(data) {
+    ArrayView(const Element* data, size_t length = Size<ct_size> {}) : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && _data == nullptr) {
             throw std::runtime_error(
@@ -1008,7 +1008,7 @@ class ArrayView {
     }
 
   private:
-    Element* _data;
+    const Element* _data;
 };
 
 template<typename A, size_t n>
@@ -1060,7 +1060,7 @@ class ArrVecView {
 
     ArrVecView() : _data(nullptr), _size(0) {}
 
-    ArrVecView(Element* data, size_t size) : _data(data), _size(size) {
+    ArrVecView(const Element* data, size_t size) : _data(data), _size(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
             throw std::runtime_error(
@@ -1130,7 +1130,7 @@ class ArrVecView {
     }
 
   private:
-    Element* _data;
+    const Element* _data;
     size_t _size;
 };
 
@@ -1184,7 +1184,8 @@ namespace detail {
 
         VectorViewBase() : _data {nullptr}, _size {0}, _capacity {0} {}
 
-        VectorViewBase(Element* data, size_t size) : _data(data), _size(size), _capacity(size) {
+        VectorViewBase(const Element* data, size_t size)
+            : _data(data), _size(size), _capacity(size) {
             // Ensure that data is not nullptr for a non-empty view.
             if (size > 0 && _data == nullptr) {
                 throw std::runtime_error(
@@ -1262,7 +1263,7 @@ namespace detail {
         }
 
       private:
-        Element* _data;
+        const Element* _data;
         size_t _size;
         size_t _capacity;
     };
