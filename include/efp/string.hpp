@@ -154,16 +154,19 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
     }
 };
 
-using String = Vector<char>;
+template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
+using BasicString = Vector<Char>;
 
-using WString = Vector<wchar_t>;
+using String = BasicString<char>;
 
-using U16String = Vector<char16_t>;
+using WString = BasicString<wchar_t>;
 
-using U32String = Vector<char32_t>;
+using U16String = BasicString<char16_t>;
+
+using U32String = BasicString<char32_t>;
 
 #if __cplusplus >= 202002L
-using U8String = Vector<char8_t>;
+using U8String = BasicString<char8_t>;
 #endif
 
 // VectorView<const char> specialization for StringView
