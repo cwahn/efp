@@ -1450,7 +1450,7 @@ FMT_FUNC bool write_console(int, string_view) {
     return false;
 }
 #else
-using dword = conditional_t<sizeof(long) == 4, unsigned long, unsigned>;
+using dword = efp::Conditional<sizeof(long) == 4, unsigned long, unsigned>;
 extern "C" __declspec(dllimport) int __stdcall WriteConsoleW(  //
     void*, const void*, dword, dword*, void*);
 

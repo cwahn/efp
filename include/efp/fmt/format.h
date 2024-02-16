@@ -292,7 +292,7 @@ template<typename P>
 struct disjunction<P>: P {};
 
 template<typename P1, typename... Pn>
-struct disjunction<P1, Pn...>: conditional_t<bool(P1::value), P1, disjunction<Pn...>> {};
+struct disjunction<P1, Pn...>: efp::Conditional<bool(P1::value), P1, disjunction<Pn...>> {};
 
 template<typename...>
 struct conjunction: std::true_type {};
@@ -301,7 +301,7 @@ template<typename P>
 struct conjunction<P>: P {};
 
 template<typename P1, typename... Pn>
-struct conjunction<P1, Pn...>: conditional_t<bool(P1::value), conjunction<Pn...>, P1> {};
+struct conjunction<P1, Pn...>: efp::Conditional<bool(P1::value), conjunction<Pn...>, P1> {};
 
 namespace detail {
 
@@ -517,7 +517,7 @@ class uint128_fallback {
     }
 };
 
-using uint128_t = conditional_t<FMT_USE_INT128, uint128_opt, uint128_fallback>;
+using uint128_t = efp::Conditional<FMT_USE_INT128, uint128_opt, uint128_fallback>;
 
 #ifdef UINTPTR_MAX
 using uintptr_t = ::uintptr_t;
@@ -1239,12 +1239,12 @@ FMT_CONSTEXPR auto is_supported_floating_point(T) -> bool {
 // Smallest of uint32_t, uint64_t, uint128_t that is large enough to
 // represent all values of an integral type T.
 template<typename T>
-using uint32_or_64_or_128_t = conditional_t<
+using uint32_or_64_or_128_t = efp::Conditional<
     num_bits<T>() <= 32 && !FMT_REDUCE_INT_INSTANTIATIONS,
     uint32_t,
-    conditional_t<num_bits<T>() <= 64, uint64_t, uint128_t>>;
+    efp::Conditional<num_bits<T>() <= 64, uint64_t, uint128_t>>;
 template<typename T>
-using uint64_or_128_t = conditional_t<num_bits<T>() <= 64, uint64_t, uint128_t>;
+using uint64_or_128_t = efp::Conditional<num_bits<T>() <= 64, uint64_t, uint128_t>;
 
 #define FMT_POWERS_OF_10(factor) \
     factor * 10, (factor) * 100, (factor) * 1000, (factor) * 10000, (factor) * 100000, \
@@ -1903,7 +1903,7 @@ FMT_CONSTEXPR inline fp operator*(fp x, fp y) {
 }
 
 template<typename T, bool doublish = num_bits<T>() == num_bits<double>()>
-using convert_float_result = conditional_t<std::is_same<T, float>::value || doublish, double, T>;
+using convert_float_result = efp::Conditional<std::is_same<T, float>::value || doublish, double, T>;
 
 template<typename T>
 constexpr auto convert_float(T value) -> convert_float_result<T> {
@@ -1988,7 +1988,7 @@ struct find_escape_result {
 };
 
 template<typename Char>
-using make_unsigned_char = typename conditional_t<
+using make_unsigned_char = typename efp::Conditional<
     std::is_integral<Char>::value,
     std::make_unsigned<Char>,
     type_identity<uint32_t>>::type;
@@ -2150,7 +2150,7 @@ template<typename Char, typename OutputIt>
 FMT_CONSTEXPR auto
 write(OutputIt out, Char value, const format_specs<Char>& specs, locale_ref loc = {}) -> OutputIt {
     // char is formatted as unsigned char for consistency across platforms.
-    using unsigned_type = conditional_t<std::is_same<Char, char>::value, unsigned char, unsigned>;
+    using unsigned_type = efp::Conditional<std::is_same<Char, char>::value, unsigned char, unsigned>;
     return check_char_specs(specs) ? write_char(out, value, specs)
                                    : write(out, static_cast<unsigned_type>(value), specs, loc);
 }
@@ -3114,7 +3114,7 @@ class bigint {
         typename UInt,
         FMT_ENABLE_IF(std::is_same<UInt, uint64_t>::value || std::is_same<UInt, uint128_t>::value)>
     FMT_CONSTEXPR20 void multiply(UInt value) {
-        using half_uint = conditional_t<std::is_same<UInt, uint128_t>::value, uint64_t, uint32_t>;
+        using half_uint = efp::Conditional<std::is_same<UInt, uint128_t>::value, uint64_t, uint32_t>;
         const int shift = num_bits<half_uint>() - bigit_bits;
         const UInt lower = static_cast<half_uint>(value);
         const UInt upper = value >> num_bits<half_uint>();
@@ -3957,7 +3957,7 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value) -> OutputIt {
     }
 
     constexpr auto specs = format_specs<Char>();
-    using floaty = conditional_t<std::is_same<T, long double>::value, double, T>;
+    using floaty = efp::Conditional<std::is_same<T, long double>::value, double, T>;
     using floaty_uint = typename dragonbox::float_info<floaty>::carrier_uint;
     floaty_uint mask = exponent_mask<floaty>();
     if ((bit_cast<floaty_uint>(value) & mask) == mask)

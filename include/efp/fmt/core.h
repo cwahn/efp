@@ -245,8 +245,8 @@ FMT_BEGIN_NAMESPACE
 // Implementations of efp::EnableIf and other metafunctions for older systems.
 // template<bool B, typename T = void>
 // using efp::EnableIf = typename std::enable_if<B, T>::type;
-template<bool B, typename T, typename F>
-using conditional_t = typename std::conditional<B, T, F>::type;
+// template<bool B, typename T, typename F>
+// using efp::Conditional = typename std::conditional<B, T, F>::type;
 template<bool B>
 using bool_constant = std::integral_constant<bool, B>;
 template<typename T>
@@ -1229,7 +1229,7 @@ constexpr auto has_const_formatter() -> bool {
 
 template<typename T>
 using buffer_appender =
-    conditional_t<std::is_same<T, char>::value, appender, std::back_insert_iterator<buffer<T>>>;
+    efp::Conditional<std::is_same<T, char>::value, appender, std::back_insert_iterator<buffer<T>>>;
 
 // Maps an output iterator to a buffer.
 template<typename T, typename OutputIt>
@@ -1476,7 +1476,7 @@ class value {
     format_custom_arg(void* arg, typename Context::parse_context_type& parse_ctx, Context& ctx) {
         auto f = Formatter();
         parse_ctx.advance_to(f.parse(parse_ctx));
-        using qualified_type = conditional_t<has_const_formatter<T, Context>(), const T, T>;
+        using qualified_type = efp::Conditional<has_const_formatter<T, Context>(), const T, T>;
         ctx.advance_to(f.format(*static_cast<qualified_type*>(arg), ctx));
     }
 };
@@ -1485,8 +1485,8 @@ class value {
 // either to int or to long long depending on its size.
 enum { long_short = sizeof(long) == sizeof(int) };
 
-using long_type = conditional_t<long_short, int, long long>;
-using ulong_type = conditional_t<long_short, unsigned, unsigned long long>;
+using long_type = efp::Conditional<long_short, int, long long>;
+using ulong_type = efp::Conditional<long_short, unsigned, unsigned long long>;
 
 template<typename T>
 struct format_as_result {
@@ -2046,7 +2046,7 @@ class format_arg_store
     static constexpr size_t num_named_args = detail::count_named_args<Args...>();
     static const bool is_packed = num_args <= detail::max_packed_args;
 
-    using value_type = conditional_t<is_packed, detail::value<Context>, basic_format_arg<Context>>;
+    using value_type = efp::Conditional<is_packed, detail::value<Context>, basic_format_arg<Context>>;
 
     detail::arg_data<value_type, typename Context::char_type, num_args, num_named_args> data_;
 
@@ -2857,7 +2857,7 @@ template<typename T, typename ParseContext>
 FMT_CONSTEXPR auto parse_format_specs(ParseContext& ctx) -> decltype(ctx.begin()) {
     using char_type = typename ParseContext::char_type;
     using context = buffer_context<char_type>;
-    using mapped_type = conditional_t<
+    using mapped_type = efp::Conditional<
         mapped_type_constant<T, context>::value != type::custom_type,
         decltype(arg_mapper<context>().map(std::declval<const T&>())),
         typename strip_named_arg<T>::type>;
