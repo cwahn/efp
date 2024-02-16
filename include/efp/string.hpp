@@ -1,78 +1,16 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-#include <cstring>
+// todo Hosted only
+
+#if defined(__STDC_HOSTED__)
+    #include <cstring>
+#endif
 
 #include "efp/prelude.hpp"
 #include "efp/sequence.hpp"
 
 namespace efp {
-
-// CString
-// Owned C-style null operator including const char*
-// Not safe to build from regular const char *
-
-// class CString {
-//   public:
-//     // const char pointer with nullptr.
-//     CString(const char* ptr) : _data(ptr) {}
-
-//     CString(const CString&) = delete;
-//     CString& operator=(const CString&) = delete;
-
-//     CString(CString&& other) noexcept : _data(other._data) {
-//         other._data = nullptr;
-//     }
-
-//     CString& operator=(CString&& other) noexcept {
-//         if (this != &other) {
-//             delete[] _data;
-
-//             _data = other._data;
-//             other._data = nullptr;
-//         }
-//         return *this;
-//     }
-
-//     ~CString() {
-//         delete[] _data;
-//     }
-
-//     operator const char*() const {
-//         return _data;
-//     }
-
-//     // Equality operator for comparing with another CString
-//     bool operator==(const CString& other) const {
-//         // If both are null, they are considered equal
-//         if (_data == nullptr && other._data == nullptr)
-//             return true;
-
-//         // If one is null and the other is not, they can't be equal
-//         if (_data == nullptr || other._data == nullptr)
-//             return false;
-
-//         // Use strcmp to compare the strings
-//         return strcmp(_data, other._data) == 0;
-//     }
-
-//     // Equality operator for comparing with a C-style string
-//     bool operator==(const char* c_str) const {
-//         // If both are null, they are considered equal
-//         if (_data == nullptr && c_str == nullptr)
-//             return true;
-
-//         // If one is null and the other is not, they can't be equal
-//         if (_data == nullptr || c_str == nullptr)
-//             return false;
-
-//         // Use strcmp to compare the strings
-//         return strcmp(_data, c_str) == 0;
-//     }
-
-//   private:
-//     const char* _data;
-// };
 
 namespace detail {
     template<typename T>
@@ -97,6 +35,32 @@ namespace detail {
 #endif
 }  // namespace detail
 
+// if freestanding manual implementation of strlen, memcpy and strncmp
+#if !defined(__STDC_HOSTED__)
+static size_t std::strlen(const Char* c_str) {
+    size_t len = 0;
+    while (c_str[len] != '\0') {
+        ++len;
+    }
+    return len;
+}
+
+static void std::memcpy(Char* dest, const Char* src, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        dest[i] = src[i];
+    }
+}
+
+static int std::strncmp(const Char* str1, const Char* str2, size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+        if (str1[i] != str2[i]) {
+            return str1[i] - str2[i];
+        }
+    }
+    return 0;
+}
+#endif
+
 template<typename Char>
 class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::VectorBase<Char> {
   public:
@@ -104,10 +68,10 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
     using Base::Base;
 
     Vector(const Char* c_str) {
-        Base::_capacity = strlen(c_str);
+        Base::_capacity = std::strlen(c_str);
         Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
         Base::_size = Base::_capacity;
-        memcpy(Base::_data, c_str, Base::_size);
+        std::memcpy(Base::_data, c_str, Base::_size);
     }
 
     bool operator==(const Vector& other) const {
@@ -125,7 +89,7 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (strncmp(Base::_data, c_str, Base::_size) != 0)
+        if (std::strncmp(Base::_data, c_str, Base::_size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
@@ -136,14 +100,6 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
-
-    // todo Change to hold one extra capacity for null character
-    // const CString c_str() const {
-    //     Char* extended_buffer = new char[Base::_size + 1];
-    //     memcpy(extended_buffer, Base::_data, Base::_size);
-    //     extended_buffer[Base::_size] = '\0';
-    //     return CString(extended_buffer);  // Mark for deletion.
-    // }
 
     const Char* c_str() const {
         Base::_data[Base::_size] = '\0';
@@ -194,7 +150,7 @@ class VectorView<const char> {
     }
 
     // StringView could be constructed from string literal
-    VectorView(Element* data) : _data(data), _size(strlen(data)), _capacity(_size) {
+    VectorView(Element* data) : _data(data), _size(std::strlen(data)), _capacity(_size) {
         // Ensure that data is not nullptr for a non-empty view.
     }
 
@@ -230,7 +186,7 @@ class VectorView<const char> {
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (strncmp(_data, c_str, _size) != 0)
+        if (std::strncmp(_data, c_str, _size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
