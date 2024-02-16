@@ -1,20 +1,22 @@
 #ifndef EFP_HPP_
 #define EFP_HPP_
 
-#include "cpp_core.hpp"
-#include "sequence.hpp"
-#include "enum_type.hpp"
-#include "maybe.hpp"
-#include "prelude.hpp"
-#include "numeric.hpp"
-#include "scientific.hpp"
-#include "cyclic.hpp"
-#include "c_utility.hpp"
-#include "sm.hpp"
-#include "string.hpp"
-// #include "format.hpp"
-#include "io.hpp"
-#include "sort.hpp"
-#include "trait.hpp"
+#include "./efp/cpp_core.hpp"
+#include "./efp/meta.hpp"
+#include "./efp/trait.hpp"
+#include "./efp/sequence.hpp"
+#include "./efp/enum.hpp"
+#include "./efp/maybe.hpp"
+#include "./efp/prelude.hpp"
+#include "./efp/cyclic.hpp"
+#include "./efp/numeric.hpp"
+#include "./efp/scientific.hpp"
+#include "./efp/sort.hpp"
+#include "./efp/c_utility.hpp"
+
+#include "./efp/io.hpp"
+#include "./efp/string.hpp"
+// #include "./efp/format.hpp"
+// #include "./efp/sm.hpp"
 
 #endif
