@@ -96,7 +96,7 @@ FMT_FUNC auto thousands_sep_impl(locale_ref loc) -> thousands_sep_result<Char> {
     auto& facet = std::use_facet<std::numpunct<Char>>(loc.get<std::locale>());
     auto grouping = facet.grouping();
     auto thousands_sep = grouping.empty() ? Char() : facet.thousands_sep();
-    return {std::move(grouping), thousands_sep};
+    return {efp::move(grouping), thousands_sep};
 }
 
 template<typename Char>

@@ -1061,7 +1061,7 @@ class iterator_buffer<T*, T, fixed_buffer_traits> final:
         : fixed_buffer_traits(n), buffer<T>(out, 0, n), out_(out) {}
 
     iterator_buffer(iterator_buffer&& other)
-        : fixed_buffer_traits(other), buffer<T>(std::move(other)), out_(other.out_) {
+        : fixed_buffer_traits(other), buffer<T>(efp::move(other)), out_(other.out_) {
         if (this->data() != out_) {
             this->set(data_, buffer_size);
             this->clear();

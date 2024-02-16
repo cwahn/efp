@@ -1047,7 +1047,7 @@ class basic_memory_buffer final: public detail::buffer<T> {
   private:
     // Move data from other to this buffer.
     FMT_CONSTEXPR20 void move(basic_memory_buffer& other) {
-        alloc_ = std::move(other.alloc_);
+        alloc_ = efp::move(other.alloc_);
         T* data = other.data();
         size_t size = other.size(), capacity = other.capacity();
         if (data == other.store_) {
@@ -2245,7 +2245,7 @@ class digit_grouping {
     }
 
     digit_grouping(std::string grouping, std::basic_string<Char> sep)
-        : grouping_(std::move(grouping)), thousands_sep_(std::move(sep)) {}
+        : grouping_(efp::move(grouping)), thousands_sep_(efp::move(sep)) {}
 
     bool has_separator() const {
         return !thousands_sep_.empty();
@@ -3269,7 +3269,7 @@ class bigint {
     FMT_CONSTEXPR20 void square() {
         int num_bigits = static_cast<int>(bigits_.size());
         int num_result_bigits = 2 * num_bigits;
-        basic_memory_buffer<bigit, bigits_capacity> n(std::move(bigits_));
+        basic_memory_buffer<bigit, bigits_capacity> n(efp::move(bigits_));
         bigits_.resize(to_unsigned(num_result_bigits));
         auto sum = uint128_t();
         for (int bigit_index = 0; bigit_index < num_bigits; ++bigit_index) {
