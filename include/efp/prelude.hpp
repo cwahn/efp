@@ -60,14 +60,15 @@ auto compose(const F& f, const Fs&... fs) -> Composed<F, Fs...> {
     return Composed<F, Fs...>(f, fs...);
 }
 
-// min_length
+// _min_length
 
 template<typename As, typename... Ass>
-size_t min_length(const As& as, const Ass&... ass) {
+size_t _min_length(const As& as, const Ass&... ass) {
     static_assert(
         All<IsSequence<As>, IsSequence<Ass>...>::value,
         "All types must be sequence types."
     );
+
     return _minimum(static_cast<size_t>(length(as)), length(ass)...);
 }
 
@@ -76,7 +77,8 @@ size_t min_length(const As& as, const Ass&... ass) {
 template<typename... Ass, typename F = void (*)(const Element<Ass>&...)>
 void for_each(const F& f, const Ass&... ass) {
     static_assert(All<IsSequence<Ass>...>::value, "All types must be sequence types.");
-    const size_t res_length = min_length(ass...);
+
+    const size_t res_length = _min_length(ass...);
 
     for (size_t i = 0; i < res_length; ++i) {
         f(nth(i, ass)...);
@@ -88,7 +90,8 @@ void for_each(const F& f, const Ass&... ass) {
 template<typename... Ass, typename F = void (*)(Element<Ass>&...)>
 void for_each_mut(const F& f, Ass&... ass) {
     static_assert(All<IsSequence<Ass>...>::value, "All types must be sequence types.");
-    const size_t res_length = min_length(ass...);
+
+    const size_t res_length = _min_length(ass...);
 
     for (size_t i = 0; i < res_length; ++i) {
         f(nth(i, ass)...);
@@ -116,7 +119,7 @@ auto map(const F& f, const Ass&... ass) -> MapReturn<F, Ass...> {
     static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
     MapReturn<F, Ass...> res {};
-    const size_t res_len = min_length(ass...);
+    const size_t res_len = _min_length(ass...);
     if (CtSize<MapReturn<F, Ass...>>::value == dyn) {
         res.resize(res_len);
     }
@@ -407,7 +410,7 @@ void for_index(const F& f, const size_t n) {
 template<typename... Ass, typename F = void (*)(size_t, const Element<Ass>&...)>
 void for_each_with_index(const F& f, const Ass&... seqs) {
     static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
-    const auto min_len = min_length(seqs...);
+    const auto min_len = _min_length(seqs...);
 
     for (size_t i = 0; i < min_len; ++i) {
         f(i, nth(i, seqs)...);
@@ -417,7 +420,7 @@ void for_each_with_index(const F& f, const Ass&... seqs) {
 template<typename... Ass, typename F = void (*)(size_t, Element<Ass>&...)>
 void for_each_with_index_mut(const F& f, Ass&... seqs) {
     static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
-    const size_t min_len = min_length(seqs...);
+    const size_t min_len = _min_length(seqs...);
 
     for (size_t i = 0; i < min_len; ++i) {
         f(i, nth(i, seqs)...);
@@ -429,6 +432,7 @@ void for_each_with_index_mut(const F& f, Ass&... seqs) {
 template<typename As, typename F = void (*)(const Element<As>&)>
 void cartesian_for_each(const F& f, const As& as) {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     for_each(f, as);
 }
 
@@ -441,6 +445,7 @@ void cartesian_for_each(const F& f, const As& as, const Ass&... ass) {
         All<IsSequence<As>, IsSequence<Ass>...>::value,
         "All arguments should be instance of Sequence trait."
     );
+
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
@@ -454,6 +459,7 @@ void cartesian_for_each(const F& f, const As& as, const Ass&... ass) {
 template<typename As, typename F = void (*)(Element<As>&)>
 void cartesian_for_each_mut(const F& f, As& as) {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     for_each_mut(f, as);
 }
 
@@ -463,6 +469,7 @@ void cartesian_for_each_mut(const F& f, As& as, Ass&... ass) {
         All<IsSequence<As>, IsSequence<Ass>...>::value,
         "All arguments should be instance of Sequence trait."
     );
+
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
@@ -491,7 +498,7 @@ auto map_with_index(const F& f, const Ass&... ass) -> MapWithIndexReturn<F, Ass.
     static_assert(All<IsSequence<Ass>...>::value, "All arguments should implement Sequence trait.");
 
     auto res = MapWithIndexReturn<F, Ass...> {};
-    const auto res_len = min_length(ass...);
+    const auto res_len = _min_length(ass...);
 
     if (CtSize<MapWithIndexReturn<F, Ass...>>::value == dyn) {
         res.resize(res_len);
@@ -559,7 +566,11 @@ void cartesian_for_index(const F& f, size_t n, const Ints&... is) {
 template<typename As>
 auto head(const As& as) -> const Element<As>& {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-    assert(!as.empty());  // Ensure the sequence is not empty.
+
+    // assert(!as.empty());  // Ensure the sequence is not empty.
+    if (as.empty())
+        throw std::runtime_error("Sequence should not be empty");
+
     return nth(0, as);
 }
 
@@ -588,14 +599,22 @@ using TailReturn = EnableIf<
 template<typename A>
 auto tail(const A& as) -> TailReturn<A, true> {
     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
-    assert(length(as) > 0);  // Ensure the sequence is not empty.
+
+    // assert(length(as) > 0);  // Ensure the sequence is not empty.
+    if (length(as) == 0)
+        throw std::runtime_error("Sequence should not be empty");
+
     return {data(as) + 1, length(as) - 1};
 }
 
 template<typename A>
 auto tail(A& as) -> TailReturn<A, false> {
     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
-    assert(length(as) > 0);  // Ensure the sequence is not empty.
+
+    // assert(length(as) > 0);  // Ensure the sequence is not empty.
+    if (length(as) == 0)
+        throw std::runtime_error("Sequence should not be empty");
+
     return {data(as) + 1, length(as) - 1};
 }
 
@@ -625,14 +644,22 @@ using InitReturn = EnableIf<
 template<typename As>
 auto init(const As& as) -> InitReturn<As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-    assert(length(as) > 0);  // Ensure the sequence is not empty.
+
+    // assert(length(as) > 0);  // Ensure the sequence is not empty.
+    if (length(as) == 0)
+        throw std::runtime_error("Sequence should not be empty");
+
     return {data(as), length(as) - 1};
 }
 
 template<typename As>
 auto init(As& as) -> InitReturn<As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-    assert(length(as) > 0);  // Ensure the sequence is not empty.
+
+    // assert(length(as) > 0);  // Ensure the sequence is not empty.
+    if (length(as) == 0)
+        throw std::runtime_error("Sequence should not be empty");
+
     return {data(as), length(as) - 1};
 }
 
@@ -643,7 +670,11 @@ auto init(As& as) -> InitReturn<As, false> {
 template<typename As>
 auto last(const As& as) -> const Element<As>& {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
-    assert(length(as) > 0);  // Ensure the sequence is not empty.
+
+    // assert(length(as) > 0);  // Ensure the sequence is not empty.
+    if (length(as) == 0)
+        throw std::runtime_error("Sequence should not be empty");
+
     return as[length(as) - 1];
 }
 
@@ -652,6 +683,7 @@ auto last(const As& as) -> const Element<As>& {
 template<typename As>
 bool is_null(const As& as) {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return length(as) == 0;
 }
 
@@ -691,12 +723,14 @@ using TakeUnsafeReturn = typename detail::TakeUnsafeReturnImpl<N, As, is_const>:
 template<typename N, typename As>
 auto take_unsafe(N n, const As& as) -> TakeUnsafeReturn<N, As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return TakeUnsafeReturn<N, As, true>(data(as), n);
 }
 
 template<typename N, typename As>
 auto take_unsafe(N n, As& as) -> TakeUnsafeReturn<N, As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return TakeUnsafeReturn<N, As, false>(data(as), n);
 }
 
@@ -745,6 +779,7 @@ using TakeReturn = typename detail::TakeReturnImpl<N, As, is_const>::Type;
 template<typename N, typename As>
 auto take(N n, const As& as) -> TakeReturn<N, As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return TakeReturn<N, As, true>(
         data(as),
         min(static_cast<size_t>(n), static_cast<size_t>(length(as)))
@@ -754,6 +789,7 @@ auto take(N n, const As& as) -> TakeReturn<N, As, true> {
 template<typename N, typename As>
 auto take(N n, As& as) -> TakeReturn<N, As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return TakeReturn<N, As, false>(
         data(as),
         min(static_cast<size_t>(n), static_cast<size_t>(length(as)))
@@ -802,12 +838,14 @@ using DropUnsafeReturn = typename detail::DropUnsafeReturnImpl<N, As, is_const>:
 template<typename N, typename As>
 auto drop_unsafe(N n, const As& as) -> DropUnsafeReturn<N, As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return DropUnsafeReturn<N, As, true>(data(as) + n, length(as) - n);
 }
 
 template<typename N, typename As>
 auto drop_unsafe(N n, As& as) -> DropUnsafeReturn<N, As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return DropUnsafeReturn<N, As, false>(data(as) + n, length(as) - n);
 }
 
@@ -857,16 +895,20 @@ using DropReturn = typename detail::DropReturnImpl<N, As, is_const>::Type;
 template<typename N, typename As>
 auto drop(N n, const As& as) -> DropReturn<N, As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const size_t as_len = length(as);
     size_t bound_drop_size = (n > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
+
     return DropReturn<N, As, true>(data(as) + bound_drop_size, as_len - bound_drop_size);
 }
 
 template<typename N, typename As>
 auto drop(N n, As& as) -> DropReturn<N, As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const size_t as_len = length(as);
     size_t bound_drop_size = (n > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
+
     return DropReturn<N, As, false>(data(as) + bound_drop_size, as_len - bound_drop_size);
 }
 
@@ -883,11 +925,15 @@ using SliceUnsafeReturn = TakeUnsafeReturn<
 // todo Optimization
 template<typename S, typename E, typename As>
 auto slice_unsafe(S start, E end, const As& as) -> SliceUnsafeReturn<S, E, As, true> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return SliceUnsafeReturn<S, E, As, true>(data(as) + start, end - start);
 }
 
 template<typename S, typename E, typename As>
 auto slice_unsafe(S start, E end, As& as) -> SliceUnsafeReturn<S, E, As, false> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return SliceUnsafeReturn<S, E, As, false>(data(as) + start, end - start);
 }
 
@@ -904,11 +950,15 @@ using SliceReturn = TakeReturn<
 // todo Optimization
 template<typename S, typename E, typename As>
 auto slice(S start, E end, const As& as) -> SliceReturn<S, E, As, true> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return SliceReturn<S, E, As, true>(data(as) + start, end - start);
 }
 
 template<typename S, typename E, typename As>
 auto slice(S start, E end, As& as) -> SliceReturn<S, E, As, false> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     return SliceReturn<S, E, As, false>(data(as) + start, end - start);
 }
 
@@ -924,6 +974,8 @@ using TakeWhileReturn = Conditional<
 
 template<typename As, typename F = bool (*)(const Element<As>&)>
 auto take_while(const F& f, const As& as) -> TakeWhileReturn<As> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const auto as_len = length(as);
 
     size_t i = 0;
@@ -944,6 +996,8 @@ using DropWhileReturn = Conditional<
 
 template<typename As, typename F = bool (*)(const Element<As>&)>
 auto drop_while(const F& f, const As& as) -> DropWhileReturn<As> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const auto as_len = length(as);
 
     size_t i = 0;
@@ -958,6 +1012,8 @@ auto drop_while(const F& f, const As& as) -> DropWhileReturn<As> {
 
 template<typename As>
 bool elem(const Element<As>& a, const As& as) {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
@@ -972,6 +1028,8 @@ bool elem(const Element<As>& a, const As& as) {
 
 template<typename As>
 Maybe<size_t> elem_index(const Element<As>& a, const As& as) {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
@@ -992,6 +1050,8 @@ using ElemIndicesReturn =
 
 template<typename As>
 auto elem_indices(const Element<As>& a, const As& as) -> ElemIndicesReturn<As> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     ElemIndicesReturn<As> res {};
     const auto as_len = length(as);
 
@@ -1021,6 +1081,8 @@ bool find(const F& f, const As& as) {
 
 template<typename As, typename F = void (*)(const Element<As>&)>
 auto find_index(const F& f, const As& as) -> Maybe<size_t> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
@@ -1041,6 +1103,8 @@ using FindIndicesReturn =
 
 template<typename As, typename F = void (*)(const Element<As>&)>
 auto find_indices(const F& f, const As& as) -> FindIndicesReturn<As> {
+    static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
+
     FindIndicesReturn<As> res {};
     const auto as_len = length(as);
 
