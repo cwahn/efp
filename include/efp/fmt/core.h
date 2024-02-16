@@ -268,10 +268,10 @@ using underlying_t = typename std::underlying_type<T>::type;
 
 // Checks whether T is a container with contiguous storage.
 template<typename T>
-struct is_contiguous: std::false_type {};
+struct is_contiguous: efp::False {};
 
 template<typename Char>
-struct is_contiguous<std::basic_string<Char>>: std::true_type {};
+struct is_contiguous<std::basic_string<Char>>: efp::True {};
 
 struct monostate {
     constexpr monostate() {}
@@ -522,10 +522,10 @@ using string_view = basic_string_view<char>;
 FMT_EXPORT
 
 template<typename T>
-struct is_char: std::false_type {};
+struct is_char: efp::False {};
 
 template<>
-struct is_char<char>: std::true_type {};
+struct is_char<char>: efp::True {};
 
 namespace detail {
 
@@ -1310,13 +1310,13 @@ template<typename Char>
 inline void init_named_args(named_arg_info<Char>*, int, int) {}
 
 template<typename T>
-struct is_named_arg: std::false_type {};
+struct is_named_arg: efp::False {};
 
 template<typename T>
-struct is_statically_named_arg: std::false_type {};
+struct is_statically_named_arg: efp::False {};
 
 template<typename T, typename Char>
-struct is_named_arg<named_arg<Char, T>>: std::true_type {};
+struct is_named_arg<named_arg<Char, T>>: efp::True {};
 
 template<typename Char, typename T, typename... Tail, FMT_ENABLE_IF(!is_named_arg<T>::value)>
 void init_named_args(
@@ -1745,7 +1745,7 @@ using void_t = void;
 #endif
 
 template<typename It, typename T, typename Enable = void>
-struct is_output_iterator: std::false_type {};
+struct is_output_iterator: efp::False {};
 
 template<typename It, typename T>
 struct is_output_iterator<
@@ -1753,13 +1753,13 @@ struct is_output_iterator<
     T,
     void_t<
         typename std::iterator_traits<It>::iterator_category,
-        decltype(*std::declval<It>() = std::declval<T>())>>: std::true_type {};
+        decltype(*std::declval<It>() = std::declval<T>())>>: efp::True {};
 
 template<typename It>
-struct is_back_insert_iterator: std::false_type {};
+struct is_back_insert_iterator: efp::False {};
 
 template<typename Container>
-struct is_back_insert_iterator<std::back_insert_iterator<Container>>: std::true_type {};
+struct is_back_insert_iterator<std::back_insert_iterator<Container>>: efp::True {};
 
 // A type-erased reference to an std::locale to avoid a heavy <locale> include.
 class locale_ref {

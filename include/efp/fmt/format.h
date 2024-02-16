@@ -286,7 +286,7 @@ FMT_END_NAMESPACE
 FMT_BEGIN_NAMESPACE
 
 template<typename...>
-struct disjunction: std::false_type {};
+struct disjunction: efp::False {};
 
 template<typename P>
 struct disjunction<P>: P {};
@@ -295,7 +295,7 @@ template<typename P1, typename... Pn>
 struct disjunction<P1, Pn...>: efp::Conditional<bool(P1::value), P1, disjunction<Pn...>> {};
 
 template<typename...>
-struct conjunction: std::true_type {};
+struct conjunction: efp::True {};
 
 template<typename P>
 struct conjunction<P>: P {};
@@ -874,15 +874,14 @@ template<typename T>
 struct is_integral: std::is_integral<T> {};
 
 template<>
-struct is_integral<int128_opt>: std::true_type {};
+struct is_integral<int128_opt>: efp::True {};
 
 template<>
-struct is_integral<uint128_t>: std::true_type {};
+struct is_integral<uint128_t>: efp::True {};
 
 template<typename T>
-using is_signed = std::integral_constant<
-    bool,
-    std::numeric_limits<T>::is_signed || efp::IsSame<T, int128_opt>::value>;
+using is_signed = std::
+    integral_constant<bool, std::numeric_limits<T>::is_signed || efp::IsSame<T, int128_opt>::value>;
 
 template<typename T>
 using is_integer = efp::Bool<
@@ -932,7 +931,7 @@ struct is_fast_float:
     efp::Bool<std::numeric_limits<T>::is_iec559 && sizeof(T) <= sizeof(double)> {};
 
 template<typename T>
-struct is_fast_float<T, false>: std::false_type {};
+struct is_fast_float<T, false>: efp::False {};
 
 template<typename T>
 using is_double_double = efp::Bool<std::numeric_limits<T>::digits == 106>;
@@ -957,10 +956,10 @@ void buffer<T>::append(const U* begin, const U* end) {
 }
 
 template<typename T, typename Enable = void>
-struct is_locale: std::false_type {};
+struct is_locale: efp::False {};
 
 template<typename T>
-struct is_locale<T, void_t<decltype(T::classic())>>: std::true_type {};
+struct is_locale<T, void_t<decltype(T::classic())>>: efp::True {};
 }  // namespace detail
 
 FMT_BEGIN_EXPORT
@@ -1116,7 +1115,7 @@ class basic_memory_buffer final: public detail::buffer<T> {
 using memory_buffer = basic_memory_buffer<char>;
 
 template<typename T, size_t SIZE, typename Allocator>
-struct is_contiguous<basic_memory_buffer<T, SIZE, Allocator>>: std::true_type {};
+struct is_contiguous<basic_memory_buffer<T, SIZE, Allocator>>: efp::True {};
 
 FMT_END_EXPORT
 
@@ -1482,7 +1481,7 @@ template<
     typename Char,
     typename UInt,
     typename Iterator,
-    FMT_ENABLE_IF(!std::is_pointer< efp::CVRefRemoved<Iterator>>::value)>
+    FMT_ENABLE_IF(!std::is_pointer<efp::CVRefRemoved<Iterator>>::value)>
 FMT_CONSTEXPR inline auto format_decimal(Iterator out, UInt value, int size)
     -> format_decimal_result<Iterator> {
     // Buffer is large enough to hold all digits (digits10 + 1).
@@ -2783,7 +2782,7 @@ template<
     typename OutputIt,
     typename UInt,
     typename Char,
-    FMT_ENABLE_IF(!std::is_pointer< efp::CVRefRemoved<OutputIt>>::value)>
+    FMT_ENABLE_IF(!std::is_pointer<efp::CVRefRemoved<OutputIt>>::value)>
 inline auto write_significand(
     OutputIt out,
     UInt significand,
@@ -3007,10 +3006,10 @@ constexpr bool isnan(T value) {
 }
 
 template<typename T, typename Enable = void>
-struct has_isfinite: std::false_type {};
+struct has_isfinite: efp::False {};
 
 template<typename T>
-struct has_isfinite<T, efp::EnableIf<sizeof(std::isfinite(T())) != 0>>: std::true_type {};
+struct has_isfinite<T, efp::EnableIf<sizeof(std::isfinite(T())) != 0>>: efp::True {};
 
 template<typename T, FMT_ENABLE_IF(std::is_floating_point<T>::value&& has_isfinite<T>::value)>
 FMT_CONSTEXPR20 bool isfinite(T value) {
@@ -4045,7 +4044,7 @@ template<
 FMT_CONSTEXPR auto write(OutputIt out, const T& value) -> efp::EnableIf<
     std::is_class<T>::value && !is_string<T>::value && !is_floating_point<T>::value
         && !efp::IsSame<T, Char>::value
-        && !efp::IsSame<T,  efp::CVRefRemoved<decltype(arg_mapper<Context>().map(value))>>::value,
+        && !efp::IsSame<T, efp::CVRefRemoved<decltype(arg_mapper<Context>().map(value))>>::value,
     OutputIt> {
     return write<Char>(out, arg_mapper<Context>().map(value));
 }
@@ -4211,10 +4210,10 @@ struct statically_named_arg: view {
 };
 
 template<typename T, typename Char, size_t N, fmt::detail_exported::fixed_string<Char, N> Str>
-struct is_named_arg<statically_named_arg<T, Char, N, Str>>: std::true_type {};
+struct is_named_arg<statically_named_arg<T, Char, N, Str>>: efp::True {};
 
 template<typename T, typename Char, size_t N, fmt::detail_exported::fixed_string<Char, N> Str>
-struct is_statically_named_arg<statically_named_arg<T, Char, N, Str>>: std::true_type {};
+struct is_statically_named_arg<statically_named_arg<T, Char, N, Str>>: efp::True {};
 
 template<typename Char, size_t N, fmt::detail_exported::fixed_string<Char, N> Str>
 struct udl_arg {
@@ -4612,7 +4611,7 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
 #else
         typename std::iterator_traits<It>::value_type;
 #endif
-    formatter< efp::CVRefRemoved<value_type>, Char> value_formatter_;
+    formatter<efp::CVRefRemoved<value_type>, Char> value_formatter_;
 
   public:
     template<typename ParseContext>
@@ -4830,7 +4829,7 @@ inline namespace literals {
     #if FMT_USE_NONTYPE_TEMPLATE_ARGS
 template<detail_exported::fixed_string Str>
 constexpr auto operator""_a() {
-    using char_t =  efp::CVRefRemoved<decltype(Str.data[0])>;
+    using char_t = efp::CVRefRemoved<decltype(Str.data[0])>;
     return detail::udl_arg<char_t, sizeof(Str.data) / sizeof(char_t), Str>();
 }
     #else
