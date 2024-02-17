@@ -607,6 +607,7 @@ namespace detail {
         using value_type = Element;
         // using traits_type = Traits;
         // using allocator_type = Allocator;
+        using allocator_type = std::allocator<value_type>;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;

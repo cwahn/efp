@@ -1726,7 +1726,8 @@ template<typename Char, typename InputIt>
 auto copy_str(InputIt begin, InputIt end, std::back_insert_iterator<efp::String> out)
     -> std::back_insert_iterator<efp::String> {
     // ! temp
-    // efp::DebugType<decltype(get_container(out))> {};
+    efp::DebugType<std::back_insert_iterator<efp::String>> {};
+    efp::DebugType<decltype(get_container(out))> {};
     // error: implicit instantiation of undefined template 'efp::DebugType<fmt::detail::buffer<char> &>'
     get_container(out).append(begin, end);
     return out;
