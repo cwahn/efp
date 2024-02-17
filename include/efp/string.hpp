@@ -5,6 +5,7 @@
 
 #if defined(__STDC_HOSTED__)
     #include <cstring>
+    #include <string>
 #endif
 
 #include "efp/prelude.hpp"
@@ -219,14 +220,12 @@ public:
     }
 
     // todo Interface with StringView
-    // void append_mut(const Vector& string) {
-    //     for_each([&](Char c) { Base::push_back(c); }, string);
-    // }
 
-    // todo STL only
+#if defined(__STDC_HOSTED__)
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
+#endif
 };
 
 template<
@@ -259,7 +258,6 @@ public:
     using Base::Base;
 
     VectorView(const Char* c_str) {
-        // Base::_size = std::strlen(c_str);
         Base::_size = Traits::length(c_str);
         Base::_data = c_str;
     }
@@ -286,10 +284,11 @@ public:
         return c_str[Base::_size] == '\0';
     }
 
-    // todo STL only
+#if defined(__STDC_HOSTED__)
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
+#endif
 
     const Char* c_str() const {
         return Base::_data;
