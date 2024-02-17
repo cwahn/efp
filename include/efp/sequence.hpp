@@ -596,30 +596,72 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
 }
 
 namespace detail {
+
+#if defined(__STDC_HOSTED__)
+    #include <memory>  // For std::allocator and std::allocator_traits
     template<typename A>
+    using DefaultAllocator = std::allocator<A>;
+
+#else
+
+    #include "efp/allocator.hpp"
+    template<typename A>
+    using DefaultAllocator = efp::Allocator<A>;
+
+#endif
+
+    template<typename A, typename Allocator = DefaultAllocator<A>>
     class VectorBase {
       public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
 
-        VectorBase() : _data {nullptr}, _size {0}, _capacity {0} {}
+        // STL compatible member types
+        using allocator_type = std::allocator<Element>;
+
+        VectorBase() : _data(nullptr), _size(0), _capacity(0), _allocator(Allocator()) {}
+
+        // VectorBase(const VectorBase& other)
+        //     : _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
+        //       _size {other._size}, _capacity {other._size} {
+        //     if (other._data) {
+        //         for (size_t i = 0; i < _size; ++i) {
+        //             new (_data + i) Element {other._data[i]};
+        //         }
+        //     }
+        // }
 
         VectorBase(const VectorBase& other)
-            : _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
-              _size {other._size}, _capacity {other._size} {
-            if (other._data) {
-                for (size_t i = 0; i < _size; ++i) {
-                    new (_data + i) Element {other._data[i]};
-                }
+            : _allocator(other._allocator), _data(_allocator.allocate(other._size + 1)),
+              _size(other._size), _capacity(other._size + 1) {
+            for (size_t i = 0; i < _size; ++i) {
+                _allocator.construct(_data + i, other._data[i]);
             }
         }
 
         // todo copy_and_swap
-        VectorBase& operator=(const VectorBase& other) noexcept {
+        // VectorBase& operator=(const VectorBase& other) noexcept {
+        //     if (this != &other) {
+        //         for (size_t i = 0; i < _size; ++i) {
+        //             _data[i].~Element();
+        //         }
+
+        //         if (_capacity < other._size) {
+        //             resize(other._size);
+        //         }
+
+        //         for (size_t i = 0; i < other._size; ++i) {
+        //             new (_data + i) Element {other._data[i]};
+        //         }
+        //     }
+        //     return *this;
+        // }
+
+        VectorBase& operator=(const VectorBase& other) {
             if (this != &other) {
                 for (size_t i = 0; i < _size; ++i) {
-                    _data[i].~Element();
+                    _allocator.destroy(_data + i);
                 }
 
                 if (_capacity < other._size) {
@@ -627,7 +669,7 @@ namespace detail {
                 }
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    new (_data + i) Element {other._data[i]};
+                    _allocator.construct(_data + i, other._data[i]);
                 }
             }
             return *this;
@@ -867,6 +909,7 @@ namespace detail {
             new (_data + index++) Element {last};
         }
 
+        Allocator _allocator;
         Element* _data;
         size_t _size;
         size_t _capacity;

@@ -280,7 +280,7 @@ TEST_CASE("Initialization") {
         Vector<int> a = {1, 2, 3};
         Vector<int> b = a;
         CHECK(b.size() == 3);
-        CHECK(b.capacity() == 3);
+        CHECK(b.capacity() == 4);
     }
 
     SECTION("Array Assignment") {
