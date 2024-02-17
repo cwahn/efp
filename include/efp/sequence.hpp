@@ -1353,7 +1353,7 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
-// todo STL only
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 template<typename A>
 auto operator<<(std::ostream& os, const A& seq)
@@ -1371,6 +1371,8 @@ auto operator<<(std::ostream& os, const A& seq)
     os << " }";
     return os;
 }
+
+#endif
 
 // Sequence trait implementation for std::array
 

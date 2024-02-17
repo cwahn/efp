@@ -273,7 +273,7 @@ public:
         return std::string(Base::_data, Base::_size);
     }
 #endif
-};
+};  // class Vector
 
 template<
     typename Char,
@@ -292,6 +292,25 @@ using U32String = BasicString<char32_t>;
 
 #if __cplusplus >= 202002L
 using U8String = BasicString<char8_t>;
+#endif
+
+template<typename A>
+auto operator<<(std::ostream& = os, const A& seq)
+    -> EnableIf<IsSequence<A>::value && !IsSame<A, std::string>::value, std::ostream&> {
+    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
+
+    // ? Interesting. Automatically consider it as VectorStream?
+    os << "{ ";
+    for (size_t i = 0; i < seq.size(); ++i) {
+        os << seq[i];
+        if (i != seq.size() - 1) {
+            os << ", ";
+        }
+    }
+    os << " }";
+    return os;
+}
+
 #endif
 
 // BasicStringView specialization
@@ -387,10 +406,10 @@ using U8StringView = BasicStringView<char8_t>;
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
-    // inline std::ostream& operator<<(std::ostream& os, const String& string) {
-    //     for_each([&](char c) { os << c; }, string);
-    //     return os;
-    // }
+// inline std::ostream& operator<<(std::ostream& os, const String& string) {
+//     for_each([&](char c) { os << c; }, string);
+//     return os;
+// }
 
 #endif
 
