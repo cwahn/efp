@@ -12,42 +12,6 @@
 
 namespace efp {
 
-// ! Not to use these for BasicString but CharTraits
-// if freestanding manual implementation of strlen, memcpy and strncmp
-// #if defined(__STDC_HOSTED__)
-// // using memcpy = std::memcpy;
-// // using strlen = std::strlen;
-// // using strncmp = std::strncmp;
-
-// void (*memcpy)(Char* dest, const Char* src, size_t size) = std::memcpy;
-// size_t (*strlen)(const Char* c_str) = std::strlen;
-// int (*strncmp)(const Char* str1, const Char* str2, size_t n) = std::strncmp;
-
-// #else
-// void memcpy(Char* dest, const Char* src, size_t size) {
-//     for (size_t i = 0; i < size; ++i) {
-//         dest[i] = src[i];
-//     }
-// }
-
-// size_t strlen(const Char* c_str) {
-//     size_t len = 0;
-//     while (c_str[len] != '\0') {
-//         ++len;
-//     }
-//     return len;
-// }
-
-// int strncmp(const Char* str1, const Char* str2, size_t n) {
-//     for (size_t i = 0; i < n; ++i) {
-//         if (str1[i] != str2[i]) {
-//             return str1[i] - str2[i];
-//         }
-//     }
-//     return 0;
-// }
-// #endif
-
 // BasicString
 
 template<typename Char, typename Traits, typename Allocator>
@@ -60,13 +24,10 @@ public:
     using traits_type = Traits;
 
     Vector(const Char* c_str) {
-        // Base::_capacity = efp::strlen(c_str);
         Base::_size = Traits::length(c_str);
         Base::_capacity = Base::_size + 1;
-        // Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
         Base::_data = Base::_allocator.allocate(Base::_capacity);
-
-        memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
+        efp::memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
     }
 
     bool operator==(const Vector& other) const {
@@ -84,7 +45,6 @@ public:
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        // if (efp::strncmp(Base::_data, c_str, Base::_size) != 0)
         if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
             return false;
 
@@ -123,7 +83,6 @@ public:
 
     // todo append(const CharT* s, size_type n)
     Vector& append(const Char* c_str) {
-        // const size_t len = efp::strlen(c_str);
         const size_t len = Traits::length(c_str);
 
         for (size_t i = 0; i < len; ++i) {
@@ -155,7 +114,6 @@ public:
             throw std::runtime_error("Index out of range");
         }
 
-        // const size_t len = efp::strlen(c_str);
         const size_t len = Traits::length(c_str);
         Base::reserve(Base::_size + len);
 
