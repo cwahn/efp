@@ -5,22 +5,21 @@
 // #include "efp/fmt_original/core.h"
 #include "efp/fmt/core.h"
 
-
 namespace efp {
 
 template<typename... Args>
 String format(const String& fmt, Args&&... args) {
-    return fmt::format(fmt, std::forward<Args>(args)...);
+    return fmt::format(fmt, efp::forward<Args>(args)...);
 }
 
 template<typename... Args>
 void print(const String& fmt, Args&&... args) {
-    fmt::print(fmt, std::forward<Args>(args)...);
+    fmt::print(fmt, efp::forward<Args>(args)...);
 }
 
 template<typename... Args>
 void println(const String& fmt, Args&&... args) {
-    fmt::println(fmt, std::forward<Args>(args)...);
+    fmt::println(fmt, efp::forward<Args>(args)...);
 }
 
 // todo styled print

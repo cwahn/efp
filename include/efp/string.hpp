@@ -11,6 +11,10 @@
 
 namespace efp {
 
+// Forward declarations for String and StringView
+template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
+using BasicStringView = VectorView<Char>;
+
 // BasicString
 
 template<typename Char, typename Traits, typename Allocator>
@@ -252,16 +256,14 @@ public:
         return Traits::compare(Base::_data + pos, other.data(), len);
     }
 
-    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
-
     const Char* c_str() const {
         Base::_data[Base::_size] = '\0';
         return Base::_data;
     }
 
-    // todo max_size
-    size_t max_size() const {
-        return Base::_allocator.max_size();
+    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
+    operator BasicStringView<Char, Traits>() const {
+        return BasicStringView<Char, Traits>(Base::_data, Base::_size);
     }
 
     // todo Interface with StringView
@@ -342,8 +344,8 @@ public:
 
 // BasicSstringView
 
-template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
-using BasicStringView = VectorView<Char>;
+// template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
+// using BasicStringView = VectorView<Char>;
 
 using StringView = BasicStringView<char>;
 

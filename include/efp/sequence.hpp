@@ -668,6 +668,10 @@ namespace detail {
             return _capacity;
         }
 
+        size_t max_size() const {
+            return _allocator.max_size();
+        }
+
         void resize(size_t new_size) {
             if (new_size < 0) {
                 throw std::runtime_error(
