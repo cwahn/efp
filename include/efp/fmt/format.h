@@ -2223,8 +2223,7 @@ class digit_grouping {
     efp::BasicString<Char> thousands_sep_;
 
     struct next_state {
-        // efp::String::const_iterator group;
-        const char & group;
+        efp::String::const_iterator group;
         int pos;
     };
 
