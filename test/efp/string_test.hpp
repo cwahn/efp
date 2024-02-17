@@ -161,6 +161,24 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(std::strncmp(buffer, "Hello", 5) == 0);
     }
 
+    SECTION("String::compare(const String& other)") {
+        String str1("Hello");
+        String str2("Hello");
+        String str3("World");
+        CHECK(str1.compare(str2) == 0);
+        CHECK(str1.compare(str3) < 0);
+        CHECK(str3.compare(str1) > 0);
+    }
+
+    SECTION("String::compare(size_t pos, size_t count, const String& other)") {
+        String str1("Hello");
+        String str2("Hello");
+        String str3("World");
+        CHECK(str1.compare(0, 5, str2) == 0);
+        CHECK(str1.compare(0, 5, str3) < 0);
+        CHECK(str3.compare(0, 5, str1) > 0);
+    }
+
     SECTION("Equality with C-Style String") {
         String str("Hello");
         CHECK(str == "Hello");

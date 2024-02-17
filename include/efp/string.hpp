@@ -176,7 +176,7 @@ public:
     }
 
     // todo size_type copy( CharT* dest, size_type count, size_type pos = 0 ) const
-    // The resulting character string is not null-terminated. 
+    // The resulting character string is not null-terminated.
     // https://en.cppreference.com/w/cpp/string/basic_string/copy
     size_t copy(Char* dest, size_t count, size_t pos = 0) const {
         if (pos > Base::_size) {
@@ -194,8 +194,22 @@ public:
     // todo find, rfind, find_first_of, find_last_of, find_first_not_of, find_last_not_of
 
     // todo compare(const basic_string& str) const
+    int compare(const Vector& other) const {
+        return Traits::compare(Base::_data, other.data(), Base::_size);
+    }
 
     // todo compare(size_type pos, size_type len, const basic_string& str) const
+    int compare(size_t pos, size_t len, const Vector& other) const {
+        if (pos > Base::_size) {
+            throw std::runtime_error("Index out of range");
+        }
+
+        if (len > Base::_size - pos) {
+            len = Base::_size - pos;
+        }
+
+        return Traits::compare(Base::_data + pos, other.data(), len);
+    }
 
     // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
 
