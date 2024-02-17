@@ -12,31 +12,41 @@
 
 namespace efp {
 
+// ! Not to use these for BasicString but CharTraits
 // if freestanding manual implementation of strlen, memcpy and strncmp
-#if !defined(__STDC_HOSTED__)
-static size_t std::strlen(const Char* c_str) {
-    size_t len = 0;
-    while (c_str[len] != '\0') {
-        ++len;
-    }
-    return len;
-}
+// #if defined(__STDC_HOSTED__)
+// // using memcpy = std::memcpy;
+// // using strlen = std::strlen;
+// // using strncmp = std::strncmp;
 
-static void std::memcpy(Char* dest, const Char* src, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        dest[i] = src[i];
-    }
-}
+// void (*memcpy)(Char* dest, const Char* src, size_t size) = std::memcpy;
+// size_t (*strlen)(const Char* c_str) = std::strlen;
+// int (*strncmp)(const Char* str1, const Char* str2, size_t n) = std::strncmp;
 
-static int std::strncmp(const Char* str1, const Char* str2, size_t n) {
-    for (size_t i = 0; i < n; ++i) {
-        if (str1[i] != str2[i]) {
-            return str1[i] - str2[i];
-        }
-    }
-    return 0;
-}
-#endif
+// #else
+// void memcpy(Char* dest, const Char* src, size_t size) {
+//     for (size_t i = 0; i < size; ++i) {
+//         dest[i] = src[i];
+//     }
+// }
+
+// size_t strlen(const Char* c_str) {
+//     size_t len = 0;
+//     while (c_str[len] != '\0') {
+//         ++len;
+//     }
+//     return len;
+// }
+
+// int strncmp(const Char* str1, const Char* str2, size_t n) {
+//     for (size_t i = 0; i < n; ++i) {
+//         if (str1[i] != str2[i]) {
+//             return str1[i] - str2[i];
+//         }
+//     }
+//     return 0;
+// }
+// #endif
 
 // BasicString
 
@@ -50,10 +60,13 @@ public:
     using traits_type = Traits;
 
     Vector(const Char* c_str) {
-        Base::_capacity = std::strlen(c_str);
-        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
-        Base::_size = Base::_capacity;
-        std::memcpy(Base::_data, c_str, Base::_size);
+        // Base::_capacity = efp::strlen(c_str);
+        Base::_size = Traits::length(c_str);
+        Base::_capacity = Base::_size + 1;
+        // Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
+        Base::_data = Base::_allocator.allocate(Base::_capacity);
+
+        memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
     }
 
     bool operator==(const Vector& other) const {
@@ -71,7 +84,8 @@ public:
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (std::strncmp(Base::_data, c_str, Base::_size) != 0)
+        // if (efp::strncmp(Base::_data, c_str, Base::_size) != 0)
+        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
@@ -109,7 +123,8 @@ public:
 
     // todo append(const CharT* s, size_type n)
     Vector& append(const Char* c_str) {
-        const size_t len = std::strlen(c_str);
+        // const size_t len = efp::strlen(c_str);
+        const size_t len = Traits::length(c_str);
 
         for (size_t i = 0; i < len; ++i) {
             Base::push_back(c_str[i]);
@@ -134,6 +149,28 @@ public:
     }
 
     // todo insert(size_type pos, const CharT* s)
+    Vector& insert(size_t pos, const Char* c_str) {
+        if (pos > Base::_size) {
+            // throw std::out_of_range("Index out of range");
+            throw std::runtime_error("Index out of range");
+        }
+
+        // const size_t len = efp::strlen(c_str);
+        const size_t len = Traits::length(c_str);
+        Base::reserve(Base::_size + len);
+
+        for (size_t i = Base::_size; i > pos; --i) {
+            Base::_data[i + len - 1] = Base::_data[i - 1];
+        }
+
+        for (size_t i = 0; i < len; ++i) {
+            Base::_data[pos + i] = c_str[i];
+        }
+
+        Base::_size += len;
+
+        return *this;
+    }
 
     // todo insert(size_type pos, const CharT* s, size_type n)
 
@@ -189,6 +226,7 @@ using U8String = BasicString<char8_t>;
 #endif
 
 // BasicStringView specialization
+// todo Traits
 
 template<typename Char>
 class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
