@@ -709,13 +709,13 @@ TEST_CASE("Vector Allocation Strategy", "Vector") {
         CHECK(vec.capacity() == 10);
     }
 
-    // SECTION("Vector::shrink_to_fit") {
-    //     Vector<int> vec {1, 2, 3};
-    //     vec.reserve(10);
-    //     // vec.shrink_to_fit();
-    //     CHECK(vec.size() == 3);
-    //     CHECK(vec.capacity() == 3);
-    // }
+    SECTION("Vector::shrink_to_fit") {
+        Vector<int> vec {1, 2, 3};
+        vec.reserve(10);
+        vec.shrink_to_fit();
+        CHECK(vec.size() == 3);
+        CHECK(vec.capacity() == 4);
+    }
 
     SECTION("Vector::resize") {
         Vector<int> vec {1, 2, 3};
@@ -733,14 +733,14 @@ TEST_CASE("Vector Allocation Strategy", "Vector") {
 
         vec.push_back(2);
         CHECK(vec.size() == 2);
-        CHECK(vec.capacity() == 4);
+        CHECK(vec.capacity() == 3);
 
         vec.push_back(3);
         vec.push_back(4);
         vec.push_back(5);
 
         CHECK(vec.size() == 5);
-        CHECK(vec.capacity() == 8);
+        CHECK(vec.capacity() == 9);
     }
 
     SECTION("Vector::pop_back") {
