@@ -108,8 +108,24 @@ public:
     }
 
     // todo append(const CharT* s, size_type n)
+    Vector& append(const Char* c_str) {
+        const size_t len = std::strlen(c_str);
+
+        for (size_t i = 0; i < len; ++i) {
+            Base::push_back(c_str[i]);
+        }
+
+        return *this;
+    }
 
     // todo append(size_type n, CharT c)
+    Vector& append(size_t n, Char c) {
+        for (size_t i = 0; i < n; ++i) {
+            Base::push_back(c);
+        }
+
+        return *this;
+    }
 
     // todo assign(const CharT* s, size_type n)
 

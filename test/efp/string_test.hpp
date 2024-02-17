@@ -118,6 +118,18 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(str == "Hello World");
     }
 
+    SECTION("String::append(const Char*)") {
+        String str("Hello");
+        str.append(" World");
+        CHECK(str == "Hello World");
+    }
+
+    SECTION("String::append(size_t, Char)") {
+        String str("Hello");
+        str.append(3, '!');
+        CHECK(str == "Hello!!!");
+    }
+
     SECTION("Equality with C-Style String") {
         String str("Hello");
         CHECK(str == "Hello");
