@@ -56,7 +56,7 @@ public:
     // Not using iterator
     template<typename InputIt>
     Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
-        : Base::allocator_(alloc), Base::data_(nullptr), Base::size_(0), Base::capacity_(0) {
+        : Base::allocator_(alloc), Base::size_(0), Base::capacity_(0) {
         // First pass: Count the number of elements to determine size
         for (InputIt it = first; it != last; ++it) {
             ++Base::size_;
@@ -68,21 +68,9 @@ public:
 
         // Second pass: Copy-construct elements from the range
         size_t i = 0;
-        // try {
         for (InputIt it = first; it != last; ++it, ++i) {
-            // Use allocator_traits for type safety and potential optimizations
-            // std::allocator_traits<Allocator>::construct(allocator_, data_ + i, *it);
             Base::allocator_.construct(Base::data_ + i, *it);
         }
-        // } catch (...) {
-        //     // If an exception is thrown, destroy constructed elements and deallocate memory
-        //     while (i > 0) {
-        //         --i;
-        //         std::allocator_traits<Allocator>::destroy(allocator_, data_ + i);
-        //     }
-        //     allocator_.deallocate(data_, capacity_);
-        //     throw;  // Rethrow the exception to propagate the error
-        // }
     }
 
     bool operator==(const Vector& other) const {
@@ -159,6 +147,12 @@ public:
     Vector& assign(const Char* c_str) {
         Base::clear();
         return append(c_str);
+    }
+
+    // todo assign(size_type n, CharT c)
+    Vector& assign(size_t n, Char c) {
+        Base::clear();
+        return append(n, c);
     }
 
     // todo insert(size_type pos, const CharT* s)
