@@ -259,6 +259,11 @@ public:
         return Base::_data;
     }
 
+    // todo max_size
+    size_t max_size() const {
+        return Base::_allocator.max_size();
+    }
+
     // todo Interface with StringView
 
 #if defined(__STDC_HOSTED__)
