@@ -162,6 +162,11 @@ struct Max<Head>: Head {};
 
 constexpr auto size_of_ptr_v = sizeof(void*);
 
+// NumericLimits
+
+template <typename A>
+using NumericLimits = std::numeric_limits<A>;
+
 // Operators
 // Make them works for a single type to disallow implicit type conversion
 // It's also the way Haskell and Rust do

@@ -61,6 +61,8 @@ static int std::strncmp(const Char* str1, const Char* str2, size_t n) {
 }
 #endif
 
+// BasicString
+
 template<typename Char>
 class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::VectorBase<Char> {
   public:
