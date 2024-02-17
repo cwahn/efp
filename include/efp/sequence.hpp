@@ -8,13 +8,22 @@
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
+#if defined(__STDC_HOSTED__)
+    #include <string>
+    #include <memory>
+#else
+    // todo remove STL
+    #include <string>
+    #include "efp/allocator.hpp"
+#endif
+
 // todo Move and copy assigment operator sort out
 
 namespace efp {
 
 template<typename A, size_t ct_size>
 class Array {
-  public:
+public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
@@ -141,7 +150,7 @@ class Array {
         return ct_size == 0;
     }
 
-  private:
+private:
     template<typename Head, typename... Tail>
     inline void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
         new (_data + index++) Element {head};
@@ -201,7 +210,7 @@ constexpr auto data(Array<A, n>& as) -> A* {
 
 template<typename A, size_t ct_capacity>
 class ArrVec {
-  public:
+public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
@@ -342,17 +351,6 @@ class ArrVec {
         }
     }
 
-    // void push_back(Element&& value) {
-    //     if (_size >= ct_capacity) {
-    //         throw std::runtime_error(
-    //             "ArrVec::push_back: size must be less than or equal to ct_capacity"
-    //         );
-    //     } else {
-    //         new (&_data[_size]) Element(efp::move(value));
-    //         ++_size;
-    //     }
-    // }
-
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
             throw std::runtime_error(
@@ -362,23 +360,6 @@ class ArrVec {
             new (_data + _size++) Element {efp::move(value)};
         }
     }
-
-    // void insert(size_t index, const Element& value) {
-    //     if (index < 0 || index > _size || _size == ct_capacity) {
-    //         throw std::runtime_error(
-    //             "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
-    //         );
-    //     }
-
-    //     for (size_t i = _size; i > index; --i) {
-    //         new (&_data[i]) Element(efp::move(_data[i - 1]));
-    //         _data[i - 1].~Element();
-    //     }
-
-    //     new (&_data[index]) Element(value);
-
-    //     ++_size;
-    // }
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > _size || _size == ct_capacity) {
@@ -392,20 +373,10 @@ class ArrVec {
             (_data + i - 1)->~Element();
         }
 
-        // new (&_data[index]) Element(value);
         new (_data + index) Element(value);
 
         ++_size;
     }
-
-    // void pop_back() {
-    //     if (_size == 0) {
-    //         std::runtime_error("ArrVec::pop_back: size must be greater than 0");
-    //     }
-
-    //     _data[_size - 1].~Element();
-    //     --_size;
-    // }
 
     void pop_back() {
         if (_size == 0) {
@@ -415,31 +386,12 @@ class ArrVec {
         (_data + _size-- - 1)->~Element();
     }
 
-    // void clear() {
-    //     for (size_t i = 0; i < _size; ++i) {
-    //         _data[i].~Element();
-    //     }
-    //     _size = 0;
-    // }
-
     void clear() {
         for (size_t i = 0; i < _size; ++i) {
             (_data + i)->~Element();
         }
         _size = 0;
     }
-
-    // void erase(size_t index) {
-    //     if (index < 0 || index >= _size) {
-    //         throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
-    //     }
-    //     _data[index].~Element();
-    //     for (size_t i = index; i < _size - 1; ++i) {
-    //         new (&_data[i]) Element(efp::move(_data[i + 1]));
-    //         _data[i + 1].~Element();
-    //     }
-    //     --_size;
-    // }
 
     void erase(size_t index) {
         if (index < 0 || index >= _size) {
@@ -483,7 +435,7 @@ class ArrVec {
         return _size == 0;
     }
 
-  private:
+private:
     template<typename Head, typename... Tail>
     void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
         new (_data + index++) Element {head};
@@ -543,13 +495,13 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
 namespace detail {
 
 #if defined(__STDC_HOSTED__)
-    #include <memory>  // For std::allocator and std::allocator_traits
+    // #include <memory>
     template<typename A>
     using DefaultAllocator = std::allocator<A>;
 
 #else
 
-    #include "efp/allocator.hpp"
+    // #include "efp/allocator.hpp"
     template<typename A>
     using DefaultAllocator = efp::Allocator<A>;
 
@@ -557,7 +509,7 @@ namespace detail {
 
     template<typename A, typename Allocator = DefaultAllocator<A>>
     class VectorBase {
-      public:
+    public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
@@ -863,7 +815,7 @@ namespace detail {
             return _size == 0;
         }
 
-      protected:
+    protected:
         template<typename Last>
         void _construct_elements(size_t& index, const Last& last) {
             _allocator.construct(_data + index++, last);
@@ -882,9 +834,54 @@ namespace detail {
     };
 }  // namespace detail
 
-template<typename A, typename = void>
-class Vector: public detail::VectorBase<A> {
-  public:
+namespace detail {
+    template<typename T>
+    struct IsCharType: False {};
+
+    // Specializations for character types
+    template<>
+    struct IsCharType<char>: True {};
+
+    template<>
+    struct IsCharType<wchar_t>: True {};
+
+    template<>
+    struct IsCharType<char16_t>: True {};
+
+    template<>
+    struct IsCharType<char32_t>: True {};
+
+#if __cplusplus >= 202002L
+    template<>
+    struct IsCharType<char8_t>: True {};  // C++20 char8_t support
+#endif
+}  // namespace detail
+
+namespace detail {
+
+#if defined(__STDC_HOSTED__)
+
+    template<typename Char>
+
+    // todo Remove warning
+    using DefaultCharTraits = std::char_traits<Char>;
+
+#else
+    // todo freestanding implementation
+    template<typename Char>
+    using DefaultCharTraits = std::char_traits<Char>;
+#endif
+
+}  // namespace detail
+
+template<
+    typename A,
+    typename Allocator = detail::DefaultAllocator<A>,
+    typename CharTraits =
+        Conditional<detail::IsCharType<A>::value, detail::DefaultCharTraits<A>, void>,
+    typename = void>
+class Vector: public detail::VectorBase<A, Allocator> {
+public:
     using Base = detail::VectorBase<A>;
     using Base::Base;
 
@@ -893,49 +890,49 @@ class Vector: public detail::VectorBase<A> {
     }
 };
 
-template<typename A>
-struct ElementImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct ElementImpl<Vector<A, Allocator, CharTraits>> {
     using Type = A;
 };
 
-template<typename A>
-struct CtSizeImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct CtSizeImpl<Vector<A, Allocator, CharTraits>> {
     using Type = Size<dyn>;
 };
 
-template<typename A>
-struct CtCapacityImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct CtCapacityImpl<Vector<A, Allocator, CharTraits>> {
     using Type = Size<dyn>;
 };
 
-template<typename A>
-constexpr auto length(const Vector<A>& as) -> size_t {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto length(const Vector<A, Allocator, CharTraits>& as) -> size_t {
     return as.size();
 }
 
-template<typename A>
-constexpr auto nth(size_t i, const Vector<A>& as) -> const A& {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto nth(size_t i, const Vector<A, Allocator, CharTraits>& as) -> const A& {
     return as[i];
 }
 
-template<typename A>
-constexpr auto nth(size_t i, Vector<A>& as) -> A& {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto nth(size_t i, Vector<A, Allocator, CharTraits>& as) -> A& {
     return as[i];
 }
 
-template<typename A>
-constexpr auto data(const Vector<A>& as) -> const A* {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto data(const Vector<A, Allocator, CharTraits>& as) -> const A* {
     return as.data();
 }
 
-template<typename A>
-constexpr auto data(Vector<A>& as) -> A* {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto data(Vector<A, Allocator, CharTraits>& as) -> A* {
     return as.data();
 }
 
 template<typename A, size_t ct_size>
 class ArrayView {
-  public:
+public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
@@ -1016,7 +1013,7 @@ class ArrayView {
         return ct_size == 0;
     }
 
-  private:
+private:
     const Element* _data;
 };
 
@@ -1062,7 +1059,7 @@ constexpr auto data(ArrayView<A, n>& as) -> const A* {
 
 template<typename A, size_t ct_capacity>
 class ArrVecView {
-  public:
+public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
@@ -1138,7 +1135,7 @@ class ArrVecView {
         return _size == 0;
     }
 
-  private:
+private:
     const Element* _data;
     size_t _size;
 };
@@ -1190,7 +1187,7 @@ namespace detail {
 
     template<typename A>
     class VectorViewBase {
-      public:
+    public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
@@ -1275,16 +1272,19 @@ namespace detail {
             return _size == 0;
         }
 
-      protected:
+    protected:
         const Element* _data;
         size_t _size;
         size_t _capacity;
     };
 }  // namespace detail
 
-template<typename A, typename = void>
+template<
+    typename A,
+    typename Traits = Conditional<detail::IsCharType<A>::value, detail::DefaultCharTraits<A>, void>,
+    typename = void>
 class VectorView: public detail::VectorViewBase<A> {
-  public:
+public:
     using Base = detail::VectorViewBase<A>;
     using Base::Base;
 
