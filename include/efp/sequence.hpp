@@ -210,26 +210,11 @@ class ArrVec {
         // By definition none of the data in ArrVec of size 0 should be valid
     }
 
-    // ArrVec(const ArrVec& other) : _size {other._size} {
-    //     for (size_t i = 0; i < _size; ++i) {
-    //         new (&_data[i]) Element(other._data[i]);
-    //     }
-    // }
     ArrVec(const ArrVec& other) : _size {other._size} {
         for (size_t i = 0; i < _size; ++i) {
             new (_data + i) Element {other._data[i]};
         }
     }
-
-    // ArrVec& operator=(const ArrVec& other) {
-    //     if (this != &other) {
-    //         resize(other.size());
-    //         for (size_t i = 0; i < _size; ++i) {
-    //             _data[i] = other._data[i];
-    //         }
-    //     }
-    //     return *this;
-    // }
 
     ArrVec& operator=(const ArrVec& other) {
         if (this != &other) {
@@ -246,38 +231,12 @@ class ArrVec {
         return *this;
     }
 
-    // ArrVec(ArrVec&& other) : _size {other._size} {
-    //     other._size = 0;
-    //     for (size_t i = 0; i < _size; ++i) {
-    //         _data[i] = efp::move(other._data[i]);
-    //     }
-    // }
-
     ArrVec(ArrVec&& other) noexcept : _size {other._size} {
         other._size = 0;
         for (size_t i = 0; i < _size; ++i) {
             new (_data + i) Element {efp::move(other._data[i])};
         }
     }
-
-    // ArrVec& operator=(ArrVec&& other) noexcept {
-    //     if (this != &other) {
-    //         // Destroy existing elements
-    //         for (size_t i = 0; i < _size; ++i) {
-    //             _data[i].~Element();
-    //         }
-
-    //         // Move data from the source object
-    //         _size = other._size;
-    //         for (size_t i = 0; i < _size; ++i) {
-    //             new (&_data[i]) Element(efp::move(other._data[i]));
-    //         }
-
-    //         // Reset the source object
-    //         other._size = 0;
-    //     }
-    //     return *this;
-    // }
 
     ArrVec& operator=(ArrVec&& other) noexcept {
         if (this != &other) {
@@ -298,25 +257,11 @@ class ArrVec {
         return *this;
     }
 
-    // ~ArrVec() {
-    //     for (size_t i = 0; i < _size; ++i) {
-    //         _data[i].~Element();
-    //     }
-    // }
-
     ~ArrVec() {
         for (size_t i = 0; i < _size; ++i) {
             (_data + i)->~Element();
         }
     }
-
-    // Constructor from array
-    // template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
-    // ArrVec(const ArrVec<Element, ct_size_>& as) : _size(ct_size_) {
-    //     for (size_t i = 0; i < ct_size_; ++i) {
-    //         new (&_data[i]) Element(as[i]);
-    //     }
-    // }
 
     // Constructor from array
     template<size_t ct_size_, typename = EnableIf<ct_capacity >= ct_size_, void>>
@@ -625,9 +570,7 @@ namespace detail {
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;
         using const_reference = const value_type&;
-        // using pointer = typename std::allocator_traits<Allocator>::pointer;
         using pointer = value_type*;
-        // using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
         using const_pointer = const value_type*;
         using iterator =
             value_type*;  // Simplification; actual implementation would be more complex
@@ -636,16 +579,6 @@ namespace detail {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         VectorBase() : _allocator(Allocator()), _data(nullptr), _size(0), _capacity(0) {}
-
-        // VectorBase(const VectorBase& other)
-        //     : _data {static_cast<Element*>(::operator new[]((other._size + 1) * sizeof(Element)))},
-        //       _size {other._size}, _capacity {other._size + 1} {
-        //     if (other._data) {
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             new (_data + i) Element {other._data[i]};
-        //         }
-        //     }
-        // }
 
         VectorBase(const VectorBase& other)
             : _allocator(other._allocator), _size(other._size), _capacity(other._capacity) {
@@ -660,23 +593,6 @@ namespace detail {
         }
 
         // todo copy_and_swap
-        // VectorBase& operator=(const VectorBase& other) noexcept {
-        //     if (this != &other) {
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             _data[i].~Element();
-        //         }
-
-        //         if (_capacity < other._size) {
-        //             resize(other._size);
-        //         }
-
-        //         for (size_t i = 0; i < other._size; ++i) {
-        //             new (_data + i) Element {other._data[i]};
-        //         }
-        //     }
-        //     return *this;
-        // }
-
         VectorBase& operator=(const VectorBase& other) noexcept {
             if (this != &other) {
                 for (size_t i = 0; i < _size; ++i) {
@@ -695,13 +611,6 @@ namespace detail {
             return *this;
         }
 
-        // VectorBase(VectorBase&& other) noexcept
-        //     : _data {other._data}, _size {other._size}, _capacity {other._capacity} {
-        //     other._data = nullptr;
-        //     other._capacity = 0;
-        //     other._size = 0;
-        // }
-
         VectorBase(VectorBase&& other) noexcept
             : _allocator(other._allocator), _data(other._data), _size(other._size),
               _capacity(other._capacity) {
@@ -709,25 +618,6 @@ namespace detail {
             other._capacity = 0;
             other._size = 0;
         }
-
-        // VectorBase& operator=(VectorBase&& other) noexcept {
-        //     if (this != &other) {
-        //         // Destroy existing elements and deallocate memory
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             _data[i].~Element();
-        //         }
-        //         ::operator delete[](_data);
-
-        //         _data = other._data;
-        //         _size = other._size;
-        //         _capacity = other._capacity;
-
-        //         other._data = nullptr;
-        //         other._size = 0;
-        //         other._capacity = 0;
-        //     }
-        //     return *this;
-        // }
 
         VectorBase& operator=(VectorBase&& other) noexcept {
             if (this != &other) {
@@ -748,25 +638,6 @@ namespace detail {
             return *this;
         }
 
-        // template<typename... Args>
-        // VectorBase(const Args&... args)
-        //     // One extra space for BasicString
-        //     : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
-        //     )},
-        //       _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
-        //     size_t index = 0;
-        //     _construct_elements(index, args...);
-        // }
-
-        // VectorBase(InitializerList<Element> il)
-        //     : _data {static_cast<Element*>(::operator new[]((il.size() + 1) * sizeof(Element)))},
-        //       _size(il.size()), _capacity(il.size() + 1) {
-        //     size_t index = 0;
-        //     for (const auto& e : il) {
-        //         new (_data + index++) Element {e};
-        //     }
-        // }
-
         VectorBase(InitializerList<Element> il)
             : _allocator(Allocator()), _size(il.size()), _capacity(il.size() + 1) {
             _data = _allocator.allocate(_capacity);
@@ -776,16 +647,6 @@ namespace detail {
                 _allocator.construct(_data + index++, e);
             }
         }
-
-        // Constructor from Array
-        // template<size_t ct_size_>
-        // VectorBase(const Array<Element, ct_size_>& as)
-        //     : _data {::operator new[]((ct_size_ + 1) * sizeof(Element))}, _size(ct_size_),
-        //       _capacity(ct_size_) {
-        //     for (size_t i = 0; i < _size; ++i) {
-        //         new (_data + i) Element {as[i]};
-        //     }
-        // }
 
         template<size_t ct_size_>
         VectorBase(const Array<Element, ct_size_>& as)
@@ -797,16 +658,6 @@ namespace detail {
             }
         }
 
-        // Constructor from ArrVec
-        // template<size_t ct_cap_>
-        // VectorBase(const ArrVec<Element, ct_cap_>& as)
-        //     : _data {::operator new[]((length(as) + 1) * sizeof(Element))}, _size(length(as)),
-        //       _capacity(ct_cap_) {
-        //     for (size_t i = 0; i < _size; ++i) {
-        //         new (_data + i) Element {as[i]};
-        //     }
-        // }
-
         template<size_t ct_cap_>
         VectorBase(const ArrVec<Element, ct_cap_>& as)
             : _allocator(Allocator()), _size(as.size()), _capacity(as.size() + 1) {
@@ -816,16 +667,6 @@ namespace detail {
                 _allocator.construct(_data + i, as[i]);
             }
         }
-
-        // ~VectorBase() {
-        //     if (_data) {
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             (_data + i)->~Element();
-        //         }
-        //         ::operator delete[](_data);
-        //         _data = nullptr;
-        //     }
-        // }
 
         ~VectorBase() {
             if (_data) {
@@ -883,22 +724,6 @@ namespace detail {
             _size = new_size;
         }
 
-        // void reserve(size_t new_capacity) {
-        //     if (new_capacity > _capacity) {
-        //         Element* new_data =
-        //             static_cast<Element*>(::operator new[](new_capacity * sizeof(Element)));
-
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             new (new_data + i) Element {efp::move(_data[i])};
-        //         }
-
-        //         ::operator delete[](_data);
-
-        //         _data = new_data;
-        //         _capacity = new_capacity;
-        //     }
-        // }
-
         void reserve(size_t new_capacity) {
             if (new_capacity > _capacity) {
                 Element* new_data = _allocator.allocate(new_capacity);
@@ -940,15 +765,6 @@ namespace detail {
             }
         }
 
-        // void push_back(const Element& value) {
-        //     if (_size + 1 >= _capacity) {
-        //         reserve(_capacity == 0 ? 2 : 2 * _capacity);
-        //     }
-
-        //     new (_data + _size) Element {value};
-        //     ++_size;
-        // }
-
         void push_back(const Element& value) {
             if (_size + 1 >= _capacity) {
                 reserve(_size == 0 ? 2 : 2 * _size + 1);
@@ -957,15 +773,6 @@ namespace detail {
             _allocator.construct(_data + _size, value);
             ++_size;
         }
-
-        // void push_back(Element&& value) {
-        //     if (_size + 1 >= _capacity) {
-        //         reserve(_capacity == 0 ? 2 : 2 * _capacity);
-        //     }
-
-        //     new (_data + _size) Element {efp::move(value)};
-        //     ++_size;
-        // }
 
         void push_back(Element&& value) {
             if (_size + 1 >= _capacity) {
@@ -976,14 +783,6 @@ namespace detail {
             ++_size;
         }
 
-        // void pop_back() {
-        //     if (_size == 0) {
-        //         throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
-        //     }
-        //     _data[_size - 1].~Element();
-        //     --_size;
-        // }
-
         void pop_back() {
             if (_size == 0) {
                 throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
@@ -993,25 +792,6 @@ namespace detail {
         }
 
         // todo emplace_back
-
-        // void insert(size_t index, const Element& value) {
-        //     if (index < 0 || index > _size) {
-        //         throw std::runtime_error(
-        //             "VectorBase::insert: index must be less than or equal to size"
-        //         );
-        //     }
-
-        //     if (_size + 1 >= _capacity) {
-        //         reserve(_capacity == 0 ? 2 : 2 * _capacity);
-        //     }
-
-        //     for (size_t i = _size; i > index; --i) {
-        //         _data[i] = efp::move(_data[i - 1]);
-        //     }
-
-        //     new (_data + index) Element {value};
-        //     ++_size;
-        // }
 
         void insert(size_t index, const Element& value) {
             if (index < 0 || index > _size) {
@@ -1032,22 +812,6 @@ namespace detail {
             ++_size;
         }
 
-        // void erase(size_t index) {
-        //     if (index < 0 || index >= _size) {
-        //         throw std::runtime_error(
-        //             "VectorBase::erase: index must be less than or equal to size"
-        //         );
-        //     }
-
-        //     (_data + index)->~Element();
-
-        //     for (size_t i = index; i < _size - 1; ++i) {
-        //         _data[i] = efp::move(_data[i + 1]);
-        //     }
-
-        //     --_size;
-        // }
-
         void erase(size_t index) {
             if (index < 0 || index >= _size) {
                 throw std::runtime_error(
@@ -1063,13 +827,6 @@ namespace detail {
 
             --_size;
         }
-
-        // void clear() {
-        //     for (size_t i = 0; i < _size; ++i) {
-        //         _data[i].~Element();
-        //     }
-        //     _size = 0;
-        // }
 
         void clear() {
             for (size_t i = 0; i < _size; ++i) {
@@ -1107,21 +864,10 @@ namespace detail {
         }
 
       protected:
-        // template<typename Last>
-        // void _construct_elements(size_t& index, const Last& last) {
-        //     new (_data + index++) Element {last};
-        // }
-
         template<typename Last>
         void _construct_elements(size_t& index, const Last& last) {
             _allocator.construct(_data + index++, last);
         }
-
-        // template<typename Head, typename... Tail>
-        // void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
-        //     new (_data + index++) Element {head};
-        //     _construct_elements(index, tail...);
-        // }
 
         template<typename Head, typename... Tail>
         void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
@@ -1368,25 +1114,25 @@ class ArrVecView {
         return _data;
     }
 
-    // const Element* data() {
-    //     return _data;
-    // }
+    const Element* data() {
+        return _data;
+    }
 
     const Element* begin() const {
         return _data;
     }
 
-    // const Element* begin() {
-    //     return _data;
-    // }
+    const Element* begin() {
+        return _data;
+    }
 
     const Element* end() const {
         return _data + _size;
     }
 
-    // const Element* end() {
-    //     return _data + _size;
-    // }
+    const Element* end() {
+        return _data + _size;
+    }
 
     bool empty() const {
         return _size == 0;
