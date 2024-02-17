@@ -46,6 +46,45 @@ public:
         }
     }
 
+    // template<class InputIt>
+    // Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+    //     : allocator_(alloc), size_(std::distance(first, last)), capacity_(size_) {
+    //     data_ = allocator_.allocate(capacity_);
+    //     std::uninitialized_copy(first, last, data_);
+    // }
+
+    // Not using iterator
+    template<typename InputIt>
+    Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+        : Base::allocator_(alloc), Base::data_(nullptr), Base::size_(0), Base::capacity_(0) {
+        // First pass: Count the number of elements to determine size
+        for (InputIt it = first; it != last; ++it) {
+            ++Base::size_;
+        }
+        Base::capacity_ = Base::size_ + 1;
+
+        // Allocate memory for the elements
+        Base::data_ = Base::allocator_.allocate(Base::capacity_);
+
+        // Second pass: Copy-construct elements from the range
+        size_t i = 0;
+        // try {
+        for (InputIt it = first; it != last; ++it, ++i) {
+            // Use allocator_traits for type safety and potential optimizations
+            // std::allocator_traits<Allocator>::construct(allocator_, data_ + i, *it);
+            Base::allocator_.construct(Base::data_ + i, *it);
+        }
+        // } catch (...) {
+        //     // If an exception is thrown, destroy constructed elements and deallocate memory
+        //     while (i > 0) {
+        //         --i;
+        //         std::allocator_traits<Allocator>::destroy(allocator_, data_ + i);
+        //     }
+        //     allocator_.deallocate(data_, capacity_);
+        //     throw;  // Rethrow the exception to propagate the error
+        // }
+    }
+
     bool operator==(const Vector& other) const {
         return Base::operator==(other);
     }
