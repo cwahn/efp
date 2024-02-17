@@ -128,6 +128,10 @@ public:
     }
 
     // todo assign(const CharT* s, size_type n)
+    Vector& assign(const Char* c_str) {
+        Base::clear();
+        return append(c_str);
+    }
 
     // todo insert(size_type pos, const CharT* s)
 

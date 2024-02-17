@@ -8,6 +8,15 @@
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
+#if defined(__STDC_HOSTED__)
+    #include <string>
+    #include <memory>
+#else
+    // todo remove STL
+    #include <string>
+    #include "efp/allocator.hpp"
+#endif
+
 // todo Move and copy assigment operator sort out
 
 namespace efp {
@@ -543,13 +552,13 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
 namespace detail {
 
 #if defined(__STDC_HOSTED__)
-    #include <memory>  // For std::allocator and std::allocator_traits
+    // #include <memory>
     template<typename A>
     using DefaultAllocator = std::allocator<A>;
 
 #else
 
-    #include "efp/allocator.hpp"
+    // #include "efp/allocator.hpp"
     template<typename A>
     using DefaultAllocator = efp::Allocator<A>;
 
@@ -909,15 +918,13 @@ namespace detail {
 
 #if defined(__STDC_HOSTED__)
 
-    #include <string>
     template<typename Char>
 
     // todo Remove warning
     using DefaultCharTraits = std::char_traits<Char>;
 
 #else
-        // todo freestanding implementation
-    #include <string>
+    // todo freestanding implementation
     template<typename Char>
     using DefaultCharTraits = std::char_traits<Char>;
 #endif
