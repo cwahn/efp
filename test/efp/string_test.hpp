@@ -130,6 +130,12 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(str == "Hello!!!");
     }
 
+    SECTION("String::assign") {
+        String str("Hello");
+        str.assign("World");
+        CHECK(str == "World");
+    }
+
     SECTION("Equality with C-Style String") {
         String str("Hello");
         CHECK(str == "Hello");
