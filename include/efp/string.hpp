@@ -259,7 +259,8 @@ public:
     using Base::Base;
 
     VectorView(const Char* c_str) {
-        Base::_size = std::strlen(c_str);
+        // Base::_size = std::strlen(c_str);
+        Base::_size = Traits::length(c_str);
         Base::_data = c_str;
     }
 

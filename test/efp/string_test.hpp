@@ -291,44 +291,71 @@ TEST_CASE("BasicString<Char>", "[BasicString<Char>]") {
     }
 }
 
-TEST_CASE("StringView class functionality", "[StringView]") {
+TEST_CASE("BasicStringView<Char>", "[BasicStringView<Char>]") {
+    SECTION("Default Construction") {
+        StringView view;
+        CHECK(view.empty());
+        CHECK(view.size() == 0);
+
+        WStringView wview;
+        CHECK(wview.empty());
+        CHECK(wview.size() == 0);
+    }
+
     SECTION("Construction from C-Style String Literal") {
         const char* str = "Hello, World!";
         StringView view(str);
         CHECK(view.size() == strlen(str));
         CHECK(std::strncmp(view.data(), str, view.size()) == 0);
-    }
 
-    SECTION("Default Construction") {
-        StringView view;
-        CHECK(view.empty());
-        CHECK(view.size() == 0);
+        const wchar_t* wstr = L"Hello, World!";
+        WStringView wview(wstr);
+        CHECK(wview.size() == std::wcslen(wstr));
+        CHECK(std::wcsncmp(wview.data(), wstr, wview.size()) == 0);
     }
 
     SECTION("Copy Construction") {
         StringView original("Hello");
         StringView copy = original;
         CHECK(copy == original);
+
+        WStringView woriginal(L"Hello");
+        WStringView wcopy = woriginal;
+        CHECK(wcopy == woriginal);
     }
 
-    SECTION("Element Access") {
+    SECTION("BasicStringView<Char>::operator[]") {
         StringView view("Hello");
         CHECK(view[0] == 'H');
         CHECK(view[4] == 'o');
+
+        WStringView wview(L"Hello");
+        CHECK(wview[0] == L'H');
+        CHECK(wview[4] == L'o');
     }
 
-    SECTION("Equality with Another StringView") {
+    SECTION("BasicStringView<Char>::at") {
         StringView view1("Hello");
         StringView view2("Hello");
         StringView view3("World");
         CHECK(view1 == view2);
         CHECK_FALSE(view1 == view3);
+
+        WStringView wview1(L"Hello");
+        WStringView wview2(L"Hello");
+        WStringView wview3(L"World");
+        CHECK(wview1 == wview2);
+        CHECK_FALSE(wview1 == wview3);
     }
 
-    SECTION("Equality with C-Style String") {
+    SECTION("BasicStringView<Char>::operator==") {
         StringView view("Hello");
         CHECK(view == "Hello");
         CHECK_FALSE(view == "World");
+
+        WStringView wview(L"Hello");
+        CHECK(wview == L"Hello");
+        CHECK_FALSE(wview == L"World");
     }
 
     // ! StringView does not have a c_str method
@@ -337,10 +364,14 @@ TEST_CASE("StringView class functionality", "[StringView]") {
     //     CHECK(std::strcmp(view.c_str(), "Hello") == 0);
     // }
 
-    SECTION("Begin and End Iterators") {
+    SECTION("BasicStringView<Char>::begin and end") {
         StringView view("Hello");
         CHECK(*view.begin() == 'H');
         CHECK(*(view.end() - 1) == 'o');
+
+        WStringView wview(L"Hello");
+        CHECK(*wview.begin() == L'H');
+        CHECK(*(wview.end() - 1) == L'o');
     }
 }
 
