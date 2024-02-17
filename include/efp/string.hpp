@@ -12,29 +12,6 @@
 
 namespace efp {
 
-namespace detail {
-    template<typename T>
-    struct IsCharType: False {};
-
-    // Specializations for character types
-    template<>
-    struct IsCharType<char>: True {};
-
-    template<>
-    struct IsCharType<wchar_t>: True {};
-
-    template<>
-    struct IsCharType<char16_t>: True {};
-
-    template<>
-    struct IsCharType<char32_t>: True {};
-
-#if __cplusplus >= 202002L
-    template<>
-    struct IsCharType<char8_t>: True {};  // C++20 char8_t support
-#endif
-}  // namespace detail
-
 // if freestanding manual implementation of strlen, memcpy and strncmp
 #if !defined(__STDC_HOSTED__)
 static size_t std::strlen(const Char* c_str) {
@@ -63,11 +40,14 @@ static int std::strncmp(const Char* str1, const Char* str2, size_t n) {
 
 // BasicString
 
-template<typename Char>
-class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::VectorBase<Char> {
+template<typename Char, typename Traits, typename Allocator>
+class Vector<Char, Allocator, Traits, EnableIf<detail::IsCharType<Char>::value>>:
+    public detail::VectorBase<Char, Allocator> {
   public:
     using Base = detail::VectorBase<Char>;
     using Base::Base;
+
+    using traits_type = Traits;
 
     Vector(const Char* c_str) {
         Base::_capacity = std::strlen(c_str);
@@ -108,19 +88,18 @@ class Vector<Char, EnableIf<detail::IsCharType<Char>::value>>: public detail::Ve
         return Base::_data;
     }
 
-    // String append(const String &string) const
-    // {
-    //     return efp::append(*this, string);
-    // }
-
     // todo Interface with StringView
     void append_mut(const Vector& string) {
         for_each([&](Char c) { Base::push_back(c); }, string);
     }
 };
 
-template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
-using BasicString = Vector<Char>;
+template<
+    typename Char,
+    typename Traits = detail::DefaultCharTraits<Char>,
+    typename Allocator = detail::DefaultAllocator<Char>,
+    typename = EnableIf<detail::IsCharType<Char>::value>>
+using BasicString = Vector<Char, Allocator, Traits>;
 
 using String = BasicString<char>;
 

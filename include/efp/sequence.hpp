@@ -882,8 +882,53 @@ namespace detail {
     };
 }  // namespace detail
 
-template<typename A, typename = void>
-class Vector: public detail::VectorBase<A> {
+namespace detail {
+    template<typename T>
+    struct IsCharType: False {};
+
+    // Specializations for character types
+    template<>
+    struct IsCharType<char>: True {};
+
+    template<>
+    struct IsCharType<wchar_t>: True {};
+
+    template<>
+    struct IsCharType<char16_t>: True {};
+
+    template<>
+    struct IsCharType<char32_t>: True {};
+
+#if __cplusplus >= 202002L
+    template<>
+    struct IsCharType<char8_t>: True {};  // C++20 char8_t support
+#endif
+}  // namespace detail
+
+namespace detail {
+
+#if defined(__STDC_HOSTED__)
+
+    #include <string>
+    template<typename Char>
+    using DefaultCharTraits = std::char_traits<Char>;
+
+#else
+        // todo freestanding implementation
+    #include <string>
+    template<typename Char>
+    using DefaultCharTraits = std::char_traits<Char>;
+#endif
+
+}  // namespace detail
+
+template<
+    typename A,
+    typename Allocator = detail::DefaultAllocator<A>,
+    typename CharTraits =
+        Conditional<detail::IsCharType<A>::value, detail::DefaultCharTraits<A>, void>,
+    typename = void>
+class Vector: public detail::VectorBase<A, Allocator> {
   public:
     using Base = detail::VectorBase<A>;
     using Base::Base;
@@ -893,43 +938,43 @@ class Vector: public detail::VectorBase<A> {
     }
 };
 
-template<typename A>
-struct ElementImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct ElementImpl<Vector<A, Allocator, CharTraits>> {
     using Type = A;
 };
 
-template<typename A>
-struct CtSizeImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct CtSizeImpl<Vector<A, Allocator, CharTraits>> {
     using Type = Size<dyn>;
 };
 
-template<typename A>
-struct CtCapacityImpl<Vector<A>> {
+template<typename A, typename Allocator, typename CharTraits>
+struct CtCapacityImpl<Vector<A, Allocator, CharTraits>> {
     using Type = Size<dyn>;
 };
 
-template<typename A>
-constexpr auto length(const Vector<A>& as) -> size_t {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto length(const Vector<A, Allocator, CharTraits>& as) -> size_t {
     return as.size();
 }
 
-template<typename A>
-constexpr auto nth(size_t i, const Vector<A>& as) -> const A& {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto nth(size_t i, const Vector<A, Allocator, CharTraits>& as) -> const A& {
     return as[i];
 }
 
-template<typename A>
-constexpr auto nth(size_t i, Vector<A>& as) -> A& {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto nth(size_t i, Vector<A, Allocator, CharTraits>& as) -> A& {
     return as[i];
 }
 
-template<typename A>
-constexpr auto data(const Vector<A>& as) -> const A* {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto data(const Vector<A, Allocator, CharTraits>& as) -> const A* {
     return as.data();
 }
 
-template<typename A>
-constexpr auto data(Vector<A>& as) -> A* {
+template<typename A, typename Allocator, typename CharTraits>
+constexpr auto data(Vector<A, Allocator, CharTraits>& as) -> A* {
     return as.data();
 }
 
