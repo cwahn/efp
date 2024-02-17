@@ -95,7 +95,7 @@
 # TabWidth: 4
 # UseTab: Never
 
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket: BlockIndent # New in v14. For earlier clang-format versions, use AlwaysBreak instead.
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false

@@ -1,7 +1,6 @@
 #ifndef NUMERIC_HPP_
 #define NUMERIC_HPP_
 
-#include "efp/limits.hpp"
 #include "efp/prelude.hpp"
 
 namespace efp {
@@ -18,9 +17,10 @@ constexpr A abs(const A& a) {
 
 template<typename A, typename B>
 constexpr A is_approx(const A& lhs, const B& rhs) {
-    using MorePrecise_t = Conditional<(sizeof(A) > sizeof(B)), A, B>;
-    return abs(static_cast<MorePrecise_t>(lhs) - static_cast<MorePrecise_t>(rhs))
-        <= NumericLimits<MorePrecise_t>::epsilon();
+    using MorePrecise = Conditional<(sizeof(A) > sizeof(B)), A, B>;
+
+    return abs(static_cast<MorePrecise>(lhs) - static_cast<MorePrecise>(rhs))
+        <= NumericLimits<MorePrecise>::epsilon();
 }
 }  // namespace efp
 

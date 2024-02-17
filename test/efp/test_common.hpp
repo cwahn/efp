@@ -104,7 +104,7 @@ class MockHW {
     static String resource_state_to_string() {
         const auto to_str = [](const Resource& resource) { return std::to_string(resource.id); };
         const auto strings = map(to_str, _resources);
-        return intercalate(std::string {", "}, strings);
+        return intercalate(String {", "}, strings);
     }
 
     // static std::string resource_state_to_string() {
