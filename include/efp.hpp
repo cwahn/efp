@@ -16,7 +16,6 @@
 
 #include "./efp/io.hpp"
 #include "./efp/string.hpp"
-// #include "./efp/format.hpp"
-// #include "./efp/sm.hpp"
+#include "./efp/format.hpp"
 
 #endif

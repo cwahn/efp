@@ -1,7 +1,7 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     #include <cstring>
     #include <string>
 #endif
@@ -268,7 +268,7 @@ public:
 
     // todo Interface with StringView
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
@@ -340,7 +340,7 @@ public:
         return c_str[Base::_size] == '\0';
     }
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
@@ -385,7 +385,7 @@ using U8StringView = BasicStringView<char8_t>;
 //     return result;
 // }
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
     // inline std::ostream& operator<<(std::ostream& os, const String& string) {
     //     for_each([&](char c) { os << c; }, string);

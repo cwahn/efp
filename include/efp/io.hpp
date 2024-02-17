@@ -5,30 +5,32 @@
 #include "efp/prelude.hpp"
 #include "efp/string.hpp"
 
-namespace efp {
-class File {
-  public:
-    static Maybe<File> open(const char* path, const char* mode) {
-        FILE* file = fopen(path, mode);
+// If hosted environment
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+    #include <cstdio>
 
-        if (file)
+namespace efp {
+
+class File {
+public:
+    static Maybe<File> open(const char* path, const char* mode) {
+        FILE* file = std::fopen(path, mode);
+
+        if (file) {
             return File {file, mode};
+        }
 
         return nothing;
     }
 
     static Maybe<File> open(const String& path, const char* mode) {
-        FILE* file = fopen(path.c_str(), mode);
+        FILE* file = std::fopen(path.c_str(), mode);
 
-        if (file)
+        if (file) {
             return File {file, mode};
+        }
 
         return nothing;
-    }
-
-    ~File() {
-        if (_file)
-            fclose(_file);
     }
 
     File(const File&) = delete;
@@ -47,12 +49,17 @@ class File {
         return *this;
     }
 
+    ~File() {
+        if (_file)
+            std::fclose(_file);
+    }
+
     Maybe<String> read_line() {
         if (_file) {
             String buffer {};
             int ch;
 
-            while ((ch = fgetc(_file)) != '\n' && ch != EOF) {
+            while ((ch = std::fgetc(_file)) != '\n' && ch != EOF) {
                 buffer.push_back(static_cast<char>(ch));
             }
 
@@ -74,10 +81,11 @@ class File {
         while (keep_read) {
             const auto maybe_line = read_line();
 
-            if (maybe_line)
+            if (maybe_line) {
                 lines.push_back(maybe_line.value());
-            else
+            } else {
                 keep_read = false;
+            }
         }
 
         return lines;
@@ -87,21 +95,23 @@ class File {
         if (_file == nullptr)
             return false;
 
-        if (strchr(_mode, 'b')) {
+        if (std::strchr(_mode, 'b')) {
             // Write binary data
-            if (length == -1)
-                length = strlen(data);
+            if (length == -1) {
+                length = std::strlen(data);
+            }
 
-            int written = fwrite(data, sizeof(char), length, _file);
+            int written = std::fwrite(data, sizeof(char), length, _file);
 
             return written == length;
         } else {
             // Write text data
-            if (length == -1)
-                length = strlen(data);
+            if (length == -1) {
+                length = std::strlen(data);
+            }
 
             for (size_t i = 0; i < length; ++i) {
-                if (fputc(data[i], _file) == EOF)
+                if (std::fputc(data[i], _file) == EOF)
                     return false;
             }
 
@@ -113,29 +123,29 @@ class File {
         if (_file == nullptr)
             return false;
 
-        if (strchr(_mode, 'b')) {
+        if (std::strchr(_mode, 'b')) {
             // Write binary data
-            int written = fwrite(data.data(), sizeof(char), data.size(), _file);
+            int written = std::fwrite(data.data(), sizeof(char), data.size(), _file);
             return written == data.size();
         } else {
-            return fputs(data.c_str(), _file) != EOF;
+            return std::fputs(data.c_str(), _file) != EOF;
         }
     }
 
     int flush() {
-        return fflush(_file);
+        return std::fflush(_file);
     }
 
     bool seek(long offset) {
-        return fseek(_file, offset, SEEK_SET) == 0;
+        return std::fseek(_file, offset, SEEK_SET) == 0;
     }
 
     int tell() {
-        return ftell(_file);
+        return std::ftell(_file);
     }
 
     bool close() {
-        if (_file && fclose(_file) != EOF) {
+        if (_file && std::fclose(_file) != EOF) {
             _file = nullptr;
             return true;
         }
@@ -143,9 +153,9 @@ class File {
         return false;
     }
 
-  private:
+private:
     explicit File(FILE* file, const char* mode) : _file(file) {
-        strncpy(_mode, mode, sizeof(_mode) - 1);
+        std::strncpy(_mode, mode, sizeof(_mode) - 1);
         _mode[sizeof(_mode) - 1] = '\0';
     }
 
@@ -154,5 +164,7 @@ class File {
 };
 
 };  // namespace efp
+
+#endif  // __STDC_HOSTED__ == 1
 
 #endif

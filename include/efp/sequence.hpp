@@ -8,7 +8,7 @@
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     #include <string>
     #include <memory>
 
@@ -497,7 +497,7 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
 
 namespace detail {
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     // #include <memory>
     template<typename A>
     using DefaultAllocator = std::allocator<A>;
@@ -870,12 +870,21 @@ namespace detail {
 
 namespace detail {
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+
+    template<typename Char, typename = void>
+    struct DefaultCharTraitsImpl {
+        using Type = void;
+    };
+
+    // Specialize only for valid character types
+    template<typename Char>
+    struct DefaultCharTraitsImpl<Char, EnableIf<IsCharType<Char>::value>> {
+        using Type = std::char_traits<Char>;
+    };
 
     template<typename Char>
-
-    // todo Remove warning
-    using DefaultCharTraits = std::char_traits<Char>;
+    using DefaultCharTraits = typename DefaultCharTraitsImpl<Char>::Type;
 
 #else
     // todo freestanding implementation

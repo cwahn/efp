@@ -24,7 +24,7 @@ constexpr A is_approx(const A& lhs, const B& rhs) {
 }
 }  // namespace efp
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
     #include <cmath>
     #include <complex>
