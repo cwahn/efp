@@ -309,6 +309,12 @@ public:
         Base::_data = c_str;
     }
 
+    // todo basic_string_view(const efp::BasicString<Char>& s) noexcept
+    VectorView(const Vector<Char>& s) noexcept {
+        Base::_size = s.size();
+        Base::_data = s.data();
+    }
+
     bool operator==(const VectorView& other) const {
         return Base::operator==(other);
     }
@@ -316,16 +322,19 @@ public:
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
         // Check if both are null pointers
-        if (Base::_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr) {
             return true;
+        }
 
         // If one is null and the other is not, they can't be equal
-        if (Base::_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr) {
             return false;
+        }
 
         // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
+        if (Traits::compare(Base::_data, c_str, Base::_size) != 0) {
             return false;
+        }
 
         // Check if the character at the position _size in c_str is the null character
         return c_str[Base::_size] == '\0';

@@ -20,7 +20,7 @@
 #include "efp/string.hpp"
 
 // todo local support
-// ! No local support 
+// ! No local support
 #define FMT_STATIC_THOUSANDS_SEPARATOR
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
@@ -439,8 +439,7 @@ public:
 
     /** Constructs a string reference from a ``std::basic_string`` object. */
     template<typename Traits, typename Alloc>
-    // FMT_CONSTEXPR basic_string_view(const efp::BasicString<Char, Traits, Alloc>& s) noexcept
-    FMT_CONSTEXPR basic_string_view(const efp::BasicString<Char>& s) noexcept
+    FMT_CONSTEXPR basic_string_view(const efp::BasicString<Char, Traits, Alloc>& s) noexcept
 
         : data_(s.data()), size_(s.size()) {}
 
