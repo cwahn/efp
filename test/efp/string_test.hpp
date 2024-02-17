@@ -136,6 +136,31 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(str == "World");
     }
 
+    SECTION("String::insert") {
+        String str("Hello");
+        str.insert(5, " World!!!", 6);
+        CHECK(str == "Hello World");
+    }
+
+    SECTION("String::substr") {
+        String str("Hello World");
+        String sub = str.substr(6, 5);
+        CHECK(sub == "World");
+
+        sub = str.substr(0, 5);
+        CHECK(sub == "Hello");
+
+        sub = str.substr(6);
+        CHECK(sub == "World");
+    }
+
+    SECTION("String::copy") {
+        String str("Hello");
+        char buffer[10];
+        str.copy(buffer, 5);
+        CHECK(std::strncmp(buffer, "Hello", 5) == 0);
+    }
+
     SECTION("Equality with C-Style String") {
         String str("Hello");
         CHECK(str == "Hello");

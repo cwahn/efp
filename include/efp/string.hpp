@@ -22,12 +22,20 @@ public:
     using Base::Base;
 
     using traits_type = Traits;
+    static const size_t npos = -1;
 
     Vector(const Char* c_str) {
         Base::_size = Traits::length(c_str);
         Base::_capacity = Base::_size + 1;
         Base::_data = Base::_allocator.allocate(Base::_capacity);
         efp::memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
+    }
+
+    Vector(const Char* s, size_t count, const Allocator& alloc = Allocator()) {
+        Base::_size = count;
+        Base::_capacity = Base::_size + 1;
+        Base::_data = Base::_allocator.allocate(Base::_capacity);
+        efp::memcpy(Base::_data, s, Base::_size * sizeof(Char));
     }
 
     bool operator==(const Vector& other) const {
@@ -55,7 +63,6 @@ public:
     // todo at
     Char at(size_t pos) const {
         if (pos >= Base::_size) {
-            // throw std::out_of_range("Index out of range");
             throw std::runtime_error("Index out of range");
         }
 
@@ -110,7 +117,6 @@ public:
     // todo insert(size_type pos, const CharT* s)
     Vector& insert(size_t pos, const Char* c_str) {
         if (pos > Base::_size) {
-            // throw std::out_of_range("Index out of range");
             throw std::runtime_error("Index out of range");
         }
 
@@ -131,14 +137,59 @@ public:
     }
 
     // todo insert(size_type pos, const CharT* s, size_type n)
+    Vector& insert(size_t pos, const Char* c_str, size_t n) {
+        if (pos > Base::_size) {
+            throw std::runtime_error("Index out of range");
+        }
+
+        // Always reserve one extra space for the null character
+        Base::reserve(Base::_size + n + 1);
+
+        for (size_t i = Base::_size; i > pos; --i) {
+            Base::_data[i + n - 1] = Base::_data[i - 1];
+        }
+
+        for (size_t i = 0; i < n; ++i) {
+            Base::_data[pos + i] = c_str[i];
+        }
+
+        Base::_size += n;
+
+        return *this;
+    }
 
     // todo replace(size_type pos, size_type len, const CharT* s)
 
     // todo replace(size_type pos, size_type len, const CharT* s, size_type n)
 
     // todo substr(size_type pos = 0, size_type len = npos) const
+    Vector substr(size_t pos = 0, size_t len = npos) const {
+        if (pos > Base::_size) {
+            throw std::runtime_error("Index out of range");
+        }
 
-    // todo copy(CharT* dest, size_type n, size_type pos = 0) const
+        if (len > Base::_size - pos) {
+            len = Base::_size - pos;
+        }
+
+        return Vector(Base::_data + pos, len);
+    }
+
+    // todo size_type copy( CharT* dest, size_type count, size_type pos = 0 ) const
+    // The resulting character string is not null-terminated. 
+    // https://en.cppreference.com/w/cpp/string/basic_string/copy
+    size_t copy(Char* dest, size_t count, size_t pos = 0) const {
+        if (pos > Base::_size) {
+            throw std::runtime_error("Index out of range");
+        }
+
+        if (count > Base::_size - pos) {
+            count = Base::_size - pos;
+        }
+
+        efp::memcpy(dest, Base::_data + pos, count * sizeof(Char));
+        return count;
+    }
 
     // todo find, rfind, find_first_of, find_last_of, find_first_not_of, find_last_not_of
 
