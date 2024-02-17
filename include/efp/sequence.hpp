@@ -351,17 +351,6 @@ public:
         }
     }
 
-    // void push_back(Element&& value) {
-    //     if (_size >= ct_capacity) {
-    //         throw std::runtime_error(
-    //             "ArrVec::push_back: size must be less than or equal to ct_capacity"
-    //         );
-    //     } else {
-    //         new (&_data[_size]) Element(efp::move(value));
-    //         ++_size;
-    //     }
-    // }
-
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
             throw std::runtime_error(
@@ -371,23 +360,6 @@ public:
             new (_data + _size++) Element {efp::move(value)};
         }
     }
-
-    // void insert(size_t index, const Element& value) {
-    //     if (index < 0 || index > _size || _size == ct_capacity) {
-    //         throw std::runtime_error(
-    //             "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
-    //         );
-    //     }
-
-    //     for (size_t i = _size; i > index; --i) {
-    //         new (&_data[i]) Element(efp::move(_data[i - 1]));
-    //         _data[i - 1].~Element();
-    //     }
-
-    //     new (&_data[index]) Element(value);
-
-    //     ++_size;
-    // }
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > _size || _size == ct_capacity) {
@@ -401,20 +373,10 @@ public:
             (_data + i - 1)->~Element();
         }
 
-        // new (&_data[index]) Element(value);
         new (_data + index) Element(value);
 
         ++_size;
     }
-
-    // void pop_back() {
-    //     if (_size == 0) {
-    //         std::runtime_error("ArrVec::pop_back: size must be greater than 0");
-    //     }
-
-    //     _data[_size - 1].~Element();
-    //     --_size;
-    // }
 
     void pop_back() {
         if (_size == 0) {
@@ -424,31 +386,12 @@ public:
         (_data + _size-- - 1)->~Element();
     }
 
-    // void clear() {
-    //     for (size_t i = 0; i < _size; ++i) {
-    //         _data[i].~Element();
-    //     }
-    //     _size = 0;
-    // }
-
     void clear() {
         for (size_t i = 0; i < _size; ++i) {
             (_data + i)->~Element();
         }
         _size = 0;
     }
-
-    // void erase(size_t index) {
-    //     if (index < 0 || index >= _size) {
-    //         throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
-    //     }
-    //     _data[index].~Element();
-    //     for (size_t i = index; i < _size - 1; ++i) {
-    //         new (&_data[i]) Element(efp::move(_data[i + 1]));
-    //         _data[i + 1].~Element();
-    //     }
-    //     --_size;
-    // }
 
     void erase(size_t index) {
         if (index < 0 || index >= _size) {
@@ -1336,7 +1279,10 @@ namespace detail {
     };
 }  // namespace detail
 
-template<typename A, typename = void>
+template<
+    typename A,
+    typename Traits = Conditional<detail::IsCharType<A>::value, detail::DefaultCharTraits<A>, void>,
+    typename = void>
 class VectorView: public detail::VectorViewBase<A> {
 public:
     using Base = detail::VectorViewBase<A>;

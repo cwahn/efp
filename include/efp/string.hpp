@@ -251,8 +251,8 @@ using U8String = BasicString<char8_t>;
 // BasicStringView specialization
 // todo Traits
 
-template<typename Char>
-class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
+template<typename Char, typename Traits>
+class VectorView<Char, Traits, EnableIf<detail::IsCharType<Char>::value>>:
     public detail::VectorViewBase<Char> {
 public:
     using Base = detail::VectorViewBase<Char>;
@@ -278,7 +278,7 @@ public:
             return false;
 
         // Compare the contents up to the size of the SequenceView
-        if (std::strncmp(Base::_data, c_str, Base::_size) != 0)
+        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
             return false;
 
         // Check if the character at the position _size in c_str is the null character
