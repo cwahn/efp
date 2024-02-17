@@ -52,25 +52,47 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(str1.empty());
     }
 
-    SECTION("Element Access") {
+    SECTION("Destruction") {
+        // This tests whether destruction happens without errors.
+        { String str("Temporary String"); }  // str goes out of scope here and should be destroyed
+        CHECK(true);  // If we reach this point, destruction didn't cause a crash
+    }
+
+    SECTION("String::operator[]") {
         String str("Hello");
         CHECK(str[0] == 'H');
         CHECK(str[4] == 'o');
     }
 
-    SECTION("Resize") {
+    SECTION("String::at") {
+        String str("Hello");
+        CHECK(str.at(0) == 'H');
+        CHECK(str.at(4) == 'o');
+    }
+
+    SECTION("String::front") {
+        String str("Hello");
+        CHECK(str.front() == 'H');
+    }
+
+    SECTION("String::back") {
+        String str("Hello");
+        CHECK(str.back() == 'o');
+    }
+
+    SECTION("String::resize") {
         String str("Hello");
         str.resize(10);
         CHECK(str.size() == 10);
     }
 
-    SECTION("Reserve") {
+    SECTION("String::reserve") {
         String str("Hello");
         str.reserve(10);
         CHECK(str.capacity() >= 10);
     }
 
-    SECTION("Push Back") {
+    SECTION("String::push_back") {
         String str;
         str.push_back('H');
         str.push_back('i');
@@ -78,30 +100,28 @@ TEST_CASE("String class functionality", "[String]") {
         CHECK(std::strcmp(str.data(), "Hi") == 0);
     }
 
-    SECTION("Erase") {
+    SECTION("String::pop_back") {
         String str("Hello");
-        str.erase(0); // Remove 'H'
+        str.erase(0);  // Remove 'H'
         CHECK(str.size() == 4);
         CHECK(str == "ello");
     }
 
-    SECTION("c_str") {
+    SECTION("String::c_str") {
         String str("Hello");
         CHECK(std::strcmp(str.c_str(), "Hello") == 0);
+    }
+
+    SECTION("String::operator+=") {
+        String str("Hello");
+        str += " World";
+        CHECK(str == "Hello World");
     }
 
     SECTION("Equality with C-Style String") {
         String str("Hello");
         CHECK(str == "Hello");
         CHECK_FALSE(str == "Hi");
-    }
-
-    SECTION("Destruction") {
-        // This tests whether destruction happens without errors.
-        {
-            String str("Temporary String");
-        }            // str goes out of scope here and should be destroyed
-        CHECK(true); // If we reach this point, destruction didn't cause a crash
     }
 }
 

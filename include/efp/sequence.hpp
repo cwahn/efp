@@ -14,7 +14,7 @@ namespace efp {
 
 template<typename A, size_t ct_size>
 class Array {
-  public:
+public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
@@ -141,7 +141,7 @@ class Array {
         return ct_size == 0;
     }
 
-  private:
+private:
     template<typename Head, typename... Tail>
     inline void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
         new (_data + index++) Element {head};
@@ -201,7 +201,7 @@ constexpr auto data(Array<A, n>& as) -> A* {
 
 template<typename A, size_t ct_capacity>
 class ArrVec {
-  public:
+public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
@@ -483,7 +483,7 @@ class ArrVec {
         return _size == 0;
     }
 
-  private:
+private:
     template<typename Head, typename... Tail>
     void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
         new (_data + index++) Element {head};
@@ -557,7 +557,7 @@ namespace detail {
 
     template<typename A, typename Allocator = DefaultAllocator<A>>
     class VectorBase {
-      public:
+    public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
@@ -863,7 +863,7 @@ namespace detail {
             return _size == 0;
         }
 
-      protected:
+    protected:
         template<typename Last>
         void _construct_elements(size_t& index, const Last& last) {
             _allocator.construct(_data + index++, last);
@@ -911,6 +911,8 @@ namespace detail {
 
     #include <string>
     template<typename Char>
+
+    // todo Remove warning
     using DefaultCharTraits = std::char_traits<Char>;
 
 #else
@@ -929,7 +931,7 @@ template<
         Conditional<detail::IsCharType<A>::value, detail::DefaultCharTraits<A>, void>,
     typename = void>
 class Vector: public detail::VectorBase<A, Allocator> {
-  public:
+public:
     using Base = detail::VectorBase<A>;
     using Base::Base;
 
@@ -980,7 +982,7 @@ constexpr auto data(Vector<A, Allocator, CharTraits>& as) -> A* {
 
 template<typename A, size_t ct_size>
 class ArrayView {
-  public:
+public:
     using Element = A;
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
@@ -1061,7 +1063,7 @@ class ArrayView {
         return ct_size == 0;
     }
 
-  private:
+private:
     const Element* _data;
 };
 
@@ -1107,7 +1109,7 @@ constexpr auto data(ArrayView<A, n>& as) -> const A* {
 
 template<typename A, size_t ct_capacity>
 class ArrVecView {
-  public:
+public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
@@ -1183,7 +1185,7 @@ class ArrVecView {
         return _size == 0;
     }
 
-  private:
+private:
     const Element* _data;
     size_t _size;
 };
@@ -1235,7 +1237,7 @@ namespace detail {
 
     template<typename A>
     class VectorViewBase {
-      public:
+    public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
@@ -1320,7 +1322,7 @@ namespace detail {
             return _size == 0;
         }
 
-      protected:
+    protected:
         const Element* _data;
         size_t _size;
         size_t _capacity;
@@ -1329,7 +1331,7 @@ namespace detail {
 
 template<typename A, typename = void>
 class VectorView: public detail::VectorViewBase<A> {
-  public:
+public:
     using Base = detail::VectorViewBase<A>;
     using Base::Base;
 

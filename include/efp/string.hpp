@@ -43,7 +43,7 @@ static int std::strncmp(const Char* str1, const Char* str2, size_t n) {
 template<typename Char, typename Traits, typename Allocator>
 class Vector<Char, Allocator, Traits, EnableIf<detail::IsCharType<Char>::value>>:
     public detail::VectorBase<Char, Allocator> {
-  public:
+public:
     using Base = detail::VectorBase<Char>;
     using Base::Base;
 
@@ -78,10 +78,60 @@ class Vector<Char, Allocator, Traits, EnableIf<detail::IsCharType<Char>::value>>
         return c_str[Base::_size] == '\0';
     }
 
-    // todo STL only
-    operator std::string() const {
-        return std::string(Base::_data, Base::_size);
+    // todo at
+    Char at(size_t pos) const {
+        if (pos >= Base::_size) {
+            // throw std::out_of_range("Index out of range");
+            throw std::runtime_error("Index out of range");
+        }
+
+        return Base::_data[pos];
     }
+
+    // todo front
+    Char front() const {
+        return Base::_data[0];
+    }
+
+    // todo back
+    Char back() const {
+        return Base::_data[Base::_size - 1];
+    }
+
+    // todo operator+=
+    Vector& operator+=(const Vector& other) {
+        for (size_t i = 0; i < other.size(); ++i) {
+            Base::push_back(other[i]);
+        }
+
+        return *this;
+    }
+
+    // todo append(const CharT* s, size_type n)
+
+    // todo append(size_type n, CharT c)
+
+    // todo assign(const CharT* s, size_type n)
+
+    // todo insert(size_type pos, const CharT* s)
+
+    // todo insert(size_type pos, const CharT* s, size_type n)
+
+    // todo replace(size_type pos, size_type len, const CharT* s)
+
+    // todo replace(size_type pos, size_type len, const CharT* s, size_type n)
+
+    // todo substr(size_type pos = 0, size_type len = npos) const
+
+    // todo copy(CharT* dest, size_type n, size_type pos = 0) const
+
+    // todo find, rfind, find_first_of, find_last_of, find_first_not_of, find_last_not_of
+
+    // todo compare(const basic_string& str) const
+
+    // todo compare(size_type pos, size_type len, const basic_string& str) const
+
+    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
 
     const Char* c_str() const {
         Base::_data[Base::_size] = '\0';
@@ -89,8 +139,13 @@ class Vector<Char, Allocator, Traits, EnableIf<detail::IsCharType<Char>::value>>
     }
 
     // todo Interface with StringView
-    void append_mut(const Vector& string) {
-        for_each([&](Char c) { Base::push_back(c); }, string);
+    // void append_mut(const Vector& string) {
+    //     for_each([&](Char c) { Base::push_back(c); }, string);
+    // }
+
+    // todo STL only
+    operator std::string() const {
+        return std::string(Base::_data, Base::_size);
     }
 };
 
@@ -118,7 +173,7 @@ using U8String = BasicString<char8_t>;
 template<typename Char>
 class VectorView<Char, EnableIf<detail::IsCharType<Char>::value>>:
     public detail::VectorViewBase<Char> {
-  public:
+public:
     using Base = detail::VectorViewBase<Char>;
     using Base::Base;
 
