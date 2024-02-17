@@ -543,10 +543,9 @@ FMT_INLINE auto to_string_view(const Char* s) -> basic_string_view<Char> {
     return s;
 }
 
-// template<typename Char, typename Traits, typename Alloc>
-template<typename Char>
-// inline auto to_string_view(const efp::BasicString<Char, Traits, Alloc>& s)
-inline auto to_string_view(const efp::BasicString<Char>& s) -> basic_string_view<Char> {
+template<typename Char, typename Traits, typename Alloc>
+inline auto to_string_view(const efp::BasicString<Char, Traits, Alloc>& s)
+    -> basic_string_view<Char> {
     return s;
 }
 
