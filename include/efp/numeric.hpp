@@ -1,7 +1,6 @@
 #ifndef NUMERIC_HPP_
 #define NUMERIC_HPP_
 
-#include "efp/limits.hpp"
 #include "efp/prelude.hpp"
 
 namespace efp {
