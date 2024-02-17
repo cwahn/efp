@@ -517,12 +517,16 @@ namespace detail {
         // STL compatible types
         using value_type = Element;
         // using traits_type = Traits;
+
         using allocator_type = Allocator;
+
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;
         using const_reference = const value_type&;
+
         using pointer = value_type*;
+
         using const_pointer = const value_type*;
         using iterator =
             value_type*;  // Simplification; actual implementation would be more complex
@@ -530,7 +534,9 @@ namespace detail {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+
         VectorBase() : _allocator(Allocator()), _data(nullptr), _size(0), _capacity(0) {}
+
 
         VectorBase(const VectorBase& other)
             : _allocator(other._allocator), _size(other._size), _capacity(other._capacity) {

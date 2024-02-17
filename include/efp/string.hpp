@@ -1,8 +1,6 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-// todo Hosted only
-
 #if defined(__STDC_HOSTED__)
     #include <cstring>
     #include <string>
@@ -37,6 +35,23 @@ public:
         Base::_capacity = Base::_size + 1;
         Base::_data = Base::_allocator.allocate(Base::_capacity);
         efp::memcpy(Base::_data, s, Base::_size * sizeof(Char));
+    }
+
+    Vector(size_t size, Char c) {
+        Base::_capacity = size;
+        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
+        Base::_size = size;
+        for (size_t i = 0; i < size; ++i) {
+            Base::_data[i] = c;
+        }
+    }
+
+    Vector(const Char* s, size_t size) {
+        // Ensure we don't read beyond the end of the provided string
+        Base::_capacity = min(std::strlen(s), size);
+        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
+        Base::_size = Base::_capacity;
+        std::memcpy(Base::_data, s, Base::_size * sizeof(Char));
     }
 
     bool operator==(const Vector& other) const {
