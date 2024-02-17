@@ -179,7 +179,6 @@ class Vcq {
 
     Vcq() {
         // Buffers are uninitialized
-
         _size = 0;
         _read = _buffer;
         _write = _buffer;
