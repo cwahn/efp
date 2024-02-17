@@ -4,26 +4,52 @@
 using namespace efp;
 
 int main() {
-    print("Hello, world!\n");
-    const int a = 42;
-    print("a: {}\n", a);
-    print("s: {}\n", "This is string");
+    // Basic string formatting
+    println("Hello, {}!", "world");
 
-    // const std::string str0 = "This is 42";
-    // // print(str0);
-    // std::cout << str0 << std::endl;
+    // Formatting integers
+    println("Integer: {}", 42);
 
-    const auto str = format("This is {}", 42);
-    // print(str);
-    std::cout << str << std::endl;
+    // Formatting Unicode characters
+    println("한국어: {}", "안녕하세요");
 
-    // const auto fmt0 = auto_format("a: {}", a);
-    // const auto fmt1 = auto_format("s: {s}", "This is string");
+    // Formatting floating-point numbers with precision
+    println("Floating-point: {:.2f}", 3.14159265);
 
-    // print(fmt0);
-    // print(fmt1);
-    // std::cout << fmt0 << std::endl;
-    // std::cout << fmt1 << std::endl;
+    // Formatting with padding and alignment
+    println("Right-aligned, padded with spaces: {:>10}", "right");
+    println("Left-aligned, padded with zeros: {:0<10}", "left");
+    println("Center-aligned, padded with asterisks: {:*^15}", "center");
+
+    // Formatting date and time (requires C++20 and fmt version 8 or later)
+    // std::time_t t = std::time(nullptr);
+    // println("Current Date and Time: {:%Y-%m-%d %H:%M:%S}", *std::localtime(&t));
+
+    // Formatting containers
+    // std::vector<int> vec = {1, 2, 3};
+    // println("Vector: {}", fmt::join(vec, ", "));
+
+    // Formatting maps
+    // std::map<std::string, int> map = {{"one", 1}, {"two", 2}};
+    // for (const auto& [key, value] : map) {
+    //     println("Map entry: {} = {}", key, value);
+    // }
+
+    // Conditional formatting
+    int score = 75;
+    println("Your score is {} and you have {}.", score, score > 60 ? "passed" : "failed");
+
+    // Formatting user-defined types
+    struct Point {
+        double x, y;
+    };
+
+    Point p = {1.2345, 9.876};
+    println("Point: ({:.1f}, {:.1f})", p.x, p.y);
+
+    // Using format to create a formatted string without immediate printing
+    const auto formatted_str = fmt::format("This is a formatted number: {}", 42);
+    println("{}", formatted_str);
 
     return 0;
 }
