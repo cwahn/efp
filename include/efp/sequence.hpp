@@ -11,6 +11,9 @@
 #if defined(__STDC_HOSTED__)
     #include <string>
     #include <memory>
+
+    #include <array>
+    #include <vector>
 #else
     // todo remove STL
     #include <string>
@@ -534,9 +537,7 @@ namespace detail {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-
         VectorBase() : _allocator(Allocator()), _data(nullptr), _size(0), _capacity(0) {}
-
 
         VectorBase(const VectorBase& other)
             : _allocator(other._allocator), _size(other._size), _capacity(other._capacity) {

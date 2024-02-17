@@ -17,8 +17,11 @@
 // #include <string>
 #include <type_traits>
 
-#include "efp/limits.hpp"
 #include "efp/string.hpp"
+
+// todo local support
+// ! No local support 
+#define FMT_STATIC_THOUSANDS_SEPARATOR
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
 #define FMT_VERSION 100101
@@ -403,11 +406,11 @@ FMT_EXPORT
 
 template<typename Char>
 class basic_string_view {
-  private:
+private:
     const Char* data_;
     size_t size_;
 
-  public:
+public:
     using value_type = Char;
     using iterator = const Char*;
 
@@ -686,13 +689,13 @@ FMT_EXPORT
 
 template<typename Char>
 class basic_format_parse_context {
-  private:
+private:
     basic_string_view<Char> format_str_;
     int next_arg_id_;
 
     FMT_CONSTEXPR void do_check_arg_id(int id);
 
-  public:
+public:
     using char_type = Char;
     using iterator = const Char*;
 
@@ -761,12 +764,12 @@ namespace detail {
 // A parse context with extra data used only in compile-time checks.
 template<typename Char>
 class compile_parse_context: public basic_format_parse_context<Char> {
-  private:
+private:
     int num_args_;
     const type* types_;
     using base = basic_format_parse_context<Char>;
 
-  public:
+public:
     explicit FMT_CONSTEXPR compile_parse_context(
         basic_string_view<Char> format_str,
         int num_args,
@@ -850,12 +853,12 @@ FMT_CONSTEXPR auto copy_str(T* begin, T* end, U* out) -> U* {
  */
 template<typename T>
 class buffer {
-  private:
+private:
     T* ptr_;
     size_t size_;
     size_t capacity_;
 
-  protected:
+protected:
     // Don't initialize ptr_ since it is not accessed to save a few cycles.
     FMT_MSC_WARNING(suppress : 26495)
 
@@ -876,7 +879,7 @@ class buffer {
     /** Increases the buffer capacity to hold at least *capacity* elements. */
     virtual FMT_CONSTEXPR20 void grow(size_t capacity) = 0;
 
-  public:
+public:
     using value_type = T;
     using const_reference = const T&;
 
@@ -972,11 +975,11 @@ struct buffer_traits {
 };
 
 class fixed_buffer_traits {
-  private:
+private:
     size_t count_ = 0;
     size_t limit_;
 
-  public:
+public:
     explicit fixed_buffer_traits(size_t limit) : limit_(limit) {}
 
     auto count() const -> size_t {
@@ -993,14 +996,14 @@ class fixed_buffer_traits {
 // A buffer that writes to an output iterator when flushed.
 template<typename OutputIt, typename T, typename Traits = buffer_traits>
 class iterator_buffer final: public Traits, public buffer<T> {
-  private:
+private:
     OutputIt out_;
 
     enum { buffer_size = 256 };
 
     T data_[buffer_size];
 
-  protected:
+protected:
     FMT_CONSTEXPR20 void grow(size_t) override {
         if (this->size() == buffer_size)
             flush();
@@ -1012,7 +1015,7 @@ class iterator_buffer final: public Traits, public buffer<T> {
         out_ = copy_str<T>(data_, data_ + this->limit(size), out_);
     }
 
-  public:
+public:
     explicit iterator_buffer(OutputIt out, size_t n = buffer_size)
         : Traits(n), buffer<T>(data_, 0, buffer_size), out_(out) {}
 
@@ -1037,14 +1040,14 @@ template<typename T>
 class iterator_buffer<T*, T, fixed_buffer_traits> final:
     public fixed_buffer_traits,
     public buffer<T> {
-  private:
+private:
     T* out_;
 
     enum { buffer_size = 256 };
 
     T data_[buffer_size];
 
-  protected:
+protected:
     FMT_CONSTEXPR20 void grow(size_t) override {
         if (this->size() == this->capacity())
             flush();
@@ -1059,7 +1062,7 @@ class iterator_buffer<T*, T, fixed_buffer_traits> final:
         this->clear();
     }
 
-  public:
+public:
     explicit iterator_buffer(T* out, size_t n = buffer_size)
         : fixed_buffer_traits(n), buffer<T>(out, 0, n), out_(out) {}
 
@@ -1087,10 +1090,10 @@ class iterator_buffer<T*, T, fixed_buffer_traits> final:
 
 template<typename T>
 class iterator_buffer<T*, T> final: public buffer<T> {
-  protected:
+protected:
     FMT_CONSTEXPR20 void grow(size_t) override {}
 
-  public:
+public:
     explicit iterator_buffer(T* out, size_t = 0) : buffer<T>(out, 0, ~size_t()) {}
 
     auto out() -> T* {
@@ -1104,16 +1107,16 @@ class iterator_buffer<
     std::back_insert_iterator<Container>,
     efp::EnableIf<is_contiguous<Container>::value, typename Container::value_type>>
     final: public buffer<typename Container::value_type> {
-  private:
+private:
     Container& container_;
 
-  protected:
+protected:
     FMT_CONSTEXPR20 void grow(size_t capacity) override {
         container_.resize(capacity);
         this->set(&container_[0], capacity);
     }
 
-  public:
+public:
     explicit iterator_buffer(Container& c)
         : buffer<typename Container::value_type>(c.size()), container_(c) {}
 
@@ -1128,13 +1131,13 @@ class iterator_buffer<
 // A buffer that counts the number of code units written discarding the output.
 template<typename T = char>
 class counting_buffer final: public buffer<T> {
-  private:
+private:
     enum { buffer_size = 256 };
 
     T data_[buffer_size];
     size_t count_ = 0;
 
-  protected:
+protected:
     FMT_CONSTEXPR20 void grow(size_t) override {
         if (this->size() != buffer_size)
             return;
@@ -1142,7 +1145,7 @@ class counting_buffer final: public buffer<T> {
         this->clear();
     }
 
-  public:
+public:
     counting_buffer() : buffer<T>(data_, 0, buffer_size) {}
 
     auto count() -> size_t {
@@ -1196,7 +1199,7 @@ using has_formatter = std::is_constructible<typename Context::template formatter
 class appender: public std::back_insert_iterator<detail::buffer<char>> {
     using base = std::back_insert_iterator<detail::buffer<char>>;
 
-  public:
+public:
     using std::back_insert_iterator<detail::buffer<char>>::back_insert_iterator;
 
     appender(base it) noexcept : base(it) {}
@@ -1395,7 +1398,7 @@ struct custom_value {
 // A formatting argument value.
 template<typename Context>
 class value {
-  public:
+public:
     using char_type = typename Context::char_type;
 
     union {
@@ -1472,7 +1475,7 @@ class value {
     value(unformattable_char);
     value(unformattable_pointer);
 
-  private:
+private:
     // Formats an argument of a custom type, such as a user-defined class.
     template<typename T, typename Formatter>
     static void
@@ -1725,8 +1728,8 @@ template<typename Char, typename InputIt>
 auto copy_str(InputIt begin, InputIt end, std::back_insert_iterator<efp::String> out)
     -> std::back_insert_iterator<efp::String> {
     // ! temp
-    efp::DebugType<std::back_insert_iterator<efp::String>> {};
-    efp::DebugType<decltype(get_container(out))> {};
+    // efp::DebugType<std::back_insert_iterator<efp::String>> {};
+    // efp::DebugType<decltype(get_container(out))> {};
     // error: implicit instantiation of undefined template 'efp::DebugType<fmt::detail::buffer<char> &>'
     get_container(out).append(begin, end);
     return out;
@@ -1770,10 +1773,10 @@ struct is_back_insert_iterator<std::back_insert_iterator<Container>>: efp::True 
 
 // A type-erased reference to an std::locale to avoid a heavy <locale> include.
 class locale_ref {
-  private:
+private:
     const void* locale_;  // A type-erased pointer to std::locale.
 
-  public:
+public:
     constexpr FMT_INLINE locale_ref() : locale_(nullptr) {}
 
     template<typename Locale>
@@ -1851,7 +1854,7 @@ FMT_BEGIN_EXPORT
 // allow storage in basic_memory_buffer.
 template<typename Context>
 class basic_format_arg {
-  private:
+private:
     detail::value<Context> value_;
     detail::type type_;
 
@@ -1873,16 +1876,16 @@ class basic_format_arg {
     basic_format_arg(const detail::named_arg_info<char_type>* args, size_t size)
         : value_(args, size) {}
 
-  public:
+public:
     class handle {
-      public:
+    public:
         explicit handle(detail::custom_value<Context> custom) : custom_(custom) {}
 
         void format(typename Context::parse_context_type& parse_ctx, Context& ctx) const {
             custom_.format(custom_.value, parse_ctx, ctx);
         }
 
-      private:
+    private:
         detail::custom_value<Context> custom_;
     };
 
@@ -1957,12 +1960,12 @@ FMT_CONSTEXPR FMT_INLINE auto visit_format_arg(Visitor&& vis, const basic_format
 // Formatting context.
 template<typename OutputIt, typename Char>
 class basic_format_context {
-  private:
+private:
     OutputIt out_;
     basic_format_args<basic_format_context> args_;
     detail::locale_ref loc_;
 
-  public:
+public:
     using iterator = OutputIt;
     using format_arg = basic_format_arg<basic_format_context>;
     using format_args = basic_format_args<basic_format_context>;
@@ -2048,7 +2051,7 @@ class format_arg_store
     public basic_format_args<Context>
 #endif
 {
-  private:
+private:
     static const size_t num_args = sizeof...(Args);
     static constexpr size_t num_named_args = detail::count_named_args<Args...>();
     static const bool is_packed = num_args <= detail::max_packed_args;
@@ -2064,7 +2067,7 @@ class format_arg_store
         (is_packed ? detail::encode_types<Context, Args...>() : detail::is_unpacked_bit | num_args)
         | (num_named_args != 0 ? static_cast<unsigned long long>(detail::has_named_args_bit) : 0);
 
-  public:
+public:
     template<typename... T>
     FMT_CONSTEXPR FMT_INLINE format_arg_store(T&... args)
         :
@@ -2122,11 +2125,11 @@ FMT_END_EXPORT
  */
 template<typename Context>
 class basic_format_args {
-  public:
+public:
     using size_type = int;
     using format_arg = basic_format_arg<Context>;
 
-  private:
+private:
     // A descriptor that contains information about formatting arguments.
     // If the number of arguments is less or equal to max_packed_args then
     // argument types are passed in the descriptor. This reduces binary code size
@@ -2164,7 +2167,7 @@ class basic_format_args {
     constexpr basic_format_args(unsigned long long desc, const format_arg* args)
         : desc_(desc), args_(args) {}
 
-  public:
+public:
     constexpr basic_format_args() : desc_(0), args_(nullptr) {}
 
     /**
@@ -2265,13 +2268,13 @@ namespace detail {
 // Workaround an array initialization issue in gcc 4.8.
 template<typename Char>
 struct fill_t {
-  private:
+private:
     enum { max_size = 4 };
 
     Char data_[max_size] = {Char(' '), Char(0), Char(0), Char(0)};
     unsigned char size_ = 1;
 
-  public:
+public:
     FMT_CONSTEXPR void operator=(basic_string_view<Char> s) {
         auto size = s.size();
         FMT_ASSERT(size <= max_size, "invalid fill");
@@ -2919,7 +2922,7 @@ FMT_CONSTEXPR auto get_arg_index_by_name(basic_string_view<Char> name) -> int {
 
 template<typename Char, typename... Args>
 class format_string_checker {
-  private:
+private:
     using parse_context_type = compile_parse_context<Char>;
     static constexpr int num_args = sizeof...(Args);
 
@@ -2933,7 +2936,7 @@ class format_string_checker {
     parse_context_type context_;
     parse_func parse_funcs_[num_args > 0 ? static_cast<size_t>(num_args) : 1];
 
-  public:
+public:
     explicit FMT_CONSTEXPR format_string_checker(basic_string_view<Char> fmt)
         : types_ {mapped_type_constant<Args, buffer_context<Char>>::value...},
           context_(fmt, num_args, types_),
@@ -3032,10 +3035,10 @@ struct formatter<
     T,
     Char,
     efp::EnableIf<detail::type_constant<T, Char>::value != detail::type::custom_type>> {
-  private:
+private:
     detail::dynamic_format_specs<Char> specs_;
 
-  public:
+public:
     template<typename ParseContext>
     FMT_CONSTEXPR auto parse(ParseContext& ctx) -> const Char* {
         auto type = detail::type_constant<T, Char>::value;
@@ -3067,10 +3070,10 @@ struct runtime_format_string {
 /** A compile-time format string. */
 template<typename Char, typename... Args>
 class basic_format_string {
-  private:
+private:
     basic_string_view<Char> str_;
 
-  public:
+public:
     template<
         typename S,
         FMT_ENABLE_IF(std::is_convertible<const S&, basic_string_view<Char>>::value)>
