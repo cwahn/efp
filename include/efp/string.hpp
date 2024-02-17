@@ -46,14 +46,6 @@ public:
         }
     }
 
-    Vector(const Char* s, size_t size) {
-        // Ensure we don't read beyond the end of the provided string
-        Base::_capacity = min(std::strlen(s), size);
-        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
-        Base::_size = Base::_capacity;
-        std::memcpy(Base::_data, s, Base::_size * sizeof(Char));
-    }
-
     bool operator==(const Vector& other) const {
         return Base::operator==(other);
     }
