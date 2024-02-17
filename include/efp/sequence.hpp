@@ -610,58 +610,49 @@ namespace detail {
 
 #endif
 
-    template<typename A, typename Allocator = DefaultAllocator<A>>
+    template<typename A>
     class VectorBase {
       public:
         using Element = A;
         using CtSize = Size<dyn>;
         using CtCapacity = Size<dyn>;
 
-        // STL compatible member types
-        using allocator_type = std::allocator<Element>;
+        // STL compatible types
+        using value_type = Element;
+        // using traits_type = Traits;
+        // using allocator_type = Allocator;
+        using allocator_type = std::allocator<value_type>;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        // using pointer = typename std::allocator_traits<Allocator>::pointer;
+        using pointer = value_type*;
+        // using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+        using const_pointer = const value_type*;
+        using iterator =
+            value_type*;  // Simplification; actual implementation would be more complex
+        using const_iterator = const value_type*;  // Simplification
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        VectorBase() : _data(nullptr), _size(0), _capacity(0), _allocator(Allocator()) {}
-
-        // VectorBase(const VectorBase& other)
-        //     : _data {static_cast<Element*>(::operator new[](other._size * sizeof(Element)))},
-        //       _size {other._size}, _capacity {other._size} {
-        //     if (other._data) {
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             new (_data + i) Element {other._data[i]};
-        //         }
-        //     }
-        // }
+        VectorBase() : _data {nullptr}, _size {0}, _capacity {0} {}
 
         VectorBase(const VectorBase& other)
-            : _allocator(other._allocator), _data(_allocator.allocate(other._size + 1)),
-              _size(other._size), _capacity(other._size + 1) {
-            for (size_t i = 0; i < _size; ++i) {
-                _allocator.construct(_data + i, other._data[i]);
+            : _data {static_cast<Element*>(::operator new[]((other._size + 1) * sizeof(Element)))},
+              _size {other._size}, _capacity {other._size + 1} {
+            if (other._data) {
+                for (size_t i = 0; i < _size; ++i) {
+                    new (_data + i) Element {other._data[i]};
+                }
             }
         }
 
         // todo copy_and_swap
-        // VectorBase& operator=(const VectorBase& other) noexcept {
-        //     if (this != &other) {
-        //         for (size_t i = 0; i < _size; ++i) {
-        //             _data[i].~Element();
-        //         }
-
-        //         if (_capacity < other._size) {
-        //             resize(other._size);
-        //         }
-
-        //         for (size_t i = 0; i < other._size; ++i) {
-        //             new (_data + i) Element {other._data[i]};
-        //         }
-        //     }
-        //     return *this;
-        // }
-
-        VectorBase& operator=(const VectorBase& other) {
+        VectorBase& operator=(const VectorBase& other) noexcept {
             if (this != &other) {
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    _data[i].~Element();
                 }
 
                 if (_capacity < other._size) {
@@ -669,7 +660,7 @@ namespace detail {
                 }
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    _allocator.construct(_data + i, other._data[i]);
+                    new (_data + i) Element {other._data[i]};
                 }
             }
             return *this;
@@ -701,14 +692,23 @@ namespace detail {
             return *this;
         }
 
-        template<typename... Args>
-        VectorBase(const Args&... args)
-            // One extra space for BasicString
-            : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
-            )},
-              _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
+        // template<typename... Args>
+        // VectorBase(const Args&... args)
+        //     // One extra space for BasicString
+        //     : _data {static_cast<Element*>(::operator new[]((sizeof...(args) + 1) * sizeof(Element))
+        //     )},
+        //       _capacity(sizeof...(args) + 1), _size(sizeof...(args)) {
+        //     size_t index = 0;
+        //     _construct_elements(index, args...);
+        // }
+
+        VectorBase(InitializerList<Element> il)
+            : _data {static_cast<Element*>(::operator new[]((il.size() + 1) * sizeof(Element)))},
+              _size(il.size()), _capacity(il.size() + 1) {
             size_t index = 0;
-            _construct_elements(index, args...);
+            for (const auto& e : il) {
+                new (_data + index++) Element {e};
+            }
         }
 
         // Constructor from Array
@@ -801,6 +801,8 @@ namespace detail {
             }
         }
 
+        // todo shrink_to_fit
+
         void push_back(const Element& value) {
             if (_size + 1 >= _capacity) {
                 reserve(_capacity == 0 ? 2 : 2 * _capacity);
@@ -818,6 +820,16 @@ namespace detail {
             new (_data + _size) Element {efp::move(value)};
             ++_size;
         }
+
+        void pop_back() {
+            if (_size == 0) {
+                throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
+            }
+            _data[_size - 1].~Element();
+            --_size;
+        }
+
+        // todo emplace_back
 
         void insert(size_t index, const Element& value) {
             if (index < 0 || index > _size) {
@@ -861,14 +873,6 @@ namespace detail {
             _size = 0;
         }
 
-        void pop_back() {
-            if (_size == 0) {
-                throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
-            }
-            _data[_size - 1].~Element();
-            --_size;
-        }
-
         const Element* data() const {
             return _data;
         }
@@ -909,7 +913,6 @@ namespace detail {
             new (_data + index++) Element {last};
         }
 
-        Allocator _allocator;
         Element* _data;
         size_t _size;
         size_t _capacity;

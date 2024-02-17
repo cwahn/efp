@@ -664,4 +664,140 @@ TEST_CASE("Vector Copy") {
     }
 }
 
+// Vector allocation startegy test
+TEST_CASE("Vector Allocation Strategy", "Vector") {
+    SECTION("Default Constructor") {
+        Vector<int> vec {};
+        CHECK(vec.size() == 0);
+        CHECK(vec.capacity() == 0);
+    }
+
+    SECTION("Copy Constructor") {
+        Vector<int> vec {1, 2, 3};
+        Vector<int> vec_copy = vec;
+        CHECK(vec_copy.size() == 3);
+        CHECK(vec_copy.capacity() == 4);
+    }
+
+    SECTION("Copy Assignment") {
+        Vector<int> vec {1, 2, 3};
+        Vector<int> vec_copy;
+        vec_copy = vec;
+        CHECK(vec_copy.size() == 3);
+        CHECK(vec_copy.capacity() == 4);
+    }
+
+    SECTION("Move Constructor") {
+        Vector<int> vec {1, 2, 3};
+        Vector<int> vec_move = efp::move(vec);
+        CHECK(vec_move.size() == 3);
+        CHECK(vec_move.capacity() == 4);
+    }
+
+    SECTION("Move Assignment") {
+        Vector<int> vec {1, 2, 3};
+        Vector<int> vec_move;
+        vec_move = efp::move(vec);
+        CHECK(vec_move.size() == 3);
+        CHECK(vec_move.capacity() == 4);
+    }
+
+    SECTION("Vector::reserve") {
+        Vector<int> vec {1, 2, 3};
+        vec.reserve(10);
+        CHECK(vec.size() == 3);
+        CHECK(vec.capacity() == 10);
+    }
+
+    // SECTION("Vector::shrink_to_fit") {
+    //     Vector<int> vec {1, 2, 3};
+    //     vec.reserve(10);
+    //     // vec.shrink_to_fit();
+    //     CHECK(vec.size() == 3);
+    //     CHECK(vec.capacity() == 3);
+    // }
+
+    SECTION("Vector::resize") {
+        Vector<int> vec {1, 2, 3};
+        vec.resize(5);
+        CHECK(vec.size() == 5);
+        CHECK(vec.capacity() == 6);
+    }
+
+    SECTION("Vector::push_back") {
+        Vector<int> vec {};
+
+        vec.push_back(1);
+        CHECK(vec.size() == 1);
+        CHECK(vec.capacity() == 2);
+
+        vec.push_back(2);
+        CHECK(vec.size() == 2);
+        CHECK(vec.capacity() == 4);
+
+        vec.push_back(3);
+        vec.push_back(4);
+        vec.push_back(5);
+
+        CHECK(vec.size() == 5);
+        CHECK(vec.capacity() == 8);
+    }
+
+    SECTION("Vector::pop_back") {
+        Vector<int> vec {1, 2, 3, 4, 5};
+
+        vec.pop_back();
+        CHECK(vec.size() == 4);
+        CHECK(vec.capacity() == 6);
+
+        vec.pop_back();
+        vec.pop_back();
+        vec.pop_back();
+        vec.pop_back();
+
+        CHECK(vec.size() == 0);
+        CHECK(vec.capacity() == 6);
+    }
+
+    SECTION("Vector::insert") {
+        Vector<int> vec {1, 2, 3};
+
+        vec.insert(0, 0);
+        CHECK(vec.size() == 4);
+        CHECK(vec.capacity() == 8);
+
+        vec.insert(2, 2);
+        CHECK(vec.size() == 5);
+        CHECK(vec.capacity() == 8);
+
+        vec.insert(5, 5);
+        CHECK(vec.size() == 6);
+        CHECK(vec.capacity() == 8);
+    }
+
+    SECTION("Vector::erase") {
+        Vector<int> vec {1, 2, 3, 4, 5};
+
+        vec.erase(2);
+        CHECK(vec.size() == 4);
+        CHECK(vec.capacity() == 6);
+
+        vec.erase(0);
+        CHECK(vec.size() == 3);
+        CHECK(vec.capacity() == 6);
+
+        vec.erase(2);
+        CHECK(vec.size() == 2);
+        CHECK(vec.capacity() == 6);
+    }
+
+    SECTION("Vector::clear") {
+        Vector<int> vec {1, 2, 3, 4, 5};
+
+        vec.clear();
+        CHECK(vec.size() == 0);
+        CHECK(vec.capacity() == 6);
+    }
+}
+
 #endif
