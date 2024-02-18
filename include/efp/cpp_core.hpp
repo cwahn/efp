@@ -15,7 +15,7 @@
 #include <atomic>       // Defines atomic operations on data shared between threads.
 #include <thread>       // Defines classes and functions for managing threads.
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
     #include <cstring>
 

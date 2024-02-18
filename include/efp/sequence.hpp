@@ -8,9 +8,12 @@
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     #include <string>
     #include <memory>
+
+    #include <array>
+    #include <vector>
 #else
     // todo remove STL
     #include <string>
@@ -18,6 +21,7 @@
 #endif
 
 // todo Move and copy assigment operator sort out
+// todo Support custom allocator and traits
 
 namespace efp {
 
@@ -494,7 +498,7 @@ constexpr auto data(ArrVec<A, n>& as) -> A* {
 
 namespace detail {
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     // #include <memory>
     template<typename A>
     using DefaultAllocator = std::allocator<A>;
@@ -534,9 +538,7 @@ namespace detail {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-
         VectorBase() : _allocator(Allocator()), _data(nullptr), _size(0), _capacity(0) {}
-
 
         VectorBase(const VectorBase& other)
             : _allocator(other._allocator), _size(other._size), _capacity(other._capacity) {
@@ -665,6 +667,10 @@ namespace detail {
 
         size_t capacity() const {
             return _capacity;
+        }
+
+        size_t max_size() const {
+            return _allocator.max_size();
         }
 
         void resize(size_t new_size) {
@@ -865,12 +871,21 @@ namespace detail {
 
 namespace detail {
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+
+    template<typename Char, typename = void>
+    struct DefaultCharTraitsImpl {
+        using Type = void;
+    };
+
+    // Specialize only for valid character types
+    template<typename Char>
+    struct DefaultCharTraitsImpl<Char, EnableIf<IsCharType<Char>::value>> {
+        using Type = std::char_traits<Char>;
+    };
 
     template<typename Char>
-
-    // todo Remove warning
-    using DefaultCharTraits = std::char_traits<Char>;
+    using DefaultCharTraits = typename DefaultCharTraitsImpl<Char>::Type;
 
 #else
     // todo freestanding implementation
@@ -1339,11 +1354,13 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
-// todo STL only
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 template<typename A>
-auto operator<<(std::ostream& os, const A& seq)
-    -> EnableIf<IsSequence<A>::value && !IsSame<A, std::string>::value, std::ostream&> {
+auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+    IsSequence<A>::value && !detail::IsCharType<Element<A>>::value
+        && !IsSame<A, std::string>::value,
+    std::ostream&> {
     static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
     // ? Interesting. Automatically consider it as VectorStream?
@@ -1357,6 +1374,8 @@ auto operator<<(std::ostream& os, const A& seq)
     os << " }";
     return os;
 }
+
+#endif
 
 // Sequence trait implementation for std::array
 

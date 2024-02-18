@@ -1,7 +1,7 @@
 #ifndef STRING_HPP_
 #define STRING_HPP_
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     #include <cstring>
     #include <string>
 #endif
@@ -10,6 +10,10 @@
 #include "efp/sequence.hpp"
 
 namespace efp {
+
+// Forward declarations for String and StringView
+template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
+using BasicStringView = VectorView<Char>;
 
 // BasicString
 
@@ -46,12 +50,31 @@ public:
         }
     }
 
-    Vector(const Char* s, size_t size) {
-        // Ensure we don't read beyond the end of the provided string
-        Base::_capacity = min(std::strlen(s), size);
-        Base::_data = static_cast<Char*>(::operator new[](Base::_capacity * sizeof(Char)));
-        Base::_size = Base::_capacity;
-        std::memcpy(Base::_data, s, Base::_size * sizeof(Char));
+    // template<class InputIt>
+    // Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+    //     : allocator_(alloc), size_(std::distance(first, last)), capacity_(size_) {
+    //     data_ = allocator_.allocate(capacity_);
+    //     std::uninitialized_copy(first, last, data_);
+    // }
+
+    // Not using iterator
+    template<typename InputIt>
+    Vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+        : Base::allocator_(alloc), Base::size_(0), Base::capacity_(0) {
+        // First pass: Count the number of elements to determine size
+        for (InputIt it = first; it != last; ++it) {
+            ++Base::size_;
+        }
+        Base::capacity_ = Base::size_ + 1;
+
+        // Allocate memory for the elements
+        Base::data_ = Base::allocator_.allocate(Base::capacity_);
+
+        // Second pass: Copy-construct elements from the range
+        size_t i = 0;
+        for (InputIt it = first; it != last; ++it, ++i) {
+            Base::allocator_.construct(Base::data_ + i, *it);
+        }
     }
 
     bool operator==(const Vector& other) const {
@@ -128,6 +151,12 @@ public:
     Vector& assign(const Char* c_str) {
         Base::clear();
         return append(c_str);
+    }
+
+    // todo assign(size_type n, CharT c)
+    Vector& assign(size_t n, Char c) {
+        Base::clear();
+        return append(n, c);
     }
 
     // todo insert(size_type pos, const CharT* s)
@@ -227,21 +256,24 @@ public:
         return Traits::compare(Base::_data + pos, other.data(), len);
     }
 
-    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
-
     const Char* c_str() const {
         Base::_data[Base::_size] = '\0';
         return Base::_data;
     }
 
+    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
+    operator BasicStringView<Char, Traits>() const {
+        return BasicStringView<Char, Traits>(Base::_data, Base::_size);
+    }
+
     // todo Interface with StringView
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
 #endif
-};
+};  // class Vector
 
 template<
     typename Char,
@@ -263,7 +295,6 @@ using U8String = BasicString<char8_t>;
 #endif
 
 // BasicStringView specialization
-// todo Traits
 
 template<typename Char, typename Traits>
 class VectorView<Char, Traits, EnableIf<detail::IsCharType<Char>::value>>:
@@ -277,6 +308,12 @@ public:
         Base::_data = c_str;
     }
 
+    // todo basic_string_view(const efp::BasicString<Char>& s) noexcept
+    VectorView(const Vector<Char>& s) noexcept {
+        Base::_size = s.size();
+        Base::_data = s.data();
+    }
+
     bool operator==(const VectorView& other) const {
         return Base::operator==(other);
     }
@@ -284,22 +321,25 @@ public:
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
         // Check if both are null pointers
-        if (Base::_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr) {
             return true;
+        }
 
         // If one is null and the other is not, they can't be equal
-        if (Base::_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr) {
             return false;
+        }
 
         // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
+        if (Traits::compare(Base::_data, c_str, Base::_size) != 0) {
             return false;
+        }
 
         // Check if the character at the position _size in c_str is the null character
         return c_str[Base::_size] == '\0';
     }
 
-#if defined(__STDC_HOSTED__)
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     operator std::string() const {
         return std::string(Base::_data, Base::_size);
     }
@@ -312,8 +352,7 @@ public:
 
 // BasicSstringView
 
-template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
-using BasicStringView = VectorView<Char>;
+// Template is forwards declared at the top of the file
 
 using StringView = BasicStringView<char>;
 
@@ -327,29 +366,22 @@ using U32StringView = BasicStringView<char32_t>;
 using U8StringView = BasicStringView<char8_t>;
 #endif
 
-// inline String join(const String &delimeter, const Vector<String> &strings)
-// {
-//     String result{};
+// Use intercalate to join strings
 
-//     const size_t string_num = length(strings);
-//     const auto join_ = [&](int i, const String &s)
-//     {
-//         result.append_mut(s);
-//         if (i < string_num - 1)
-//             result.append_mut(delimeter);
-//     };
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
-//     for_each_with_index(join_, strings);
+template<typename A>
+auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+    IsSequence<A>::value && detail::IsCharType<Element<A>>::value && !IsSame<A, std::string>::value,
+    std::ostream&> {
+    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
-//     return result;
-// }
+    for (const auto& elem : seq) {
+        os << elem;
+    }
 
-#if defined(__STDC_HOSTED__)
-
-    // inline std::ostream& operator<<(std::ostream& os, const String& string) {
-    //     for_each([&](char c) { os << c; }, string);
-    //     return os;
-    // }
+    return os;
+}
 
 #endif
 

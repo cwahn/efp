@@ -50,9 +50,5 @@ int main() {
     if (!file.close())
         throw std::runtime_error("Failed to close the file.");
 
-    // file = File::open("test", "w+").move();
-    // file.write("Hello, world!\nThis is a test file.\nEnd of test.");
-    // file.close();
-
     return 0;
 }
