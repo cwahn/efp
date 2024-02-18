@@ -21,6 +21,7 @@
 #endif
 
 // todo Move and copy assigment operator sort out
+// todo Support custom allocator and traits
 
 namespace efp {
 

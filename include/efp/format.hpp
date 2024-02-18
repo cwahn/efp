@@ -6,6 +6,7 @@
 #include "efp/sequence.hpp"
 #include "efp/string.hpp"
 #include "efp/cyclic.hpp"
+#include "efp/enum.hpp"
 
 namespace efp {
 
@@ -114,5 +115,20 @@ struct fmt::formatter<efp::Vcq<T, ct_cap>> {
         return fmt::format_to(ctx.out(), "[{}]", fmt::join(vcq.begin(), vcq.end(), ", "));
     }
 };
+
+// todo enum support
+// Specialize fmt::formatter for efp::Enum
+// template<typename... As>
+// struct fmt::formatter<efp::Enum<As...>> {
+//     template<typename ParseContext>
+//     constexpr auto parse(ParseContext& ctx) const -> format_parse_context::iterator {
+//         return ctx.begin();
+//     }
+
+//     template<typename FormatContext>
+//     auto format(const efp::Enum<As...>& enm, FormatContext& ctx) -> format_context::iterator {
+//         return fmt::format_to(ctx.out(), "{}", enm.to_string());
+//     }
+// };
 
 #endif
