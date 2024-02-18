@@ -18,6 +18,8 @@ EFP offers no-STL contiguous sequence types and immutable view types implementin
 
 STL containers like `std::vector`, `std::array`, `std::string` also implement the `Sequence` trait. Therefore they could be used whenever sequence type is expected.
 
+Also, the trait is not 'sealed'. Therefore one could implement `Sequence` trait for external types as well.
+
 #### Higher Order Functions
 EFP offers higher-order functions including   
 
