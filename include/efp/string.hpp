@@ -294,27 +294,7 @@ using U32String = BasicString<char32_t>;
 using U8String = BasicString<char8_t>;
 #endif
 
-template<typename A>
-auto operator<<(std::ostream& = os, const A& seq)
-    -> EnableIf<IsSequence<A>::value && !IsSame<A, std::string>::value, std::ostream&> {
-    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
-
-    // ? Interesting. Automatically consider it as VectorStream?
-    os << "{ ";
-    for (size_t i = 0; i < seq.size(); ++i) {
-        os << seq[i];
-        if (i != seq.size() - 1) {
-            os << ", ";
-        }
-    }
-    os << " }";
-    return os;
-}
-
-#endif
-
 // BasicStringView specialization
-// todo Traits
 
 template<typename Char, typename Traits>
 class VectorView<Char, Traits, EnableIf<detail::IsCharType<Char>::value>>:
@@ -372,8 +352,7 @@ public:
 
 // BasicSstringView
 
-// template<typename Char, typename = EnableIf<detail::IsCharType<Char>::value>>
-// using BasicStringView = VectorView<Char>;
+// Template is forwards declared at the top of the file
 
 using StringView = BasicStringView<char>;
 
@@ -387,29 +366,22 @@ using U32StringView = BasicStringView<char32_t>;
 using U8StringView = BasicStringView<char8_t>;
 #endif
 
-// inline String join(const String &delimeter, const Vector<String> &strings)
-// {
-//     String result{};
-
-//     const size_t string_num = length(strings);
-//     const auto join_ = [&](int i, const String &s)
-//     {
-//         result.append_mut(s);
-//         if (i < string_num - 1)
-//             result.append_mut(delimeter);
-//     };
-
-//     for_each_with_index(join_, strings);
-
-//     return result;
-// }
+// Use intercalate to join strings
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
-// inline std::ostream& operator<<(std::ostream& os, const String& string) {
-//     for_each([&](char c) { os << c; }, string);
-//     return os;
-// }
+template<typename A>
+auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+    IsSequence<A>::value && detail::IsCharType<Element<A>>::value && !IsSame<A, std::string>::value,
+    std::ostream&> {
+    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
+
+    for (const auto& elem : seq) {
+        os << elem;
+    }
+
+    return os;
+}
 
 #endif
 

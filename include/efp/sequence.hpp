@@ -1356,8 +1356,10 @@ constexpr auto data(VectorView<A>& as) -> const A* {
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 template<typename A>
-auto operator<<(std::ostream& os, const A& seq)
-    -> EnableIf<IsSequence<A>::value && !IsSame<A, std::string>::value, std::ostream&> {
+auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+    IsSequence<A>::value && !detail::IsCharType<Element<A>>::value
+        && !IsSame<A, std::string>::value,
+    std::ostream&> {
     static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
     // ? Interesting. Automatically consider it as VectorStream?

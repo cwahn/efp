@@ -10,14 +10,21 @@ using namespace efp;
 
 TEST_CASE("format", "[format]") {
     CHECK(format("{}", 42) == "42");
-    CHECK(format("{}", 42.0) == "42.000000");
+
+    CHECK(format("{}", 42.0) == "42");
+    CHECK(format("{}", 42.1) == "42.1");
+
     CHECK(format("{}", "hello") == "hello");
     CHECK(format("{}", 'c') == "c");
     CHECK(format("{}", 42u) == "42");
     CHECK(format("{}", 42l) == "42");
     CHECK(format("{}", 42ll) == "42");
-    CHECK(format("{}", 42.0f) == "42.000000");
-    CHECK(format("{}", 42.0l) == "42.000000");
+
+    CHECK(format("{}", 42.0f) == "42");
+    CHECK(format("{}", 42.1f) == "42.1");
+
+    CHECK(format("{}", 42.0l) == "42");
+    CHECK(format("{}", 42.1l) == "42.1");
 
     // format specifiers
     // CHECK(format("{:d}", 42) == "42");
