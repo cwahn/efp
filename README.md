@@ -10,7 +10,10 @@ Support freestanding(no-STL) C++ with some limitations.
 
 ## Features
 
-### Sequence Trait: Contiguous Sequential Containers
+### Sequence Trait
+
+Generalization of contiguous sequential containers
+
 EFP offers no-STL contiguous sequence types and immutable view types implementing the Sequence trait: `Array`, `ArrVec`, `Vector`, `ArrayView`, `ArrVecView`, and `VectorView`
 
 STL containers like `std::vector`, `std::array`, `std::string` also implement the `Sequence` trait. Therefore they could be used whenever sequence type is expected.
@@ -48,22 +51,22 @@ Sequence-returning functions will return either `Array`, `ArrVec`, or `Vector`.
 - Dynamic capacity
   - Vector (analog of `std::vector`)
 
-### Sum Type (Enum) with Pattern Matching
+#### String and formatting
+Just like in Haskell, `String` is `Vector<char>` in EFP (with minor difference on template argument). This enables string data manipulation with the same HOF used for all the other sequencial types. 
 
-EFP supports sum-type similar to `std::variant` with pattern matching only requires freestanding C++ 11. 
+EFP also supports powerful formatting (and printing) features based on [fmtlib/fmt](https://github.com/fmtlib/fmt).
+
+### Sum Type with Pattern Matching
+
+EFP offers `Enum`, which is a sum type(or disjoint union type) similar to `std::variant` with rust-style pattern matching. 
 
 - Exhaustive: Non-exhaustive branches will fail to be compiled.
 - Performance: Compiles to switch-case statement on the runtime tag. 
 - Coherent: The matching rule is the same as that of the overloaded function.
   
-One drawback of `Enum` is memory usage. Like `std::variant` `Enum` needs extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence supports 256 variants at maximum for now), but because of the memory alignment, the size of `Enum` tends to be twice the size of the largest variant for small data.
+One drawback of `Enum` is memory usage. Like all the other tagged-union base implementations, `Enum` requires extra space to store the runtime tag of the stored variant. The tag itself is only 1 byte (hence supports 256 variants at maximum for now), but because of the memory alignment, the size of the resultant `Enum` tends to be larger than the size of the largest variant.
 
-EFP provides sum-type `Maybe<A>` which is inheriting `Enum<Nothing, A>`. 
-
-### String and formatting
-Just like in Haskell, `String` is `Vector<char>` in EFP. This enables string data manipulation with the same HoF used for all the other sequencial types. 
-
-EFP also supports powerful formatting (and printing) features based on [fmtlib/fmt](https://github.com/fmtlib/fmt).
+EFP provides `Maybe<A>` which is inheriting `Enum<Nothing, A>`. 
 
 ## Examples
 ### General
@@ -96,6 +99,13 @@ int main() {
 }
 ```
 
+### String and formatting
+```cpp
+const String name_0 = "Lighthouse";
+const String name_1 = "Tinker Bell";
+println("{}", format("{} loves {}.", name_0, name_1));
+``` 
+
 ### Pattern Matching
 ```cpp
 Enum<bool, int, double> a = 0;
@@ -116,13 +126,6 @@ auto file = File::open("test", "w+").move();
 file.write("Hello, world!\nThis is a test file.\nEnd of test.");
 file.close();
 ```
-
-### String and formatting
-```cpp
-const String name_0 = "Lighthouse";
-const String name_1 = "Tinker Bell";
-println("{}", format("{} loves {}.", name_0, name_1));
-``` 
 
 ## Benchmarks
 WIP
