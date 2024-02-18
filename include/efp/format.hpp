@@ -31,6 +31,7 @@ inline void print(FormatString<Args...> fmt, Args&&... args) {
 }
 
 // todo Move to io.hpp
+// todo Need to make it use Maybe or Result rather than exceptions
 // template<typename... Args>
 // inline void print(std::FILE* f, fmt::format_string<Args...> fmt, Args&&... args) {
 //     const auto& vargs = fmt::make_format_args(args...);
@@ -44,6 +45,7 @@ inline void println(FormatString<Args...> fmt, Args&&... args) {
 }
 
 // todo Move to io.hpp
+// todo Need to make it use Maybe or Result rather than exceptions
 // template<typename... Args>
 // inline void println(std::FILE* f, fmt::format_string<Args...> fmt, Args&&... args) {
 //     return fmt::print(f, "{}\n", fmt::format(fmt, efp::forward<Args>(args)...));

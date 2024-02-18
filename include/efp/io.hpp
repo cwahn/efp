@@ -4,6 +4,7 @@
 #include "efp/cpp_core.hpp"
 #include "efp/prelude.hpp"
 #include "efp/string.hpp"
+#include "efp/format.hpp"
 
 // If hosted environment
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
