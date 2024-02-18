@@ -14,7 +14,7 @@ constexpr Nothing nothing;
 
 template<typename A>
 class Enum<Nothing, A>: public detail::EnumBase<Nothing, A> {
-  public:
+public:
     using Base = detail::EnumBase<Nothing, A>;
     using Base::Base;
 
@@ -95,9 +95,7 @@ auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
 
 template<typename A, typename F>
 auto bind(const Maybe<A>& ma, const F& f)
-    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>>
-// todo test if monadic action
-{
+    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>> {
     if (ma)
         return f(ma.value());
     else
@@ -106,9 +104,7 @@ auto bind(const Maybe<A>& ma, const F& f)
 
 template<typename A, typename F>
 auto operator>>=(const Maybe<A>& ma, const F& f)
-    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>>
-// todo test if monadic action
-{
+    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>> {
     if (ma)
         return f(ma.value());
     else

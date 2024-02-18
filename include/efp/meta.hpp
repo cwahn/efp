@@ -865,7 +865,6 @@ using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 template<typename A>
 using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 
-// todo Decay
 // Decay
 template<typename A>
 using Decay = typename std::decay<A>::type;

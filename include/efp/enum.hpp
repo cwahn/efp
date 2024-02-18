@@ -158,7 +158,7 @@ namespace detail {
 
     template<typename... As>
     class EnumBase {
-      public:
+    public:
         friend struct detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct detail::MoveImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct detail::DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>;
@@ -228,7 +228,6 @@ namespace detail {
             new (reinterpret_cast<Variant*>(_storage)) Variant {};
         }
 
-        // todo Support rule of five
         EnumBase(const EnumBase& other) : _index(other._index) {
             detail::CopyImpl<power_2_ceiling(sizeof...(As)), As...>::impl(*this, other);
         }
@@ -306,7 +305,6 @@ namespace detail {
                 VariantType(forward<Head>(head), forward<Tail>(args)...);
         }
 
-        // todo Implement equality operator
         bool operator==(const EnumBase& other) const {
             if (_index != other._index) {
                 return false;
@@ -440,7 +438,7 @@ namespace detail {
             );
         }
 
-      private:
+    private:
         // Member variables
         alignas(_maximum(alignof(As)...)) uint8_t _storage[_maximum(sizeof(As)...)];
         uint8_t _index;  // Current maxinum variant is 256

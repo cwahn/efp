@@ -19,11 +19,6 @@ inline auto format(FormatString<Args...> fmt, Args&&... args) -> String {
 }
 
 template<typename... Args>
-inline auto format(FormatString<Args...> fmt, Args&&... args) -> String {
-    return fmt::vformat(fmt, fmt::make_format_args(args...));
-}
-
-template<typename... Args>
 inline void print(FormatString<Args...> fmt, Args&&... args) {
     const auto& vargs = fmt::make_format_args(args...);
     return fmt::detail::is_utf8() ? fmt::vprint(fmt, vargs)

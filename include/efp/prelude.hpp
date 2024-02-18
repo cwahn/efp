@@ -188,7 +188,6 @@ R foldr(const F& f, const R& init, const As& as) {
     return res;
 }
 
-// todo size_t
 // FromFunctionReturnImpl
 
 namespace detail {

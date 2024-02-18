@@ -7,47 +7,48 @@ using namespace efp;
 
 int main() {
     const char* path = "test.txt";
-    const char* test_data = "Hello, world!\nThis is a test file.\nEnd of test.";
-    String test_data_string = test_data;
+    const char* c_str_data = "Hello, world!\nThis is a test file.\nEnd of test.";
+    String string_data = "Hello, world!\nThis is a test file.\nEnd of test.";
 
     auto maybe_file = File::open(path, "w+");
     if (!maybe_file)
         throw std::runtime_error("Failed to open file for writing.");
 
-    File file = maybe_file.move();
+    {
+        File file = maybe_file.move();
 
-    if (!file.write(test_data))
-        throw std::runtime_error("Failed to write char* data to file.");
+        if (!file.write(c_str_data))
+            throw std::runtime_error("Failed to write char* data to file.");
 
-    file.flush();
+        file.flush();
 
-    if (!file.seek(0))
-        throw std::runtime_error("Failed to seek to the beginning of the file.");
+        if (!file.seek(0))
+            throw std::runtime_error("Failed to seek to the beginning of the file.");
 
-    auto lines = file.read_lines();
-    for (const auto& line : lines) {
-        std::cout << "Read line: " << line << std::endl;
+        auto lines = file.read_lines();
+
+        println("File content after writing c_str data:");
+        for_each([](const String& line) { println("{}", line); }, lines);
+
+        long position = file.tell();
+        println("Current file position: {}\n", position);
+
+        if (!file.write(string_data))
+            throw std::runtime_error("Failed to write String data to file.");
     }
 
-    long position = file.tell();
-    std::cout << "Current file position: " << position << std::endl;
-
-    if (!file.write(test_data_string))
-        throw std::runtime_error("Failed to write String data to file.");
-
-    maybe_file = File::open(path, "r");
-    if (!maybe_file)
+    auto maybe_file_to_read = File::open(path, "r");
+    if (!maybe_file_to_read)
         throw std::runtime_error("Failed to reopen file for reading.");
 
-    file = maybe_file.move();
+    File file_to_read = maybe_file_to_read.move();
 
-    lines = file.read_lines();
-    std::cout << "File content after writing String data:" << std::endl;
-    for (const auto& line : lines) {
-        std::cout << line << std::endl;
-    }
+    const auto read_lines = file_to_read.read_lines();
 
-    if (!file.close())
+    println("File content after writing String data:");
+    for_each([](const String& line) { println("{}", line); }, read_lines);
+
+    if (!file_to_read.close())
         throw std::runtime_error("Failed to close the file.");
 
     return 0;

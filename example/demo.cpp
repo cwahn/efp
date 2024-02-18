@@ -3,22 +3,24 @@
 
 using namespace efp;
 
+constexpr int n = 10;
+
 int main() {
-    auto negate = [](int x) { return -x; };
+    const auto negate = [](int x) { return -x; };
 
-    auto is_even = [](int x) { return x % 2 == 0; };
+    const auto is_even = [](int x) { return x % 2 == 0; };
 
-    auto stdout = [&](int x) { std::cout << x << " "; };
+    // Create a statically sized sequence, which is efp::Array<int, n> with identity function
+    const auto as = from_function(Int<n> {}, id<int>);
+    // Function composition
+    const auto minus_square = compose(negate, square<int>);
+    const auto bs = map(minus_square, as);
+    const auto cs = filter(is_even, bs);
 
-    auto as = from_function(CtConst<int, 10>{}, id<int>);
+    println("Result is: {}", cs);  // Result is: 0 -4 -16 -36 -64
 
-    auto minus_square = compose(negate, square<int>);
-
-    auto bs = map(minus_square, as);
-
-    auto cs = filter(is_even, bs);
-
-    for_each(stdout, cs); // 0 -4 -16 -36 -64
+    const auto cout = [](int x) { std::cout << x << " "; };
+    for_each(cout, cs);  // 0 -4 -16 -36 -64
 
     return 0;
 }

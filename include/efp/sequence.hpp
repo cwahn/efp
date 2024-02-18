@@ -21,7 +21,6 @@
 #endif
 
 // todo Move and copy assigment operator sort out
-// todo Support custom allocator and traits
 
 namespace efp {
 
@@ -747,6 +746,16 @@ namespace detail {
             ++_size;
         }
 
+        template<typename... Args>
+        void emplace_back(Args&&... args) {
+            if (_size + 1 >= _capacity) {
+                reserve(_size == 0 ? 2 : 2 * _size + 1);
+            }
+
+            _allocator.construct(_data + _size, efp::forward<Args>(args)...);
+            ++_size;
+        }
+
         void pop_back() {
             if (_size == 0) {
                 throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
@@ -754,8 +763,6 @@ namespace detail {
 
             _allocator.destroy(_data + _size-- - 1);
         }
-
-        // todo emplace_back
 
         void insert(size_t index, const Element& value) {
             if (index < 0 || index > _size) {
