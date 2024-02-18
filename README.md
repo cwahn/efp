@@ -21,21 +21,14 @@ STL containers like `std::vector`, `std::array`, `std::string` also implement th
 #### Higher Order Functions
 EFP offers higher-order functions including   
 
-**Composition and Utility Functions:** `compose`, `execute_pack`
-
-**Element Access and Manipulation:** `head`, `last`, `tail`, `init`
-
-**Mapping Functions:** `map`, `map_with_index`, `cartesian_map`
-
-**Folding Functions:** `foldl`, `foldr`
-
-**Filtering Functions:** `filter`, `take_while`, `drop_while`
-
-**Iteration Functions:** `for_each`, `for_each_mut`, `for_each_with_index`, `for_each_with_index_mut`, `cartesian_for_each`, `cartesian_for_each_mut`, `for_index`, `cartesian_for_index`
-
-**Sequence Operations:** `append`, `slice`, `slice_unsafe`, `take`, `take_unsafe`, `drop`, `drop_unsafe`
-
-**Element Search and Indexing:** `elem`, `elem_index`, `elem_indices`, `find`, `find_index`, `find_indices`
+- Composition and Utility Functions: `compose`, `execute_pack`
+- Element Access and Manipulation: `head`, `last`, `tail`, `init`
+- Mapping Functions: `map`, `map_with_index`, `cartesian_map`
+- Folding Functions: `foldl`, `foldr`
+- Filtering Functions: `filter`, `take_while`, `drop_while`
+- Iteration Functions: `for_each`, `for_each_mut`, `for_each_with_index`, `for_each_with_index_mut`, `cartesian_for_each`, `cartesian_for_each_mut`, `for_index`, `cartesian_for_index`
+- Sequence Operations: `append`, `slice`, `slice_unsafe`, `take`, `take_unsafe`, `drop`, `drop_unsafe`
+- Element Search and Indexing: `elem`, `elem_index`, `elem_indices`, `find`, `find_index`, `find_indices`
 
 and many more.
 
