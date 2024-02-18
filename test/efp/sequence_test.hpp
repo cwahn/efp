@@ -743,6 +743,10 @@ TEST_CASE("Vector Allocation Strategy", "Vector") {
         CHECK(vec.capacity() == 9);
     }
 
+    SECTION("Vector::emplace_back") {
+        // todo
+    }
+
     SECTION("Vector::pop_back") {
         Vector<int> vec {1, 2, 3, 4, 5};
 

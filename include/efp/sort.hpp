@@ -4,7 +4,7 @@
 #include "efp/sequence.hpp"
 
 // todo Need to make it work for static sequences as well
-// todo Make member function version of it
+// ? Make member function version of it
 
 namespace efp {
 

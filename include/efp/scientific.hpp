@@ -4,7 +4,8 @@
 #include "efp/numeric.hpp"
 #include "efp/prelude.hpp"
 
-// todo Make default
+// todo Make default return type automation
+// todo Separate to efp-scientific library
 
 namespace efp {
 template<typename R, typename As>

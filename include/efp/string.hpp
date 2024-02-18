@@ -99,7 +99,6 @@ public:
         return c_str[Base::_size] == '\0';
     }
 
-    // todo at
     Char at(size_t pos) const {
         if (pos >= Base::_size) {
             throw std::runtime_error("Index out of range");
@@ -108,17 +107,14 @@ public:
         return Base::_data[pos];
     }
 
-    // todo front
     Char front() const {
         return Base::_data[0];
     }
 
-    // todo back
     Char back() const {
         return Base::_data[Base::_size - 1];
     }
 
-    // todo operator+=
     Vector& operator+=(const Vector& other) {
         for (size_t i = 0; i < other.size(); ++i) {
             Base::push_back(other[i]);
@@ -127,7 +123,6 @@ public:
         return *this;
     }
 
-    // todo append(const CharT* s, size_type n)
     Vector& append(const Char* c_str) {
         const size_t len = Traits::length(c_str);
 
@@ -138,7 +133,6 @@ public:
         return *this;
     }
 
-    // todo append(size_type n, CharT c)
     Vector& append(size_t n, Char c) {
         for (size_t i = 0; i < n; ++i) {
             Base::push_back(c);
@@ -147,19 +141,16 @@ public:
         return *this;
     }
 
-    // todo assign(const CharT* s, size_type n)
     Vector& assign(const Char* c_str) {
         Base::clear();
         return append(c_str);
     }
 
-    // todo assign(size_type n, CharT c)
     Vector& assign(size_t n, Char c) {
         Base::clear();
         return append(n, c);
     }
 
-    // todo insert(size_type pos, const CharT* s)
     Vector& insert(size_t pos, const Char* c_str) {
         if (pos > Base::_size) {
             throw std::runtime_error("Index out of range");
@@ -181,7 +172,6 @@ public:
         return *this;
     }
 
-    // todo insert(size_type pos, const CharT* s, size_type n)
     Vector& insert(size_t pos, const Char* c_str, size_t n) {
         if (pos > Base::_size) {
             throw std::runtime_error("Index out of range");
@@ -207,7 +197,6 @@ public:
 
     // todo replace(size_type pos, size_type len, const CharT* s, size_type n)
 
-    // todo substr(size_type pos = 0, size_type len = npos) const
     Vector substr(size_t pos = 0, size_t len = npos) const {
         if (pos > Base::_size) {
             throw std::runtime_error("Index out of range");
@@ -220,7 +209,6 @@ public:
         return Vector(Base::_data + pos, len);
     }
 
-    // todo size_type copy( CharT* dest, size_type count, size_type pos = 0 ) const
     // The resulting character string is not null-terminated.
     // https://en.cppreference.com/w/cpp/string/basic_string/copy
     size_t copy(Char* dest, size_t count, size_t pos = 0) const {
@@ -238,12 +226,10 @@ public:
 
     // todo find, rfind, find_first_of, find_last_of, find_first_not_of, find_last_not_of
 
-    // todo compare(const basic_string& str) const
     int compare(const Vector& other) const {
         return Traits::compare(Base::_data, other.data(), Base::_size);
     }
 
-    // todo compare(size_type pos, size_type len, const basic_string& str) const
     int compare(size_t pos, size_t len, const Vector& other) const {
         if (pos > Base::_size) {
             throw std::runtime_error("Index out of range");
@@ -261,12 +247,9 @@ public:
         return Base::_data;
     }
 
-    // todo Implicit conversion operators to std::basic_string_view<CharT, Traits>
     operator BasicStringView<Char, Traits>() const {
         return BasicStringView<Char, Traits>(Base::_data, Base::_size);
     }
-
-    // todo Interface with StringView
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     operator std::string() const {

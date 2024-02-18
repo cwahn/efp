@@ -19,7 +19,7 @@ struct Unit {
 
 constexpr Unit unit;
 
-// CtConst  
+// CtConst
 
 template<typename A, A v>
 using CtConst = std::integral_constant<A, v>;
@@ -164,7 +164,7 @@ constexpr auto size_of_ptr_v = sizeof(void*);
 
 // NumericLimits
 
-template <typename A>
+template<typename A>
 using NumericLimits = std::numeric_limits<A>;
 
 // Operators
@@ -410,7 +410,7 @@ class HasCallOperator {
     template<typename B>
     static two test(...);
 
-  public:
+public:
     static const bool value = sizeof(test<A>(0)) == sizeof(one);
 };
 
@@ -425,14 +425,14 @@ using IsInvocable = std::is_invocable<F, Args...>;
 
 template<typename F, typename... Args>
 struct IsInvocable {
-  private:
+private:
     template<typename A>
     static auto check(int) -> decltype(declval<A>()(declval<Args>()...), True());
 
     template<typename>
     static auto check(...) -> False;
 
-  public:
+public:
     static constexpr bool value = decltype(check<F>(0))::value;
 };
 
@@ -489,7 +489,7 @@ using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
 
 template<size_t index, typename A>
 class TupleLeaf {
-  public:
+public:
     using Element = A;
     static constexpr size_t idx = index;
 
@@ -511,7 +511,7 @@ class TupleLeaf {
         return _value;
     }
 
-  private:
+private:
     A _value;
 };
 
@@ -547,11 +547,11 @@ namespace detail {
 
     template<int... idxs, typename... As>
     class TupleImpl<IndexSequence<idxs...>, As...>: public TupleLeaf<idxs, As>... {
-      public:
+    public:
         // Function name or function type will be automatically converted to function pointer type
         TupleImpl(const As&... as) : TupleLeaf<idxs, As> {as}... {}
 
-      protected:
+    protected:
         template<typename F>
         auto match_impl(const F& f) const
             -> EnableIf<IsInvocable<F, As...>::value, CallReturn<F, As...>> {
@@ -564,7 +564,7 @@ namespace detail {
 
 template<typename... As>
 class Tuple: public detail::TupleImpl<IndexSequenceFor<As...>, As...> {
-  public:
+public:
     Tuple(const As&... as) : detail::TupleImpl<IndexSequenceFor<As...>, As...> {as...} {}
 
     template<size_t idx>
@@ -582,7 +582,7 @@ class Tuple: public detail::TupleImpl<IndexSequenceFor<As...>, As...> {
         return detail::TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
     }
 
-  private:
+private:
 };
 
 // Pair
@@ -866,6 +866,9 @@ template<typename A>
 using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 
 // todo Decay
+// Decay
+template<typename A>
+using Decay = typename std::decay<A>::type;
 
 // IsConst
 
