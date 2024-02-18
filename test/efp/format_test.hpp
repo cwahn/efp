@@ -61,6 +61,21 @@ TEST_CASE("format", "[format]") {
     SECTION("efp::String") {
         CHECK(format("{}", String("hello")) == "hello");
     }
+
+    SECTION("efp::Vcb") {
+        Vcb<int, 3> vcb {};
+        vcb.push_back(1);
+        vcb.push_back(2);
+        vcb.push_back(3);
+        CHECK(format("{}", vcb) == "[1, 2, 3]");
+    }
+
+    SECTION("efp::Vcq") {
+        Vcq<int, 3> vcq {};
+        vcq.push_back(1);
+        vcq.push_back(2);
+        CHECK(format("{}", vcq) == "[1, 2]");
+    }
 }
 
 #endif

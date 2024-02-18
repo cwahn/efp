@@ -3,6 +3,9 @@
 
 #define FMT_HEADER_ONLY
 #include "efp/fmt/core.h"
+#include "efp/sequence.hpp"
+#include "efp/string.hpp"
+#include "efp/cyclic.hpp"
 
 namespace efp {
 
@@ -54,6 +57,7 @@ struct fmt::formatter<efp::Array<T, ct_size>> {
     }
 };
 
+// Specialize fmt::formatter for efp::ArrVec
 template<typename T, size_t ct_cap>
 struct fmt::formatter<efp::ArrVec<T, ct_cap>> {
     template<typename ParseContext>
@@ -68,7 +72,7 @@ struct fmt::formatter<efp::ArrVec<T, ct_cap>> {
     }
 };
 
-// Do the same for efp::Vector and efp::ArrVec
+// Specialize fmt::formatter for efp::Vector
 template<typename T, typename Allocator, typename Traits>
 struct fmt::formatter<efp::Vector<T, Allocator, Traits>> {
     template<typename ParseContext>
@@ -80,6 +84,34 @@ struct fmt::formatter<efp::Vector<T, Allocator, Traits>> {
     auto format(const efp::Vector<T, Allocator, Traits>& vec, FormatContext& ctx)
         -> format_context::iterator {
         return fmt::format_to(ctx.out(), "[{}]", fmt::join(vec.begin(), vec.end(), ", "));
+    }
+};
+
+// Sepecialize fmt::formatter for efp::Vcb
+template<typename T, size_t ct_size>
+struct fmt::formatter<efp::Vcb<T, ct_size>> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) const -> format_parse_context::iterator {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const efp::Vcb<T, ct_size>& vcb, FormatContext& ctx) -> format_context::iterator {
+        return fmt::format_to(ctx.out(), "[{}]", fmt::join(vcb.begin(), vcb.end(), ", "));
+    }
+};
+
+// Specialize fmt::formatter for efp::Vcq
+template<typename T, size_t ct_cap>
+struct fmt::formatter<efp::Vcq<T, ct_cap>> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) const -> format_parse_context::iterator {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const efp::Vcq<T, ct_cap>& vcq, FormatContext& ctx) -> format_context::iterator {
+        return fmt::format_to(ctx.out(), "[{}]", fmt::join(vcq.begin(), vcq.end(), ", "));
     }
 };
 
