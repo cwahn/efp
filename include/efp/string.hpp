@@ -31,14 +31,14 @@ public:
         Base::_size = Traits::length(c_str);
         Base::_capacity = Base::_size + 1;
         Base::_data = Base::_allocator.allocate(Base::_capacity);
-        efp::memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
+        _memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
     }
 
     Vector(const Char* s, size_t count, const Allocator& alloc = Allocator()) {
         Base::_size = count;
         Base::_capacity = Base::_size + 1;
         Base::_data = Base::_allocator.allocate(Base::_capacity);
-        efp::memcpy(Base::_data, s, Base::_size * sizeof(Char));
+        _memcpy(Base::_data, s, Base::_size * sizeof(Char));
     }
 
     Vector(size_t size, Char c) {
@@ -220,7 +220,7 @@ public:
             count = Base::_size - pos;
         }
 
-        efp::memcpy(dest, Base::_data + pos, count * sizeof(Char));
+        _memcpy(dest, Base::_data + pos, count * sizeof(Char));
         return count;
     }
 
