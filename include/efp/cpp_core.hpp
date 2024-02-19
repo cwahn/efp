@@ -20,15 +20,22 @@
     #include <cstring>
 
 namespace efp {
-void* (*memcpy)(void* dest, const void* src, size_t size) = std::memcpy;
+// Use a function alias for clarity and avoid direct assignment to avoid potential confusion.
+inline void* _memcpy(void* dest, const void* src, size_t size) {
+    return std::memcpy(dest, src, size);
 }
+}  // namespace efp
 
 #else
 
 namespace efp {
-void* memcpy(void* dest, const void* src, size_t size) {
+// Custom memcpy implementation for freestanding environments.
+// Added extern "C" to ensure C linkage for compatibility with C libraries or code.
+extern "C" void* _memcpy(void* dest, const void* src, size_t size) {
+    auto* d = static_cast<char*>(dest);
+    const auto* s = static_cast<const char*>(src);
     for (size_t i = 0; i < size; ++i) {
-        static_cast<char*>(dest)[i] = static_cast<const char*>(src)[i];
+        d[i] = s[i];
     }
     return dest;
 }
