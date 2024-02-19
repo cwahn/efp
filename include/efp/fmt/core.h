@@ -5,8 +5,8 @@
 //
 // For the license information refer to format.h.
 
-#ifndef FMT_CORE_H_
-#define FMT_CORE_H_
+#ifndef EFP_FMT_CORE_H_
+#define EFP_FMT_CORE_H_
 
 #include <cstddef>  // std::byte
 #include <cstdio>   // std::FILE
@@ -3283,4 +3283,4 @@ FMT_END_NAMESPACE
 #ifdef FMT_HEADER_ONLY
     #include "format.h"
 #endif
-#endif  // FMT_CORE_H_
+#endif  // EFP_FMT_CORE_H_
