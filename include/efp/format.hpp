@@ -1,7 +1,7 @@
 #ifndef EFP_FORMAT_HPP_
 #define EFP_FORMAT_HPP_
 
-#define FMT_HEADER_ONLY
+#define EFP_FMT_HEADER_ONLY
 #include "efp/sequence.hpp"
 #include "efp/string.hpp"
 #include "efp/cyclic.hpp"
