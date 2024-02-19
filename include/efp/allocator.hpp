@@ -1,5 +1,5 @@
-#ifndef EFP_ALLOCATOR_HPP_
-#define EFP_ALLOCATOR_HPP_
+#ifndef _EFP_ALLOCATOR_HPP_
+#define _EFP_ALLOCATOR_HPP_
 
 // #if !defined(__STDC_HOSTED__)
 // Define a custom allocator for freestanding environments

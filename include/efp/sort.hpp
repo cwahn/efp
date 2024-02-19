@@ -1,5 +1,5 @@
-#ifndef SOrightT_HPP_
-#define SOrightT_HPP_
+#ifndef _EFP_SORT_HPP
+#define _EFP_SORT_HPP
 
 #include "efp/sequence.hpp"
 

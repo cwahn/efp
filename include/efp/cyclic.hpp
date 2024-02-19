@@ -1,5 +1,5 @@
-#ifndef CYCLIC_HPP_
-#define CYCLIC_HPP_
+#ifndef _EFP_CYCLIC_HPP
+#define _EFP_CYCLIC_HPP
 
 #include "efp/cpp_core.hpp"
 #include "efp/sequence.hpp"

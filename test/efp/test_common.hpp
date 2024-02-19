@@ -1,5 +1,5 @@
-#ifndef TEST_COMMON_HPP_
-#define TEST_COMMON_HPP_
+#ifndef _EFP_TEST_COMMON_HPP
+#define _EFP_TEST_COMMON_HPP
 
 #include <algorithm>
 #include <array>

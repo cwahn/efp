@@ -1,5 +1,5 @@
-#ifndef SCIENTIFIC_HPP_
-#define SCIENTIFIC_HPP_
+#ifndef _EFP_SCIENTIFIC_HPP
+#define _EFP_SCIENTIFIC_HPP
 
 #include "efp/numeric.hpp"
 #include "efp/prelude.hpp"

@@ -1,5 +1,5 @@
-#ifndef SEQUENCE_HPP_
-#define SEQUENCE_HPP_
+#ifndef _EFP_SEQUENCE_HPP
+#define _EFP_SEQUENCE_HPP
 
 // ct_capacity is compile time bound of length. It does not mean safety of access.
 // However, actual capacity does means the length of memory safe to access.
@@ -282,9 +282,6 @@ public:
             new (_data + i) Element {as[i]};
         }
     }
-
-    // template<typename... Arg>
-    // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
 
     template<typename... Arg>
     ArrVec(const Arg&... args) : _size(sizeof...(args)) {

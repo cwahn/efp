@@ -1,5 +1,5 @@
-#ifndef META_HPP_
-#define META_HPP_
+#ifndef _EFP_META_HPP
+#define _EFP_META_HPP
 
 #include "cpp_core.hpp"
 

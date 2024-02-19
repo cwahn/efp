@@ -1,5 +1,5 @@
-#ifndef SEQUENCE_TEST_HPP_
-#define SEQUENCE_TEST_HPP_
+#ifndef _EFP_SEQUENCE_TEST_HPP
+#define _EFP_SEQUENCE_TEST_HPP
 
 #include "catch2/catch_test_macros.hpp"
 #include "efp.hpp"

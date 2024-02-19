@@ -1,5 +1,5 @@
-#ifndef STRING_TEST_HPP_
-#define STRING_TEST_HPP_
+#ifndef _EFP_STRING_TEST_HPP
+#define _EFP_STRING_TEST_HPP
 
 #include "catch2/catch_test_macros.hpp"
 

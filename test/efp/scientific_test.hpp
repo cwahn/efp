@@ -1,5 +1,5 @@
-#ifndef SCIENTIFIC_TEST_
-#define SCIENTIFIC_TEST_
+#ifndef _EFP_SCIENTIFIC_TEST
+#define _EFP_SCIENTIFIC_TEST
 
 #include "catch2/catch_test_macros.hpp"
 

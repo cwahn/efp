@@ -1,5 +1,5 @@
-#ifndef C_UTILITY_TEST_HPP_
-#define C_UTILITY_TEST_HPP_
+#ifndef _EFP_C_UTILITY_TEST_HPP
+#define _EFP_C_UTILITY_TEST_HPP
 
 #include "catch2/catch_test_macros.hpp"
 

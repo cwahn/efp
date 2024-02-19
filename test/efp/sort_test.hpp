@@ -1,5 +1,5 @@
-#ifndef SORT_TEST_HPP_
-#define SORT_TEST_HPP_
+#ifndef _EFP_SORT_TEST_HPP
+#define _EFP_SORT_TEST_HPP
 
 #include "catch2/catch_test_macros.hpp"
 

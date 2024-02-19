@@ -1,5 +1,5 @@
-#ifndef NUMERIC_HPP_
-#define NUMERIC_HPP_
+#ifndef _EFP_NUMERIC_HPP
+#define _EFP_NUMERIC_HPP
 
 #include "efp/prelude.hpp"
 

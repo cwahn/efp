@@ -1,3 +1,6 @@
+#ifndef _EFP_CONCURRENCY_TEST_HPP
+#define _EFP_CONCURRENCY_TEST_HPP
+
 #include "catch2/catch_test_macros.hpp"
 
 #include "mth.hpp"
@@ -207,3 +210,5 @@ TEST_CASE("Empty State Dynamic Capacity", "[NonBlockingQ]") {
         REQUIRE(queue.is_empty());
     }
 }
+
+#endif // _EFP_CONCURRENCY_TEST_HPP

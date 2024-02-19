@@ -1,5 +1,5 @@
-#ifndef EFP_FORMAT_HPP_
-#define EFP_FORMAT_HPP_
+#ifndef _EFP_FORMAT_HPP
+#define _EFP_FORMAT_HPP
 
 #define FMT_HEADER_ONLY
 #include "efp/fmt/core.h"

@@ -1,5 +1,5 @@
-#ifndef STRING_HPP_
-#define STRING_HPP_
+#ifndef _EFP_STRING_HPP
+#define _EFP_STRING_HPP
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
     #include <cstring>

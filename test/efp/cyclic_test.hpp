@@ -1,5 +1,5 @@
-#ifndef CYCLIC_TEST_HPP_
-#define CYCLIC_TEST_HPP_
+#ifndef _EFP_CYCLIC_TEST_HPP
+#define _EFP_CYCLIC_TEST_HPP
 
 #include "efp.hpp"
 #include "test_common.hpp"

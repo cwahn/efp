@@ -1,5 +1,5 @@
-#ifndef EFP_TRAIT_HPP_
-#define EFP_TRAIT_HPP_
+#ifndef _EFP_TRAIT_HPP
+#define _EFP_TRAIT_HPP
 
 #include "efp/meta.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef ENUM_HPP_
-#define ENUM_HPP_
+#ifndef _EFP_ENUM_HPP
+#define _EFP_ENUM_HPP
 
 #include "efp/meta.hpp"
 

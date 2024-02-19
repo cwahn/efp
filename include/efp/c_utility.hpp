@@ -1,5 +1,5 @@
-#ifndef C_UTILITY_HPP_
-#define C_UTILITY_HPP_
+#ifndef _EFP_C_UTILITY_HPP
+#define _EFP_C_UTILITY_HPP
 
 #include "efp/prelude.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef PRELUDE_HPP_
-#define PRELUDE_HPP_
+#ifndef _PRELUDE_HPP
+#define _PRELUDE_HPP
 
 #include "efp/enum.hpp"
 #include "efp/maybe.hpp"

@@ -1,5 +1,5 @@
-#ifndef MAYBE_HPP_
-#define MAYBE_HPP_
+#ifndef _EFP_MAYBE_HPP
+#define _EFP_MAYBE_HPP
 
 #include "efp/enum.hpp"
 #include "efp/meta.hpp"

@@ -1,5 +1,5 @@
-#ifndef CPP_CORE_HPP
-#define CPP_CORE_HPP
+#ifndef _EFP_CPP_CORE_HPP
+#define _EFP_CPP_CORE_HPP
 
 // C++ 11 Freestanding headers specified by N3242=11-0012
 
