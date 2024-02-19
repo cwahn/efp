@@ -1,12 +1,12 @@
 #ifndef _EFP_ALLOCATOR_HPP_
 #define _EFP_ALLOCATOR_HPP_
 
-// #if !defined(__STDC_HOSTED__)
-// Define a custom allocator for freestanding environments
-
-#include "efp/cpp_core.hpp"
+#if !defined(__STDC_HOSTED__)
+    // Define a custom allocator for freestanding environments
+    #include "efp/cpp_core.hpp"
 
 namespace efp {
+
 template<typename T>
 class Allocator {
 public:
@@ -51,6 +51,6 @@ public:
 
 }  // namespace efp
 
-// #endif
+#endif
 
 #endif
