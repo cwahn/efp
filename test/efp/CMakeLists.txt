@@ -1,5 +1,7 @@
 include(CTest)
 
+include(FetchContent)
+
 find_package(Catch2 QUIET)
 
 if(NOT Catch2_FOUND)

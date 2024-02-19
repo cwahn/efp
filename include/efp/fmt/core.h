@@ -171,7 +171,7 @@
 
 #ifndef FMT_BEGIN_NAMESPACE
     #define FMT_BEGIN_NAMESPACE \
-        namespace fmt { \
+        namespace efp_fmt { \
         inline namespace v10 {
     #define FMT_END_NAMESPACE \
         } \
@@ -333,12 +333,12 @@ FMT_NORETURN FMT_API void assert_fail(const char* file, int line, const char* me
 #ifndef FMT_ASSERT
     #ifdef NDEBUG
         // FMT_ASSERT is not empty to avoid -Wempty-body.
-        #define FMT_ASSERT(condition, message) fmt::detail::ignore_unused((condition), (message))
+        #define FMT_ASSERT(condition, message) efp_fmt::detail::ignore_unused((condition), (message))
     #else
         #define FMT_ASSERT(condition, message) \
             ((condition) /* void() fails with -Winvalid-constexpr on clang 4.0.1 */ \
                  ? (void)0 \
-                 : fmt::detail::assert_fail(__FILE__, __LINE__, (message)))
+                 : efp_fmt::detail::assert_fail(__FILE__, __LINE__, (message)))
     #endif
 #endif
 
@@ -397,7 +397,7 @@ FMT_CONSTEXPR inline auto is_utf8() -> bool {
 
 /**
   An implementation of ``efp::BasicStringView`` for pre-C++17. It provides a
-  subset of the API. ``fmt::basic_string_view`` is used for format strings even
+  subset of the API. ``efp_fmt::basic_string_view`` is used for format strings even
   if ``efp::String_view`` is available to prevent issues when a library is
   compiled with a different ``-std`` option than the client code (which is not
   recommended).
@@ -568,7 +568,7 @@ constexpr auto to_string_view(const S& s) -> basic_string_view<typename S::char_
 
 void to_string_view(...);
 
-// Specifies whether S is a string type convertible to fmt::basic_string_view.
+// Specifies whether S is a string type convertible to efp_fmt::basic_string_view.
 // It should be a constexpr function but MSVC 2017 fails to compile it in
 // enable_if and MSVC 2015 fails to compile it as an alias template.
 // ADL is intentionally disabled as to_string_view is not an extension point.
@@ -847,7 +847,7 @@ FMT_CONSTEXPR auto copy_str(T* begin, T* end, U* out) -> U* {
 /**
   \rst
   A contiguous memory buffer with an optional growing ability. It is an internal
-  class and shouldn't be used directly, only via `~fmt::basic_memory_buffer`.
+  class and shouldn't be used directly, only via `~efp_fmt::basic_memory_buffer`.
   \endrst
  */
 template<typename T>
@@ -1729,7 +1729,7 @@ auto copy_str(InputIt begin, InputIt end, std::back_insert_iterator<efp::String>
     // ! temp
     // efp::DebugType<std::back_insert_iterator<efp::String>> {};
     // efp::DebugType<decltype(get_container(out))> {};
-    // error: implicit instantiation of undefined template 'efp::DebugType<fmt::detail::buffer<char> &>'
+    // error: implicit instantiation of undefined template 'efp::DebugType<efp_fmt::detail::buffer<char> &>'
     get_container(out).append(begin, end);
     return out;
 }
@@ -2038,8 +2038,8 @@ using is_formattable = efp::Bool<!std::is_base_of<
 /**
   \rst
   An array of references to arguments. It can be implicitly converted into
-  `~fmt::basic_format_args` for passing into type-erased formatting functions
-  such as `~fmt::vformat`.
+  `~efp_fmt::basic_format_args` for passing into type-erased formatting functions
+  such as `~efp_fmt::vformat`.
   \endrst
  */
 template<typename Context, typename... Args>
@@ -2081,10 +2081,10 @@ public:
 
 /**
   \rst
-  Constructs a `~fmt::format_arg_store` object that contains references to
-  arguments and can be implicitly converted to `~fmt::format_args`. `Context`
-  can be omitted in which case it defaults to `~fmt::format_context`.
-  See `~fmt::arg` for lifetime considerations.
+  Constructs a `~efp_fmt::format_arg_store` object that contains references to
+  arguments and can be implicitly converted to `~efp_fmt::format_args`. `Context`
+  can be omitted in which case it defaults to `~efp_fmt::format_context`.
+  See `~efp_fmt::arg` for lifetime considerations.
   \endrst
  */
 // Arguments are taken by lvalue references to avoid some lifetime issues.
@@ -2101,7 +2101,7 @@ constexpr auto make_format_args(T&... args) -> format_arg_store<Context, efp::CV
 
   **Example**::
 
-    fmt::print("Elapsed time: {s:.2f} seconds", fmt::arg("s", 1.23));
+    efp_fmt::print("Elapsed time: {s:.2f} seconds", efp_fmt::arg("s", 1.23));
   \endrst
  */
 template<typename Char, typename T>
@@ -2171,7 +2171,7 @@ public:
 
     /**
    \rst
-   Constructs a `basic_format_args` object from `~fmt::format_arg_store`.
+   Constructs a `basic_format_args` object from `~efp_fmt::format_arg_store`.
    \endrst
    */
     template<typename... Args>
@@ -2181,7 +2181,7 @@ public:
     /**
    \rst
    Constructs a `basic_format_args` object from
-   `~fmt::dynamic_format_arg_store`.
+   `~efp_fmt::dynamic_format_arg_store`.
    \endrst
    */
     constexpr FMT_INLINE basic_format_args(const dynamic_format_arg_store<Context>& store)
@@ -3124,7 +3124,7 @@ using format_string = basic_format_string<char, type_identity_t<Args>...>;
   **Example**::
 
     // Check format string at runtime instead of compile-time.
-    fmt::print(fmt::runtime("{:d}"), "I am not a number");
+    efp_fmt::print(efp_fmt::runtime("{:d}"), "I am not a number");
   \endrst
  */
 inline auto runtime(string_view s) -> runtime_format_string<> {
@@ -3142,12 +3142,12 @@ FMT_API auto vformat(string_view fmt, format_args args) -> efp::String;
   **Example**::
 
     #include <fmt/core.h>
-    efp::String message = fmt::format("The answer is {}.", 42);
+    efp::String message = efp_fmt::format("The answer is {}.", 42);
   \endrst
 */
 template<typename... T>
 FMT_NODISCARD FMT_INLINE auto format(format_string<T...> fmt, T&&... args) -> efp::String {
-    return vformat(fmt, fmt::make_format_args(args...));
+    return vformat(fmt, efp_fmt::make_format_args(args...));
 }
 
 /** Formats a string and writes the output to ``out``. */
@@ -3167,7 +3167,7 @@ auto vformat_to(OutputIt out, string_view fmt, format_args args) -> OutputIt {
  **Example**::
 
    auto out = std::vector<char>();
-   fmt::format_to(std::back_inserter(out), "{}", 42);
+   efp_fmt::format_to(std::back_inserter(out), "{}", 42);
  \endrst
  */
 template<
@@ -3175,7 +3175,7 @@ template<
     typename... T,
     FMT_ENABLE_IF(detail::is_output_iterator<OutputIt, char>::value)>
 FMT_INLINE auto format_to(OutputIt out, format_string<T...> fmt, T&&... args) -> OutputIt {
-    return vformat_to(out, fmt, fmt::make_format_args(args...));
+    return vformat_to(out, fmt, efp_fmt::make_format_args(args...));
 }
 
 template<typename OutputIt>
@@ -3212,14 +3212,14 @@ template<
     FMT_ENABLE_IF(detail::is_output_iterator<OutputIt, char>::value)>
 FMT_INLINE auto format_to_n(OutputIt out, size_t n, format_string<T...> fmt, T&&... args)
     -> format_to_n_result<OutputIt> {
-    return vformat_to_n(out, n, fmt, fmt::make_format_args(args...));
+    return vformat_to_n(out, n, fmt, efp_fmt::make_format_args(args...));
 }
 
 /** Returns the number of chars in the output of ``format(fmt, args...)``. */
 template<typename... T>
 FMT_NODISCARD FMT_INLINE auto formatted_size(format_string<T...> fmt, T&&... args) -> size_t {
     auto buf = detail::counting_buffer<>();
-    detail::vformat_to<char>(buf, fmt, fmt::make_format_args(args...), {});
+    detail::vformat_to<char>(buf, fmt, efp_fmt::make_format_args(args...), {});
     return buf.count();
 }
 
@@ -3233,12 +3233,12 @@ FMT_API void vprint(std::FILE* f, string_view fmt, format_args args);
 
   **Example**::
 
-    fmt::print("Elapsed time: {0:.2f} seconds", 1.23);
+    efp_fmt::print("Elapsed time: {0:.2f} seconds", 1.23);
   \endrst
  */
 template<typename... T>
 FMT_INLINE void print(format_string<T...> fmt, T&&... args) {
-    const auto& vargs = fmt::make_format_args(args...);
+    const auto& vargs = efp_fmt::make_format_args(args...);
     return detail::is_utf8() ? vprint(fmt, vargs) : detail::vprint_mojibake(stdout, fmt, vargs);
 }
 
@@ -3249,12 +3249,12 @@ FMT_INLINE void print(format_string<T...> fmt, T&&... args) {
 
   **Example**::
 
-    fmt::print(stderr, "Don't {}!", "panic");
+    efp_fmt::print(stderr, "Don't {}!", "panic");
   \endrst
  */
 template<typename... T>
 FMT_INLINE void print(std::FILE* f, format_string<T...> fmt, T&&... args) {
-    const auto& vargs = fmt::make_format_args(args...);
+    const auto& vargs = efp_fmt::make_format_args(args...);
     return detail::is_utf8() ? vprint(f, fmt, vargs) : detail::vprint_mojibake(f, fmt, vargs);
 }
 
@@ -3264,7 +3264,7 @@ FMT_INLINE void print(std::FILE* f, format_string<T...> fmt, T&&... args) {
  */
 template<typename... T>
 FMT_INLINE void println(std::FILE* f, format_string<T...> fmt, T&&... args) {
-    return fmt::print(f, "{}\n", fmt::format(fmt, std::forward<T>(args)...));
+    return efp_fmt::print(f, "{}\n", efp_fmt::format(fmt, std::forward<T>(args)...));
 }
 
 /**
@@ -3273,7 +3273,7 @@ FMT_INLINE void println(std::FILE* f, format_string<T...> fmt, T&&... args) {
  */
 template<typename... T>
 FMT_INLINE void println(format_string<T...> fmt, T&&... args) {
-    return fmt::println(stdout, fmt, std::forward<T>(args)...);
+    return efp_fmt::println(stdout, fmt, std::forward<T>(args)...);
 }
 
 FMT_END_EXPORT

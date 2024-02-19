@@ -1438,7 +1438,7 @@ FMT_FUNC void report_system_error(int error_code, const char* message) noexcept 
 
 FMT_FUNC efp::String vformat(string_view fmt, format_args args) {
     // Don't optimize the "{}" case to keep the binary size small and because it
-    // can be better optimized in fmt::format anyway.
+    // can be better optimized in efp_fmt::format anyway.
     auto buffer = memory_buffer();
     detail::vformat_to(buffer, fmt, args);
     return to_string(buffer);
