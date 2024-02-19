@@ -9,7 +9,7 @@
 namespace efp {
 template<typename T>
 class Allocator {
-  public:
+public:
     using value_type = T;
     using pointer = T*;
     using const_pointer = const T*;
