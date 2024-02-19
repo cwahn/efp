@@ -17,10 +17,10 @@ endif()
 include(Catch)
 enable_testing()
 
-add_executable(all_test test.cpp)
-target_link_libraries(all_test
+add_executable(efp_test test.cpp)
+target_link_libraries(efp_test
     PRIVATE
     Catch2::Catch2WithMain
     efp)
 
-catch_discover_tests(all_test)
+catch_discover_tests(efp_test)
