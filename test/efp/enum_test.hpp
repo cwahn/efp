@@ -22,7 +22,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Non-trivially copyable") {
             {
                 MockHW::reset();
-                Enum<int, MockRaii> a = MockRaii{};
+                Enum<int, MockRaii> a = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 1);
             }
             CHECK(MockHW::is_sound());
@@ -41,7 +41,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Non-trivially copyable") {
             {
                 MockHW::reset();
-                Enum<int, MockRaii> a = MockRaii{};
+                Enum<int, MockRaii> a = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 1);
 
                 Enum<int, MockRaii> b = a;
@@ -64,10 +64,10 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Non-trivially copyable") {
             {
                 MockHW::reset();
-                Enum<int, MockRaii> a = MockRaii{};
+                Enum<int, MockRaii> a = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 1);
 
-                Enum<int, MockRaii> b = MockRaii{};
+                Enum<int, MockRaii> b = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 12);
 
                 b = a;
@@ -90,7 +90,7 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Non-trivially copyable") {
             {
                 MockHW::reset();
-                Enum<int, MockRaii> a = MockRaii{};
+                Enum<int, MockRaii> a = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 1);
 
                 Enum<int, MockRaii> b = efp::move(a);
@@ -113,10 +113,10 @@ TEST_CASE("Enum Rule of 5", "Enum") {
         SECTION("Non-trivially copyable") {
             {
                 MockHW::reset();
-                Enum<int, MockRaii> a = MockRaii{};
+                Enum<int, MockRaii> a = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 1);
 
-                Enum<int, MockRaii> b = MockRaii{};
+                Enum<int, MockRaii> b = MockRaii {};
                 CHECK(MockHW::resource_state_to_int() == 12);
 
                 b = efp::move(a);
@@ -151,22 +151,18 @@ TEST_CASE("WildCard") {
     SECTION("Void return") {
         bool wild_card_work = false;
 
-        const auto wc = [&]() {
-            wild_card_work = true;
-        };
+        const auto wc = [&]() { wild_card_work = true; };
 
-        const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
+        const auto wrapped = WildCardWrapper<decltype(wc)> {wc};
         wrapped(42);
 
         CHECK(wild_card_work == true);
     }
 
     SECTION("Non-void return") {
-        const auto wc = [&]() {
-            return 42;
-        };
+        const auto wc = [&]() { return 42; };
 
-        const auto wrapped = WildCardWrapper<decltype(wc)>{wc};
+        const auto wrapped = WildCardWrapper<decltype(wc)> {wc};
 
         CHECK(wrapped(unit) == 42);
     }
@@ -201,71 +197,75 @@ TEST_CASE("enum_type") {
 //     List<A> tail;
 // };
 
-TEST_CASE("Enum Exteneded Constructor") {
-    SECTION("Explicit constructor") {
-        struct A {
-            A(bool arg) : value(arg) {}
-            bool value;
-        };
-        struct B {};
+// ! Deprecate because of too much compile time overhead
+// TEST_CASE("Enum Exteneded Constructor") {
+//     SECTION("Explicit constructor") {
+//         struct A {
+//             A(bool arg) : value(arg) {}
+//             bool value;
+//         };
+//         struct B {};
 
-        using SomeEnum = Enum<A, B>;
+//         using SomeEnum = Enum<A, B>;
 
-        CHECK(IsConstructible<bool, bool>::value);
-        CHECK(IsConstructible<A, bool>::value);
+//         CHECK(IsConstructible<bool, bool>::value);
+//         CHECK(IsConstructible<A, bool>::value);
 
-        CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+//         CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-        int idx_0 = (int)SomeEnum(true).index();
-        int idx_1 = (int)SomeEnum{A{true}}.index();
+//         int idx_0 = (int)SomeEnum(true).index();
+//         int idx_1 = (int)SomeEnum{A{true}}.index();
 
-        CHECK(idx_0 == idx_1);
+//         CHECK(idx_0 == idx_1);
 
-        // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-    }
+//         // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+//     }
 
-    // todo Make it works for aggregate construction as well
-    // SECTION("Non-explicit constructor") {
-    //     struct A {
-    //         bool value;
-    //     };
-    //     struct B {};
+//     // todo Make it works for aggregate construction as well
+//     // SECTION("Non-explicit constructor") {
+//     //     struct A {
+//     //         bool value;
+//     //     };
+//     //     struct B {};
 
-    //     using SomeEnum = Enum<A, B>;
+//     //     using SomeEnum = Enum<A, B>;
 
-    //     CHECK(IsConstructible<bool, bool>::value);
-    //     CHECK(IsConstructible<A, bool>::value);
+//     //     CHECK(IsConstructible<bool, bool>::value);
+//     //     CHECK(IsConstructible<A, bool>::value);
 
-    //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+//     //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-    //     int idx_0 = (int)SomeEnum(true).index();
-    //     int idx_1 = (int)SomeEnum{A{true}}.index();
+//     //     int idx_0 = (int)SomeEnum(true).index();
+//     //     int idx_1 = (int)SomeEnum{A{true}}.index();
 
-    //     CHECK(idx_0 == idx_1);
+//     //     CHECK(idx_0 == idx_1);
 
-    //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-    // }
+//     //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+//     // }
 
-    SECTION("Nested Enum") {
-        struct A {};
-        struct B {};
+//     SECTION("Nested Enum") {
+//         struct A {};
+//         struct B {};
 
-        using Enum0 = Enum<A, B>;
-        struct C {};
+//         using Enum0 = Enum<A, B>;
+//         struct C {};
 
-        using NestedEnum = Enum<C, Enum0>;
+//         using NestedEnum = Enum<C, Enum0>;
 
-        CHECK(NestedEnum{A{}}.index() == NestedEnum{Enum0{A{}}}.index());
-    }
+//         CHECK(NestedEnum{A{}}.index() == NestedEnum{Enum0{A{}}}.index());
+//     }
 
-    // SECTION("Self referencing Enum") {
-    //     List<int> empty_list = Nil{};
-    //     List<int> one_list = Cons<int>{42, Nil{}};
-    // }
-}
+//     // SECTION("Self referencing Enum") {
+//     //     List<int> empty_list = Nil{};
+//     //     List<int> one_list = Cons<int>{42, Nil{}};
+//     // }
+// }
 
 struct TemplateBranch {
-    template <typename A> int operator()(const A& a) { return a * 2; }
+    template<typename A>
+    int operator()(const A& a) {
+        return a * 2;
+    }
 };
 
 TEST_CASE("enum_match") {
@@ -273,13 +273,7 @@ TEST_CASE("enum_match") {
         Enum<int, double> a = 42;
         double b = 0.;
 
-        a.match(
-            [&](int x) {
-                b += x;
-            },
-            [&](double x) {
-                b++;
-            });
+        a.match([&](int x) { b += x; }, [&](double x) { b++; });
 
         //! Non-exhaustive match will not compile
 
@@ -294,13 +288,7 @@ TEST_CASE("enum_match") {
         Enum<int, double> a = 42.;
         double b = 0.;
 
-        a.match(
-            [&](int x) {
-                b += x;
-            },
-            [&](double x) {
-                b++;
-            });
+        a.match([&](int x) { b += x; }, [&](double x) { b++; });
 
         CHECK(b == 1.);
     }
@@ -308,13 +296,7 @@ TEST_CASE("enum_match") {
     SECTION("non-void0") {
         Enum<Unit, int> a = unit;
 
-        int b = a.match(
-            [&](Unit x) {
-                return -1;
-            },
-            [&](int x) {
-                return 1;
-            });
+        int b = a.match([&](Unit x) { return -1; }, [&](int x) { return 1; });
 
         CHECK(b == -1);
     }
@@ -322,13 +304,7 @@ TEST_CASE("enum_match") {
     SECTION("non-void1") {
         Enum<Unit, int> a = 42;
 
-        int b = a.match(
-            [&](Unit x) {
-                return -1;
-            },
-            [&](int x) {
-                return x;
-            });
+        int b = a.match([&](Unit x) { return -1; }, [&](int x) { return x; });
 
         CHECK(b == 42);
     }
@@ -338,15 +314,10 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) {
-                return b * 0;
-            },
-            [&](int x) {
-                return b * 1;
-            },
-            [&](double x) {
-                return b * 2;
-            });
+            [&](bool x) { return b * 0; },
+            [&](int x) { return b * 1; },
+            [&](double x) { return b * 2; }
+        );
 
         CHECK(b == 42);
     }
@@ -356,54 +327,40 @@ TEST_CASE("enum_match") {
         int b = 42;
 
         int c = a.match(
-            [&](bool x) {
-                return b * 0;
-            },
-            [&](int x) {
-                return b * 1;
-            },
-            [&](double x) {
-                return b * 2;
-            },
-            [&](float x) {
-                return b * 3;
-            },
-            [&](long x) {
-                return b * 4;
-            });
+            [&](bool x) { return b * 0; },
+            [&](int x) { return b * 1; },
+            [&](double x) { return b * 2; },
+            [&](float x) { return b * 3; },
+            [&](long x) { return b * 4; }
+        );
 
         CHECK(b == 42);
     }
 
     SECTION("non-void3") {
         struct InitState {};
+
         struct AState {};
+
         struct BState {};
+
         struct ErrorState {};
+
         struct TerminatedState {};
 
         using MajorState = efp::Enum<InitState, AState, BState, ErrorState, TerminatedState>;
 
-        MajorState a{InitState{}};
+        MajorState a {InitState {}};
 
         int b = 42;
 
         int c = a.match(
-            [&](InitState x) {
-                return b * 0;
-            },
-            [&](AState x) {
-                return b * 1;
-            },
-            [&](BState x) {
-                return b * 2;
-            },
-            [&](ErrorState x) {
-                return b * 3;
-            },
-            [&](TerminatedState x) {
-                return b * 4;
-            });
+            [&](InitState x) { return b * 0; },
+            [&](AState x) { return b * 1; },
+            [&](BState x) { return b * 2; },
+            [&](ErrorState x) { return b * 3; },
+            [&](TerminatedState x) { return b * 4; }
+        );
 
         CHECK(b == 42);
     }
@@ -412,12 +369,7 @@ TEST_CASE("enum_match") {
         Enum<Unit, int, double> a = unit;
         double b = 0.;
 
-        a.match(
-            [&](int x) {
-                b += 1;
-            },
-            [&]() {
-            });
+        a.match([&](int x) { b += 1; }, [&]() {});
 
         CHECK(b == 0.);
 
@@ -431,9 +383,7 @@ TEST_CASE("enum_match") {
     SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
 
-        CHECK(a.match([]() {
-            return 42;
-        }) == 42);
+        CHECK(a.match([]() { return 42; }) == 42);
     }
 
     SECTION("non-trivial0") {
@@ -441,13 +391,7 @@ TEST_CASE("enum_match") {
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
-        int c = a.match(
-            [&](bool x) {
-                return b * 0;
-            },
-            [&](std::string x) {
-                return 42;
-            });
+        int c = a.match([&](bool x) { return b * 0; }, [&](std::string x) { return 42; });
 
         CHECK(b == 42);
     }
@@ -457,13 +401,7 @@ TEST_CASE("enum_match") {
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
-        int c = a.match(
-            [&](bool x) {
-                return b * 0;
-            },
-            [&](const std::string& x) {
-                return 42;
-            });
+        int c = a.match([&](bool x) { return b * 0; }, [&](const std::string& x) { return 42; });
 
         CHECK(b == 42);
     }
@@ -477,7 +415,9 @@ TEST_CASE("enum_match") {
 }
 
 // A test function to be pointed to
-int enum_test_function() { return 42; }
+int enum_test_function() {
+    return 42;
+}
 
 TEST_CASE("Function Pointer in Enum") {
     SECTION("Storing and retrieving function pointer") {
@@ -493,9 +433,7 @@ TEST_CASE("Function Pointer in Enum") {
 
     SECTION("Storing and retrieving lambda") {
         // ! For some reason this does not work with const qualifier
-        auto enum_test_lambda = [&]() {
-            return 84;
-        };
+        auto enum_test_lambda = [&]() { return 84; };
 
         // Create an Enum instance holding a lambda
         Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);

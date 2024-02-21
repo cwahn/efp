@@ -110,54 +110,6 @@ using EnableIf = typename std::enable_if<cond, A>::type;
 template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
 
-// All
-
-template<typename... Args>
-struct All {};
-
-// Base case: When no types are left, return true.
-template<>
-struct All<>: True {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
-
-// Any
-
-template<typename... Args>
-struct Any {};
-
-// Base case: When no types are left, return false.
-template<>
-struct Any<>: False {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
-
-// Min
-
-template<typename Head, typename... Tail>
-struct Min: Min<Head, Min<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Min<Head>: Head {};
-
-// Max
-
-template<typename Head, typename... Tail>
-struct Max: Max<Head, Max<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Max<Head>: Head {};
-
 // size_of_ptr_v
 
 constexpr auto size_of_ptr_v = sizeof(void*);
@@ -931,82 +883,103 @@ struct IsDefaultConstructible: False {};
 template<typename A>
 struct IsDefaultConstructible<A, decltype(A())>: True {};
 
-// _foldl
-
-template<typename F, typename A>
-constexpr A _foldl(F f, A a) {
-    return a;
-}
-
-#if __cplusplus >= 201703L
-// C++17 or later, use a loop for foldl
-template<typename F, typename A, typename... Bs>
-constexpr A _foldl(F f, A a, Bs... bs) {
-    // Convert parameter pack to array for iteration
-    A arr[] = {static_cast<A>(bs)...};
-
-    for (auto& element : arr) {
-        a = f(a, element);
-    }
-
-    return a;
-}
-#else
-// Before C++17, recursive implementation
-template<typename F, typename A, typename B, typename... Bs>
-constexpr A _foldl(F f, A a, B b, Bs... bs) {
-    return _foldl(f, f(efp::forward<A>(a), efp::forward<B>(b)), efp::forward<Bs>(bs)...);
-}
-#endif
-
-// _all
-
-template<typename... Args>
-constexpr bool _all(Args... args) {
-    return _foldl(op_and, true, args...);
-}
-
-// _any
-
-template<typename... Args>
-constexpr bool _any(Args... args) {
-    return _foldl(op_or, false, args...);
-}
-
-// _maximum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _maximum(A a, As... as) {
-    return _foldl(max<A>, a, as...);
-}
-
-// _minimum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _minimum(A a, As... as) {
-    return _foldl(min<A>, a, as...);
-}
-
-// _sum
-
-template<typename A, typename... As>
-constexpr A _sum(A a, As... as) {
-    return _foldl(op_add<A>, a, as...);
-}
-
-// _product
-
-template<typename A, typename... As>
-constexpr A _product(A a, As... as) {
-    return _foldl(op_mul<A>, a, as...);
-}
-
 // InitializerList
 
 template<typename A>
 using InitializerList = std::initializer_list<A>;
+
+// _foldl :: (A -> B -> A) -> A -> [B] -> A
+template<typename F, typename A, typename... Bs>
+constexpr A _foldl(F f, A a, Bs... bs) {
+    (void)std::initializer_list<Unit> {(a = f(a, bs), unit)...};
+    return a;
+}
+
+// _all :: [Bool] -> Bool
+template<typename... Args>
+constexpr bool _all(Args... args) {
+    bool result = true;
+    (void)std::initializer_list<Unit> {(result = result && args, unit)...};
+
+    return result;
+}
+
+// _any :: [Bool] -> Bool
+template<typename... Args>
+constexpr bool _any(Args... args) {
+    bool result = false;
+    (void)std::initializer_list<Unit> {(result = result || args, unit)...};
+
+    return result;
+}
+
+// _maximum :: [A] -> A
+template<typename A, typename... As>
+constexpr A _maximum(A a, As... as) {
+    A result = a;
+    (void)std::initializer_list<Unit> {(result = as > result ? as : result, unit)...};
+
+    return result;
+}
+
+// _minimum :: [A] -> A
+template<typename A, typename... As>
+constexpr A _minimum(A a, As... as) {
+    A result = a;
+    (void)std::initializer_list<Unit> {(result = as < result ? as : result, unit)...};
+
+    return result;
+}
+
+// _sum :: [A] -> A
+template<typename A, typename... As>
+constexpr A _sum(A a, As... as) {
+    A result = a;
+    (void)std::initializer_list<Unit> {(result += as, unit)...};
+
+    return result;
+}
+
+// _product :: [A] -> A
+template<typename A, typename... As>
+constexpr A _product(A a, As... as) {
+    A result = a;
+    (void)std::initializer_list<Unit> {(result *= as, unit)...};
+
+    return result;
+}
+
+// All
+
+template<typename A, typename... Args>
+struct All: Bool<_all(A::value, Args::value...)> {};
+
+// Any
+
+template<typename A, typename... Args>
+struct Any: Bool<_any(A::value, Args::value...)> {};
+
+// Min
+// ? May be need to get removed for compile time performance
+template<typename Head, typename... Tail>
+struct Min: Min<Head, Min<Tail...>> {};
+
+template<typename Head, typename Tail>
+struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
+
+template<typename Head>
+struct Min<Head>: Head {};
+
+// Max
+// ? May be need to get removed for compile time performance
+template<typename Head, typename... Tail>
+struct Max: Max<Head, Max<Tail...>> {};
+
+template<typename Head, typename Tail>
+struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
+
+template<typename Head>
+struct Max<Head>: Head {};
 
 // Common
 
