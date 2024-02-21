@@ -351,22 +351,22 @@ using U8StringView = BasicStringView<char8_t>;
 
 // Use intercalate to join strings
 
-#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+// #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
-template<typename A>
-auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
-    IsSequence<A>::value && detail::IsCharType<Element<A>>::value && !IsSame<A, std::string>::value,
-    std::ostream&> {
-    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
+// template<typename A>
+// auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+//     IsSequence<A>::value && detail::IsCharType<Element<A>>::value && !IsSame<A, std::string>::value,
+//     std::ostream&> {
+//     static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
-    for (const auto& elem : seq) {
-        os << elem;
-    }
+//     for (const auto& elem : seq) {
+//         os << elem;
+//     }
 
-    return os;
-}
+//     return os;
+// }
 
-#endif
+// #endif
 
 };  // namespace efp
 

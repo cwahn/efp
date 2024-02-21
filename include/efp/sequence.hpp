@@ -1361,28 +1361,28 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
-#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+// #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
-template<typename A>
-auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
-    IsSequence<A>::value && !detail::IsCharType<Element<A>>::value
-        && !IsSame<A, std::string>::value,
-    std::ostream&> {
-    static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
+// template<typename A>
+// auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
+//     IsSequence<A>::value && !detail::IsCharType<Element<A>>::value
+//         && !IsSame<A, std::string>::value,
+//     std::ostream&> {
+//     static_assert(IsSequence<A>(), "Argument should be an instance of Sequence trait.");
 
-    // ? Interesting. Automatically consider it as VectorStream?
-    os << "{ ";
-    for (size_t i = 0; i < seq.size(); ++i) {
-        os << seq[i];
-        if (i != seq.size() - 1) {
-            os << ", ";
-        }
-    }
-    os << " }";
-    return os;
-}
+//     // ? Interesting. Automatically consider it as VectorStream?
+//     os << "{ ";
+//     for (size_t i = 0; i < seq.size(); ++i) {
+//         os << seq[i];
+//         if (i != seq.size() - 1) {
+//             os << ", ";
+//         }
+//     }
+//     os << " }";
+//     return os;
+// }
 
-#endif
+// #endif
 
 // Sequence trait implementation for std::array
 
