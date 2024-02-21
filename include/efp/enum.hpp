@@ -178,18 +178,19 @@ namespace detail {
     template<size_t n, typename... As>
     struct EqualityImpl {};
 
-    template<size_t n, typename... As>
-    struct Switch {};
-
     template<typename... As>
     class EnumBase {
     public:
+        template<size_t n>
+        struct Switch {};
+
+        friend struct Switch<power_2_ceiling(sizeof...(As))>;
+
         friend struct CopyImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct MoveImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct DestroctorImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct MatchImpl<power_2_ceiling(sizeof...(As)), As...>;
         friend struct EqualityImpl<power_2_ceiling(sizeof...(As)), As...>;
-        friend struct Switch<power_2_ceiling(sizeof...(As)), As...>;
 
         template<typename A>
         struct IsSameUnary {
@@ -201,6 +202,82 @@ namespace detail {
 
         template<typename A>
         struct VariantIndex: Find<IsSameUnary<A>::template Binded, As...> {};
+
+#define CASE(i) \
+    case i: \
+        return o( \
+            self.template get < (i < sizeof...(As)) ? i : sizeof...(As) - 1 > (), \
+            efp::forward(args)... \
+        );
+
+        template<>
+        struct Switch<2> {
+            template<typename O, typename... Args>
+            static auto f(O&& o, const EnumBase& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP2(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+
+            template<typename O, typename... Args>
+            static auto f(O&& o, EnumBase&& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP2(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+        };
+
+        template<>
+        struct Switch<4> {
+            template<typename O, typename... Args>
+            static auto f(O&& o, const EnumBase& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP4(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+
+            template<typename O, typename... Args>
+            static auto f(O&& o, EnumBase&& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP4(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+        };
+
+        template<>
+        struct Switch<8> {
+            template<typename O, typename... Args>
+            static auto f(O&& o, const EnumBase& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP8(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+
+            template<typename O, typename... Args>
+            static auto f(O&& o, EnumBase&& self, Args&&... args)
+                -> CallReturn<O, PackAt<0, As...>> {
+                switch (self._index) {
+                    STAMP8(0, CASE)
+                    default:
+                        throw std::runtime_error("Wrong variant index");
+                }
+            }
+        };
 
         // Default constructor will construct the first variant if the first
         // variant is default constructible
@@ -477,7 +554,7 @@ namespace detail {
             //     this
             // );
 
-            return Switch<power_2_ceiling(sizeof...(As)), As...>::template f<
+            return Switch<power_2_ceiling(sizeof...(As))>::template f<
                 Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>(
                 efp::move<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>(
                     Overloaded<MatchBranch<F>, MatchBranch<Fs>...> {
@@ -976,77 +1053,6 @@ namespace detail {
         ); \
         break; \
     }
-
-#define CASE(i) \
-    case i: \
-        return o(self.template get < (i < sizeof...(As)) ? i : sizeof...(As) - 1 > ());
-
-    // template<size_t n, typename... As>
-    // struct Switch {};
-
-    // todo return type
-    template<typename... As>
-    struct Switch<2, As...> {
-        template<typename O>
-        static auto f(O&& o, const EnumBase<As...>& self) {
-            switch (self._index) {
-                STAMP2(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-
-        template<typename O>
-        static auto f(O&& o, EnumBase<As...>&& self) {
-            switch (self._index) {
-                STAMP2(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-    };
-
-    template<typename... As>
-    struct Switch<4, As...> {
-        template<typename O>
-        static auto f(O&& o, const EnumBase<As...>& self) {
-            switch (self._index) {
-                STAMP4(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-
-        template<typename O>
-        static auto f(O&& o, EnumBase<As...>&& self) {
-            switch (self._index) {
-                STAMP4(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-    };
-
-    template<typename... As>
-    struct Switch<8, As...> {
-        template<typename O>
-        static auto f(O&& o, const EnumBase<As...>& self) {
-            switch (self._index) {
-                STAMP8(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-
-        template<typename O>
-        static auto f(O&& o, EnumBase<As...>&& self) {
-            switch (self._index) {
-                STAMP8(0, CASE)
-                default:
-                    throw std::runtime_error("Wrong variant index");
-            }
-        }
-    };
 
 #undef MATCH_CASE
 #undef STAMP2
