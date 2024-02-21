@@ -414,13 +414,13 @@ public:
 };
 
 // IsInvocable
+// ? Is Custom implementation faster?
+// #if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
 
-#if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
+// template<typename F, typename... Args>
+// using IsInvocable = std::is_invocable<F, Args...>;
 
-template<typename F, typename... Args>
-using IsInvocable = std::is_invocable<F, Args...>;
-
-#else  // If earlier than C++17, use custom IsInvocable
+// #else  // If earlier than C++17, use custom IsInvocable
 
 template<typename F, typename... Args>
 struct IsInvocable {
@@ -435,7 +435,7 @@ public:
     static constexpr bool value = decltype(check<F>(0))::value;
 };
 
-#endif
+// #endif
 
 // IsFunction
 
