@@ -22,3 +22,4 @@ target_link_libraries(all_test
     efp)
 
 catch_discover_tests(all_test)
+enable_template_compilation_time(all_test)

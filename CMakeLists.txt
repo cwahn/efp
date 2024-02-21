@@ -33,6 +33,7 @@ if(MSVC)
     endif()
 endif()
 
+# AddressSanitizer
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
 if(ENABLE_ASAN)
@@ -40,6 +41,26 @@ if(ENABLE_ASAN)
     add_compile_options(-fsanitize=address)
     add_link_options(-fsanitize=address)
 endif()
+
+# Function to enable template compilation time measurement for a specific target
+function(enable_template_compilation_time target_name)
+    message(STATUS "Enabling template compilation time measurement for target: ${target_name}")
+
+    # Check if the compiler is Clang or GCC and add the respective flags to the target
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Clang-specific flags to report template instantiation times for the target
+        set_property(TARGET ${target_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -ftime-trace")
+        message(STATUS "Added Clang-specific flags for template instantiation times to ${target_name}")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # GCC-specific flags to report template instantiation times for the target
+        set_property(TARGET ${target_name} APPEND_STRING PROPERTY COMPILE_FLAGS " -ftemplate-depth=1024 -ftime-report")
+        message(STATUS "Added GCC-specific flags for template instantiation times to ${target_name}")
+    endif()
+endfunction()
+
+# ! temp
+# Set verbose makefile output
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
 
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
