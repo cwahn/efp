@@ -930,33 +930,45 @@ struct IsDefaultConstructible: False {};
 template<typename A>
 struct IsDefaultConstructible<A, decltype(A())>: True {};
 
+// InitializerList
+
+template<typename A>
+using InitializerList = std::initializer_list<A>;
+
 // _foldl
 
-template<typename F, typename A>
-constexpr A _foldl(F f, A a) {
-    return a;
-}
+// template<typename F, typename A>
+// constexpr A _foldl(F f, A a) {
+//     return a;
+// }
 
-#if __cplusplus >= 201703L
-// C++17 or later, use a loop for foldl
+// #if __cplusplus >= 201703L
+// // C++17 or later, use a loop for foldl
+// template<typename F, typename A, typename... Bs>
+// constexpr A _foldl(F f, A a, Bs... bs) {
+//     // Convert parameter pack to array for iteration
+//     A arr[] = {static_cast<A>(bs)...};
+
+//     for (auto& element : arr) {
+//         a = f(a, element);
+//     }
+
+//     return a;
+// }
+// #else
+// // Before C++17, recursive implementation
+// template<typename F, typename A, typename B, typename... Bs>
+// constexpr A _foldl(F f, A a, B b, Bs... bs) {
+//     return _foldl(f, f(efp::forward<A>(a), efp::forward<B>(b)), efp::forward<Bs>(bs)...);
+// }
+// #endif
+
+// _foldl :: (A -> B -> A) -> A -> [B] -> A
 template<typename F, typename A, typename... Bs>
 constexpr A _foldl(F f, A a, Bs... bs) {
-    // Convert parameter pack to array for iteration
-    A arr[] = {static_cast<A>(bs)...};
-
-    for (auto& element : arr) {
-        a = f(a, element);
-    }
-
+    (void)InitializerList<Unit> {(a = f(a, bs), unit)...};
     return a;
 }
-#else
-// Before C++17, recursive implementation
-template<typename F, typename A, typename B, typename... Bs>
-constexpr A _foldl(F f, A a, B b, Bs... bs) {
-    return _foldl(f, f(efp::forward<A>(a), efp::forward<B>(b)), efp::forward<Bs>(bs)...);
-}
-#endif
 
 // _all
 
@@ -965,12 +977,26 @@ constexpr bool _all(Args... args) {
     return _foldl(op_and, true, args...);
 }
 
+// template<typename... Args>
+// constexpr bool _all(Args... args) {
+//     bool result = true;
+//     (void)InitializerList<Unit> {((result = result && args), unit)...};
+//     return result;
+// }
+
 // _any
 
 template<typename... Args>
 constexpr bool _any(Args... args) {
     return _foldl(op_or, false, args...);
 }
+
+// template<typename... Args>
+// constexpr bool _any(Args... args) {
+//     bool result = false;
+//     (void)InitializerList<Unit> {((result = result || args), unit)...};
+//     return result;
+// }
 
 // _maximum
 // cf) since the function is defined as foldr, the result follows the type of first argument.
@@ -1001,11 +1027,6 @@ template<typename A, typename... As>
 constexpr A _product(A a, As... as) {
     return _foldl(op_mul<A>, a, as...);
 }
-
-// InitializerList
-
-template<typename A>
-using InitializerList = std::initializer_list<A>;
 
 // Common
 
