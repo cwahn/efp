@@ -111,33 +111,33 @@ template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
 
 // All
+// ! deprecated use _all instead
+// template<typename... Args>
+// struct All {};
 
-template<typename... Args>
-struct All {};
+// // Base case: When no types are left, return true.
+// template<>
+// struct All<>: True {};
 
-// Base case: When no types are left, return true.
-template<>
-struct All<>: True {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
+// // Recursive case: Check the first type, and recurse for the rest.
+// template<typename Head, typename... Tail>
+// struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
 
 // Any
+// ! deprecated use _any instead
+// template<typename... Args>
+// struct Any {};
 
-template<typename... Args>
-struct Any {};
+// // Base case: When no types are left, return false.
+// template<>
+// struct Any<>: False {};
 
-// Base case: When no types are left, return false.
-template<>
-struct Any<>: False {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
+// // Recursive case: Check the first type, and recurse for the rest.
+// template<typename Head, typename... Tail>
+// struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
 
 // Min
-
+// ? May be need to get removed for compile time performance
 template<typename Head, typename... Tail>
 struct Min: Min<Head, Min<Tail...>> {};
 
@@ -148,7 +148,7 @@ template<typename Head>
 struct Min<Head>: Head {};
 
 // Max
-
+// ? May be need to get removed for compile time performance
 template<typename Head, typename... Tail>
 struct Max: Max<Head, Max<Tail...>> {};
 
@@ -296,21 +296,20 @@ constexpr A min(const A& lhs, const A& rhs) {
 }
 
 // Foldl
-// Maybe just recursive constexpr template function could be enough
+// ? Maybe just recursive constexpr template function could be enough
+// namespace detail {
+//     template<template<class, class> class F, typename A, typename... Bs>
+//     struct FoldlImpl {};
 
-namespace detail {
-    template<template<class, class> class F, typename A, typename... Bs>
-    struct FoldlImpl {};
+//     template<template<class, class> class F, typename A, typename B>
+//     struct FoldlImpl<F, A, B>: F<A, B>::Type {};
 
-    template<template<class, class> class F, typename A, typename B>
-    struct FoldlImpl<F, A, B>: F<A, B>::Type {};
+//     template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+//     struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
+// }  // namespace detail
 
-    template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-    struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
-}  // namespace detail
-
-template<template<class, class> class F, typename A, typename... Bs>
-using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
+// template<template<class, class> class F, typename A, typename... Bs>
+// using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // IsSame
 
