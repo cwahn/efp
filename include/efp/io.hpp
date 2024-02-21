@@ -18,7 +18,7 @@ public:
         FILE* file = std::fopen(path, mode);
 
         if (file) {
-            return File {file, mode};
+            return efp::move(File {file, mode});
         }
 
         return nothing;
@@ -28,7 +28,7 @@ public:
         FILE* file = std::fopen(path.c_str(), mode);
 
         if (file) {
-            return File {file, mode};
+            return efp::move(File {file, mode});
         }
 
         return nothing;

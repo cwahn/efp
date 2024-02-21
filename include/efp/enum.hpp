@@ -273,16 +273,37 @@ namespace detail {
 
         // Function name or function type will be automatically converted to
         // function pointer type
-        template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
-        EnumBase(const A& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
-            new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(a);
+        // ! deprecated. Not safe
+        // template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
+        // EnumBase(const A& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
+        //     new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(a);
+        // }
+
+        template<typename A>
+        EnumBase(const A& a) : _index(VariantIndex<A>::value) {
+            static_assert(
+                Any<IsSame<A, As>...>::value,
+                "Argument type should be one of the variant types"
+            );
+
+            new (reinterpret_cast<A*>(_storage)) A(a);
         }
 
-        // Function name or function type will be automatically converted to
-        // function pointer type
-        template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
-        EnumBase(A&& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
-            new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(efp::move(a));
+        // // Function name or function type will be automatically converted to
+        // // function pointer type
+        // template<typename A, typename = EnableIf<_any(IsSame<FuncToFuncPtr<A>, As>::value...)>>
+        // EnumBase(A&& a) : _index(VariantIndex<FuncToFuncPtr<A>>::value) {
+        //     new (reinterpret_cast<FuncToFuncPtr<A>*>(_storage)) FuncToFuncPtr<A>(efp::move(a));
+        // }
+
+        template<typename A>
+        EnumBase(A&& a) : _index(VariantIndex<A>::value) {
+            static_assert(
+                Any<IsSame<A, As>...>::value,
+                "Argument type should be one of the variant types"
+            );
+
+            new (reinterpret_cast<A*>(_storage)) A(efp::move(a));
         }
 
         // Extended constructor
@@ -323,8 +344,19 @@ namespace detail {
             return _index;
         }
 
+        // template<typename A>
+        // auto get() const -> EnableIf<_any(IsSame<A, As>::value...), A> {
+        //     if (_index != VariantIndex<A>::value) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return *(reinterpret_cast<const A*>(_storage));
+        // }
+
         template<typename A>
-        auto get() const -> EnableIf<_any(IsSame<A, As>::value...), A> {
+        auto get() const -> A {
+            static_assert(Any<IsSame<A, As>...>::value, "Invalid variant type");
+
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -332,17 +364,39 @@ namespace detail {
             return *(reinterpret_cast<const A*>(_storage));
         }
 
+        // template<uint8_t n>
+        //     auto get() -> EnableIf < n<sizeof...(As), PackAt<n, As...>> {
+        //     if (_index != n) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return *(reinterpret_cast<PackAt<n, As...>*>(_storage));
+        // }
+
         template<uint8_t n>
-            auto get() -> EnableIf < n<sizeof...(As), PackAt<n, As...>> {
+        auto get() const -> PackAt<n, As...> {
+            static_assert(n < sizeof...(As), "Invalid variant index");
+
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }
 
-            return *(reinterpret_cast<PackAt<n, As...>*>(_storage));
+            return *(reinterpret_cast<const PackAt<n, As...>*>(_storage));
         }
 
+        // template<typename A>
+        // auto move() const -> EnableIf<_any(IsSame<A, As>::value...), const A&&> {
+        //     if (_index != VariantIndex<A>::value) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return efp::move(*(reinterpret_cast<const A*>(_storage)));
+        // }
+
         template<typename A>
-        auto move() const -> EnableIf<_any(IsSame<A, As>::value...), const A&&> {
+        auto move() const -> A {
+            static_assert(Any<IsSame<A, As>...>::value, "Invalid variant type");
+
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -350,8 +404,19 @@ namespace detail {
             return efp::move(*(reinterpret_cast<const A*>(_storage)));
         }
 
+        // template<typename A>
+        // auto move() -> EnableIf<_any(IsSame<A, As>::value...), A&&> {
+        //     if (_index != VariantIndex<A>::value) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return efp::move(*(reinterpret_cast<A*>(_storage)));
+        // }
+
         template<typename A>
-        auto move() -> EnableIf<_any(IsSame<A, As>::value...), A&&> {
+        auto move() -> A {
+            static_assert(Any<IsSame<A, As>...>::value, "Invalid variant type");
+
             if (_index != VariantIndex<A>::value) {
                 throw std::runtime_error("Wrong variant index");
             }
@@ -359,17 +424,39 @@ namespace detail {
             return efp::move(*(reinterpret_cast<A*>(_storage)));
         }
 
+        // template<uint8_t n>
+        //     auto move() const -> EnableIf < n<sizeof...(As), PackAt<n, As...> const&&> {
+        //     if (_index != n) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return efp::move(*(reinterpret_cast<const PackAt<n, As...>*>(_storage)));
+        // }
+
         template<uint8_t n>
-            auto move() const -> EnableIf < n<sizeof...(As), PackAt<n, As...> const&&> {
+        auto move() const -> PackAt<n, As...> {
+            static_assert(n < sizeof...(As), "Invalid variant index");
+
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }
 
-            return efp::move(*(reinterpret_cast<const PackAt<n, As...>*>(_storage)));
+            return efp::move(*(reinterpret_cast<PackAt<n, As...>*>(_storage)));
         }
 
+        // template<uint8_t n>
+        //     auto move() -> EnableIf < n<sizeof...(As), PackAt<n, As...>&&> {
+        //     if (_index != n) {
+        //         throw std::runtime_error("Wrong variant index");
+        //     }
+
+        //     return efp::move(*(reinterpret_cast<PackAt<n, As...>*>(_storage)));
+        // }
+
         template<uint8_t n>
-            auto move() -> EnableIf < n<sizeof...(As), PackAt<n, As...>&&> {
+        auto move() -> PackAt<n, As...> {
+            static_assert(n < sizeof...(As), "Invalid variant index");
+
             if (_index != n) {
                 throw std::runtime_error("Wrong variant index");
             }
