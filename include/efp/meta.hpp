@@ -110,54 +110,6 @@ using EnableIf = typename std::enable_if<cond, A>::type;
 template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
 
-// All
-// ! deprecated use _all instead
-// template<typename... Args>
-// struct All {};
-
-// // Base case: When no types are left, return true.
-// template<>
-// struct All<>: True {};
-
-// // Recursive case: Check the first type, and recurse for the rest.
-// template<typename Head, typename... Tail>
-// struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
-
-// Any
-// ! deprecated use _any instead
-// template<typename... Args>
-// struct Any {};
-
-// // Base case: When no types are left, return false.
-// template<>
-// struct Any<>: False {};
-
-// // Recursive case: Check the first type, and recurse for the rest.
-// template<typename Head, typename... Tail>
-// struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
-
-// Min
-// ? May be need to get removed for compile time performance
-template<typename Head, typename... Tail>
-struct Min: Min<Head, Min<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Min<Head>: Head {};
-
-// Max
-// ? May be need to get removed for compile time performance
-template<typename Head, typename... Tail>
-struct Max: Max<Head, Max<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Max<Head>: Head {};
-
 // size_of_ptr_v
 
 constexpr auto size_of_ptr_v = sizeof(void*);
@@ -972,10 +924,10 @@ constexpr A _foldl(F f, A a, Bs... bs) {
 
 // _all
 
-template<typename... Args>
-constexpr bool _all(Args... args) {
-    return _foldl(op_and, true, args...);
-}
+// template<typename... Args>
+// constexpr bool _all(Args... args) {
+//     return _foldl(op_and, true, args...);
+// }
 
 // template<typename... Args>
 // constexpr bool _all(Args... args) {
@@ -984,12 +936,20 @@ constexpr bool _all(Args... args) {
 //     return result;
 // }
 
+template<typename... Args>
+constexpr bool _all(Args... args) {
+    bool result = true;
+    (void)InitializerList<Unit> {(result = result && args, unit)...};
+
+    return result;
+}
+
 // _any
 
-template<typename... Args>
-constexpr bool _any(Args... args) {
-    return _foldl(op_or, false, args...);
-}
+// template<typename... Args>
+// constexpr bool _any(Args... args) {
+//     return _foldl(op_or, false, args...);
+// }
 
 // template<typename... Args>
 // constexpr bool _any(Args... args) {
@@ -998,35 +958,129 @@ constexpr bool _any(Args... args) {
 //     return result;
 // }
 
+template<typename... Args>
+constexpr bool _any(Args... args) {
+    bool result = false;
+    (void)InitializerList<Unit> {(result = result || args, unit)...};
+
+    return result;
+}
+
 // _maximum
 // cf) since the function is defined as foldr, the result follows the type of first argument.
 
+// template<typename A, typename... As>
+// constexpr A _maximum(A a, As... as) {
+//     return _foldl(max<A>, a, as...);
+// }
+
 template<typename A, typename... As>
 constexpr A _maximum(A a, As... as) {
-    return _foldl(max<A>, a, as...);
+    A result = a;
+    (void)InitializerList<Unit> {(result = as > result ? as : result, unit)...};
+
+    return result;
 }
 
 // _minimum
 // cf) since the function is defined as foldr, the result follows the type of first argument.
 
+// template<typename A, typename... As>
+// constexpr A _minimum(A a, As... as) {
+//     return _foldl(min<A>, a, as...);
+// }
+
 template<typename A, typename... As>
 constexpr A _minimum(A a, As... as) {
-    return _foldl(min<A>, a, as...);
+    A result = a;
+    (void)InitializerList<Unit> {(result = as < result ? as : result, unit)...};
+
+    return result;
 }
 
 // _sum
 
+// template<typename A, typename... As>
+// constexpr A _sum(A a, As... as) {
+//     return _foldl(op_add<A>, a, as...);
+// }
+
 template<typename A, typename... As>
 constexpr A _sum(A a, As... as) {
-    return _foldl(op_add<A>, a, as...);
+    A result = a;
+    (void)InitializerList<Unit> {(result += as, unit)...};
+
+    return result;
 }
 
 // _product
 
+// template<typename A, typename... As>
+// constexpr A _product(A a, As... as) {
+//     return _foldl(op_mul<A>, a, as...);
+// }
+
 template<typename A, typename... As>
 constexpr A _product(A a, As... as) {
-    return _foldl(op_mul<A>, a, as...);
+    A result = a;
+    (void)InitializerList<Unit> {(result *= as, unit)...};
+
+    return result;
 }
+
+// All
+// ! deprecated use _all instead
+// template<typename... Args>
+// struct All {};
+
+// // Base case: When no types are left, return true.
+// template<>
+// struct All<>: True {};
+
+// // Recursive case: Check the first type, and recurse for the rest.
+// template<typename Head, typename... Tail>
+// struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
+
+template<typename A, typename... Args>
+struct All: Bool<_all(A::value, Args::value...)> {};
+
+// Any
+// ! deprecated use _any instead
+// template<typename... Args>
+// struct Any {};
+
+// // Base case: When no types are left, return false.
+// template<>
+// struct Any<>: False {};
+
+// // Recursive case: Check the first type, and recurse for the rest.
+// template<typename Head, typename... Tail>
+// struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
+
+template<typename A, typename... Args>
+struct Any: Bool<_any(A::value, Args::value...)> {};
+
+// Min
+// ? May be need to get removed for compile time performance
+template<typename Head, typename... Tail>
+struct Min: Min<Head, Min<Tail...>> {};
+
+template<typename Head, typename Tail>
+struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
+
+template<typename Head>
+struct Min<Head>: Head {};
+
+// Max
+// ? May be need to get removed for compile time performance
+template<typename Head, typename... Tail>
+struct Max: Max<Head, Max<Tail...>> {};
+
+template<typename Head, typename Tail>
+struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
+
+template<typename Head>
+struct Max<Head>: Head {};
 
 // Common
 
