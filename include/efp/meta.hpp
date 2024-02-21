@@ -248,20 +248,21 @@ constexpr A min(const A& lhs, const A& rhs) {
 }
 
 // Foldl
-// ? Maybe just recursive constexpr template function could be enough
-// namespace detail {
-//     template<template<class, class> class F, typename A, typename... Bs>
-//     struct FoldlImpl {};
+// Maybe just recursive constexpr template function could be enough
 
-//     template<template<class, class> class F, typename A, typename B>
-//     struct FoldlImpl<F, A, B>: F<A, B>::Type {};
+namespace detail {
+    template<template<class, class> class F, typename A, typename... Bs>
+    struct FoldlImpl {};
 
-//     template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-//     struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
-// }  // namespace detail
+    template<template<class, class> class F, typename A, typename B>
+    struct FoldlImpl<F, A, B>: F<A, B>::Type {};
 
-// template<template<class, class> class F, typename A, typename... Bs>
-// using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
+    template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+    struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
+}  // namespace detail
+
+template<template<class, class> class F, typename A, typename... Bs>
+using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // IsSame
 

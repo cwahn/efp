@@ -290,7 +290,7 @@ namespace detail {
             typename Head,
             typename... Tail,
             typename = EnableIf<
-                !(sizeof...(Tail) == 0 && _any(IsSame<As, Head>::value...))
+                !(sizeof...(Tail) == 0 && Any<IsSame<As, Head>...>::value)
                     && IsUniquelyConstructible<Head, Tail...>::value,
                 void>>
         EnumBase(Head&& head, Tail&&... args)

@@ -67,10 +67,8 @@ template<typename A>
 struct IsSequenceImplLength<
     A,
     Void<decltype(efp::length(declval<const A>())), decltype(efp::length(declval<A>()))>>:
-    Bool<_any(
-        IsSame<decltype(efp::length(declval<const A>())), CtSize<A>>::value,
-        IsSame<decltype(efp::length(declval<const A>())), size_t>::value
-    )> {};
+    Any<IsSame<decltype(efp::length(declval<const A>())), CtSize<A>>,
+        IsSame<decltype(efp::length(declval<const A>())), size_t>> {};
 
 // nth
 // todo non-const ref check
@@ -112,6 +110,7 @@ struct IsSequence: False {};
 
 template<typename A>
 struct IsSequence<A, Void<Element<A>, CtSize<A>, CtCapacity<A>>>:
+    // All<IsSequenceImplLength<A>, IsSequenceImplNth<A>, IsSequenceImplData<A>> {};
     Bool<_all(
         IsSequenceImplLength<A>::value,
         IsSequenceImplNth<A>::value,
