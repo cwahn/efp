@@ -27,10 +27,10 @@ namespace detail {
     // clang-format on
 
     template<uint8_t stamp_n, uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct EnumSwitchImpl {};
+    struct _EnumSwitch {};
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct EnumSwitchImpl<4, alt_num, Case, Args...> {
+    struct _EnumSwitch<4, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -42,7 +42,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct EnumSwitchImpl<16, alt_num, Case, Args...> {
+    struct _EnumSwitch<16, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -54,7 +54,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct EnumSwitchImpl<64, alt_num, Case, Args...> {
+    struct _EnumSwitch<64, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -67,8 +67,8 @@ namespace detail {
 
     // ! temp
     // template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    // struct EnumSwitchImpl<256, alt_num, Case, Args...> {
-    //     static  auto call(uint8_t index, Args&&... args)
+    // struct _EnumSwitch<256, alt_num, Case, Args...> {
+    //     static auto call(uint8_t index, Args&&... args)
     //         -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
     //         switch (index) {
     //             EFP_STAMP256(0, EFP_ENUM_CASE)
@@ -79,7 +79,7 @@ namespace detail {
     // };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    using EnumSwitch = EnumSwitchImpl<power_4_ceiling(alt_num), alt_num, Case, Args...>;
+    using EnumSwitch = _EnumSwitch<power_4_ceiling(alt_num), alt_num, Case, Args...>;
 
     // todo Maybe support more than 256 alternatives
 
@@ -291,8 +291,11 @@ namespace detail {
         // Pattern matching
         template<typename F, typename... Fs>
         auto match(const F& f, const Fs&... fs) const
-            -> decltype(efp::declval<MatchBranch<F>>()(efp::declval<A>())) const {
-            // static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
+                efp::declval<A>()
+            )) const {
+            // ! Not working at the moment
+            static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
@@ -387,69 +390,120 @@ namespace detail {
         // using IsExhaustive =
         //     Any<Any<IsWildCard<Fs>...>, All<IsRelevantBranch<Fs>..., AreAllAltCovered<Fs...>>>;
 
-        // IsOnlyOneWildCardAtLast
+        // WildCardIffLast
         // Check if only the last branch is a wild card
+
         template<typename... Fs>
-        struct IsOnlyOneWildCardAtLast {};
+        struct _WildCardIffLast {};
 
         template<typename F>
-        struct IsOnlyOneWildCardAtLast<F>: IsWildCard<F> {};
-
-        template<typename F, typename... Fs>
-        struct IsOnlyOneWildCardAtLast<F, Fs...>:
-            Conditional<IsWildCard<F>::value, False, IsOnlyOneWildCardAtLast<Fs...>> {};
-
-        // RemoveFirstInvocableImpl
-        template<typename Alt, typename List>
-        struct RemoveFirstInvocableImpl {};
-
-        template<typename Alt, typename F, typename... Fs>
-        struct RemoveFirstInvocableImpl<Alt, TypeList<F, Fs...>> {
-            // Result of removing the first invocable from the rest of the list
-            using Next = typename RemoveFirstInvocableImpl<Alt, TypeList<Fs...>>::Type;
-
-            // If F is invocable, stop and use the rest of the list as the result
-            // Otherwise, keep F and continue with the recursion
-            using Type = Conditional<IsInvocable<F, Alt>::value, TypeList<Fs...>, Prepend<F, Next>>;
+        struct _WildCardIffLast<F> {
+            using Type = IsWildCard<F>;
         };
 
+        template<typename F, typename... Fs>
+        struct _WildCardIffLast<F, Fs...> {
+            using Type = typename _WildCardIffLast<Fs...>::Type;
+        };
+
+        template<typename... Fs>
+        using WildCardIffLast = typename _WildCardIffLast<Fs...>::Type;
+
+        // Helper struct to check if all types except the last are relevant
+        template<typename...>
+        struct _AllButLastAreRelevant {};
+
+        // Base case: only one type left (the "last" type), so we return true since we don't check the last type
+        template<typename F>
+        struct _AllButLastAreRelevant<F> {
+            using Type = True;
+        };
+
+        // Recursive case: Check the first type in the pack and recurse for the rest, excluding the last type eventually
+        template<typename First, typename... Rest>
+        struct _AllButLastAreRelevant<First, Rest...> {
+            using Type = Conditional<
+                IsRelevantBranch<First>::value,
+                typename _AllButLastAreRelevant<Rest...>::Type,
+                False>;
+        };
+
+        template<typename... Fs>
+        using AllButLastAreRelevant = typename _AllButLastAreRelevant<Fs...>::Type;
+
+        // todo Make it more stricter only excpeting explicitly invocable branches
         // RemoveFirstInvocable
-        // Remove the first invocable with Alt from the List
         template<typename Alt, typename List>
-        using RemoveFirstInvocable = typename RemoveFirstInvocableImpl<Alt, List>::Type;
+        struct _RemoveFirstInvocable {
+            DebugType<Alt> _;
+            DebugType<List> __;
+            static_assert(false, "Invalid pattern");
+        };
+
+        template<typename Alt>
+        struct _RemoveFirstInvocable<Alt, TypeList<>> {
+            using Type = TypeList<>;
+        };
+
+        template<typename Alt, typename F, typename... Fs>
+        struct _RemoveFirstInvocable<Alt, TypeList<F, Fs...>> {
+            using Type = Conditional<
+                IsInvocable<F, Alt>::value,
+                TypeList<Fs...>,
+                Prepend<F, typename _RemoveFirstInvocable<Alt, TypeList<Fs...>>::Type>>;
+        };
+
+        template<typename Alt, typename List>
+        using RemoveFirstInvocable = typename _RemoveFirstInvocable<Alt, List>::Type;
 
         // Mutual Exhaustiveness
         // Check if the alternatives and the branches are mutually exhaustive
-        template<typename, typename>
-        struct Me;
+        template<typename AltList, typename BranchList>
+        struct _Me {
+            DebugType<AltList> _;
+            DebugType<BranchList> __;
+            static_assert(false, "Invalid pattern");
+        };
 
-        template<>
-        struct Me<TypeList<>, TypeList<>>: True {};
+        template<typename Alt, typename F>
+        struct _Me<TypeList<Alt>, TypeList<F>> {
+            using Type = IsInvocable<F, Alt>;
+        };
 
         template<typename Alt, typename... Alts, typename F, typename... Fs>
-        struct Me<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
-            Conditional<
+        struct _Me<TypeList<Alt, Alts...>, TypeList<F, Fs...>> {
+            using Type = Conditional<
                 sizeof...(Alts) == sizeof...(Fs),
-                Me<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<Fs...>>>,
-                False> {};
+                typename _Me<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>::
+                    Type,
+                False>;
+        };
+
+        template<typename AltList, typename BranchList>
+        using Me = typename _Me<AltList, BranchList>::Type;
 
         // PatternCheck
         template<typename, typename... Fs>
-        struct PatternCheckImpl {};
+        struct _PatternCheck {};
 
         // No need to check if all the alternatives are covered
         // Only need to check if all the branches are relevant
         template<typename... Fs>
-        struct PatternCheckImpl<True, Fs...>: All<IsRelevantBranch<Fs>...> {};
+        // struct _PatternCheck<True, Fs...>: All<IsRelevantBranch<Fs>...> {};
+        struct _PatternCheck<True, Fs...> {
+            using Type = AllButLastAreRelevant<Fs...>;
+        };
 
         // If there is no wild card at the last branch, check if the alternatives and the branches are mutually exhaustive
         template<typename... Fs>
-        struct PatternCheckImpl<False, Fs...>: Me<TypeList<A, As...>, TypeList<Fs...>> {};
+        struct _PatternCheck<False, Fs...> {
+            using Type = Me<TypeList<A, As...>, TypeList<Fs...>>;
+        };
 
         template<typename... Fs>
-        using PatternCheck = PatternCheckImpl<
-            Conditional<IsOnlyOneWildCardAtLast<Fs...>::value, True, False>,
-            Fs...>;
+        using PatternCheck =
+            typename _PatternCheck<Conditional<WildCardIffLast<Fs...>::value, True, False>, Fs...>::
+                Type;
 
         alignas(_maximum(alignof(A), alignof(As)...)
         ) uint8_t _storage[_maximum(sizeof(A), sizeof(As)...)];
@@ -470,16 +524,16 @@ public:
 
 namespace detail {
     template<size_t n, typename A>
-    struct EnumAtImpl {};
+    struct _EnumAt {};
 
     template<size_t n, typename... As>
-    struct EnumAtImpl<n, Enum<As...>> {
+    struct _EnumAt<n, Enum<As...>> {
         using Type = PackAt<n, As...>;
     };
 }  // namespace detail
 
 template<size_t n, typename A>
-using EnumAt = typename detail::EnumAtImpl<n, A>::Type;
+using EnumAt = typename detail::_EnumAt<n, A>::Type;
 
 }  // namespace efp
 

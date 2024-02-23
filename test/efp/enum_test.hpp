@@ -292,7 +292,7 @@ TEST_CASE("enum_match") {
         double b = 0.;
 
         //?
-        // a.match([&](int x) { b += 1; }, [&]() {});
+        a.match([&](int x) { b += 1; }, [&]() {});
 
         CHECK(b == 0.);
 
