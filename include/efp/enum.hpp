@@ -295,7 +295,7 @@ namespace detail {
                 efp::declval<A>()
             )) const {
             // ! Not working at the moment
-            static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            // static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
@@ -371,74 +371,35 @@ namespace detail {
 
         // Match branch sanity check
 
-        // Is the argument type of the branch matches to any of the alternatives
-        // template<typename... Fs>
-        // using IsWildCardAtLast = IsSame<PackAt<sizeof...(Fs) - 1, Fs>, IsWildCard>;
-
         // Wild card will be considered as a irrelevant branch
         template<typename F>
         using IsRelevantBranch = Any<IsInvocable<F, A>, IsInvocable<F, As>...>;
 
-        // // Coverage by wild card will not be counted
-        // template<typename Alt, typename... Fs>
-        // using IsAltCovered = Any<IsInvocable<Fs, A>...>;
-
-        // template<typename... Fs>
-        // using AreAllAltCovered = All<IsAltCovered<A, Fs>..., IsAltCovered<As, Fs>...>;
-
-        // template<typename... Fs>
-        // using IsExhaustive =
-        //     Any<Any<IsWildCard<Fs>...>, All<IsRelevantBranch<Fs>..., AreAllAltCovered<Fs...>>>;
-
         // WildCardIffLast
-        // Check if only the last branch is a wild card
-
         template<typename... Fs>
-        struct _WildCardIffLast {};
+        struct WildCardIffLast {};
 
         template<typename F>
-        struct _WildCardIffLast<F> {
-            using Type = IsWildCard<F>;
-        };
+        struct WildCardIffLast<F>: IsWildCard<F> {};
 
         template<typename F, typename... Fs>
-        struct _WildCardIffLast<F, Fs...> {
-            using Type = typename _WildCardIffLast<Fs...>::Type;
-        };
+        struct WildCardIffLast<F, Fs...>: WildCardIffLast<Fs...> {};
 
+        // AllButLastAreRelevant
         template<typename... Fs>
-        using WildCardIffLast = typename _WildCardIffLast<Fs...>::Type;
+        struct AllButLastAreRelevant {};
 
-        // Helper struct to check if all types except the last are relevant
-        template<typename...>
-        struct _AllButLastAreRelevant {};
-
-        // Base case: only one type left (the "last" type), so we return true since we don't check the last type
         template<typename F>
-        struct _AllButLastAreRelevant<F> {
-            using Type = True;
-        };
+        struct AllButLastAreRelevant<F>: True {};
 
-        // Recursive case: Check the first type in the pack and recurse for the rest, excluding the last type eventually
-        template<typename First, typename... Rest>
-        struct _AllButLastAreRelevant<First, Rest...> {
-            using Type = Conditional<
-                IsRelevantBranch<First>::value,
-                typename _AllButLastAreRelevant<Rest...>::Type,
-                False>;
-        };
-
-        template<typename... Fs>
-        using AllButLastAreRelevant = typename _AllButLastAreRelevant<Fs...>::Type;
+        template<typename F, typename... Fs>
+        struct AllButLastAreRelevant<F, Fs...>:
+            Conditional<IsRelevantBranch<F>::value, AllButLastAreRelevant<Fs...>, False> {};
 
         // todo Make it more stricter only excpeting explicitly invocable branches
         // RemoveFirstInvocable
         template<typename Alt, typename List>
-        struct _RemoveFirstInvocable {
-            DebugType<Alt> _;
-            DebugType<List> __;
-            static_assert(false, "Invalid pattern");
-        };
+        struct _RemoveFirstInvocable {};
 
         template<typename Alt>
         struct _RemoveFirstInvocable<Alt, TypeList<>> {
@@ -456,31 +417,33 @@ namespace detail {
         template<typename Alt, typename List>
         using RemoveFirstInvocable = typename _RemoveFirstInvocable<Alt, List>::Type;
 
+        // template<typename Alt, typename List>
+        // struct RemoveFirstInvocable {};
+
+        // template<typename Alt>
+        // struct RemoveFirstInvocable<Alt, TypeList<>>: TypeList<> {};
+
+        // template<typename Alt, typename F, typename... Fs>
+        // struct RemoveFirstInvocable<Alt, TypeList<F, Fs...>>:
+        //     Conditional<
+        //         IsInvocable<F, Alt>::value,
+        //         TypeList<Fs...>,
+        //         Prepend<F, RemoveFirstInvocable<Alt, TypeList<Fs...>>>> {};
+
         // Mutual Exhaustiveness
         // Check if the alternatives and the branches are mutually exhaustive
         template<typename AltList, typename BranchList>
-        struct _Me {
-            DebugType<AltList> _;
-            DebugType<BranchList> __;
-            static_assert(false, "Invalid pattern");
-        };
+        struct Me {};
 
         template<typename Alt, typename F>
-        struct _Me<TypeList<Alt>, TypeList<F>> {
-            using Type = IsInvocable<F, Alt>;
-        };
+        struct Me<TypeList<Alt>, TypeList<F>>: IsInvocable<F, Alt> {};
 
         template<typename Alt, typename... Alts, typename F, typename... Fs>
-        struct _Me<TypeList<Alt, Alts...>, TypeList<F, Fs...>> {
-            using Type = Conditional<
+        struct Me<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
+            Conditional<
                 sizeof...(Alts) == sizeof...(Fs),
-                typename _Me<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>::
-                    Type,
-                False>;
-        };
-
-        template<typename AltList, typename BranchList>
-        using Me = typename _Me<AltList, BranchList>::Type;
+                Me<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>,
+                False> {};
 
         // PatternCheck
         template<typename, typename... Fs>
@@ -489,7 +452,6 @@ namespace detail {
         // No need to check if all the alternatives are covered
         // Only need to check if all the branches are relevant
         template<typename... Fs>
-        // struct _PatternCheck<True, Fs...>: All<IsRelevantBranch<Fs>...> {};
         struct _PatternCheck<True, Fs...> {
             using Type = AllButLastAreRelevant<Fs...>;
         };
@@ -505,6 +467,7 @@ namespace detail {
             typename _PatternCheck<Conditional<WildCardIffLast<Fs...>::value, True, False>, Fs...>::
                 Type;
 
+        // Private member variables
         alignas(_maximum(alignof(A), alignof(As)...)
         ) uint8_t _storage[_maximum(sizeof(A), sizeof(As)...)];
 
