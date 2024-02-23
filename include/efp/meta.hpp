@@ -1037,6 +1037,25 @@ struct RawStorage {
     }
 };
 
+// TypeList
+template<typename... As>
+struct TypeList {};
+
+// Helper to prepend a type to a TypeList
+namespace detail {
+    template<typename A, typename List>
+    struct PrependImpl {};
+
+    template<typename A, typename... As>
+    struct PrependImpl<A, TypeList<As...>> {
+        using Type = TypeList<A, As...>;
+    };
+}  // namespace detail
+
+// Prepend
+template<typename A, typename List>
+using Prepend = typename detail::PrependImpl<A, List>::Type;
+
 }  // namespace efp
 
 #endif
