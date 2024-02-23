@@ -183,6 +183,79 @@ TEST_CASE("enum_type") {
     // CHECK(b.get<int>() == 1);
 }
 
+// ! Deprecated
+TEST_CASE("Enum Exteneded Constructor") {
+    SECTION("Explicit constructor") {
+        struct A {
+            A(bool arg) : value(arg) {}
+
+            bool value;
+        };
+
+        struct B {};
+
+        using SomeEnum = Enum<A, B>;
+
+        CHECK(IsConstructible<bool, bool>::value);
+        CHECK(IsConstructible<A, bool>::value);
+
+        CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+
+        int idx_0 = (int)SomeEnum(true).index();
+        int idx_1 = (int)SomeEnum {A {true}}.index();
+
+        CHECK(idx_0 == idx_1);
+
+        // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+    }
+
+    // todo Make it works for aggregate construction as well
+    // SECTION("Non-explicit constructor") {
+    //     struct A {
+    //         bool value;
+    //     };
+    //     struct B {};
+
+    //     using SomeEnum = Enum<A, B>;
+
+    //     CHECK(IsConstructible<bool, bool>::value);
+    //     CHECK(IsConstructible<A, bool>::value);
+
+    //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+
+    //     int idx_0 = (int)SomeEnum(true).index();
+    //     int idx_1 = (int)SomeEnum{A{true}}.index();
+
+    //     CHECK(idx_0 == idx_1);
+
+    //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+    // }
+
+    SECTION("Nested Enum") {
+        struct A {};
+
+        struct B {};
+
+        using Enum0 = Enum<A, B>;
+
+        struct C {};
+
+        using NestedEnum = Enum<C, Enum0>;
+
+        CHECK(NestedEnum {A {}}.index() == NestedEnum {Enum0 {A {}}}.index());
+    }
+
+    // SECTION("Self referencing Enum") {
+    //     List<int> empty_list = Nil{};
+    //     List<int> one_list = Cons<int>{42, Nil{}};
+    // }
+}
+
+// SECTION("Self referencing Enum") {
+//     List<int> empty_list = Nil{};
+//     List<int> one_list = Cons<int>{42, Nil{}};
+// }
+
 struct TemplateBranch {
     template<typename A>
     int operator()(const A& a) {

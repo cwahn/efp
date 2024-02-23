@@ -183,16 +183,14 @@ namespace detail {
             EnumSwitch<alt_num, DestroyCase, EnumBase*>::call(_index, this);
         }
 
-        template<typename Alt>
-        EnumBase(const Alt& alt) : _index {AltIndex<Alt>::value} {
-            // Compiler will complain if Alt is not in the list
-            new (reinterpret_cast<Alt*>(&_storage)) Alt {alt};
+        template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
+        EnumBase(const Alt& alt) : _index(AltIndex<Alt>::value) {
+            new (reinterpret_cast<Alt*>(_storage)) Alt(alt);
         }
 
-        template<typename Alt>
-        EnumBase(Alt&& alt) : _index {AltIndex<Alt>::value} {
-            // Compiler will complain if Alt is not in the list
-            new (reinterpret_cast<Alt*>(&_storage)) Alt {efp::move(alt)};
+        template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
+        EnumBase(Alt&& alt) : _index(AltIndex<Alt>::value) {
+            new (reinterpret_cast<Alt*>(_storage)) Alt(efp::move(alt));
         }
 
         // ! Deprecated
@@ -217,7 +215,7 @@ namespace detail {
 
         template<typename... Args>
         using IsUniquelyConstructible =
-            Bool<ConstructibleCount<As...>::template Type<Args...>::value == 1>;
+            Bool<ConstructibleCount<A, As...>::template Type<Args...>::value == 1>;
 
         // Base case: no types are constructible
         template<typename...>
@@ -239,7 +237,7 @@ namespace detail {
         template<typename... Args>
         using DetermineAlt = EnableIf<
             IsUniquelyConstructible<Args...>::value,
-            typename FirstConstructible<As...>::template Type<Args...>>;
+            typename FirstConstructible<A, As...>::template Type<Args...>>;
 
         // ! End of deprecated
 
@@ -252,17 +250,14 @@ namespace detail {
             typename... Tail,
             typename = EnableIf<
                 !(sizeof...(Tail) == 0 && Any<IsSame<As, Head>...>::value)
-                    && IsUniquelyConstructible<Head, Tail...>::value,
-                void>>
+                && IsUniquelyConstructible<Head, Tail...>::value>>
         EnumBase(Head&& head, Tail&&... args)
             : _index(AltIndex<DetermineAlt<Head, Tail...>>::value) {
             // Determine the appropriate variant type based on the argument
-            using VariantType = DetermineAlt<Head,
-                                             Tail...>;  // Implement this based on your logic
+            using Alt = DetermineAlt<Head, Tail...>;  // Implement this based on your logic
 
             // Construct the variant in place
-            new (reinterpret_cast<VariantType*>(_storage))
-                VariantType(forward<Head>(head), forward<Tail>(args)...);
+            new (reinterpret_cast<Alt*>(_storage)) Alt(forward<Head>(head), forward<Tail>(args)...);
         }
 
         bool operator==(const EnumBase& other) const {
