@@ -296,8 +296,11 @@ namespace detail {
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
-            EnumSwitch<alt_num, Match<Pattern>::template Case, const EnumBase*, const Pattern&>::
-                call(_index, this, Pattern {f, fs...});
+            return EnumSwitch<
+                alt_num,
+                Match<Pattern>::template Case,
+                const EnumBase*,
+                const Pattern&>::call(_index, this, Pattern {f, fs...});
         }
 
     private:
