@@ -7,18 +7,27 @@ namespace efp {
 
 namespace detail {
 
-    constexpr uint8_t power_4_ceiling(uint8_t n, uint8_t power = 4) {
-        return (power >= n) ? power : power_4_ceiling(n, power * 4);
+    constexpr uint8_t power_n_ceiling(uint8_t n, uint8_t power = 2) {
+        return (power >= n) ? power : power_n_ceiling(n, power * 2);
     }
 
     // clang-format off
-    #define EFP_STAMP4(n, x) x(n) x(n + 1) x(n + 2) x(n + 3)
+    // #define EFP_STAMP4(n, x) x(n) x(n + 1) x(n + 2) x(n + 3)
 
-    #define EFP_STAMP16(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x) EFP_STAMP4(n + 8, x) EFP_STAMP4(n + 12, x)
+    // #define EFP_STAMP16(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x) EFP_STAMP4(n + 8, x) EFP_STAMP4(n + 12, x)
 
-    #define EFP_STAMP64(n, x) EFP_STAMP16(n, x) EFP_STAMP16(n + 16, x) EFP_STAMP16(n + 32, x) EFP_STAMP16(n + 48, x)
+    // #define EFP_STAMP64(n, x) EFP_STAMP16(n, x) EFP_STAMP16(n + 16, x) EFP_STAMP16(n + 32, x) EFP_STAMP16(n + 48, x)
 
-    #define EFP_STAMP256(n, x) EFP_STAMP64(n, x) EFP_STAMP64(n + 64, x) EFP_STAMP64(n + 128, x) EFP_STAMP64(n + 192, x)
+    // #define EFP_STAMP256(n, x) EFP_STAMP64(n, x) EFP_STAMP64(n + 64, x) EFP_STAMP64(n + 128, x) EFP_STAMP64(n + 192, x)
+
+    #define EFP_STAMP2(n, x) x(n) x(n + 1)
+    #define EFP_STAMP4(n, x) EFP_STAMP2(n, x) EFP_STAMP2(n + 2, x)
+    #define EFP_STAMP8(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x)
+    #define EFP_STAMP16(n, x) EFP_STAMP8(n, x) EFP_STAMP8(n + 8, x)
+    #define EFP_STAMP32(n, x) EFP_STAMP16(n, x) EFP_STAMP16(n + 16, x)
+    #define EFP_STAMP64(n, x) EFP_STAMP32(n, x) EFP_STAMP32(n + 32, x)
+    #define EFP_STAMP128(n, x) EFP_STAMP64(n, x) EFP_STAMP64(n + 64, x)
+    #define EFP_STAMP256(n, x) EFP_STAMP128(n, x) EFP_STAMP128(n + 128, x)
 
     // Generic case for pattern matching
     // Bound the index to the maximum alternative index to reduce the number of template instantiations
@@ -30,11 +39,35 @@ namespace detail {
     struct _EnumSwitch {};
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<2, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP2(0, EFP_ENUM_CASE)
+                default:
+                    throw std::runtime_error("Invalid alternative index");
+            }
+        }
+    };
+
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
     struct _EnumSwitch<4, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP4(0, EFP_ENUM_CASE)
+                default:
+                    throw std::runtime_error("Invalid alternative index");
+            }
+        }
+    };
+
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<8, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP8(0, EFP_ENUM_CASE)
                 default:
                     throw std::runtime_error("Invalid alternative index");
             }
@@ -54,11 +87,35 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<32, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP32(0, EFP_ENUM_CASE)
+                default:
+                    throw std::runtime_error("Invalid alternative index");
+            }
+        }
+    };
+
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
     struct _EnumSwitch<64, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP64(0, EFP_ENUM_CASE)
+                default:
+                    throw std::runtime_error("Invalid alternative index");
+            }
+        }
+    };
+
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<128, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP128(0, EFP_ENUM_CASE)
                 default:
                     throw std::runtime_error("Invalid alternative index");
             }
@@ -79,7 +136,7 @@ namespace detail {
     // };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    using EnumSwitch = _EnumSwitch<power_4_ceiling(alt_num), alt_num, Case, Args...>;
+    using EnumSwitch = _EnumSwitch<power_n_ceiling(alt_num), alt_num, Case, Args...>;
 
     // todo Maybe support more than 256 alternatives
 
@@ -134,7 +191,7 @@ namespace detail {
     public:
         constexpr static uint8_t alt_num = sizeof...(As) + 1;
 
-        // constexpr static uint8_t switch_size = power_4_ceiling(alt_num);
+        // constexpr static uint8_t switch_size = power_n_ceiling(alt_num);
 
         // Default constructor initializes the first alternative with default constructor
         EnumBase() : _index {0} {
