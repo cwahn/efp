@@ -361,8 +361,7 @@ namespace detail {
             -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
                 efp::declval<A>()
             )) const {
-            // ! Not working at the moment
-            // static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
