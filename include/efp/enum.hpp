@@ -127,6 +127,8 @@ namespace detail {
             : F {MatchBranch<G> {forward<G>(g)}}, Overloaded<Fs...>(forward<Gs>(gs)...) {}
     };
 
+    // EnumBase
+    // Enum is not permitted to hold a reference, but permitted to hold cv-qualified types
     template<typename A, typename... As>
     class EnumBase {
     public:
@@ -316,7 +318,7 @@ namespace detail {
         };
 
         template<typename Alt>
-        struct AltIndex: Find<IsSameUnary<Alt>::template Binded, A, As...> {};
+        struct AltIndex: Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...> {};
 
         // Assume that the index is altready bounded
         template<uint8_t i>
