@@ -7,19 +7,12 @@ namespace efp {
 
 namespace detail {
 
-    constexpr uint8_t power_n_ceiling(uint8_t n, uint8_t power = 2) {
-        return (power >= n) ? power : power_n_ceiling(n, power * 2);
+    // Use bit operation and recursion
+    constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
+        return (power >= n) ? power : power_2_ceiling(n, power << 1);
     }
 
     // clang-format off
-    // #define EFP_STAMP4(n, x) x(n) x(n + 1) x(n + 2) x(n + 3)
-
-    // #define EFP_STAMP16(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x) EFP_STAMP4(n + 8, x) EFP_STAMP4(n + 12, x)
-
-    // #define EFP_STAMP64(n, x) EFP_STAMP16(n, x) EFP_STAMP16(n + 16, x) EFP_STAMP16(n + 32, x) EFP_STAMP16(n + 48, x)
-
-    // #define EFP_STAMP256(n, x) EFP_STAMP64(n, x) EFP_STAMP64(n + 64, x) EFP_STAMP64(n + 128, x) EFP_STAMP64(n + 192, x)
-
     #define EFP_STAMP2(n, x) x(n) x(n + 1)
     #define EFP_STAMP4(n, x) EFP_STAMP2(n, x) EFP_STAMP2(n + 2, x)
     #define EFP_STAMP8(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x)
@@ -135,28 +128,62 @@ namespace detail {
     //     }
     // };
 
+#undef EFP_ENUM_CASE
+
+#undef EFP_STAMP2
+#undef EFP_STAMP4
+#undef EFP_STAMP8
+#undef EFP_STAMP16
+#undef EFP_STAMP32
+#undef EFP_STAMP64
+#undef EFP_STAMP128
+#undef EFP_STAMP256
+
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    using EnumSwitch = _EnumSwitch<power_n_ceiling(alt_num), alt_num, Case, Args...>;
+    using EnumSwitch = _EnumSwitch<power_2_ceiling(alt_num), alt_num, Case, Args...>;
 
     // todo Maybe support more than 256 alternatives
 
-    // todo zero copy
     template<typename F>
     using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
 
+    // todo zero copy
     // Wrapper for wild card to be callable with any arguments
-    template<typename F>
-    struct WildCardWrapper: public F {
-        // Explicitly define a constructor to accept a lambda or any callable
-        template<typename G>
-        WildCardWrapper(G&& g) : F {std::forward<G>(g)} {}
+    // template<typename F>
+    // struct WildCardWrapper: public F {
+    //     // Explicitly define a constructor to accept a lambda or any callable
+    //     template<typename G>
+    //     WildCardWrapper(G&& g) : F {std::forward<G>(g)} {}
 
-        // Overload operator() to forward arguments to the callable's operator()
+    //     // Overload operator() to forward arguments to the callable's operator()
+    //     template<typename... Args>
+    //     inline auto operator()(Args&&...) const -> decltype(std::declval<F>()()) {
+    //         return F::operator()();
+    //     }
+    // };
+
+    template<typename F>
+    class WildCardWrapper {
+    public:
+        // Constructor that initializes the reference. Note the explicit use of a reference to ensure the lambda is not copied.
+        explicit WildCardWrapper(const F& lambda) : _lambda(lambda) {}
+
+        // Overload the function call operator to forward calls to the lambda's own call operator.
         template<typename... Args>
-        inline auto operator()(Args&&...) const -> decltype(std::declval<F>()()) {
-            return F::operator()();
+        inline auto operator()(Args&&...) const -> decltype(efp::declval<F>()()) {
+            return _lambda();
         }
+
+    private:
+        // A reference to the lambda
+        const F& _lambda;
     };
+
+    // // Utility function to easily create a lambda wrapper
+    // template<typename F>
+    // WildCardWrapper<F> wild_card_wrapper(const F& lambda) {
+    //     return WildCardWrapper<F>(lambda);
+    // }
 
     // Wrap the wild card with WildCardWrapper, otherwise use the original callable
     template<typename F>
@@ -191,7 +218,7 @@ namespace detail {
     public:
         constexpr static uint8_t alt_num = sizeof...(As) + 1;
 
-        // constexpr static uint8_t switch_size = power_n_ceiling(alt_num);
+        // constexpr static uint8_t switch_size = power_2_ceiling(alt_num);
 
         // Default constructor initializes the first alternative with default constructor
         EnumBase() : _index {0} {
