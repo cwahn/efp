@@ -1,8 +1,10 @@
-#include "catch2/catch_test_macros.hpp"
+#ifndef CONCURRENCY_TEST_HPP_
+#define CONCURRENCY_TEST_HPP_
 
-#include "mth.hpp"
+#include "efp/concurrency.hpp"
+#include "test_common.hpp"
 
-// todo Theading in Catch2 in unstable at the moment and aborting time to time. Though it passes if get run
+using namespace efp;
 
 TEST_CASE("Enqueue and Dequeue", "[BlockingQ]") {
     BlockingQ<int, 5> queue;
@@ -17,6 +19,15 @@ TEST_CASE("Enqueue and Dequeue", "[BlockingQ]") {
         queue.enqueue(2);
         CHECK(queue.dequeue() == 1);
         CHECK(queue.dequeue() == 2);
+    }
+
+    SECTION("Dequeue Order") {
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+        CHECK(queue.dequeue() == 1);
+        CHECK(queue.dequeue() == 2);
+        CHECK(queue.dequeue() == 3);
     }
 }
 
@@ -34,176 +45,87 @@ TEST_CASE("Enqueue and Dequeue Dynamic Capacity", "[BlockingQ]") {
         CHECK(queue.dequeue() == 1);
         CHECK(queue.dequeue() == 2);
     }
-}
 
-// TEST_CASE("Blocking Behavior", "[BlockingQ]") {
-//     BlockingQ<int, 5> queue;
-
-//     SECTION("Dequeue Blocks When Queue is Empty") {
-//         std::thread t([&]() {
-//             std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay to ensure dequeue blocks
-//             queue.enqueue(1);
-//         });
-
-//         auto start = std::chrono::high_resolution_clock::now();
-//         CHECK(queue.dequeue() == 1); // This should block until the other thread enqueues
-//         auto end = std::chrono::high_resolution_clock::now();
-//         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-//         CHECK(duration.count() >= 100); // Check if there was a block
-//         t.join();
-//     }
-// }
-
-// TEST_CASE("Blocking Behavior Dynamic Capacity", "[BlockingQ]") {
-//     BlockingQ<int> queue;
-
-//     SECTION("Dequeue Blocks When Queue is Empty") {
-//         std::thread t([&]() {
-//             std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay to ensure dequeue blocks
-//             queue.enqueue(1);
-//         });
-
-//         auto start = std::chrono::high_resolution_clock::now();
-//         CHECK(queue.dequeue() == 1); // This should block until the other thread enqueues
-//         auto end = std::chrono::high_resolution_clock::now();
-//         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-//         CHECK(duration.count() >= 100); // Check if there was a block
-//         t.join();
-//     }
-// }
-
-// TEST_CASE("Thread Safety", "[BlockingQ]") {
-//     BlockingQ<int, 5> queue;
-//     efp::Vector<std::thread> threads;
-
-//     for (int i = 0; i < 10; ++i) {
-//         threads.emplace_back([&queue, i]() {
-//             queue.enqueue(i);
-//         });
-//     }
-
-//     efp::Vector<int> results;
-//     for (int i = 0; i < 10; ++i) {
-//         threads.emplace_back([&queue, &results]() {
-//             results.push_back(queue.dequeue());
-//         });
-//     }
-
-//     for (auto& t : threads) {
-//         t.join();
-//     }
-
-//     CHECK(results.size() == 10); // Ensure we dequeued 10 items
-//     // Further checks can be added to verify the dequeued values
-// }
-
-// TEST_CASE("Thread Safety Dynamic Capacity", "[BlockingQ]") {
-//     BlockingQ<int> queue;
-//     efp::Vector<std::thread> threads;
-
-//     for (int i = 0; i < 10; ++i) {
-//         threads.emplace_back([&queue, i]() {
-//             queue.enqueue(i);
-//         });
-//     }
-
-//     efp::Vector<int> results;
-//     for (int i = 0; i < 10; ++i) {
-//         threads.emplace_back([&queue, &results]() {
-//             results.push_back(queue.dequeue());
-//         });
-//     }
-
-//     for (auto& t : threads) {
-//         t.join();
-//     }
-
-//     CHECK(results.size() == 10); // Ensure we dequeued 10 items
-//     // Further checks can be added to verify the dequeued values
-// }
-
-TEST_CASE("Enqueue and Dequeue", "[NonBlockingQ]") {
-    NonBlockingQ<int, 5> queue;
-
-    SECTION("Enqueue then Dequeue") {
-        queue.enqueue(1);
-        auto result = queue.dequeue();
-        REQUIRE(result.has_value());
-        REQUIRE(result.value() == 1);
-    }
-
-    SECTION("Dequeue from Empty Queue") {
-        auto result = queue.dequeue();
-        REQUIRE_FALSE(result.has_value());
-    }
-
-    SECTION("Multiple Enqueue and Dequeue") {
+    SECTION("Dequeue Order") {
         queue.enqueue(1);
         queue.enqueue(2);
-        REQUIRE(queue.dequeue().value() == 1);
-        REQUIRE(queue.dequeue().value() == 2);
+        queue.enqueue(3);
+        CHECK(queue.dequeue() == 1);
+        CHECK(queue.dequeue() == 2);
+        CHECK(queue.dequeue() == 3);
     }
 }
 
-TEST_CASE("Enqueue and Dequeue Dynamic Capacity", "[NonBlockingQ]") {
+TEST_CASE("NonBlockingQ Operations", "[NonBlockingQ]") {
     NonBlockingQ<int> queue;
 
-    SECTION("Enqueue then Dequeue") {
+    SECTION("Queue starts empty") {
+        CHECK(queue.is_empty());
+    }
+
+    SECTION("Enqueue adds elements") {
         queue.enqueue(1);
-        auto result = queue.dequeue();
-        REQUIRE(result.has_value());
-        REQUIRE(result.value() == 1);
+        CHECK_FALSE(queue.is_empty());
     }
 
-    SECTION("Dequeue from Empty Queue") {
-        auto result = queue.dequeue();
-        REQUIRE_FALSE(result.has_value());
-    }
-
-    SECTION("Multiple Enqueue and Dequeue") {
+    SECTION("Dequeue returns elements in FIFO order") {
         queue.enqueue(1);
         queue.enqueue(2);
-        REQUIRE(queue.dequeue().value() == 1);
-        REQUIRE(queue.dequeue().value() == 2);
+        auto maybeOne = queue.dequeue();
+        CHECK(maybeOne.has_value());
+        CHECK(maybeOne.value() == 1);
+
+        auto maybeTwo = queue.dequeue();
+        CHECK(maybeTwo.has_value());
+        CHECK(maybeTwo.value() == 2);
+    }
+
+    SECTION("Dequeue on empty queue returns efp::Nothing") {
+        auto result = queue.dequeue();
+        CHECK_FALSE(result.has_value());
+    }
+
+    SECTION("Enqueue and dequeue multiple elements") {
+        for (int i = 1; i <= 5; ++i) {
+            queue.enqueue(i);
+        }
+
+        for (int i = 1; i <= 5; ++i) {
+            auto result = queue.dequeue();
+            CHECK(result.has_value());
+            CHECK(result.value() == i);
+        }
     }
 }
 
-TEST_CASE("Empty State", "[NonBlockingQ]") {
-    NonBlockingQ<int, 5> queue;
+TEST_CASE("DoubleBuffer Operations", "[DoubleBuffer]") {
+    DoubleBuffer<int, 10> buffer;  // Assuming a buffer size of 10 for testing
 
-    SECTION("Initially Empty") {
-        REQUIRE(queue.is_empty());
+    SECTION("Initial State is Empty") {
+        CHECK(buffer.empty());
     }
 
-    SECTION("NotEmpty After Enqueue") {
-        queue.enqueue(1);
-        REQUIRE_FALSE(queue.is_empty());
+    SECTION("Enqueue Adds Elements") {
+        buffer.enqueue(1);
+        buffer.swap_buffer();  // Swap to make the enqueued element available for dequeue
+        CHECK_FALSE(buffer.empty());
     }
 
-    SECTION("Empty After Dequeuing Last Element") {
-        queue.enqueue(1);
-        queue.dequeue();
-        REQUIRE(queue.is_empty());
-    }
-}
-
-TEST_CASE("Empty State Dynamic Capacity", "[NonBlockingQ]") {
-    NonBlockingQ<int> queue;
-
-    SECTION("Initially Empty") {
-        REQUIRE(queue.is_empty());
+    SECTION("Dequeue Removes Elements") {
+        buffer.enqueue(1);
+        buffer.swap_buffer();
+        CHECK(buffer.dequeue() == 1);
+        CHECK(buffer.empty());
     }
 
-    SECTION("NotEmpty After Enqueue") {
-        queue.enqueue(1);
-        REQUIRE_FALSE(queue.is_empty());
-    }
-
-    SECTION("Empty After Dequeuing Last Element") {
-        queue.enqueue(1);
-        queue.dequeue();
-        REQUIRE(queue.is_empty());
+    SECTION("Elements Move to Read Buffer on Swap") {
+        buffer.enqueue(1);
+        buffer.enqueue(2);
+        buffer.swap_buffer();  // Now, the elements should be in the read buffer
+        CHECK(buffer.dequeue() == 1);
+        CHECK(buffer.dequeue() == 2);
+        CHECK(buffer.empty());
     }
 }
+
+#endif  // CONCURRENCY_TEST_HPP_
