@@ -884,62 +884,68 @@ using InitializerList = std::initializer_list<A>;
 // _foldl :: (A -> B -> A) -> A -> [B] -> A
 template<typename F, typename A, typename... Bs>
 constexpr A _foldl(F f, A a, Bs... bs) {
-    (void)std::initializer_list<Unit> {(a = f(a, bs), unit)...};
-    return a;
+    // (void)std::initializer_list<Unit> {(a = f(a, bs), unit)...};
+    return ((void)std::initializer_list<Unit> {(a = f(a, bs), unit)...}, a);
 }
 
 // _all :: [Bool] -> Bool
 template<typename... Args>
 constexpr bool _all(Args... args) {
-    bool result = true;
-    (void)std::initializer_list<Unit> {(result = result && args, unit)...};
+    // bool result = true;
+    // (void)std::initializer_list<Unit> {(result = result && args, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(op_and, true, args...);
 }
 
 // _any :: [Bool] -> Bool
 template<typename... Args>
 constexpr bool _any(Args... args) {
-    bool result = false;
-    (void)std::initializer_list<Unit> {(result = result || args, unit)...};
+    // bool result = false;
+    // (void)std::initializer_list<Unit> {(result = result || args, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(op_or, false, args...);
 }
 
 // _maximum :: [A] -> A
 template<typename A, typename... As>
 constexpr A _maximum(A a, As... as) {
-    A result = a;
-    (void)std::initializer_list<Unit> {(result = as > result ? as : result, unit)...};
+    // A result = a;
+    // (void)std::initializer_list<Unit> {(result = as > result ? as : result, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(max<A>, a, as...);
 }
 
 // _minimum :: [A] -> A
 template<typename A, typename... As>
 constexpr A _minimum(A a, As... as) {
-    A result = a;
-    (void)std::initializer_list<Unit> {(result = as < result ? as : result, unit)...};
+    // A result = a;
+    // (void)std::initializer_list<Unit> {(result = as < result ? as : result, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(min<A>, a, as...);
 }
 
 // _sum :: [A] -> A
 template<typename A, typename... As>
 constexpr A _sum(A a, As... as) {
-    A result = a;
-    (void)std::initializer_list<Unit> {(result += as, unit)...};
+    // A result = a;
+    // (void)std::initializer_list<Unit> {(result += as, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(op_add<A>, a, as...);
 }
 
 // _product :: [A] -> A
 template<typename A, typename... As>
 constexpr A _product(A a, As... as) {
-    A result = a;
-    (void)std::initializer_list<Unit> {(result *= as, unit)...};
+    // A result = a;
+    // (void)std::initializer_list<Unit> {(result *= as, unit)...};
 
-    return result;
+    // return result;
+    return _foldl(op_mul<A>, a, as...);
 }
 
 // All
