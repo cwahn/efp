@@ -24,4 +24,4 @@ target_link_libraries(efp_test
     efp)
 
 catch_discover_tests(efp_test)
-enable_template_compilation_time(efp_test)
+efp_enable_compilation_time(efp_test)

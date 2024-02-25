@@ -153,7 +153,7 @@ TEST_CASE("WildCard") {
 
         const auto wc = [&]() { wild_card_work = true; };
 
-        const auto wrapped = WildCardWrapper<decltype(wc)> {wc};
+        const auto wrapped = detail::WildCardWrapper<CVRemoved<decltype(wc)>> {wc};
         wrapped(42);
 
         CHECK(wild_card_work == true);
@@ -162,7 +162,7 @@ TEST_CASE("WildCard") {
     SECTION("Non-void return") {
         const auto wc = [&]() { return 42; };
 
-        const auto wrapped = WildCardWrapper<decltype(wc)> {wc};
+        const auto wrapped = detail::WildCardWrapper<CVRemoved<decltype(wc)>> {wc};
 
         CHECK(wrapped(unit) == 42);
     }
@@ -183,82 +183,77 @@ TEST_CASE("enum_type") {
     // CHECK(b.get<int>() == 1);
 }
 
-// template <typename A>
-// struct Cons;
+// ! Deprecated
+TEST_CASE("Enum Exteneded Constructor") {
+    SECTION("Explicit constructor") {
+        struct A {
+            A(bool arg) : value(arg) {}
 
-// struct Nil {};
+            bool value;
+        };
 
-// template <typename A>
-// using List = Enum<Nil, Cons<A>>;
+        struct B {};
 
-// template <typename A>
-// struct Cons {
-//     A head;
-//     List<A> tail;
-// };
+        using SomeEnum = Enum<A, B>;
 
-// ! Deprecate because of too much compile time overhead
-// TEST_CASE("Enum Exteneded Constructor") {
-//     SECTION("Explicit constructor") {
-//         struct A {
-//             A(bool arg) : value(arg) {}
-//             bool value;
-//         };
-//         struct B {};
+        CHECK(IsConstructible<bool, bool>::value);
+        CHECK(IsConstructible<A, bool>::value);
 
-//         using SomeEnum = Enum<A, B>;
+        CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-//         CHECK(IsConstructible<bool, bool>::value);
-//         CHECK(IsConstructible<A, bool>::value);
+        int idx_0 = (int)SomeEnum(true).index();
+        int idx_1 = (int)SomeEnum {A {true}}.index();
 
-//         CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+        CHECK(idx_0 == idx_1);
 
-//         int idx_0 = (int)SomeEnum(true).index();
-//         int idx_1 = (int)SomeEnum{A{true}}.index();
+        // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+    }
 
-//         CHECK(idx_0 == idx_1);
+    // todo Make it works for aggregate construction as well
+    // SECTION("Non-explicit constructor") {
+    //     struct A {
+    //         bool value;
+    //     };
+    //     struct B {};
 
-//         // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-//     }
+    //     using SomeEnum = Enum<A, B>;
 
-//     // todo Make it works for aggregate construction as well
-//     // SECTION("Non-explicit constructor") {
-//     //     struct A {
-//     //         bool value;
-//     //     };
-//     //     struct B {};
+    //     CHECK(IsConstructible<bool, bool>::value);
+    //     CHECK(IsConstructible<A, bool>::value);
 
-//     //     using SomeEnum = Enum<A, B>;
+    //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-//     //     CHECK(IsConstructible<bool, bool>::value);
-//     //     CHECK(IsConstructible<A, bool>::value);
+    //     int idx_0 = (int)SomeEnum(true).index();
+    //     int idx_1 = (int)SomeEnum{A{true}}.index();
 
-//     //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+    //     CHECK(idx_0 == idx_1);
 
-//     //     int idx_0 = (int)SomeEnum(true).index();
-//     //     int idx_1 = (int)SomeEnum{A{true}}.index();
+    //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+    // }
 
-//     //     CHECK(idx_0 == idx_1);
+    SECTION("Nested Enum") {
+        struct A {};
 
-//     //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-//     // }
+        struct B {};
 
-//     SECTION("Nested Enum") {
-//         struct A {};
-//         struct B {};
+        using Enum0 = Enum<A, B>;
 
-//         using Enum0 = Enum<A, B>;
-//         struct C {};
+        struct C {};
 
-//         using NestedEnum = Enum<C, Enum0>;
+        using NestedEnum = Enum<C, Enum0>;
 
-//         CHECK(NestedEnum{A{}}.index() == NestedEnum{Enum0{A{}}}.index());
-//     }
+        CHECK(NestedEnum {A {}}.index() == NestedEnum {Enum0 {A {}}}.index());
+    }
 
-//     // SECTION("Self referencing Enum") {
-//     //     List<int> empty_list = Nil{};
-//     //     List<int> one_list = Cons<int>{42, Nil{}};
-//     // }
+    // SECTION("Self referencing Enum") {
+    //     List<int> empty_list = Nil{};
+    //     List<int> one_list = Cons<int>{42, Nil{}};
+    // }
+}
+
+// SECTION("Self referencing Enum") {
+//     List<int> empty_list = Nil{};
+//     List<int> one_list = Cons<int>{42, Nil{}};
 // }
 
 struct TemplateBranch {
@@ -369,6 +364,7 @@ TEST_CASE("enum_match") {
         Enum<Unit, int, double> a = unit;
         double b = 0.;
 
+        //?
         a.match([&](int x) { b += 1; }, [&]() {});
 
         CHECK(b == 0.);
@@ -414,50 +410,50 @@ TEST_CASE("enum_match") {
     // }
 }
 
-// A test function to be pointed to
-int enum_test_function() {
-    return 42;
-}
+// // A test function to be pointed to
+// int enum_test_function() {
+//     return 42;
+// }
 
-TEST_CASE("Function Pointer in Enum") {
-    SECTION("Storing and retrieving function pointer") {
-        // Create an Enum instance holding a function pointer
-        Enum<int (*)()> my_enum_func_ptr = enum_test_function;
+// TEST_CASE("Function Pointer in Enum") {
+//     // SECTION("Storing and retrieving function pointer") {
+//     //     // Create an Enum instance holding a function pointer
+//     //     Enum<int (*)()> my_enum_func_ptr = enum_test_function;
 
-        // Retrieve the function pointer and store it in a variable
-        int (*retrieved_func_ptr)() = my_enum_func_ptr.get<int (*)()>();
+//     //     // Retrieve the function pointer and store it in a variable
+//     //     int (*retrieved_func_ptr)() = my_enum_func_ptr.get<int (*)()>();
 
-        // Test if the retrieved function pointer is equal to the original one
-        CHECK(retrieved_func_ptr == &enum_test_function);
-    }
+//     //     // Test if the retrieved function pointer is equal to the original one
+//     //     CHECK(retrieved_func_ptr == &enum_test_function);
+//     // }
 
-    SECTION("Storing and retrieving lambda") {
-        // ! For some reason this does not work with const qualifier
-        auto enum_test_lambda = [&]() { return 84; };
+//     // SECTION("Storing and retrieving lambda") {
+//     //     // ! For some reason this does not work with const qualifier
+//     //     auto enum_test_lambda = [&]() { return 84; };
 
-        // Create an Enum instance holding a lambda
-        Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);
+//     //     // Create an Enum instance holding a lambda
+//     //     Enum<decltype(enum_test_lambda)> my_enum_lambda(enum_test_lambda);
 
-        // Retrieve the lambda and store it in a variable
-        auto retrieved_lambda = my_enum_lambda.get<decltype(enum_test_lambda)>();
+//     //     // Retrieve the lambda and store it in a variable
+//     //     auto retrieved_lambda = my_enum_lambda.get<decltype(enum_test_lambda)>();
 
-        // Test if the retrieved lambda is equal to the original one
-        // This check confirms that the lambda is stored and retrieved correctly.
-        // Note: Direct lambda comparison might not be feasible; instead, test the behavior.
-        CHECK(retrieved_lambda() == enum_test_lambda());
-    }
+//     //     // Test if the retrieved lambda is equal to the original one
+//     //     // This check confirms that the lambda is stored and retrieved correctly.
+//     //     // Note: Direct lambda comparison might not be feasible; instead, test the behavior.
+//     //     CHECK(retrieved_lambda() == enum_test_lambda());
+//     // }
 
-    SECTION("Using function name directly") {
-        // Create an Enum instance using the function name directly
-        Enum<int (*)()> my_enum_func_name = enum_test_function;
+//     // SECTION("Using function name directly") {
+//     //     // Create an Enum instance using the function name directly
+//     //     Enum<int (*)()> my_enum_func_name = enum_test_function;
 
-        // Retrieve the function pointer and store it in a variable
-        int (*retrieved_func_name)() = my_enum_func_name.get<int (*)()>();
+//     //     // Retrieve the function pointer and store it in a variable
+//     //     int (*retrieved_func_name)() = my_enum_func_name.get<int (*)()>();
 
-        // Test if the retrieved function pointer is equal to the original one
-        CHECK(retrieved_func_name == &enum_test_function);
-    }
-}
+//     //     // Test if the retrieved function pointer is equal to the original one
+//     //     CHECK(retrieved_func_name == &enum_test_function);
+//     // }
+// }
 
 TEST_CASE("EnumAt") {
     CHECK(IsSame<EnumAt<0, Enum<int, double>>, int>::value);

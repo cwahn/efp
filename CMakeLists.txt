@@ -43,7 +43,7 @@ if(ENABLE_ASAN)
 endif()
 
 # Function to enable template compilation time measurement for a specific target
-function(enable_template_compilation_time target_name)
+function(efp_enable_compilation_time target_name)
     message(STATUS "Enabling template compilation time measurement for target: ${target_name}")
 
     # Check if the compiler is Clang or GCC and add the respective flags to the target
@@ -64,7 +64,6 @@ set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
 
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
-
 
 # Check if this CMakeLists.txt is the top-most CMake project
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)

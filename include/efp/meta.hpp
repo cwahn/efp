@@ -249,20 +249,20 @@ constexpr A min(const A& lhs, const A& rhs) {
 
 // Foldl
 // Maybe just recursive constexpr template function could be enough
+// ! deprecated because of performance issue
+// namespace detail {
+//     template<template<class, class> class F, typename A, typename... Bs>
+//     struct FoldlImpl {};
 
-namespace detail {
-    template<template<class, class> class F, typename A, typename... Bs>
-    struct FoldlImpl {};
+//     template<template<class, class> class F, typename A, typename B>
+//     struct FoldlImpl<F, A, B>: F<A, B>::Type {};
 
-    template<template<class, class> class F, typename A, typename B>
-    struct FoldlImpl<F, A, B>: F<A, B>::Type {};
+//     template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+//     struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
+// }  // namespace detail
 
-    template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-    struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
-}  // namespace detail
-
-template<template<class, class> class F, typename A, typename... Bs>
-using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
+// template<template<class, class> class F, typename A, typename... Bs>
+// using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // IsSame
 
@@ -272,7 +272,7 @@ using IsSame = std::is_same<A, B>;
 // PackAt
 
 namespace detail {
-    template<uint8_t n, typename... Args>
+    template<size_t n, typename... Args>
     struct PackAtImpl {
         using Type = void*;
     };
@@ -282,33 +282,26 @@ namespace detail {
         using Type = Head;
     };
 
-    template<uint8_t n, typename Head, typename... Tail>
+    template<size_t n, typename Head, typename... Tail>
     struct PackAtImpl<n, Head, Tail...>: PackAtImpl<n - 1, Tail...> {};
 }  // namespace detail
 
-template<uint8_t n, typename... Args>
+template<size_t n, typename... Args>
 using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
 // Find
 
 namespace detail {
-    // FindHelperValue
-
-    template<uint8_t n>
-    struct FindHelperValue {
-        static constexpr uint8_t value = n;
-    };
-
     // FindImpl
-
     template<size_t n, template<class> class P, typename... Args>
     struct FindImpl {};
 
     template<size_t n, template<class> class P, typename Head, typename... Tail>
     struct FindImpl<n, P, Head, Tail...>:
-        Conditional<P<Head>::value, FindHelperValue<n>, FindImpl<n + 1, P, Tail...>> {};
+        Conditional<P<Head>::value, CtConst<size_t, n>, FindImpl<n + 1, P, Tail...>> {};
 }  // namespace detail
 
+// Find the first type in the list that satisfies the predicate P
 template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
 
@@ -367,13 +360,13 @@ public:
 };
 
 // IsInvocable
+// ? Is Custom implementation faster?
+// #if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
 
-#if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
+// template<typename F, typename... Args>
+// using IsInvocable = std::is_invocable<F, Args...>;
 
-template<typename F, typename... Args>
-using IsInvocable = std::is_invocable<F, Args...>;
-
-#else  // If earlier than C++17, use custom IsInvocable
+// #else  // If earlier than C++17, use custom IsInvocable
 
 template<typename F, typename... Args>
 struct IsInvocable {
@@ -388,7 +381,7 @@ public:
     static constexpr bool value = decltype(check<F>(0))::value;
 };
 
-#endif
+// #endif
 
 // IsFunction
 
@@ -1036,6 +1029,25 @@ struct RawStorage {
         return reinterpret_cast<A*>(_data);
     }
 };
+
+// TypeList
+template<typename... As>
+struct TypeList {};
+
+// Helper to prepend a type to a TypeList
+namespace detail {
+    template<typename A, typename List>
+    struct PrependImpl {};
+
+    template<typename A, typename... As>
+    struct PrependImpl<A, TypeList<As...>> {
+        using Type = TypeList<A, As...>;
+    };
+}  // namespace detail
+
+// Prepend
+template<typename A, typename List>
+using Prepend = typename detail::PrependImpl<A, List>::Type;
 
 }  // namespace efp
 
