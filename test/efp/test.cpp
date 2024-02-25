@@ -10,3 +10,4 @@
 #include "./string_test.hpp"
 #include "./sort_test.hpp"
 #include "./format_test.hpp"
+#include "./concurrency_test.hpp"
