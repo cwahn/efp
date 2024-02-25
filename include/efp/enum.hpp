@@ -215,7 +215,7 @@ namespace detail {
         Overloaded(const F& f, const Fs&... fs) : F {f}, Overloaded<Fs...> {fs...} {}
     };
 
-    // IsSameUnary 
+    // IsSameUnary
     template<typename Alt>
     struct IsSameUnary {
         template<typename Alt_>
