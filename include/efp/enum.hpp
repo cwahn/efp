@@ -179,16 +179,23 @@ namespace detail {
         const F& _lambda;
     };
 
-    // // Utility function to easily create a lambda wrapper
-    // template<typename F>
-    // WildCardWrapper<F> wild_card_wrapper(const F& lambda) {
-    //     return WildCardWrapper<F>(lambda);
-    // }
-
+    // MatchBranch
     // Wrap the wild card with WildCardWrapper, otherwise use the original callable
     template<typename F>
     using MatchBranch = Conditional<IsWildCard<F>::value, WildCardWrapper<F>, F>;
 
+    template<typename F, typename = EnableIf<IsWildCard<F>::value>>
+    WildCardWrapper<F> match_branch(const F& f) {
+        return WildCardWrapper<F>(f);
+    }
+
+    // Template specialization for non-wild cards (zero-copy)
+    template<typename F, typename = EnableIf<!IsWildCard<F>::value>>
+    const F& match_branch(const F& f) {
+        return f;
+    }
+
+    // Overloaded
     // Overloaded class for pattern matching
     template<typename... Fs>
     struct Overloaded;
@@ -197,8 +204,7 @@ namespace detail {
     struct Overloaded<F>: F {
         using F::operator();
 
-        template<typename G>
-        Overloaded(const G& g) : F {MatchBranch<G> {g}} {}
+        Overloaded(const F& f) : F {f} {}
     };
 
     template<class F, class... Fs>
@@ -206,9 +212,16 @@ namespace detail {
         using F::operator();
         using Overloaded<Fs...>::operator();
 
-        template<class G, class... Gs>
-        Overloaded(G&& g, Gs&&... gs)
-            : F {MatchBranch<G> {forward<G>(g)}}, Overloaded<Fs...>(forward<Gs>(gs)...) {}
+        Overloaded(const F& f, const Fs&... fs) : F {f}, Overloaded<Fs...> {fs...} {}
+    };
+
+    // IsSameUnary 
+    template<typename Alt>
+    struct IsSameUnary {
+        template<typename Alt_>
+        struct Binded {
+            static const bool value = IsSame<Alt, Alt_>::value;
+        };
     };
 
     // EnumBase
@@ -453,18 +466,10 @@ namespace detail {
                 alt_num,
                 Match<Pattern>::template Case,
                 const EnumBase*,
-                const Pattern&>::call(_index, this, Pattern {f, fs...});
+                const Pattern&>::call(_index, this, Pattern {match_branch(f), match_branch(fs)...});
         }
 
     private:
-        template<typename Alt>
-        struct IsSameUnary {
-            template<typename Alt_>
-            struct Binded {
-                static const bool value = IsSame<Alt, Alt_>::value;
-            };
-        };
-
         template<typename Alt>
         struct AltIndex: Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...> {};
 
@@ -567,32 +572,19 @@ namespace detail {
         template<typename Alt, typename List>
         using RemoveFirstInvocable = typename _RemoveFirstInvocable<Alt, List>::Type;
 
-        // template<typename Alt, typename List>
-        // struct RemoveFirstInvocable {};
-
-        // template<typename Alt>
-        // struct RemoveFirstInvocable<Alt, TypeList<>>: TypeList<> {};
-
-        // template<typename Alt, typename F, typename... Fs>
-        // struct RemoveFirstInvocable<Alt, TypeList<F, Fs...>>:
-        //     Conditional<
-        //         IsInvocable<F, Alt>::value,
-        //         TypeList<Fs...>,
-        //         Prepend<F, RemoveFirstInvocable<Alt, TypeList<Fs...>>>> {};
-
         // Mutual Exhaustiveness
         // Check if the alternatives and the branches are mutually exhaustive
         template<typename AltList, typename BranchList>
-        struct Me {};
+        struct MutExhaust {};
 
         template<typename Alt, typename F>
-        struct Me<TypeList<Alt>, TypeList<F>>: IsInvocable<F, Alt> {};
+        struct MutExhaust<TypeList<Alt>, TypeList<F>>: IsInvocable<F, Alt> {};
 
         template<typename Alt, typename... Alts, typename F, typename... Fs>
-        struct Me<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
+        struct MutExhaust<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
             Conditional<
                 sizeof...(Alts) == sizeof...(Fs),
-                Me<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>,
+                MutExhaust<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>,
                 False> {};
 
         // PatternCheck
@@ -609,7 +601,7 @@ namespace detail {
         // If there is no wild card at the last branch, check if the alternatives and the branches are mutually exhaustive
         template<typename... Fs>
         struct _PatternCheck<False, Fs...> {
-            using Type = Me<TypeList<A, As...>, TypeList<Fs...>>;
+            using Type = MutExhaust<TypeList<A, As...>, TypeList<Fs...>>;
         };
 
         template<typename... Fs>

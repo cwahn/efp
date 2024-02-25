@@ -272,7 +272,7 @@ using IsSame = std::is_same<A, B>;
 // PackAt
 
 namespace detail {
-    template<uint8_t n, typename... Args>
+    template<size_t n, typename... Args>
     struct PackAtImpl {
         using Type = void*;
     };
@@ -282,33 +282,26 @@ namespace detail {
         using Type = Head;
     };
 
-    template<uint8_t n, typename Head, typename... Tail>
+    template<size_t n, typename Head, typename... Tail>
     struct PackAtImpl<n, Head, Tail...>: PackAtImpl<n - 1, Tail...> {};
 }  // namespace detail
 
-template<uint8_t n, typename... Args>
+template<size_t n, typename... Args>
 using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
 // Find
 
 namespace detail {
-    // FindHelperValue
-
-    template<uint8_t n>
-    struct FindHelperValue {
-        static constexpr uint8_t value = n;
-    };
-
     // FindImpl
-
     template<size_t n, template<class> class P, typename... Args>
     struct FindImpl {};
 
     template<size_t n, template<class> class P, typename Head, typename... Tail>
     struct FindImpl<n, P, Head, Tail...>:
-        Conditional<P<Head>::value, FindHelperValue<n>, FindImpl<n + 1, P, Tail...>> {};
+        Conditional<P<Head>::value, CtConst<size_t, n>, FindImpl<n + 1, P, Tail...>> {};
 }  // namespace detail
 
+// Find the first type in the list that satisfies the predicate P
 template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
 
