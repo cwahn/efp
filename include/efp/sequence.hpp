@@ -76,14 +76,26 @@ public:
         }
     }
 
-    template<typename... Arg>
-    Array(const Arg&... args) {
-        static_assert(
-            sizeof...(args) == ct_size,
-            "Array::Array: number of arguments must be equal to ct_size"
-        );
+    // ! Deprecated: variadic template constructor
+    // template<typename... Arg>
+    // Array(const Arg&... args) {
+    //     static_assert(
+    //         sizeof...(args) == ct_size,
+    //         "Array::Array: number of arguments must be equal to ct_size"
+    //     );
+    //     size_t index = 0;
+    //     _construct_elements(index, args...);
+    // }
+
+    Array(InitializerList<Element> il) {
+        if (il.size() != ct_size) {
+            throw std::runtime_error("Array::Array: number of arguments must be equal to ct_size");
+        }
+
         size_t index = 0;
-        _construct_elements(index, args...);
+        for (const auto& e : il) {
+            new (_data + index++) Element {e};
+        }
     }
 
     Element& operator[](size_t index) {
@@ -286,14 +298,28 @@ public:
     // template<typename... Arg>
     // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
 
-    template<typename... Arg>
-    ArrVec(const Arg&... args) : _size(sizeof...(args)) {
-        static_assert(
-            sizeof...(args) <= ct_capacity,
-            "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
-        );
+    // ! Deprecated: variadic template constructor
+    // template<typename... Arg>
+    // ArrVec(const Arg&... args) : _size(sizeof...(args)) {
+    //     static_assert(
+    //         sizeof...(args) <= ct_capacity,
+    //         "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
+    //     );
+    //     size_t index = 0;
+    //     _construct_elements(index, args...);
+    // }
+
+    ArrVec(InitializerList<Element> il) : _size(il.size()) {
+        if (il.size() > ct_capacity) {
+            throw std::runtime_error(
+                "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
+            );
+        }
+
         size_t index = 0;
-        _construct_elements(index, args...);
+        for (const auto& e : il) {
+            new (_data + index++) Element {e};
+        }
     }
 
     Element& operator[](size_t index) {

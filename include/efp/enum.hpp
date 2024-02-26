@@ -610,8 +610,8 @@ namespace detail {
                 Type;
 
         // Private member variables
-        alignas(_maximum(alignof(A), alignof(As)...)
-        ) uint8_t _storage[_maximum(sizeof(A), sizeof(As)...)];
+        alignas(_maximum({alignof(A), alignof(As)...})
+        ) uint8_t _storage[_maximum({sizeof(A), sizeof(As)...})];
 
         uint8_t _index;  // Current maxinum variant is 256
     };
