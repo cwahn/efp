@@ -6,7 +6,6 @@
 namespace efp {
 
 // Unit
-
 struct Unit {
     constexpr bool operator==(const Unit&) const noexcept {
         return true;
@@ -20,7 +19,6 @@ struct Unit {
 constexpr Unit unit;
 
 // CtConst
-
 template<typename A, A v>
 using CtConst = std::integral_constant<A, v>;
 
@@ -55,30 +53,24 @@ constexpr auto operator/(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs / r
 }
 
 // Bool
-
 template<bool b>
 using Bool = CtConst<bool, b>;
 
 // True
-
 using True = CtConst<bool, true>;
 
 // False
-
 using False = CtConst<bool, false>;
 
 // Int
-
 template<size_t n>
 using Int = CtConst<int, n>;
 
 // Size
-
 template<size_t n>
 using Size = CtConst<size_t, n>;
 
 // IsCtConst
-
 template<typename A>
 struct IsCtConst {
     static constexpr bool value = false;
@@ -96,26 +88,21 @@ template<typename A>
 struct IsCtConst<A&&>: IsCtConst<A> {};
 
 // AlwaysFalse
-
 template<typename T>
 struct AlwaysFalse: False {};
 
 // EnableIf
-
 template<bool cond, typename A = void>
 using EnableIf = typename std::enable_if<cond, A>::type;
 
 // Conditionl
-
 template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
 
 // size_of_ptr_v
-
 constexpr auto size_of_ptr_v = sizeof(void*);
 
 // NumericLimits
-
 template<typename A>
 using NumericLimits = std::numeric_limits<A>;
 
@@ -124,109 +111,93 @@ using NumericLimits = std::numeric_limits<A>;
 // It's also the way Haskell and Rust do
 
 // op_neg
-
 template<typename A>
 constexpr A op_neg(const A& a) {
     return -a;
 }
 
 // op_eq
-
 template<typename A>
 constexpr bool op_eq(const A& lhs, const A& rhs) {
     return lhs == rhs;
 }
 
 // op_neq
-
 template<typename A>
 constexpr bool op_neq(const A& lhs, const A& rhs) {
     return lhs != rhs;
 }
 
 // op_gt
-
 template<typename A>
 constexpr bool op_gt(const A& lhs, const A& rhs) {
     return lhs > rhs;
 }
 
 // op_lt
-
 template<typename A>
 constexpr bool op_lt(const A& lhs, const A& rhs) {
     return lhs < rhs;
 }
 
 // op_geq
-
 template<typename A>
 constexpr bool op_geq(const A& lhs, const A& rhs) {
     return lhs >= rhs;
 }
 
 // op_leq
-
 template<typename A>
 constexpr bool op_leq(const A& lhs, const A& rhs) {
     return lhs <= rhs;
 }
 
 // op_not
-
 constexpr bool op_not(const bool b) {
     return !b;
 }
 
 // op_and
-
 constexpr bool op_and(const bool lhs, const bool rhs) {
     return lhs && rhs;
 }
 
 // op_or
-
 constexpr bool op_or(const bool lhs, const bool rhs) {
     return lhs || rhs;
 }
 
 // op_add
-
 template<typename A>
 constexpr A op_add(const A& lhs, const A& rhs) {
     return lhs + rhs;
 }
 
 // op_sub
-
 template<typename A>
 constexpr A op_sub(const A& lhs, const A& rhs) {
     return lhs - rhs;
 }
 
 // op_mul
-
 template<typename A>
 constexpr A op_mul(const A& lhs, const A& rhs) {
     return lhs * rhs;
 }
 
 // op_div
-
 template<typename A>
 constexpr A op_div(const A& lhs, const A& rhs) {
     return lhs / rhs;
 }
 
 // op_mod
-
 template<typename A>
 constexpr A op_mod(const A& lhs, const A& rhs) {
     return lhs % rhs;
 }
 
 // bound_v
-
 template<typename A, typename B, typename C>
 constexpr auto bound_v(const A& lower, const B& upper, const C& x)
     -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x)) {
@@ -234,14 +205,12 @@ constexpr auto bound_v(const A& lower, const B& upper, const C& x)
 }
 
 // max
-
 template<typename A>
 constexpr A max(const A& lhs, const A& rhs) {
     return lhs > rhs ? lhs : rhs;
 }
 
 // min
-
 template<typename A>
 constexpr A min(const A& lhs, const A& rhs) {
     return lhs < rhs ? lhs : rhs;
@@ -306,17 +275,14 @@ template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
 
 // LvalueRefAdded
-
 template<class T>
 using LvalueRefAdded = typename std::add_lvalue_reference<T>::type;
 
 // RvalueRefAdded
-
 template<class T>
 using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 
 // declval
-
 template<typename T>
 constexpr RvalueRefAdded<T> declval() noexcept;
 
@@ -343,7 +309,6 @@ using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
 #endif
 
 // HasCallOperator
-
 template<typename A>
 class HasCallOperator {
     typedef char one;
@@ -384,7 +349,6 @@ public:
 // #endif
 
 // IsFunction
-
 template<typename T>
 using IsFunction = std::is_function<T>;
 
@@ -763,50 +727,43 @@ namespace detail {
 template<typename F>
 using Return = typename detail::ReturnImpl<F>::Type;
 
-// apply
-
 namespace detail {
     template<typename F, typename... As, int... indices>
-    Return<F> apply_impl(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
+    Return<F> _apply(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
         return f(get<indices>(tpl)...);
     }
 }  // namespace detail
 
+// apply
 template<
     typename F,
     typename... As,
     typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
 Return<F> apply(const F& f, const Tuple<As...>& tpl) {
-    return detail::apply_impl(f, tpl, IndexSequenceFor<As...> {});
+    return detail::_apply(f, tpl, IndexSequenceFor<As...> {});
 }
 
 // PointerRemoved
-
 template<typename A>
 using PointerRemoved = typename std::remove_pointer<A>::type;
 
 // ReferenceRemoved
-
 template<typename A>
 using ReferenceRemoved = typename std::remove_reference<A>::type;
 
 // ConstRemoved
-
 template<typename A>
 using ConstRemoved = typename std::remove_const<A>::type;
 
 // VoletileRemoved
-
 template<typename A>
 using VoletileRemoved = typename std::remove_volatile<A>::type;
 
 // CVRemoved
-
 template<typename A>
 using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
 // CVRefRemoved
-
 template<typename A>
 using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 
@@ -815,12 +772,10 @@ template<typename A>
 using Decay = typename std::decay<A>::type;
 
 // IsConst
-
 template<typename A>
 using IsConst = std::is_const<A>;
 
 // Void
-
 namespace detail {
     template<typename... Ts>
     struct VoidImpl {
@@ -840,7 +795,6 @@ template<typename A>
 struct IsLvalueReference<A&>: True {};
 
 // forward
-
 template<typename A>
 constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
     return static_cast<A&&>(a);
@@ -853,14 +807,12 @@ constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
 }
 
 // move
-
 template<typename A>
 constexpr ReferenceRemoved<A>&& move(A&& a) {
     return static_cast<ReferenceRemoved<A>&&>(a);
 }
 
 // swap
-
 template<typename A>
 void swap(A& a, A& b) {
     A temp = efp::move(a);
@@ -909,13 +861,13 @@ constexpr bool _any(const bool (&bs)[n]) {
 // _maximum :: [A] -> A
 template<typename A, size_t n>
 constexpr A _maximum(const A (&as)[n]) {
-    return _foldl(max<A>, as[0], as);
+    return _foldl(max<A>, NumericLimits<A>::min(), as);
 }
 
 // _minimum :: [A] -> A
 template<typename A, size_t n>
 constexpr A _minimum(const A (&as)[n]) {
-    return _foldl(min<A>, as[0], as);
+    return _foldl(min<A>, NumericLimits<A>::max(), as);
 }
 
 // _sum :: [A] -> A
@@ -931,39 +883,18 @@ constexpr A _product(const A (&as)[n]) {
 }
 
 // All
-
 template<typename A, typename... As>
 struct All: Bool<_all({A::value, As::value...})> {};
 
 // Any
-
 template<typename A, typename... As>
 struct Any: Bool<_any({A::value, As::value...})> {};
 
 // Minimum
-// ? May be need to get removed for compile time performance
-// template<typename Head, typename... Tail>
-// struct Minimum: Minimum<Head, Minimum<Tail...>> {};
-
-// template<typename Head, typename Tail>
-// struct Minimum<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
-
-// template<typename Head>
-// struct Minimum<Head>: Head {};
 template<typename A, typename... As>
 struct Minimum: CtConst<typename A::value_type, _minimum({A::value, As::value...})> {};
 
 // Maximum
-// ? May be need to get removed for compile time performance
-// template<typename Head, typename... Tail>
-// struct Maximum: Maximum<Head, Maximum<Tail...>> {};
-
-// template<typename Head, typename Tail>
-// struct Maximum<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
-
-// template<typename Head>
-// struct Maximum<Head>: Head {};
-
 template<typename A, typename... As>
 struct Maximum: CtConst<typename A::value_type, _maximum({A::value, As::value...})> {};
 
