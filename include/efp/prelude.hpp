@@ -99,11 +99,9 @@ void for_each_mut(const F& f, Ass&... ass) {
 template<typename R, typename... Ass>
 using NAryReturn = Conditional<
     _all({IsStaticSize<Ass>::value...}),
-    // Array<R, Min<CtSize<Ass>...>::value>,
     Array<R, _minimum({CtSize<Ass>::value...})>,
     Conditional<
         _all({IsStaticCapacity<Ass>::value...}),
-        // ArrVec<R, Min<CtCapacity<Ass>...>::value>,
         ArrVec<R, _minimum({CtCapacity<Ass>::value...})>,
         Vector<R>>>;
 
@@ -425,7 +423,6 @@ void for_each_with_index(const F& f, const Ass&... seqs) {
 
 template<typename... Ass, typename F = void (*)(size_t, Element<Ass>&...)>
 void for_each_with_index_mut(const F& f, Ass&... seqs) {
-    // static_assert(_all(IsSequence<Ass>...>::value, "Arguments should implement sequence trait.");
     static_assert(_all({IsSequence<Ass>::value...}), "Arguments should implement sequence trait.");
     const size_t min_len = _min_length(seqs...);
 
@@ -502,7 +499,6 @@ using MapWithIndexReturn = Conditional<
 
 template<typename... Ass, typename F = void (*)(size_t, const Element<Ass>&...)>
 auto map_with_index(const F& f, const Ass&... ass) -> MapWithIndexReturn<F, Ass...> {
-    // static_assert(_all(IsSequence<Ass>...>::value, "Arguments should implement sequence trait.");
     static_assert(_all({IsSequence<Ass>::value...}), "Arguments should implement sequence trait.");
 
     auto res = MapWithIndexReturn<F, Ass...> {};

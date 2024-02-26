@@ -881,24 +881,6 @@ struct IsDefaultConstructible<A, decltype(A())>: True {};
 template<typename A>
 using InitializerList = std::initializer_list<A>;
 
-// _foldl :: (A -> B -> A) -> A -> [B] -> A
-// Implement with loop for c++ 14, and
-// template<typename F, typename A, typename... Bs>
-// constexpr A _foldl(F f, A a, Bs... bs) {
-//     // (void)std::initializer_list<Unit> {(a = f(a, bs), unit)...};
-//     return ((void)std::initializer_list<Unit> {(a = f(a, bs), unit)...}, a);
-// }
-
-// template<typename F, typename A, typename B>
-// constexpr void _foldl(F f, A& a, B b) {
-//     a = f(a, b);
-// }
-
-// template<typename F, typename A, typename... Bs>
-// constexpr A _foldl(F f, A a, Bs... bs) {
-//     return
-// }
-
 namespace detail {
     template<typename F, typename A, typename It>
     constexpr A foldl(const F& f, A a, It begin, It end) {
@@ -906,105 +888,43 @@ namespace detail {
     }
 }  // namespace detail
 
+// _foldl :: (A -> B -> A) -> A -> [B] -> A
 template<typename F, typename A, typename B, size_t n>
 constexpr A _foldl(const F& f, A a, const B (&bs)[n]) {
     return detail::foldl(f, a, bs, bs + n);
 }
 
-template<typename F, typename A, typename B, typename... Bs>
-constexpr A _foldl(const F& f, A a, B b, Bs... bs) {
-    return _foldl<F, A, B>(f, a, {b, bs...});
-}
-
 // _all :: [Bool] -> Bool
-// template<typename... Args>
-// constexpr bool _all(Args... args) {
-//     // bool result = true;
-//     // (void)std::initializer_list<Unit> {(result = result && args, unit)...};
-
-//     // return result;
-//     return _foldl(op_and, true, {args...});
-// }
 template<size_t n>
 constexpr bool _all(const bool (&bs)[n]) {
     return _foldl(op_and, true, bs);
 }
 
 // _any :: [Bool] -> Bool
-// template<typename... Args>
-// constexpr bool _any(Args... args) {
-//     // bool result = false;
-//     // (void)std::initializer_list<Unit> {(result = result || args, unit)...};
-
-//     // return result;
-//     return _foldl(op_or, false, {args...});
-// }
 template<size_t n>
 constexpr bool _any(const bool (&bs)[n]) {
     return _foldl(op_or, false, bs);
 }
 
 // _maximum :: [A] -> A
-// template<typename A, typename... As>
-// constexpr A _maximum(A a, As... as) {
-//     // A result = a;
-//     // (void)std::initializer_list<Unit> {(result = as > result ? as : result, unit)...};
-
-//     // return result;
-//     return _foldl(max<A>, a, {as...});
-// }
-// template<typename A, typename... As>
-// constexpr A _maximum(A a, As... as) {
-//     // A result = a;
-//     // (void)std::initializer_list<Unit> {(result = as > result ? as : result, unit)...};
-
-//     // return result;
-//     return _foldl(max<A>, a, {as...});
-// }
-
 template<typename A, size_t n>
 constexpr A _maximum(const A (&as)[n]) {
     return _foldl(max<A>, as[0], as);
 }
 
 // _minimum :: [A] -> A
-// template<typename A, typename... As>
-// constexpr A _minimum(A a, As... as) {
-//     // A result = a;
-//     // (void)std::initializer_list<Unit> {(result = as < result ? as : result, unit)...};
-
-//     // return result;
-//     return _foldl(min<A>, a, {as...});
-// }
-
 template<typename A, size_t n>
 constexpr A _minimum(const A (&as)[n]) {
     return _foldl(min<A>, as[0], as);
 }
 
 // _sum :: [A] -> A
-// template<typename A, typename... As>
-// constexpr A _sum(A a, As... as) {
-//     // A result = a;
-//     // (void)std::initializer_list<Unit> {(result += as, unit)...};
-
-//     // return result;
-//     return _foldl(op_add<A>, a, {as...});
-// }
 template<typename A, size_t n>
 constexpr A _sum(const A (&as)[n]) {
     return _foldl(op_add<A>, 0, as);
 }
 
 // _product :: [A] -> A
-// template<typename A, typename... As>
-// constexpr A _product(A a, As... as) {
-//     // A result = a;
-//     // (void)std::initializer_list<Unit> {(result *= as, unit)...};
-
-//     // return result;
-//     return _foldl(op_mul<A>, a, {as...});
-// }
 template<typename A, size_t n>
 constexpr A _product(const A (&as)[n]) {
     return _foldl(op_mul<A>, 1, as);
@@ -1012,35 +932,40 @@ constexpr A _product(const A (&as)[n]) {
 
 // All
 
-template<typename A, typename... Args>
-struct All: Bool<_all({A::value, Args::value...})> {};
+template<typename A, typename... As>
+struct All: Bool<_all({A::value, As::value...})> {};
 
 // Any
 
-template<typename A, typename... Args>
-struct Any: Bool<_any({A::value, Args::value...})> {};
+template<typename A, typename... As>
+struct Any: Bool<_any({A::value, As::value...})> {};
 
-// Min
+// Minimum
 // ? May be need to get removed for compile time performance
-template<typename Head, typename... Tail>
-struct Min: Min<Head, Min<Tail...>> {};
+// template<typename Head, typename... Tail>
+// struct Minimum: Minimum<Head, Minimum<Tail...>> {};
 
-template<typename Head, typename Tail>
-struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
+// template<typename Head, typename Tail>
+// struct Minimum<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
 
-template<typename Head>
-struct Min<Head>: Head {};
+// template<typename Head>
+// struct Minimum<Head>: Head {};
+template<typename A, typename... As>
+struct Minimum: CtConst<typename A::value_type, _minimum({A::value, As::value...})> {};
 
-// Max
+// Maximum
 // ? May be need to get removed for compile time performance
-template<typename Head, typename... Tail>
-struct Max: Max<Head, Max<Tail...>> {};
+// template<typename Head, typename... Tail>
+// struct Maximum: Maximum<Head, Maximum<Tail...>> {};
 
-template<typename Head, typename Tail>
-struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
+// template<typename Head, typename Tail>
+// struct Maximum<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
 
-template<typename Head>
-struct Max<Head>: Head {};
+// template<typename Head>
+// struct Maximum<Head>: Head {};
+
+template<typename A, typename... As>
+struct Maximum: CtConst<typename A::value_type, _maximum({A::value, As::value...})> {};
 
 // Common
 
