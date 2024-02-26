@@ -99,10 +99,12 @@ void for_each_mut(const F& f, Ass&... ass) {
 template<typename R, typename... Ass>
 using NAryReturn = Conditional<
     _all({IsStaticSize<Ass>::value...}),
-    Array<R, Min<CtSize<Ass>...>::value>,
+    // Array<R, Min<CtSize<Ass>...>::value>,
+    Array<R, _minimum({CtSize<Ass>::value...})>,
     Conditional<
         _all({IsStaticCapacity<Ass>::value...}),
-        ArrVec<R, Min<CtCapacity<Ass>...>::value>,
+        // ArrVec<R, Min<CtCapacity<Ass>...>::value>,
+        ArrVec<R, _minimum({CtCapacity<Ass>::value...})>,
         Vector<R>>>;
 
 // MapReturn
@@ -490,10 +492,10 @@ void cartesian_for_each_mut(const F& f, As& as, Ass&... ass) {
 template<typename F, typename... Ass>
 using MapWithIndexReturn = Conditional<
     _all({IsStaticSize<Ass>::value...}),
-    Array<CallReturn<F, size_t, Element<Ass>...>, Min<CtSize<Ass>...>::value>,
+    Array<CallReturn<F, size_t, Element<Ass>...>, _minimum({CtSize<Ass>::value...})>,
     Conditional<
         _all({IsStaticCapacity<Ass>::value...}),
-        ArrVec<CallReturn<F, size_t, Element<Ass>...>, Min<CtCapacity<Ass>...>::value>,
+        ArrVec<CallReturn<F, size_t, Element<Ass>...>, _minimum({CtCapacity<Ass>::value...})>,
         Vector<CallReturn<F, size_t, Element<Ass>...>>>>;
 
 // map_with_index
