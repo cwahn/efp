@@ -286,25 +286,25 @@ using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 template<typename T>
 constexpr RvalueRefAdded<T> declval() noexcept;
 
-// CallReturn
+// InvokeResult
 
 // Check the C++ standard version
 #if __cplusplus >= 201703L  // C++17 or later, use std::invoke_result
 template<typename F, typename... Args>
-using CallReturn = typename std::invoke_result<F, Args...>::type;
+using InvokeResult = typename std::invoke_result<F, Args...>::type;
 
 #else  // Before C++17, use the custom implementation
 
 namespace detail {
 
     template<typename F, typename... Args>
-    struct CallReturnImpl {
+    struct InvokeResultImpl {
         using Type = decltype(declval<F>()(declval<Args>()...));
     };
 }  // namespace detail
 
 template<typename F, typename... Args>
-using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
+using InvokeResult = typename detail::InvokeResultImpl<F, Args...>::Type;
 
 #endif
 
@@ -457,7 +457,7 @@ namespace detail {
     protected:
         template<typename F>
         auto match_impl(const F& f) const
-            -> EnableIf<IsInvocable<F, As...>::value, CallReturn<F, As...>> {
+            -> EnableIf<IsInvocable<F, As...>::value, InvokeResult<F, As...>> {
             return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
         }
     };
@@ -480,7 +480,7 @@ public:
     }
 
     template<typename F>
-    auto match(const F& f) const -> EnableIf<IsInvocable<F, As...>::value, CallReturn<F, As...>> {
+    auto match(const F& f) const -> EnableIf<IsInvocable<F, As...>::value, InvokeResult<F, As...>> {
         return detail::TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
     }
 
@@ -634,7 +634,7 @@ namespace detail {
 
     template<typename F, typename... Args>
     struct ReturnFromArgumentImpl<F, Tuple<Args...>> {
-        using Type = CallReturn<F, Args...>;
+        using Type = InvokeResult<F, Args...>;
     };
 }  // namespace detail
 

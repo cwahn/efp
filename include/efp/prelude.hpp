@@ -108,7 +108,7 @@ using NAryReturn = Conditional<
 // MapReturn
 
 template<typename F, typename... Ass>
-using MapReturn = NAryReturn<CallReturn<F, Element<Ass>...>, Ass...>;
+using MapReturn = NAryReturn<InvokeResult<F, Element<Ass>...>, Ass...>;
 
 // map :: (A -> B) -> [A] -> [B]
 template<typename F, typename... Ass>
@@ -189,12 +189,12 @@ auto foldr(const F& f, const B& init, const As& as) -> B {
 namespace detail {
     template<typename N, typename F>
     struct FromFunctionReturnImpl {
-        using Type = Vector<CallReturn<F, N>>;
+        using Type = Vector<InvokeResult<F, N>>;
     };
 
     template<size_t n, typename F>
     struct FromFunctionReturnImpl<Size<n>, F> {
-        using Type = Array<CallReturn<F, size_t>, n>;
+        using Type = Array<InvokeResult<F, size_t>, n>;
     };
 }  // namespace detail
 
@@ -489,11 +489,11 @@ void cartesian_for_each_mut(const F& f, As& as, Ass&... ass) {
 template<typename F, typename... Ass>
 using MapWithIndexReturn = Conditional<
     _all({IsStaticSize<Ass>::value...}),
-    Array<CallReturn<F, size_t, Element<Ass>...>, _minimum({CtSize<Ass>::value...})>,
+    Array<InvokeResult<F, size_t, Element<Ass>...>, _minimum({CtSize<Ass>::value...})>,
     Conditional<
         _all({IsStaticCapacity<Ass>::value...}),
-        ArrVec<CallReturn<F, size_t, Element<Ass>...>, _minimum({CtCapacity<Ass>::value...})>,
-        Vector<CallReturn<F, size_t, Element<Ass>...>>>>;
+        ArrVec<InvokeResult<F, size_t, Element<Ass>...>, _minimum({CtCapacity<Ass>::value...})>,
+        Vector<InvokeResult<F, size_t, Element<Ass>...>>>>;
 
 // map_with_index
 
@@ -520,11 +520,11 @@ auto map_with_index(const F& f, const Ass&... ass) -> MapWithIndexReturn<F, Ass.
 template<typename F, typename... Ass>
 using CartesianMapReturn = Conditional<
     _all({IsStaticSize<Ass>::value...}),
-    Array<CallReturn<F, Element<Ass>...>, _product({CtSize<Ass>::value...})>,
+    Array<InvokeResult<F, Element<Ass>...>, _product({CtSize<Ass>::value...})>,
     Conditional<
         _all({IsStaticCapacity<Ass>::value...}),
-        ArrVec<CallReturn<F, Element<Ass>...>, _product({CtCapacity<Ass>::value...})>,
-        Vector<CallReturn<F, Element<Ass>...>>>>;
+        ArrVec<InvokeResult<F, Element<Ass>...>, _product({CtCapacity<Ass>::value...})>,
+        Vector<InvokeResult<F, Element<Ass>...>>>>;
 
 // cartesian_map
 

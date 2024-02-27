@@ -44,7 +44,7 @@ public:
     }
 
     template<typename F>
-    auto fmap(const F& f) -> Enum<Nothing, CallReturn<F, A>> {
+    auto fmap(const F& f) -> Enum<Nothing, InvokeResult<F, A>> {
         if (has_value())
             return f(value());
         else
@@ -70,7 +70,7 @@ struct ElementImpl<Enum<Nothing, A>> {
 // functor
 
 template<typename A, typename F>
-auto fmap(const F& f, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
+auto fmap(const F& f, const Maybe<A>& ma) -> Maybe<InvokeResult<F, A>> {
     if (ma)
         return f(ma.value());
     else
@@ -84,7 +84,7 @@ auto pure(const Element<A>& a) -> EnableIf<IsMaybe<A>::value, A> {
 }
 
 template<typename A, typename F>
-auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
+auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<InvokeResult<F, A>> {
     if (mf && ma)
         return mf.value()(ma.value());
     else
@@ -95,7 +95,7 @@ auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<CallReturn<F, A>> {
 
 template<typename A, typename F>
 auto bind(const Maybe<A>& ma, const F& f)
-    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>> {
+    -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> {
     if (ma)
         return f(ma.value());
     else
@@ -104,7 +104,7 @@ auto bind(const Maybe<A>& ma, const F& f)
 
 template<typename A, typename F>
 auto operator>>=(const Maybe<A>& ma, const F& f)
-    -> EnableIf<IsMaybe<CallReturn<F, A>>::value, CallReturn<F, A>> {
+    -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> {
     if (ma)
         return f(ma.value());
     else
