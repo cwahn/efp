@@ -153,17 +153,17 @@ constexpr bool op_leq(const A& lhs, const A& rhs) {
 }
 
 // op_not
-constexpr bool op_not(const bool b) {
+constexpr bool op_not(const bool& b) {
     return !b;
 }
 
 // op_and
-constexpr bool op_and(const bool lhs, const bool rhs) {
+constexpr bool op_and(const bool& lhs, const bool& rhs) {
     return lhs && rhs;
 }
 
 // op_or
-constexpr bool op_or(const bool lhs, const bool rhs) {
+constexpr bool op_or(const bool& lhs, const bool& rhs) {
     return lhs || rhs;
 }
 
@@ -353,7 +353,6 @@ template<typename T>
 using IsFunction = std::is_function<T>;
 
 // FuncToFuncPtr
-
 namespace detail {
 
     // Base template
@@ -395,7 +394,6 @@ template<typename A>
 using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
 
 // TupleLeaf
-
 template<size_t index, typename A>
 class TupleLeaf {
 public:
@@ -425,12 +423,10 @@ private:
 };
 
 // IndexSequence
-
 template<int... ns>
 struct IndexSequence {};
 
 // MakeIndexSequenceImpl
-
 template<size_t n, int... ns>
 struct MakeIndexSequenceImpl: MakeIndexSequenceImpl<n - 1, n - 1, ns...> {};
 
@@ -440,12 +436,10 @@ struct MakeIndexSequenceImpl<0, ns...> {
 };
 
 // MakeIndexSequence
-
 template<size_t n>
 using MakeIndexSequence = typename MakeIndexSequenceImpl<n>::Type;
 
 // IndexSequenceFor
-
 template<typename... Ts>
 using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
@@ -470,7 +464,6 @@ namespace detail {
 }  // namespace detail
 
 // Tuple
-
 template<typename... As>
 class Tuple: public detail::TupleImpl<IndexSequenceFor<As...>, As...> {
 public:
@@ -495,7 +488,6 @@ private:
 };
 
 // Pair
-
 template<typename A, typename B>
 using Pair = Tuple<A, B>;
 
@@ -522,7 +514,6 @@ auto p(Tuple<As...>& tpl) -> PackAt<index, As...>& {
 }
 
 // fst
-
 template<typename... As>
 auto fst(const Tuple<As...>& tpl) -> const PackAt<0, As...>& {
     return tpl.template get<0>();
@@ -534,7 +525,6 @@ auto fst(Tuple<As...>& tpl) -> PackAt<0, As...>& {
 }
 
 // snd
-
 template<typename... As>
 auto snd(const Tuple<As...>& tpl) -> const PackAt<1, As...>& {
     return tpl.template get<1>();
@@ -586,14 +576,12 @@ bool operator!=(const Tuple<As...>& lhs, const Tuple<As...>& rhs) {
 }
 
 // tuple
-
 template<typename... As>
 auto tuple(const As&... as) -> Tuple<FuncToFuncPtr<As>...> {
     return Tuple<FuncToFuncPtr<As>...> {as...};
 }
 
 // TupleAt
-
 namespace detail {
     template<size_t n, typename Tpl>
     struct TupleAtImpl {};
@@ -899,17 +887,14 @@ template<typename A, typename... As>
 struct Maximum: CtConst<typename A::value_type, _maximum({A::value, As::value...})> {};
 
 // Common
-
 template<typename... As>
 using Common = typename std::common_type<As...>::type;
 
 // DebugType
-
 template<typename A>
 struct DebugType;  // Intentionally undefined
 
 // IsConstructible
-
 template<typename A, typename... Args>
 using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
 
@@ -920,8 +905,7 @@ using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
 //     alignas(Align) char data[Len];
 // };
 
-// Storage
-
+// RawStorage
 template<typename A, size_t n>
 struct RawStorage {
     static_assert(sizeof(A) % alignof(A) == 0, "Size of A must be a multiple of its alignment");
