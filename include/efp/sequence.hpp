@@ -31,6 +31,20 @@ public:
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
 
+    // STL compatible types
+    using value_type = Element;
+    using allocator_type = std::allocator<Element>;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using iterator = value_type*;
+    using const_iterator = const value_type*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
     Array() {
         // By definition all of the data in Array should be valid
         for (size_t i = 0; i < ct_size; ++i) {
@@ -229,6 +243,20 @@ public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
+
+    // STL compatible types
+    using value_type = Element;
+    // using allocator_type = std::allocator<Element>;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using iterator = value_type*;
+    using const_iterator = const value_type*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     ArrVec() : _size {0} {
         // By definition none of the data in ArrVec of size 0 should be valid
@@ -546,20 +574,15 @@ namespace detail {
         // STL compatible types
         using value_type = Element;
         // using traits_type = Traits;
-
         using allocator_type = Allocator;
-
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;
         using const_reference = const value_type&;
-
         using pointer = value_type*;
-
         using const_pointer = const value_type*;
-        using iterator =
-            value_type*;  // Simplification; actual implementation would be more complex
-        using const_iterator = const value_type*;  // Simplification
+        using iterator = value_type*;
+        using const_iterator = const value_type*;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
