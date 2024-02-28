@@ -42,6 +42,36 @@ struct CtCapacityImpl {};
 template<typename A>
 using CtCapacity = typename CtCapacityImpl<CVRefRemoved<A>>::Type;
 
+// Iterator
+
+template<typename A>
+struct IteratorImpl {};
+
+template<typename A>
+using Iterator = typename IteratorImpl<CVRefRemoved<A>>::Type;
+
+// ConstIterator
+
+template<typename A>
+struct ConstIteratorImpl {};
+
+template<typename A>
+using ConstIterator = typename ConstIteratorImpl<CVRefRemoved<A>>::Type;
+
+// ReverseIterator
+template<typename A>
+struct ReverseIteratorImpl {};
+
+template<typename A>
+using ReverseIterator = typename ReverseIteratorImpl<CVRefRemoved<A>>::Type;
+
+// ConstReverseIterator
+template<typename A>
+struct ConstReverseIteratorImpl {};
+
+template<typename A>
+using ConstReverseIterator = typename ConstReverseIteratorImpl<CVRefRemoved<A>>::Type;
+
 template<typename As, size_t n, typename = Void<CtSize<As>>>
 constexpr auto length(const As& as) -> CtSize<As>;
 
@@ -54,11 +84,37 @@ constexpr auto nth(size_t i, const As& as) -> const Element<As>&;
 template<typename As, typename = Void<Element<As>>>
 constexpr auto nth(size_t i, As& as) -> Element<As>&;
 
+// ! Deprecated
 template<typename As, typename = Void<Element<As>>>
 constexpr auto data(const As& as) -> const Element<As>*;
 
 template<typename As, typename = Void<Element<As>>>
 constexpr auto data(As& as) -> Element<As>*;
+
+// iterator support
+template<typename As, typename = Void<ConstIterator<As>>>
+constexpr auto begin(const As& as) -> ConstIterator<As>;
+
+template<typename As, typename = Void<Iterator<As>>>
+constexpr auto begin(As& as) -> Iterator<As>;
+
+template<typename As, typename = Void<ConstIterator<As>>>
+constexpr auto end(const As& as) -> ConstIterator<As>;
+
+template<typename As, typename = Void<Iterator<As>>>
+constexpr auto end(As& as) -> Iterator<As>;
+
+template<typename As, typename = Void<ConstReverseIterator<As>>>
+constexpr auto rbegin(const As& as) -> ConstReverseIterator<As>;
+
+template<typename As, typename = Void<ReverseIterator<As>>>
+constexpr auto rbegin(As& as) -> ReverseIterator<As>;
+
+template<typename As, typename = Void<ConstReverseIterator<As>>>
+constexpr auto rend(const As& as) -> ConstReverseIterator<As>;
+
+template<typename As, typename = Void<ReverseIterator<As>>>
+constexpr auto rend(As& as) -> ReverseIterator<As>;
 
 template<typename A, typename = void>
 struct IsSequenceImplLength: False {};

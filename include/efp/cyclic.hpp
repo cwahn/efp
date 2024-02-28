@@ -7,7 +7,7 @@
 namespace efp {
 template<typename A, size_t n>
 class Vcb {
-  public:
+public:
     using Element = A;
     using CtSize = Size<n>;
     using CtCapcity = Size<n>;
@@ -117,7 +117,7 @@ class Vcb {
         return _data + ct_size;
     }
 
-  private:
+private:
     RawStorage<A, 2 * ct_size> _buffer;
     // A* _buffer + ct_capacity;
     A* _data;
@@ -165,7 +165,7 @@ constexpr auto data(Vcb<A, n>& as) -> A* {
 
 template<typename A, size_t n>
 class Vcq {
-  public:
+public:
     using Element = A;
     using CtSize = Size<dyn>;
     using CtCapcity = Size<n>;
@@ -346,7 +346,7 @@ class Vcq {
         return _write > _read ? _write : _write + ct_capacity;
     }
 
-  private:
+private:
     RawStorage<A, 2 * ct_capacity> _buffer;
 
     size_t _size = 0;
