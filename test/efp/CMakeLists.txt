@@ -22,5 +22,7 @@ target_link_libraries(efp_test
     PRIVATE
     Catch2::Catch2WithMain
     efp)
+target_compile_features(efp_test PRIVATE cxx_std_11)
 
 catch_discover_tests(efp_test)
+efp_enable_compilation_time(efp_test)

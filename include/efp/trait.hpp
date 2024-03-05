@@ -110,7 +110,10 @@ struct IsSequence: False {};
 
 template<typename A>
 struct IsSequence<A, Void<Element<A>, CtSize<A>, CtCapacity<A>>>:
-    All<IsSequenceImplLength<A>, IsSequenceImplNth<A>, IsSequenceImplData<A>> {};
+    // All<IsSequenceImplLength<A>, IsSequenceImplNth<A>, IsSequenceImplData<A>> {};
+    Bool<_all(
+        {IsSequenceImplLength<A>::value, IsSequenceImplNth<A>::value, IsSequenceImplData<A>::value}
+    )> {};
 
 // Utility type-level functions for Sequence trait
 

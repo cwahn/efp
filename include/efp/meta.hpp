@@ -6,7 +6,6 @@
 namespace efp {
 
 // Unit
-
 struct Unit {
     constexpr bool operator==(const Unit&) const noexcept {
         return true;
@@ -20,7 +19,6 @@ struct Unit {
 constexpr Unit unit;
 
 // CtConst
-
 template<typename A, A v>
 using CtConst = std::integral_constant<A, v>;
 
@@ -55,30 +53,24 @@ constexpr auto operator/(CtConst<A, lhs>, CtConst<A, rhs>) -> CtConst<A, lhs / r
 }
 
 // Bool
-
 template<bool b>
 using Bool = CtConst<bool, b>;
 
 // True
-
 using True = CtConst<bool, true>;
 
 // False
-
 using False = CtConst<bool, false>;
 
 // Int
-
 template<size_t n>
 using Int = CtConst<int, n>;
 
 // Size
-
 template<size_t n>
 using Size = CtConst<size_t, n>;
 
 // IsCtConst
-
 template<typename A>
 struct IsCtConst {
     static constexpr bool value = false;
@@ -96,74 +88,21 @@ template<typename A>
 struct IsCtConst<A&&>: IsCtConst<A> {};
 
 // AlwaysFalse
-
 template<typename T>
 struct AlwaysFalse: False {};
 
 // EnableIf
-
 template<bool cond, typename A = void>
 using EnableIf = typename std::enable_if<cond, A>::type;
 
 // Conditionl
-
 template<bool cond, typename T, typename F>
 using Conditional = typename std::conditional<cond, T, F>::type;
 
-// All
-
-template<typename... Args>
-struct All {};
-
-// Base case: When no types are left, return true.
-template<>
-struct All<>: True {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct All<Head, Tail...>: Bool<Head::value && All<Tail...>::value> {};
-
-// Any
-
-template<typename... Args>
-struct Any {};
-
-// Base case: When no types are left, return false.
-template<>
-struct Any<>: False {};
-
-// Recursive case: Check the first type, and recurse for the rest.
-template<typename Head, typename... Tail>
-struct Any<Head, Tail...>: Bool<Head::value || Any<Tail...>::value> {};
-
-// Min
-
-template<typename Head, typename... Tail>
-struct Min: Min<Head, Min<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Min<Head, Tail>: Conditional<Head::value <= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Min<Head>: Head {};
-
-// Max
-
-template<typename Head, typename... Tail>
-struct Max: Max<Head, Max<Tail...>> {};
-
-template<typename Head, typename Tail>
-struct Max<Head, Tail>: Conditional<Head::value >= Tail::value, Head, Tail> {};
-
-template<typename Head>
-struct Max<Head>: Head {};
-
 // size_of_ptr_v
-
 constexpr auto size_of_ptr_v = sizeof(void*);
 
 // NumericLimits
-
 template<typename A>
 using NumericLimits = std::numeric_limits<A>;
 
@@ -172,109 +111,93 @@ using NumericLimits = std::numeric_limits<A>;
 // It's also the way Haskell and Rust do
 
 // op_neg
-
 template<typename A>
 constexpr A op_neg(const A& a) {
     return -a;
 }
 
 // op_eq
-
 template<typename A>
 constexpr bool op_eq(const A& lhs, const A& rhs) {
     return lhs == rhs;
 }
 
 // op_neq
-
 template<typename A>
 constexpr bool op_neq(const A& lhs, const A& rhs) {
     return lhs != rhs;
 }
 
 // op_gt
-
 template<typename A>
 constexpr bool op_gt(const A& lhs, const A& rhs) {
     return lhs > rhs;
 }
 
 // op_lt
-
 template<typename A>
 constexpr bool op_lt(const A& lhs, const A& rhs) {
     return lhs < rhs;
 }
 
 // op_geq
-
 template<typename A>
 constexpr bool op_geq(const A& lhs, const A& rhs) {
     return lhs >= rhs;
 }
 
 // op_leq
-
 template<typename A>
 constexpr bool op_leq(const A& lhs, const A& rhs) {
     return lhs <= rhs;
 }
 
 // op_not
-
-constexpr bool op_not(const bool b) {
+constexpr bool op_not(const bool& b) {
     return !b;
 }
 
 // op_and
-
-constexpr bool op_and(const bool lhs, const bool rhs) {
+constexpr bool op_and(const bool& lhs, const bool& rhs) {
     return lhs && rhs;
 }
 
 // op_or
-
-constexpr bool op_or(const bool lhs, const bool rhs) {
+constexpr bool op_or(const bool& lhs, const bool& rhs) {
     return lhs || rhs;
 }
 
 // op_add
-
 template<typename A>
 constexpr A op_add(const A& lhs, const A& rhs) {
     return lhs + rhs;
 }
 
 // op_sub
-
 template<typename A>
 constexpr A op_sub(const A& lhs, const A& rhs) {
     return lhs - rhs;
 }
 
 // op_mul
-
 template<typename A>
 constexpr A op_mul(const A& lhs, const A& rhs) {
     return lhs * rhs;
 }
 
 // op_div
-
 template<typename A>
 constexpr A op_div(const A& lhs, const A& rhs) {
     return lhs / rhs;
 }
 
 // op_mod
-
 template<typename A>
 constexpr A op_mod(const A& lhs, const A& rhs) {
     return lhs % rhs;
 }
 
 // bound_v
-
 template<typename A, typename B, typename C>
 constexpr auto bound_v(const A& lower, const B& upper, const C& x)
     -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x)) {
@@ -282,14 +205,12 @@ constexpr auto bound_v(const A& lower, const B& upper, const C& x)
 }
 
 // max
-
 template<typename A>
 constexpr A max(const A& lhs, const A& rhs) {
     return lhs > rhs ? lhs : rhs;
 }
 
 // min
-
 template<typename A>
 constexpr A min(const A& lhs, const A& rhs) {
     return lhs < rhs ? lhs : rhs;
@@ -297,20 +218,20 @@ constexpr A min(const A& lhs, const A& rhs) {
 
 // Foldl
 // Maybe just recursive constexpr template function could be enough
+// ! deprecated because of performance issue
+// namespace detail {
+//     template<template<class, class> class F, typename A, typename... Bs>
+//     struct FoldlImpl {};
 
-namespace detail {
-    template<template<class, class> class F, typename A, typename... Bs>
-    struct FoldlImpl {};
+//     template<template<class, class> class F, typename A, typename B>
+//     struct FoldlImpl<F, A, B>: F<A, B>::Type {};
 
-    template<template<class, class> class F, typename A, typename B>
-    struct FoldlImpl<F, A, B>: F<A, B>::Type {};
+//     template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
+//     struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
+// }  // namespace detail
 
-    template<template<class, class> class F, typename A, typename B0, typename B1, typename... Bs>
-    struct FoldlImpl<F, A, B0, B1, Bs...>: FoldlImpl<F, typename F<A, B0>::Type, B1, Bs...> {};
-}  // namespace detail
-
-template<template<class, class> class F, typename A, typename... Bs>
-using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
+// template<template<class, class> class F, typename A, typename... Bs>
+// using Foldl = typename detail::FoldlImpl<F, A, Bs...>::Type;
 
 // IsSame
 
@@ -320,7 +241,7 @@ using IsSame = std::is_same<A, B>;
 // PackAt
 
 namespace detail {
-    template<uint8_t n, typename... Args>
+    template<size_t n, typename... Args>
     struct PackAtImpl {
         using Type = void*;
     };
@@ -330,75 +251,64 @@ namespace detail {
         using Type = Head;
     };
 
-    template<uint8_t n, typename Head, typename... Tail>
+    template<size_t n, typename Head, typename... Tail>
     struct PackAtImpl<n, Head, Tail...>: PackAtImpl<n - 1, Tail...> {};
 }  // namespace detail
 
-template<uint8_t n, typename... Args>
+template<size_t n, typename... Args>
 using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
 // Find
 
 namespace detail {
-    // FindHelperValue
-
-    template<uint8_t n>
-    struct FindHelperValue {
-        static constexpr uint8_t value = n;
-    };
-
     // FindImpl
-
     template<size_t n, template<class> class P, typename... Args>
     struct FindImpl {};
 
     template<size_t n, template<class> class P, typename Head, typename... Tail>
     struct FindImpl<n, P, Head, Tail...>:
-        Conditional<P<Head>::value, FindHelperValue<n>, FindImpl<n + 1, P, Tail...>> {};
+        Conditional<P<Head>::value, CtConst<size_t, n>, FindImpl<n + 1, P, Tail...>> {};
 }  // namespace detail
 
+// Find the first type in the list that satisfies the predicate P
 template<template<class> class P, typename... Args>
 struct Find: detail::FindImpl<0, P, Args...> {};
 
 // LvalueRefAdded
-
 template<class T>
 using LvalueRefAdded = typename std::add_lvalue_reference<T>::type;
 
 // RvalueRefAdded
-
 template<class T>
 using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 
 // declval
-
 template<typename T>
 constexpr RvalueRefAdded<T> declval() noexcept;
 
-// CallReturn
+// InvokeResult
 
 // Check the C++ standard version
 #if __cplusplus >= 201703L  // C++17 or later, use std::invoke_result
 template<typename F, typename... Args>
-using CallReturn = typename std::invoke_result<F, Args...>::type;
+using InvokeResult = typename std::invoke_result<F, Args...>::type;
 
 #else  // Before C++17, use the custom implementation
 
 namespace detail {
 
     template<typename F, typename... Args>
-    struct CallReturnImpl {
+    struct InvokeResultImpl {
         using Type = decltype(declval<F>()(declval<Args>()...));
     };
 }  // namespace detail
 
 template<typename F, typename... Args>
-using CallReturn = typename detail::CallReturnImpl<F, Args...>::Type;
+using InvokeResult = typename detail::InvokeResultImpl<F, Args...>::Type;
 
 #endif
 
 // HasCallOperator
-
 template<typename A>
 class HasCallOperator {
     typedef char one;
@@ -415,13 +325,13 @@ public:
 };
 
 // IsInvocable
+// ? Is Custom implementation faster?
+// #if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
 
-#if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
+// template<typename F, typename... Args>
+// using IsInvocable = std::is_invocable<F, Args...>;
 
-template<typename F, typename... Args>
-using IsInvocable = std::is_invocable<F, Args...>;
-
-#else  // If earlier than C++17, use custom IsInvocable
+// #else  // If earlier than C++17, use custom IsInvocable
 
 template<typename F, typename... Args>
 struct IsInvocable {
@@ -436,15 +346,13 @@ public:
     static constexpr bool value = decltype(check<F>(0))::value;
 };
 
-#endif
+// #endif
 
 // IsFunction
-
 template<typename T>
 using IsFunction = std::is_function<T>;
 
 // FuncToFuncPtr
-
 namespace detail {
 
     // Base template
@@ -486,7 +394,6 @@ template<typename A>
 using FuncToFuncPtr = typename detail::FuncToFuncPtrImpl<A>::Type;
 
 // TupleLeaf
-
 template<size_t index, typename A>
 class TupleLeaf {
 public:
@@ -516,12 +423,10 @@ private:
 };
 
 // IndexSequence
-
 template<int... ns>
 struct IndexSequence {};
 
 // MakeIndexSequenceImpl
-
 template<size_t n, int... ns>
 struct MakeIndexSequenceImpl: MakeIndexSequenceImpl<n - 1, n - 1, ns...> {};
 
@@ -531,12 +436,10 @@ struct MakeIndexSequenceImpl<0, ns...> {
 };
 
 // MakeIndexSequence
-
 template<size_t n>
 using MakeIndexSequence = typename MakeIndexSequenceImpl<n>::Type;
 
 // IndexSequenceFor
-
 template<typename... Ts>
 using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
@@ -554,14 +457,13 @@ namespace detail {
     protected:
         template<typename F>
         auto match_impl(const F& f) const
-            -> EnableIf<IsInvocable<F, As...>::value, CallReturn<F, As...>> {
+            -> EnableIf<IsInvocable<F, As...>::value, InvokeResult<F, As...>> {
             return f(TupleLeaf<idxs, PackAt<idxs, As...>>::get()...);
         }
     };
 }  // namespace detail
 
 // Tuple
-
 template<typename... As>
 class Tuple: public detail::TupleImpl<IndexSequenceFor<As...>, As...> {
 public:
@@ -578,7 +480,7 @@ public:
     }
 
     template<typename F>
-    auto match(const F& f) const -> EnableIf<IsInvocable<F, As...>::value, CallReturn<F, As...>> {
+    auto match(const F& f) const -> EnableIf<IsInvocable<F, As...>::value, InvokeResult<F, As...>> {
         return detail::TupleImpl<IndexSequenceFor<As...>, As...>::match_impl(f);
     }
 
@@ -586,7 +488,6 @@ private:
 };
 
 // Pair
-
 template<typename A, typename B>
 using Pair = Tuple<A, B>;
 
@@ -613,7 +514,6 @@ auto p(Tuple<As...>& tpl) -> PackAt<index, As...>& {
 }
 
 // fst
-
 template<typename... As>
 auto fst(const Tuple<As...>& tpl) -> const PackAt<0, As...>& {
     return tpl.template get<0>();
@@ -625,7 +525,6 @@ auto fst(Tuple<As...>& tpl) -> PackAt<0, As...>& {
 }
 
 // snd
-
 template<typename... As>
 auto snd(const Tuple<As...>& tpl) -> const PackAt<1, As...>& {
     return tpl.template get<1>();
@@ -677,14 +576,12 @@ bool operator!=(const Tuple<As...>& lhs, const Tuple<As...>& rhs) {
 }
 
 // tuple
-
 template<typename... As>
 auto tuple(const As&... as) -> Tuple<FuncToFuncPtr<As>...> {
     return Tuple<FuncToFuncPtr<As>...> {as...};
 }
 
 // TupleAt
-
 namespace detail {
     template<size_t n, typename Tpl>
     struct TupleAtImpl {};
@@ -737,7 +634,7 @@ namespace detail {
 
     template<typename F, typename... Args>
     struct ReturnFromArgumentImpl<F, Tuple<Args...>> {
-        using Type = CallReturn<F, Args...>;
+        using Type = InvokeResult<F, Args...>;
     };
 }  // namespace detail
 
@@ -818,50 +715,43 @@ namespace detail {
 template<typename F>
 using Return = typename detail::ReturnImpl<F>::Type;
 
-// apply
-
 namespace detail {
     template<typename F, typename... As, int... indices>
-    Return<F> apply_impl(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
+    Return<F> _apply(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
         return f(get<indices>(tpl)...);
     }
 }  // namespace detail
 
+// apply
 template<
     typename F,
     typename... As,
     typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
 Return<F> apply(const F& f, const Tuple<As...>& tpl) {
-    return detail::apply_impl(f, tpl, IndexSequenceFor<As...> {});
+    return detail::_apply(f, tpl, IndexSequenceFor<As...> {});
 }
 
 // PointerRemoved
-
 template<typename A>
 using PointerRemoved = typename std::remove_pointer<A>::type;
 
 // ReferenceRemoved
-
 template<typename A>
 using ReferenceRemoved = typename std::remove_reference<A>::type;
 
 // ConstRemoved
-
 template<typename A>
 using ConstRemoved = typename std::remove_const<A>::type;
 
 // VoletileRemoved
-
 template<typename A>
 using VoletileRemoved = typename std::remove_volatile<A>::type;
 
 // CVRemoved
-
 template<typename A>
 using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
 
 // CVRefRemoved
-
 template<typename A>
 using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
 
@@ -870,12 +760,10 @@ template<typename A>
 using Decay = typename std::decay<A>::type;
 
 // IsConst
-
 template<typename A>
 using IsConst = std::is_const<A>;
 
 // Void
-
 namespace detail {
     template<typename... Ts>
     struct VoidImpl {
@@ -895,7 +783,6 @@ template<typename A>
 struct IsLvalueReference<A&>: True {};
 
 // forward
-
 template<typename A>
 constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
     return static_cast<A&&>(a);
@@ -908,14 +795,12 @@ constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
 }
 
 // move
-
 template<typename A>
 constexpr ReferenceRemoved<A>&& move(A&& a) {
     return static_cast<ReferenceRemoved<A>&&>(a);
 }
 
 // swap
-
 template<typename A>
 void swap(A& a, A& b) {
     A temp = efp::move(a);
@@ -931,95 +816,85 @@ struct IsDefaultConstructible: False {};
 template<typename A>
 struct IsDefaultConstructible<A, decltype(A())>: True {};
 
-// _foldl
-
-template<typename F, typename A>
-constexpr A _foldl(F f, A a) {
-    return a;
-}
-
-#if __cplusplus >= 201703L
-// C++17 or later, use a loop for foldl
-template<typename F, typename A, typename... Bs>
-constexpr A _foldl(F f, A a, Bs... bs) {
-    // Convert parameter pack to array for iteration
-    A arr[] = {static_cast<A>(bs)...};
-
-    for (auto& element : arr) {
-        a = f(a, element);
-    }
-
-    return a;
-}
-#else
-// Before C++17, recursive implementation
-template<typename F, typename A, typename B, typename... Bs>
-constexpr A _foldl(F f, A a, B b, Bs... bs) {
-    return _foldl(f, f(efp::forward<A>(a), efp::forward<B>(b)), efp::forward<Bs>(bs)...);
-}
-#endif
-
-// _all
-
-template<typename... Args>
-constexpr bool _all(Args... args) {
-    return _foldl(op_and, true, args...);
-}
-
-// _any
-
-template<typename... Args>
-constexpr bool _any(Args... args) {
-    return _foldl(op_or, false, args...);
-}
-
-// _maximum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _maximum(A a, As... as) {
-    return _foldl(max<A>, a, as...);
-}
-
-// _minimum
-// cf) since the function is defined as foldr, the result follows the type of first argument.
-
-template<typename A, typename... As>
-constexpr A _minimum(A a, As... as) {
-    return _foldl(min<A>, a, as...);
-}
-
-// _sum
-
-template<typename A, typename... As>
-constexpr A _sum(A a, As... as) {
-    return _foldl(op_add<A>, a, as...);
-}
-
-// _product
-
-template<typename A, typename... As>
-constexpr A _product(A a, As... as) {
-    return _foldl(op_mul<A>, a, as...);
-}
-
 // InitializerList
 
 template<typename A>
 using InitializerList = std::initializer_list<A>;
 
-// Common
+namespace detail {
+    template<typename F, typename A, typename It>
+    constexpr A foldl(const F& f, A a, It begin, It end) {
+        return begin == end ? a : foldl(f, f(a, *begin), begin + 1, end);
+    }
+}  // namespace detail
 
+// _foldl :: (A -> B -> A) -> A -> [B] -> A
+template<typename F, typename A, typename B, size_t n>
+constexpr A _foldl(const F& f, A a, const B (&bs)[n]) {
+    return detail::foldl(f, a, bs, bs + n);
+}
+
+// _all :: [Bool] -> Bool
+template<size_t n>
+constexpr bool _all(const bool (&bs)[n]) {
+    return _foldl(op_and, true, bs);
+}
+
+// _any :: [Bool] -> Bool
+template<size_t n>
+constexpr bool _any(const bool (&bs)[n]) {
+    return _foldl(op_or, false, bs);
+}
+
+// _maximum :: [A] -> A
+template<typename A, size_t n>
+constexpr A _maximum(const A (&as)[n]) {
+    return _foldl(max<A>, NumericLimits<A>::min(), as);
+}
+
+// _minimum :: [A] -> A
+template<typename A, size_t n>
+constexpr A _minimum(const A (&as)[n]) {
+    return _foldl(min<A>, NumericLimits<A>::max(), as);
+}
+
+// _sum :: [A] -> A
+template<typename A, size_t n>
+constexpr A _sum(const A (&as)[n]) {
+    return _foldl(op_add<A>, 0, as);
+}
+
+// _product :: [A] -> A
+template<typename A, size_t n>
+constexpr A _product(const A (&as)[n]) {
+    return _foldl(op_mul<A>, 1, as);
+}
+
+// All
+template<typename A, typename... As>
+struct All: Bool<_all({A::value, As::value...})> {};
+
+// Any
+template<typename A, typename... As>
+struct Any: Bool<_any({A::value, As::value...})> {};
+
+// Minimum
+template<typename A, typename... As>
+struct Minimum: CtConst<typename A::value_type, _minimum({A::value, As::value...})> {};
+
+// Maximum
+template<typename A, typename... As>
+struct Maximum: CtConst<typename A::value_type, _maximum({A::value, As::value...})> {};
+
+// Common
 template<typename... As>
 using Common = typename std::common_type<As...>::type;
 
 // DebugType
-
 template<typename A>
 struct DebugType;  // Intentionally undefined
 
 // IsConstructible
-
 template<typename A, typename... Args>
 using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
 
@@ -1030,8 +905,7 @@ using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
 //     alignas(Align) char data[Len];
 // };
 
-// Storage
-
+// RawStorage
 template<typename A, size_t n>
 struct RawStorage {
     static_assert(sizeof(A) % alignof(A) == 0, "Size of A must be a multiple of its alignment");
@@ -1063,6 +937,25 @@ struct RawStorage {
         return reinterpret_cast<A*>(_data);
     }
 };
+
+// TypeList
+template<typename... As>
+struct TypeList {};
+
+// Helper to prepend a type to a TypeList
+namespace detail {
+    template<typename A, typename List>
+    struct PrependImpl {};
+
+    template<typename A, typename... As>
+    struct PrependImpl<A, TypeList<As...>> {
+        using Type = TypeList<A, As...>;
+    };
+}  // namespace detail
+
+// Prepend
+template<typename A, typename List>
+using Prepend = typename detail::PrependImpl<A, List>::Type;
 
 }  // namespace efp
 

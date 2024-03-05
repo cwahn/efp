@@ -31,6 +31,20 @@ public:
     using CtSize = Size<ct_size>;
     using CtCapacity = Size<ct_size>;
 
+    // STL compatible types
+    using value_type = Element;
+    using allocator_type = std::allocator<Element>;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using iterator = value_type*;
+    using const_iterator = const value_type*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
     Array() {
         // By definition all of the data in Array should be valid
         for (size_t i = 0; i < ct_size; ++i) {
@@ -76,14 +90,26 @@ public:
         }
     }
 
-    template<typename... Arg>
-    Array(const Arg&... args) {
-        static_assert(
-            sizeof...(args) == ct_size,
-            "Array::Array: number of arguments must be equal to ct_size"
-        );
+    // ! Deprecated: variadic template constructor
+    // template<typename... Arg>
+    // Array(const Arg&... args) {
+    //     static_assert(
+    //         sizeof...(args) == ct_size,
+    //         "Array::Array: number of arguments must be equal to ct_size"
+    //     );
+    //     size_t index = 0;
+    //     _construct_elements(index, args...);
+    // }
+
+    Array(InitializerList<Element> il) {
+        if (il.size() != ct_size) {
+            throw std::runtime_error("Array::Array: number of arguments must be equal to ct_size");
+        }
+
         size_t index = 0;
-        _construct_elements(index, args...);
+        for (const auto& e : il) {
+            new (_data + index++) Element {e};
+        }
     }
 
     Element& operator[](size_t index) {
@@ -218,6 +244,20 @@ public:
     using CtSize = Size<dyn>;
     using CtCapacity = Size<ct_capacity>;
 
+    // STL compatible types
+    using value_type = Element;
+    // using allocator_type = std::allocator<Element>;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using iterator = value_type*;
+    using const_iterator = const value_type*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
     ArrVec() : _size {0} {
         // By definition none of the data in ArrVec of size 0 should be valid
     }
@@ -286,14 +326,28 @@ public:
     // template<typename... Arg>
     // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
 
-    template<typename... Arg>
-    ArrVec(const Arg&... args) : _size(sizeof...(args)) {
-        static_assert(
-            sizeof...(args) <= ct_capacity,
-            "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
-        );
+    // ! Deprecated: variadic template constructor
+    // template<typename... Arg>
+    // ArrVec(const Arg&... args) : _size(sizeof...(args)) {
+    //     static_assert(
+    //         sizeof...(args) <= ct_capacity,
+    //         "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
+    //     );
+    //     size_t index = 0;
+    //     _construct_elements(index, args...);
+    // }
+
+    ArrVec(InitializerList<Element> il) : _size(il.size()) {
+        if (il.size() > ct_capacity) {
+            throw std::runtime_error(
+                "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
+            );
+        }
+
         size_t index = 0;
-        _construct_elements(index, args...);
+        for (const auto& e : il) {
+            new (_data + index++) Element {e};
+        }
     }
 
     Element& operator[](size_t index) {
@@ -520,20 +574,15 @@ namespace detail {
         // STL compatible types
         using value_type = Element;
         // using traits_type = Traits;
-
         using allocator_type = Allocator;
-
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;
         using const_reference = const value_type&;
-
         using pointer = value_type*;
-
         using const_pointer = const value_type*;
-        using iterator =
-            value_type*;  // Simplification; actual implementation would be more complex
-        using const_iterator = const value_type*;  // Simplification
+        using iterator = value_type*;
+        using const_iterator = const value_type*;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -1361,7 +1410,7 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
-#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+// #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 // template<typename A>
 // auto operator<<(std::ostream& os, const A& seq) -> EnableIf<
@@ -1382,7 +1431,7 @@ constexpr auto data(VectorView<A>& as) -> const A* {
 //     return os;
 // }
 
-#endif
+// #endif
 
 // Sequence trait implementation for std::array
 
