@@ -12,18 +12,18 @@ int main() {
 
     auto maybe_file = File::open(path, "w+");
     if (!maybe_file)
-        throw std::runtime_error("Failed to open file for writing.");
+        throw RuntimeError("Failed to open file for writing.");
 
     {
         File file = maybe_file.move();
 
         if (!file.write(c_str_data))
-            throw std::runtime_error("Failed to write char* data to file.");
+            throw RuntimeError("Failed to write char* data to file.");
 
         file.flush();
 
         if (!file.seek(0))
-            throw std::runtime_error("Failed to seek to the beginning of the file.");
+            throw RuntimeError("Failed to seek to the beginning of the file.");
 
         auto lines = file.read_lines();
 
@@ -34,12 +34,12 @@ int main() {
         println("Current file position: {}\n", position);
 
         if (!file.write(string_data))
-            throw std::runtime_error("Failed to write String data to file.");
+            throw RuntimeError("Failed to write String data to file.");
     }
 
     auto maybe_file_to_read = File::open(path, "r");
     if (!maybe_file_to_read)
-        throw std::runtime_error("Failed to reopen file for reading.");
+        throw RuntimeError("Failed to reopen file for reading.");
 
     File file_to_read = maybe_file_to_read.move();
 
@@ -49,7 +49,7 @@ int main() {
     for_each([](const String& line) { println("{}", line); }, read_lines);
 
     if (!file_to_read.close())
-        throw std::runtime_error("Failed to close the file.");
+        throw RuntimeError("Failed to close the file.");
 
     return 0;
 }

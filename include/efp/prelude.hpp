@@ -572,7 +572,7 @@ auto head(const As& as) -> const Element<As>& {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
     if (as.empty()) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return nth(0, as);
@@ -605,7 +605,7 @@ auto tail(const A& as) -> TailReturn<A, true> {
     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
 
     if (length(as) == 0) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return {data(as) + 1, length(as) - 1};
@@ -616,7 +616,7 @@ auto tail(A& as) -> TailReturn<A, false> {
     static_assert(IsSequence<A>::value, "Argument should be an instance of Sequence trait.");
 
     if (length(as) == 0) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return {data(as) + 1, length(as) - 1};
@@ -650,7 +650,7 @@ auto init(const As& as) -> InitReturn<As, true> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
     if (length(as) == 0) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return {data(as), length(as) - 1};
@@ -661,7 +661,7 @@ auto init(As& as) -> InitReturn<As, false> {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
     if (length(as) == 0) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return {data(as), length(as) - 1};
@@ -676,7 +676,7 @@ auto last(const As& as) -> const Element<As>& {
     static_assert(IsSequence<As>::value, "Argument should implement sequence trait.");
 
     if (length(as) == 0) {
-        throw std::runtime_error("Sequence should not be empty");
+        throw RuntimeError("Sequence should not be empty");
     }
 
     return nth(length(as) - 1, as);

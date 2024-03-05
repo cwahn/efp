@@ -38,7 +38,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP2(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -50,7 +50,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP4(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -62,7 +62,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP8(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -74,7 +74,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP16(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -86,7 +86,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP32(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -98,7 +98,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP64(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -110,7 +110,7 @@ namespace detail {
             switch (index) {
                 EFP_STAMP128(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
@@ -123,7 +123,7 @@ namespace detail {
     //         switch (index) {
     //             EFP_STAMP256(0, EFP_ENUM_CASE)
     //             default:
-    //                 throw std::runtime_error("Invalid alternative index");
+    //                 throw RuntimeError("Invalid alternative index");
     //         }
     //     }
     // };
@@ -380,7 +380,7 @@ namespace detail {
         template<typename Alt>
         const Alt& get() const {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<const Alt*>(&_storage);
@@ -389,7 +389,7 @@ namespace detail {
         template<typename Alt>
         Alt& get() {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<Alt*>(&_storage);
@@ -398,7 +398,7 @@ namespace detail {
         template<uint8_t i>
         const PackAt<i, A, As...>& get() const {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<const PackAt<i, A, As...>*>(&_storage);
@@ -407,7 +407,7 @@ namespace detail {
         template<uint8_t i>
         PackAt<i, A, As...>& get() {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<PackAt<i, A, As...>*>(&_storage);
@@ -416,7 +416,7 @@ namespace detail {
         template<typename Alt>
         const Alt&& move() const {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<Alt*>(&_storage));
@@ -425,7 +425,7 @@ namespace detail {
         template<typename Alt>
         Alt&& move() {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<Alt*>(&_storage));
@@ -434,7 +434,7 @@ namespace detail {
         template<uint8_t i>
         const PackAt<i, A, As...>&& move() const {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<PackAt<i, A, As...>*>(&_storage));
@@ -443,7 +443,7 @@ namespace detail {
         template<uint8_t i>
         PackAt<i, A, As...>&& move() {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<PackAt<i, A, As...>*>(&_storage));

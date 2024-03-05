@@ -17,6 +17,7 @@
 // #include <string>
 #include <type_traits>
 
+#include "efp/cpp_core.hpp"
 #include "efp/string.hpp"
 
 // todo local support

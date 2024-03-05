@@ -103,7 +103,7 @@ public:
 
     Array(InitializerList<Element> il) {
         if (il.size() != ct_size) {
-            throw std::runtime_error("Array::Array: number of arguments must be equal to ct_size");
+            throw RuntimeError("Array::Array: number of arguments must be equal to ct_size");
         }
 
         size_t index = 0;
@@ -139,13 +139,13 @@ public:
 
     void resize(size_t length) {
         if (length != ct_size) {
-            throw std::runtime_error("Array::resize: length must be equal to ct_size");
+            throw RuntimeError("Array::resize: length must be equal to ct_size");
         }
     }
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "Array::reserve: capacity must be less than or equal to ct_size"
             );
         }
@@ -339,7 +339,7 @@ public:
 
     ArrVec(InitializerList<Element> il) : _size(il.size()) {
         if (il.size() > ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
             );
         }
@@ -382,7 +382,7 @@ public:
 
     void resize(size_t length) {
         if (length > ct_capacity || length < 0) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::resize: length must be less than or equal to ct_capacity"
             );
         }
@@ -392,7 +392,7 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::reserve: capacity must be less than or equal to ct_capacity"
             );
         }
@@ -400,7 +400,7 @@ public:
 
     void push_back(const Element& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::push_back: size must be less than or equal to ct_capacity"
             );
         } else {
@@ -410,7 +410,7 @@ public:
 
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::push_back: size must be less than or equal to ct_capacity"
             );
         } else {
@@ -420,7 +420,7 @@ public:
 
     void insert(size_t index, const Element& value) {
         if (index < 0 || index > _size || _size == ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
             );
         }
@@ -437,7 +437,7 @@ public:
 
     void pop_back() {
         if (_size == 0) {
-            throw std::runtime_error("ArrVec::pop_back: size must be greater than 0");
+            throw RuntimeError("ArrVec::pop_back: size must be greater than 0");
         }
 
         (_data + _size-- - 1)->~Element();
@@ -452,7 +452,7 @@ public:
 
     void erase(size_t index) {
         if (index < 0 || index >= _size) {
-            throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
+            throw RuntimeError("ArrVec::erase: index must be less than or equal to size");
         }
 
         (_data + index)->~Element();
@@ -723,7 +723,7 @@ namespace detail {
 
         void resize(size_t new_size) {
             if (new_size < 0) {
-                throw std::runtime_error(
+                throw RuntimeError(
                     "VectorBase::resize: length must be greater than or equal to 0"
                 );
             }
@@ -807,7 +807,7 @@ namespace detail {
 
         void pop_back() {
             if (_size == 0) {
-                throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
+                throw RuntimeError("VectorBase::pop_back: size must be greater than 0");
             }
 
             _allocator.destroy(_data + _size-- - 1);
@@ -815,7 +815,7 @@ namespace detail {
 
         void insert(size_t index, const Element& value) {
             if (index < 0 || index > _size) {
-                throw std::runtime_error(
+                throw RuntimeError(
                     "VectorBase::insert: index must be less than or equal to size"
                 );
             }
@@ -834,7 +834,7 @@ namespace detail {
 
         void erase(size_t index) {
             if (index < 0 || index >= _size) {
-                throw std::runtime_error(
+                throw RuntimeError(
                     "VectorBase::erase: index must be less than or equal to size"
                 );
             }
@@ -1020,7 +1020,7 @@ public:
     ArrayView(const Element* data, size_t length = Size<ct_size> {}) : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && _data == nullptr) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrayView::ArrayView: data must not be nullptr for a non-empty view"
             );
         }
@@ -1048,7 +1048,7 @@ public:
 
     void resize(size_t length) {
         if (length > ct_size || length < 0) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrayView::resize: length must be less than or equal to ct_size and greater than or equal to 0"
             );
         }
@@ -1056,7 +1056,7 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrayView::reserve: capacity must be less than or equal to ct_size"
             );
         }
@@ -1146,7 +1146,7 @@ public:
     ArrVecView(const Element* data, size_t size) : _data(data), _size(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVecView::ArrVecView: data must not be nullptr for a non-empty view"
             );
         }
@@ -1275,7 +1275,7 @@ namespace detail {
             : _data(data), _size(size), _capacity(size) {
             // Ensure that data is not nullptr for a non-empty view.
             if (size > 0 && _data == nullptr) {
-                throw std::runtime_error(
+                throw RuntimeError(
                     "VectorViewBase::VectorViewBase: data must not be nullptr for a non-empty view"
                 );
             }

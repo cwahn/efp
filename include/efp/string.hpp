@@ -101,7 +101,7 @@ public:
 
     Char at(size_t pos) const {
         if (pos >= Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         return Base::_data[pos];
@@ -153,7 +153,7 @@ public:
 
     Vector& insert(size_t pos, const Char* c_str) {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         const size_t len = Traits::length(c_str);
@@ -174,7 +174,7 @@ public:
 
     Vector& insert(size_t pos, const Char* c_str, size_t n) {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         // Always reserve one extra space for the null character
@@ -199,7 +199,7 @@ public:
 
     Vector substr(size_t pos = 0, size_t len = npos) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (len > Base::_size - pos) {
@@ -213,7 +213,7 @@ public:
     // https://en.cppreference.com/w/cpp/string/basic_string/copy
     size_t copy(Char* dest, size_t count, size_t pos = 0) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (count > Base::_size - pos) {
@@ -232,7 +232,7 @@ public:
 
     int compare(size_t pos, size_t len, const Vector& other) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (len > Base::_size - pos) {

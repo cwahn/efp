@@ -43,4 +43,53 @@ extern "C" void* _memcpy(void* dest, const void* src, size_t size) {
 
 #endif
 
+// stdexcept
+
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+
+    #include <stdexcept>
+
+namespace efp {
+using LogicError = std::logic_error;
+using RuntimeError = std::runtime_error;
+}  // namespace efp
+
+#else
+
+namespace efp {
+
+class LogicError: public std::exception {
+public:
+    explicit LogicError(const char* what_arg) : _what_arg(what_arg) {}
+
+    LogicError(const LogicError& other) noexcept
+        : std::exception(other), _what_arg(other._what_arg) {}
+
+    const char* what() const noexcept override {
+        return _what_arg;
+    }
+
+protected:
+    const char* _what_arg;
+};
+
+class RuntimeError: public std::exception {
+public:
+    explicit RuntimeError(const char* what_arg) : _what_arg(what_arg) {}
+
+    RuntimeError(const RuntimeError& other) noexcept
+        : std::exception(other), _what_arg(other._what_arg) {}
+
+    const char* what() const noexcept override {
+        return _what_arg;
+    }
+
+protected:
+    const char* _what_arg;
+};
+
+}  // namespace efp
+
+#endif
+
 #endif
