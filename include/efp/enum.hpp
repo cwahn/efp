@@ -177,8 +177,7 @@ namespace detail {
 
         // Overload the function call operator to forward calls to the lambda's own call operator.
         template<typename A>
-        inline auto operator()(A&&, HighPriority = HighPriority {}) const
-            -> decltype(efp::declval<F>()()) {
+        inline auto operator()(A&&) const -> decltype(efp::declval<F>()()) {
             return _lambda();
         }
 
@@ -208,20 +207,21 @@ namespace detail {
     template<typename... Fs>
     struct Overloaded;
 
-    // template<>
-    // struct Overloaded<> {
-    //     template<typename... Args>
-    //     auto operator()(Args&&..., LowPriority) const {
-    //         static_assert(AlwaysFalse<Args...>::value, "No matching pattern found");
-    //     }
-    // };
-
-    template<typename F>
-    struct Overloaded<F>: F {
-        using F::operator();
-
-        Overloaded(const F& f) : F {f} {}
+    template<>
+    struct Overloaded<> {
+        // Extra template parameter to avoid ambiguity with the wildcard case
+        template<typename A, typename... Args>
+        auto operator()(A&&, Args...) const {
+            static_assert(AlwaysFalse<A>::value, "No matching pattern found");
+        }
     };
+
+    // template<typename F>
+    // struct Overloaded<F>: F {
+    //     using F::operator();
+
+    //     Overloaded(const F& f) : F {f} {}
+    // };
 
     template<class F, class... Fs>
     struct Overloaded<F, Fs...>: F, Overloaded<Fs...> {
@@ -471,10 +471,11 @@ namespace detail {
         // Pattern matching
         template<typename F, typename... Fs>
         auto match(const F& f, const Fs&... fs) const
-            -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
-                efp::declval<A>()
-            )) const {
-            static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            // -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
+            //     efp::declval<A>()
+            // ))
+            -> InvokeResult<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>, A> const {
+            // static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
@@ -484,19 +485,6 @@ namespace detail {
                 const EnumBase*,
                 const Pattern&>::call(_index, this, Pattern {match_branch(f), match_branch(fs)...});
         }
-
-        // template<typename F, typename... Fs>
-        // auto match(const F& f, const Fs&... fs) const -> InvokeResult<F, A> const {
-        //     static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
-
-        //     using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
-
-        //     return EnumSwitch<
-        //         alt_num,
-        //         Match<Pattern>::template Case,
-        //         const EnumBase*,
-        //         const Pattern&>::call(_index, this, Pattern {match_branch(f), match_branch(fs)...});
-        // }
 
     private:
         template<typename Alt>

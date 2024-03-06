@@ -366,6 +366,8 @@ TEST_CASE("enum_match") {
 
         //?
         a.match([&](int x) { b += 1; }, [&]() {});
+        // a.match([&](int x) { b += 1; }, [&](double _) { b += 1; });
+        a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
 
         CHECK(b == 0.);
 
