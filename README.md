@@ -126,10 +126,14 @@ file.close();
 WIP
 
 ## Tests
-EFP is tested with Catch2 with GCC and Clang.
+EFP is tested with
+- Clang 15 and GCC 13
+- C++ 11, 14, 17, 20, 23
+- CI is WIP
+
 ```
 ===============================================================================
-All tests passed (1036 assertions in 106 test cases)
+All tests passed (1055 assertions in 107 test cases)
 ```
 
 ## Requirements

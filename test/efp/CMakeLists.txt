@@ -3,11 +3,10 @@ include(FetchContent)
 find_package(Catch2 QUIET)
 
 if(NOT Catch2_FOUND)
-# message("Catch2 not found on the system.\nBuild from source.")
+message("Catch2 not found on the system.\nBuild from source.")
 FetchContent_Declare(
     Catch2
     URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.5.0.tar.gz
-    # URL_HASH MD5=2c802a4938ed842e2942c60d1d231bb7
     )
     FetchContent_MakeAvailable(Catch2)
 endif()
@@ -15,15 +14,6 @@ endif()
 include(CTest)
 include(Catch)
 enable_testing()
-
-# add_executable(efp_test test.cpp)
-# target_link_libraries(efp_test
-#     PRIVATE
-#     Catch2::Catch2WithMain
-#     efp)
-
-# catch_discover_tests(efp_test)
-# efp_enable_compilation_time(efp_test)
 
 # Function to configure and create a test target for a specific C++ standard
 function(create_test_for_standard cpp_standard)
