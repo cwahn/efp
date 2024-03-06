@@ -7,13 +7,12 @@
 // Method requirements could be satisfied by actual implementation or inheritance
 
 namespace efp {
-// Element trait
 
-// Rethrive element type from container
+// Element trait
+// Should be the type of the elements of the sequence
 template<typename A>
 struct ElementImpl {
     static_assert(AlwaysFalse<A>::value, "Element trait is not implemented for the type");
-    ;
 };
 
 template<typename A>
@@ -21,18 +20,15 @@ using Element = typename ElementImpl<CVRefRemoved<A>>::Type;
 
 // Sequence traits
 // dyn
-
 constexpr size_t dyn = -1;
 using Dyn = Size<dyn>;
 
 // CtSize
 // Should be IntegralConstant<size_t> with compile time size.
 // dyn for dynamic size
-
 template<typename A>
 struct CtSizeImpl {
     static_assert(AlwaysFalse<A>::value, "CtSize trait is not implemented for the type");
-    ;
 };
 
 template<typename A>
@@ -41,11 +37,9 @@ using CtSize = typename CtSizeImpl<CVRefRemoved<A>>::Type;
 // CtCapacity
 // Should be IntegralConstant<size_t> with compile time capcity.
 // dyn for dynamic size
-
 template<typename A>
 struct CtCapacityImpl {
     static_assert(AlwaysFalse<A>::value, "CtCapacity trait is not implemented for the type");
-    ;
 };
 
 template<typename A>
