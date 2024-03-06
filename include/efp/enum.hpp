@@ -164,11 +164,6 @@ namespace detail {
     //     }
     // };
 
-    // Priority tags
-    struct LowPriority {};
-
-    struct HighPriority: LowPriority {};
-
     template<typename F>
     class WildCardWrapper {
     public:
@@ -202,6 +197,12 @@ namespace detail {
         return f;
     }
 
+    // LowPriorityWrapper
+    template<typename T>
+    struct LowPriorityWrapper {
+        LowPriorityWrapper(T&&) {}
+    };
+
     // Overloaded
     // Overloaded class for pattern matching
     template<typename... Fs>
@@ -211,7 +212,7 @@ namespace detail {
     struct Overloaded<> {
         // Extra template parameter to avoid ambiguity with the wildcard case
         template<typename A, typename... Args>
-        auto operator()(A&&, Args...) const {
+        auto operator()(LowPriorityWrapper<A>&&, Args...) const {
             static_assert(AlwaysFalse<A>::value, "No matching pattern found");
         }
     };

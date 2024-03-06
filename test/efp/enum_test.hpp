@@ -378,6 +378,8 @@ TEST_CASE("enum_match") {
         //     [&]() {});
     }
 
+    // todo Check priority of cosntructor argument then no match
+
     SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
 
