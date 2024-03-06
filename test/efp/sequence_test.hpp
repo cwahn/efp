@@ -54,6 +54,12 @@ using namespace efp;
 // DebugType<decltype(data(declval<std::vector<int>>()))> c {};
 // DebugType<const Element<std::vector<int>>*> d {};
 
+// Default implementation static assess message works as expected.
+// class NonSequence {};
+
+// const NonSequence non_sequence {};
+// const auto _ = map([](int x) { return x; }, non_sequence);
+
 TEST_CASE("Array Rule of five", "Array") {
     SECTION("New Constructor") {
         {
