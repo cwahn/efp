@@ -91,6 +91,75 @@ struct IsCtConst<A&&>: IsCtConst<A> {};
 template<typename T>
 struct AlwaysFalse: False {};
 
+// PointerRemoved
+template<typename A>
+using PointerRemoved = typename std::remove_pointer<A>::type;
+
+// ReferenceRemoved
+template<typename A>
+using ReferenceRemoved = typename std::remove_reference<A>::type;
+
+// ConstRemoved
+template<typename A>
+using ConstRemoved = typename std::remove_const<A>::type;
+
+// VoletileRemoved
+template<typename A>
+using VoletileRemoved = typename std::remove_volatile<A>::type;
+
+// CVRemoved
+template<typename A>
+using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
+
+// CVRefRemoved
+template<typename A>
+using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
+
+// Decay
+template<typename A>
+using Decay = typename std::decay<A>::type;
+
+// IsConst
+template<typename A>
+using IsConst = std::is_const<A>;
+
+// Void
+namespace detail {
+    template<typename... Ts>
+    struct VoidImpl {
+        using Type = void;
+    };
+}  // namespace detail
+
+template<typename... Ts>
+using Void = typename detail::VoidImpl<Ts...>::Type;
+
+// IsLvalueReference
+
+template<typename A>
+struct IsLvalueReference: False {};
+
+template<typename A>
+struct IsLvalueReference<A&>: True {};
+
+// forward
+template<typename A>
+constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
+    return static_cast<A&&>(a);
+}
+
+template<typename A>
+constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
+    static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
+    return static_cast<A&&>(a);
+}
+
+// move
+template<typename A>
+constexpr ReferenceRemoved<A>&& move(A&& a) {
+    return static_cast<ReferenceRemoved<A>&&>(a);
+}
+
 // EnableIf
 template<bool cond, typename A = void>
 using EnableIf = typename std::enable_if<cond, A>::type;
@@ -630,30 +699,36 @@ using TupleAt = typename detail::TupleAtImpl<n, Tpl>::Type;
 // ! This type-level function is partial. It will not work for callable with auto arguments
 
 namespace detail {
-    template<typename, bool>
-    struct ArgumentsImpl {};
+    // Fallback for unsupported types
+    struct Unsupported {};
+
+    template<typename, typename = Void<>>
+    struct ArgumentsImpl {
+        using Type = Unsupported;
+    };
 
     template<typename F>
-    struct ArgumentsImpl<F, true>: ArgumentsImpl<decltype(&F::operator()), false> {};
+    struct ArgumentsImpl<F, Void<decltype(&F::operator())>>:
+        ArgumentsImpl<decltype(&F::operator()), void> {};
 
     template<typename R, typename... Args>
-    struct ArgumentsImpl<R (*)(Args...), false> {
+    struct ArgumentsImpl<R (*)(Args...), void> {
         using Type = Tuple<Args...>;
     };
 
     template<typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...), false> {
+    struct ArgumentsImpl<R (A::*)(Args...), void> {
         using Type = Tuple<Args...>;
     };
 
     template<typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...) const, false> {
+    struct ArgumentsImpl<R (A::*)(Args...) const, void> {
         using Type = Tuple<Args...>;
     };
 }  // namespace detail
 
 template<typename F>
-using Arguments = typename detail::ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
+using Arguments = typename detail::ArgumentsImpl<ReferenceRemoved<F>>::Type;
 
 // ! deprecated, Implement invoke if needed
 // // apply
@@ -664,75 +739,6 @@ using Arguments = typename detail::ArgumentsImpl<F, HasCallOperator<F>::value>::
 // Return<F> apply(const F& f, const Tuple<As...>& tpl) {
 //     return detail::_apply(f, tpl, IndexSequenceFor<As...> {});
 // }
-
-// PointerRemoved
-template<typename A>
-using PointerRemoved = typename std::remove_pointer<A>::type;
-
-// ReferenceRemoved
-template<typename A>
-using ReferenceRemoved = typename std::remove_reference<A>::type;
-
-// ConstRemoved
-template<typename A>
-using ConstRemoved = typename std::remove_const<A>::type;
-
-// VoletileRemoved
-template<typename A>
-using VoletileRemoved = typename std::remove_volatile<A>::type;
-
-// CVRemoved
-template<typename A>
-using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
-
-// CVRefRemoved
-template<typename A>
-using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
-
-// Decay
-template<typename A>
-using Decay = typename std::decay<A>::type;
-
-// IsConst
-template<typename A>
-using IsConst = std::is_const<A>;
-
-// Void
-namespace detail {
-    template<typename... Ts>
-    struct VoidImpl {
-        using Type = void;
-    };
-}  // namespace detail
-
-template<typename... Ts>
-using Void = typename detail::VoidImpl<Ts...>::Type;
-
-// IsLvalueReference
-
-template<typename A>
-struct IsLvalueReference: False {};
-
-template<typename A>
-struct IsLvalueReference<A&>: True {};
-
-// forward
-template<typename A>
-constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
-    return static_cast<A&&>(a);
-}
-
-template<typename A>
-constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
-    static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
-    return static_cast<A&&>(a);
-}
-
-// move
-template<typename A>
-constexpr ReferenceRemoved<A>&& move(A&& a) {
-    return static_cast<ReferenceRemoved<A>&&>(a);
-}
 
 // swap
 template<typename A>
