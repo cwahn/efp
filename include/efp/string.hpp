@@ -30,14 +30,16 @@ public:
     Vector(const Char* c_str) {
         Base::_size = Traits::length(c_str);
         Base::_capacity = Base::_size + 1;
-        Base::_data = Base::_allocator.allocate(Base::_capacity);
+        // Base::_data = Base::_allocator.allocate(Base::_capacity);
+        Base::_data = AllocatorTraits<Allocator>::allocate(Base::_allocator, Base::_capacity);
         _memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
     }
 
     Vector(const Char* s, size_t count, const Allocator& alloc = Allocator()) {
         Base::_size = count;
         Base::_capacity = Base::_size + 1;
-        Base::_data = Base::_allocator.allocate(Base::_capacity);
+        // Base::_data = Base::_allocator.allocate(Base::_capacity);
+        Base::_data = AllocatorTraits<Allocator>::allocate(Base::_allocator, Base::_capacity);
         _memcpy(Base::_data, s, Base::_size * sizeof(Char));
     }
 
@@ -68,7 +70,8 @@ public:
         Base::capacity_ = Base::size_ + 1;
 
         // Allocate memory for the elements
-        Base::data_ = Base::allocator_.allocate(Base::capacity_);
+        // Base::data_ = Base::allocator_.allocate(Base::capacity_);
+        Base::data_ = AllocatorTraits<Allocator>::allocate(Base::allocator_, Base::capacity_);
 
         // Second pass: Copy-construct elements from the range
         size_t i = 0;
