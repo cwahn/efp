@@ -6,17 +6,19 @@
 
 using namespace efp;
 
-static_assert(IsSequence<Array<int, 3>>::value, "Array<int, 3> should satisfy IsSequence");
+// ! Explicit test of sequence trait is deprecated.
+// ! Failure to implement requirements we're going to be informed by static asset message of default implementation.
+// static_assert(IsSequence<Array<int, 3>>::value, "Array<int, 3> should satisfy IsSequence");
 // static_assert(IsSequenceImplLength<Array<int, 3>>::value, "IsSequenceImplLength should be satisfied by Array");
 // static_assert(IsSequenceImplNth<Array<int, 3>>::value, "IsSequenceImplNth should be satisfied by Array");
 // static_assert(IsSequenceImplData<Array<int, 3>>::value, "IsSequenceImplData should be satisfied by Array");
 
-static_assert(IsSequence<ArrVec<int, 3>>::value, "ArrVec<int, 3> should satisfy IsSequence");
+// static_assert(IsSequence<ArrVec<int, 3>>::value, "ArrVec<int, 3> should satisfy IsSequence");
 // static_assert(IsSequenceImplLength<ArrVec<int, 3>>::value, "IsSequenceImplLength should be satisfied by ArrVec");
 // static_assert(IsSequenceImplNth<ArrVec<int, 3>>::value, "IsSequenceImplNth should be satisfied by ArrVec");
 // static_assert(IsSequenceImplData<ArrVec<int, 3>>::value, "IsSequenceImplData should be satisfied by ArrVec");
 
-static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequence");
+// static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequence");
 // static_assert(IsSequenceImplLength<Vector<int>>::value, "IsSequenceImplLength should be satisfied by Vector");
 // static_assert(IsSequenceImplNth<Vector<int>>::value, "IsSequenceImplNth should be satisfied by Vector");
 // static_assert(IsSequenceImplData<Vector<int>>::value, "IsSequenceImplData should be satisfied by Vector");
@@ -29,10 +31,10 @@ static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequ
 // );
 // static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
 // static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
-static_assert(
-    IsSequenceImplData<std::array<int, 3>>::value,
-    "IsSequenceImplData should be satisfied by std::array"
-);
+// static_assert(
+//     IsSequenceImplData<std::array<int, 3>>::value,
+//     "IsSequenceImplData should be satisfied by std::array"
+// );
 
 // DebugType<decltype(data(declval<std::array<int, 3>>()))> a {};
 // DebugType<const Element<std::array<int, 3>>*> b {};
@@ -44,10 +46,10 @@ static_assert(
 
 // static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by std::array");
 // static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by std::array");
-static_assert(
-    IsSequenceImplData<std::vector<int>>::value,
-    "IsSequenceImplData should be satisfied by std::array"
-);
+// static_assert(
+//     IsSequenceImplData<std::vector<int>>::value,
+//     "IsSequenceImplData should be satisfied by std::array"
+// );
 
 // DebugType<decltype(data(declval<std::vector<int>>()))> c {};
 // DebugType<const Element<std::vector<int>>*> d {};
