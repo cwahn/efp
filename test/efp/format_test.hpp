@@ -8,6 +8,7 @@
 
 using namespace efp;
 
+// todo Find the reason why std::format is also visible
 TEST_CASE("format", "[format]") {
     SECTION("fundamental types") {
         CHECK(efp::format("{}", 42) == "42");
