@@ -627,15 +627,14 @@ using TupleAt = typename detail::TupleAtImpl<n, Tpl>::Type;
 
 // Arguements
 // l-value and r-value reference will preserved at the result, but const will be removed.
+// ! This type-level function is partial. It will not work for callable with auto arguments
 
 namespace detail {
     template<typename, bool>
     struct ArgumentsImpl {};
 
     template<typename F>
-    struct ArgumentsImpl<F, true>: ArgumentsImpl<decltype(&F::operator()), false> {
-        // using Type = typename
-    };
+    struct ArgumentsImpl<F, true>: ArgumentsImpl<decltype(&F::operator()), false> {};
 
     template<typename R, typename... Args>
     struct ArgumentsImpl<R (*)(Args...), false> {
@@ -656,105 +655,7 @@ namespace detail {
 template<typename F>
 using Arguments = typename detail::ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
 
-// // ReturnFromArgument
-// ! deprecated
-// namespace detail {
-//     template<typename, typename>
-//     struct ReturnFromArgumentImpl {};
-
-//     template<typename F, typename... Args>
-//     struct ReturnFromArgumentImpl<F, Tuple<Args...>> {
-//         using Type = InvokeResult<F, Args...>;
-//     };
-// }  // namespace detail
-
-// template<typename F>
-// using ReturnFromArgument = typename detail::ReturnFromArgumentImpl<F, Arguments<F>>::Type;
-
-// // FunctionReturn
-
-// namespace detail {
-//     template<typename F>
-//     struct FunctionReturnImpl {};
-
-//     // Specialization for function posize_ters
-//     template<typename R, typename... Args>
-//     struct FunctionReturnImpl<R (*)(Args...)> {
-//         using Type = R;
-//     };
-
-//     // Specialization for member function posize_ters
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args...)> {
-//         using Type = R;
-//     };
-
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args..., ...)> {
-//         using Type = R;
-//     };
-
-//     // Specialization for member function posize_ters with const qualifier
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args...) const> {
-//         using Type = R;
-//     };
-
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args..., ...) const> {
-//         using Type = R;
-//     };
-
-//     // Specialization for member function posize_ters with volatile qualifier
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args...) volatile> {
-//         using Type = R;
-//     };
-
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args..., ...) volatile> {
-//         using Type = R;
-//     };
-
-//     // Specialization for member function posize_ters with const volatile qualifier
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args...) const volatile> {
-//         using Type = R;
-//     };
-
-//     template<typename R, typename C, typename... Args>
-//     struct FunctionReturnImpl<R (C::*)(Args..., ...) const volatile> {
-//         using Type = R;
-//     };
-// }  // namespace detail
-
-// // ! The std::result_of is deprecated and replaced by std::invoke result in C++17
-
-// template<typename F>
-// using FunctionReturn = typename detail::FunctionReturnImpl<F>::Type;
-
-// // Return
-
-// namespace detail {
-//     template<typename F, typename Enable = void>
-//     struct ReturnImpl: FunctionReturnImpl<F> {};
-
-//     template<typename F>
-//     struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>>:
-//         FunctionReturnImpl<decltype(&F::operator())> {};
-// }  // namespace detail
-
-// template<typename F>
-// using Return = typename detail::ReturnImpl<F>::Type;
-
-// namespace detail {
-//     template<typename F, typename... As, int... indices>
-//     Return<F> _apply(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
-//         return f(get<indices>(tpl)...);
-//     }
-// }  // namespace detail
-
-// ! deprecated
+// ! deprecated, Implement invoke if needed
 // // apply
 // template<
 //     typename F,

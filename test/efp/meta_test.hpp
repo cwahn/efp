@@ -18,14 +18,6 @@ using namespace efp;
 //     // CHECK((-1 > CtConst<size_t, 3>{}) ? (CtConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
 // }
 
-// TEST_CASE("_all") {
-//     CHECK(_all() == true);
-//     CHECK(_all(true) == true);
-//     CHECK(_all(false) == false);
-//     CHECK(_all(true, false) == false);
-//     CHECK(_all(false, true) == false);
-// }
-
 TEST_CASE("_all") {
     // CHECK(_all({}) == true);
     CHECK(_all({true}) == true);
@@ -33,14 +25,6 @@ TEST_CASE("_all") {
     CHECK(_all({true, false}) == false);
     CHECK(_all({false, true}) == false);
 }
-
-// TEST_CASE("any_v") {
-//     CHECK(_any() == false);
-//     CHECK(_any(true) == true);
-//     CHECK(_any(false) == false);
-//     CHECK(_any(true, false) == true);
-//     CHECK(_any(false, true) == true);
-// }
 
 TEST_CASE("_any") {
     // CHECK(_any({}) == false);
@@ -50,14 +34,6 @@ TEST_CASE("_any") {
     CHECK(_any({false, true}) == true);
 }
 
-// TEST_CASE("_maximum") {
-//     CHECK(_maximum(0) == 0);
-//     CHECK(_maximum(0, 1) == 1);
-//     CHECK(_maximum(-1, 1) == 1);
-//     CHECK(_maximum(1., 2., 3) == 3.);
-//     CHECK(_maximum(-1., 2, 3.) == 3.);
-// }
-
 TEST_CASE("_maximum") {
     CHECK(_maximum({0}) == 0);
     CHECK(_maximum({0, 1}) == 1);
@@ -65,14 +41,6 @@ TEST_CASE("_maximum") {
     CHECK(_maximum({1., 2., 3.}) == 3.);
     CHECK(_maximum({-1., 2., 3.}) == 3.);
 }
-
-// TEST_CASE("_minimum") {
-//     CHECK(_minimum(0) == 0);
-//     CHECK(_minimum(1, 0) == 0);
-//     CHECK(_minimum(1u, -1) == 1);
-//     CHECK(_minimum(1, 2., 3) == 1);
-//     CHECK(_minimum(1, 2, -3.) == -3);
-// }
 
 TEST_CASE("_minimum") {
     CHECK(_minimum({0}) == 0);
