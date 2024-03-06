@@ -183,31 +183,32 @@ double* return_t_function1(const int x0, float& x1) {
     return nullptr;
 }
 
-TEST_CASE("Return") {
-    auto return_t_lambda0 = [](int x0, float x1) { return x1 + x0; };
-    auto return_t_lambda1 = [](const int x0, float& x1) { return x0 + x1; };
-    auto return_t_lambda2 = [](const int x0, float& x1) {};
+// ! Deprecate. Use InvokeResult instead
+// TEST_CASE("Return") {
+//     auto return_t_lambda0 = [](int x0, float x1) { return x1 + x0; };
+//     auto return_t_lambda1 = [](const int x0, float& x1) { return x0 + x1; };
+//     auto return_t_lambda2 = [](const int x0, float& x1) {};
 
-    CHECK(IsSame<double, Return<decltype(&return_t_function0)>>::value == true);
+//     CHECK(IsSame<double, Return<decltype(&return_t_function0)>>::value == true);
 
-    CHECK(IsSame<double&, Return<decltype(&return_t_function0)>>::value == false);
+//     CHECK(IsSame<double&, Return<decltype(&return_t_function0)>>::value == false);
 
-    CHECK(IsSame<double*, Return<decltype(&return_t_function1)>>::value == true);
+//     CHECK(IsSame<double*, Return<decltype(&return_t_function1)>>::value == true);
 
-    CHECK(IsSame<double, Return<decltype(&return_t_function1)>>::value == false);
+//     CHECK(IsSame<double, Return<decltype(&return_t_function1)>>::value == false);
 
-    CHECK(IsSame<float, Return<decltype(return_t_lambda0)>>::value == true);
+//     CHECK(IsSame<float, Return<decltype(return_t_lambda0)>>::value == true);
 
-    CHECK(IsSame<int&, Return<decltype(return_t_lambda0)>>::value == false);
+//     CHECK(IsSame<int&, Return<decltype(return_t_lambda0)>>::value == false);
 
-    CHECK(IsSame<float, Return<decltype(return_t_lambda1)>>::value == true);
+//     CHECK(IsSame<float, Return<decltype(return_t_lambda1)>>::value == true);
 
-    CHECK(IsSame<float*, Return<decltype(return_t_lambda1)>>::value == false);
+//     CHECK(IsSame<float*, Return<decltype(return_t_lambda1)>>::value == false);
 
-    // Does catch void return
+//     // Does catch void return
 
-    CHECK(IsSame<void, Return<decltype(return_t_lambda2)>>::value == true);
-}
+//     CHECK(IsSame<void, Return<decltype(return_t_lambda2)>>::value == true);
+// }
 
 int is_invocable_add(int a, int b) {
     return a + b;
@@ -294,27 +295,28 @@ TEST_CASE("tuple") {
     CHECK(Tuple<> {} == tuple());
 }
 
-TEST_CASE("apply") {
-    SECTION("0") {
-        const auto tpl = tuple();
-        const auto f = []() { return unit; };
+// ! Deprecate. Use invoke instead
+// TEST_CASE("apply") {
+//     SECTION("0") {
+//         const auto tpl = tuple();
+//         const auto f = []() { return unit; };
 
-        CHECK(apply(f, tpl) == unit);
-    }
+//         CHECK(apply(f, tpl) == unit);
+//     }
 
-    SECTION("1") {
-        const auto tpl = tuple(true, 42);
-        const auto f = [](bool a, int b) { return unit; };
+//     SECTION("1") {
+//         const auto tpl = tuple(true, 42);
+//         const auto f = [](bool a, int b) { return unit; };
 
-        CHECK(apply(f, tpl) == unit);
-    }
+//         CHECK(apply(f, tpl) == unit);
+//     }
 
-    SECTION("2") {
-        const auto tpl = tuple(40, 2);
-        const auto add = [](int a, int b) { return a + b; };
+//     SECTION("2") {
+//         const auto tpl = tuple(40, 2);
+//         const auto add = [](int a, int b) { return a + b; };
 
-        CHECK(apply(add, tpl) == 42);
-    }
-}
+//         CHECK(apply(add, tpl) == 42);
+//     }
+// }
 
 #endif
