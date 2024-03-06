@@ -7,12 +7,12 @@
 
 using namespace efp;
 
-// TEST_CASE("bound_v")
+// TEST_CASE("clamp")
 // {
-//     CHECK(bound_v(0, 2, CtConst<size_t, -1>{}) == 0);
-//     CHECK(bound_v(0, 2, CtConst<size_t, 1>{}) == 1);
-//     CHECK(bound_v(0, 2, CtConst<size_t, 3>{}) == 2);
-//     CHECK(bound_v(0, CtConst<size_t, 3>{}, -1) == 0);
+//     CHECK(clamp(0, 2, CtConst<size_t, -1>{}) == 0);
+//     CHECK(clamp(0, 2, CtConst<size_t, 1>{}) == 1);
+//     CHECK(clamp(0, 2, CtConst<size_t, 3>{}) == 2);
+//     CHECK(clamp(0, CtConst<size_t, 3>{}, -1) == 0);
 //     // ! issue
 //     // CHECK((-1 > CtConst<size_t, 3>{}) == true);
 //     // CHECK((-1 > CtConst<size_t, 3>{}) ? (CtConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);

@@ -20,6 +20,7 @@ function(create_test_for_standard cpp_standard)
     set(target_name "efp_test_cpp${cpp_standard}")
     add_executable(${target_name} test.cpp)
     target_compile_features(${target_name} PRIVATE cxx_std_${cpp_standard})
+    set_target_properties(${target_name} PROPERTIES CXX_EXTENSIONS OFF)
     target_link_libraries(${target_name}
         PRIVATE
         Catch2::Catch2WithMain

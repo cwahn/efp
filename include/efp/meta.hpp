@@ -266,9 +266,9 @@ constexpr A op_mod(const A& lhs, const A& rhs) {
     return lhs % rhs;
 }
 
-// bound_v
+// clamp
 template<typename A, typename B, typename C>
-constexpr auto bound_v(const A& lower, const B& upper, const C& x)
+constexpr auto clamp(const A& lower, const B& upper, const C& x)
     -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x)) {
     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
 }

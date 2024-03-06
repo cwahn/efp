@@ -164,6 +164,11 @@ namespace detail {
     //     }
     // };
 
+    // Priority tags
+    struct LowPriority {};
+
+    struct HighPriority: LowPriority {};
+
     template<typename F>
     class WildCardWrapper {
     public:
@@ -171,8 +176,9 @@ namespace detail {
         explicit WildCardWrapper(const F& lambda) : _lambda(lambda) {}
 
         // Overload the function call operator to forward calls to the lambda's own call operator.
-        template<typename... Args>
-        inline auto operator()(Args&&...) const -> decltype(efp::declval<F>()()) {
+        template<typename A>
+        inline auto operator()(A&&, HighPriority = HighPriority {}) const
+            -> decltype(efp::declval<F>()()) {
             return _lambda();
         }
 
@@ -201,6 +207,14 @@ namespace detail {
     // Overloaded class for pattern matching
     template<typename... Fs>
     struct Overloaded;
+
+    // template<>
+    // struct Overloaded<> {
+    //     template<typename... Args>
+    //     auto operator()(Args&&..., LowPriority) const {
+    //         static_assert(AlwaysFalse<Args...>::value, "No matching pattern found");
+    //     }
+    // };
 
     template<typename F>
     struct Overloaded<F>: F {
@@ -470,6 +484,19 @@ namespace detail {
                 const EnumBase*,
                 const Pattern&>::call(_index, this, Pattern {match_branch(f), match_branch(fs)...});
         }
+
+        // template<typename F, typename... Fs>
+        // auto match(const F& f, const Fs&... fs) const -> InvokeResult<F, A> const {
+        //     static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+
+        //     using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
+
+        //     return EnumSwitch<
+        //         alt_num,
+        //         Match<Pattern>::template Case,
+        //         const EnumBase*,
+        //         const Pattern&>::call(_index, this, Pattern {match_branch(f), match_branch(fs)...});
+        // }
 
     private:
         template<typename Alt>
