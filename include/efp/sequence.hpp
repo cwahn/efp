@@ -99,17 +99,6 @@ public:
         }
     }
 
-    // ! Deprecated: variadic template constructor
-    // template<typename... Arg>
-    // Array(const Arg&... args) {
-    //     static_assert(
-    //         sizeof...(args) == ct_size,
-    //         "Array::Array: number of arguments must be equal to ct_size"
-    //     );
-    //     size_t index = 0;
-    //     _construct_elements(index, args...);
-    // }
-
     Array(InitializerList<Element> il) {
         if (il.size() != ct_size) {
             throw RuntimeError("Array::Array: number of arguments must be equal to ct_size");
@@ -231,9 +220,6 @@ constexpr auto nth(size_t i, Array<A, n>& as) -> A& {
     return as[i];
 }
 
-// static_assert(IsSame<decltype(nth(0, Array<int, 2>{0, 1, 2})), int &>::value, "Assert nth");
-// DebugType<decltype(nth(0, Array<int, 2>{0, 1, 2}))> _;
-
 template<typename A, size_t n>
 constexpr auto data(const Array<A, n>& as) -> const A* {
     return as.data();
@@ -329,20 +315,6 @@ public:
             new (_data + i) Element {as[i]};
         }
     }
-
-    // template<typename... Arg>
-    // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
-
-    // ! Deprecated: variadic template constructor
-    // template<typename... Arg>
-    // ArrVec(const Arg&... args) : _size(sizeof...(args)) {
-    //     static_assert(
-    //         sizeof...(args) <= ct_capacity,
-    //         "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
-    //     );
-    //     size_t index = 0;
-    //     _construct_elements(index, args...);
-    // }
 
     ArrVec(InitializerList<Element> il) : _size(il.size()) {
         if (il.size() > ct_capacity) {
