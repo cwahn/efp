@@ -471,11 +471,8 @@ namespace detail {
         // Pattern matching
         template<typename F, typename... Fs>
         auto match(const F& f, const Fs&... fs) const
-            // -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
-            //     efp::declval<A>()
-            // ))
             -> InvokeResult<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>, A> const {
-            // static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            // ? Maybe check for irrelevant branches only if specified to do so
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
