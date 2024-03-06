@@ -197,10 +197,13 @@ namespace detail {
         return f;
     }
 
-    // LowPriorityWrapper
-    template<typename T>
-    struct LowPriorityWrapper {
-        LowPriorityWrapper(T&&) {}
+    // BadParam
+    struct BadParam {
+        BadParam() {}
+
+        operator int() const {
+            return 0;
+        }
     };
 
     // Overloaded
@@ -212,7 +215,7 @@ namespace detail {
     struct Overloaded<> {
         // Extra template parameter to avoid ambiguity with the wildcard case
         template<typename A, typename... Args>
-        auto operator()(LowPriorityWrapper<A>&&, Args...) const {
+        auto operator()(A&&, int = BadParam(), Args...) const {
             static_assert(AlwaysFalse<A>::value, "No matching pattern found");
         }
     };
