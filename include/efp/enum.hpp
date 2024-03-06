@@ -144,8 +144,10 @@ namespace detail {
 
     // todo Maybe support more than 256 alternatives
 
+    // IsWildCard
+    // The function or lambda with auto arguments is not considered as a wild card
     template<typename F>
-    using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
+    using IsWildCard = IsSame<Arguments<F>, Tuple<>>;
 
     // todo zero copy
     // Wrapper for wild card to be callable with any arguments
