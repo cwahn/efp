@@ -607,7 +607,7 @@ namespace detail {
         };
 
         template<typename... Fs>
-        using PatternCheck =
+        usingPatternCheck =
             typename _PatternCheck<Conditional<WildCardIffLast<Fs...>::value, True, False>, Fs...>::
                 Type;
 
