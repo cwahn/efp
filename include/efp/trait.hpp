@@ -60,6 +60,8 @@ constexpr auto data(const As& as) -> const Element<As>*;
 template<typename As, typename = Void<Element<As>>>
 constexpr auto data(As& as) -> Element<As>*;
 
+// length
+
 template<typename A, typename = void>
 struct IsSequenceImplLength: False {};
 
@@ -69,6 +71,11 @@ struct IsSequenceImplLength<
     Void<decltype(efp::length(declval<const A>())), decltype(efp::length(declval<A>()))>>:
     Any<IsSame<decltype(efp::length(declval<const A>())), CtSize<A>>,
         IsSame<decltype(efp::length(declval<const A>())), size_t>> {};
+
+// template<typename A>
+// using IsSequenceImplLength =
+//     Any<IsInvocableR<CtSize<A>, decltype(length), const A&>,
+//         IsInvocableR<size_t, decltype(length), const A&>>;
 
 // nth
 // todo non-const ref check
@@ -88,9 +95,10 @@ struct IsSequenceImplNth<
     :
     IsSame<
         decltype(efp::nth(declval<size_t>(), declval<const CVRefRemoved<A>>())),
-        const Element<CVRefRemoved<A>>&>
+        const Element<CVRefRemoved<A>>&> {};
 
-{};
+// template<typename A>
+// using IsSequenceImplNth = IsInvocableR<const Element<A>&, decltype(nth), size_t, const A&>;
 
 // data
 
@@ -104,6 +112,11 @@ struct IsSequenceImplData<A, Void<decltype(data(declval<const A>())), decltype(d
     //       IsSame<decltype(data(declval<A>())), Element<A> *>>
 
     : IsSame<decltype(data(declval<const A>())), const Element<A>*> {};
+
+// template<typename A>
+// using IsSequenceImplData = IsInvocableR<const Element<A>*, decltype(data), const A&>;
+
+// IsSequence
 
 template<typename A, typename = void>
 struct IsSequence: False {};

@@ -36,6 +36,11 @@ function(create_test_for_standard cpp_standard)
         efp)
     catch_discover_tests(${target_name})
     efp_enable_compilation_time(${target_name})
+
+    target_compile_options(${target_name} PRIVATE
+  -ftemplate-backtrace-limit=0
+  -fdiagnostics-show-template-tree
+)
 endfunction()
 
 # Create tests for C++11 through C++23

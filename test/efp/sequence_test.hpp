@@ -23,21 +23,34 @@ static_assert(IsSequence<Vector<int>>::value, "Vector<int> should satisfy IsSequ
 
 // todo STL only
 
+// static_assert(
+//     IsSequence<std::array<int, 3>>::value,
+//     "std::array<int, 3> should satisfy IsSequence"
+// );
+// static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by std::array");
+// static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by std::array");
 static_assert(
-    IsSequence<std::array<int, 3>>::value,
-    "std::array<int, 3> should satisfy IsSequence"
+    IsSequenceImplData<std::array<int, 3>>::value,
+    "IsSequenceImplData should be satisfied by std::array"
 );
-// static_assert(IsSequenceImplLength<std::array<int, 3>>::value, "IsSequenceImplLength should be satisfied by
-// std::array"); static_assert(IsSequenceImplNth<std::array<int, 3>>::value, "IsSequenceImplNth should be satisfied by
-// std::array"); static_assert(IsSequenceImplData<std::array<int, 3>>::value, "IsSequenceImplData should be satisfied by
-// std::array");
 
-static_assert(IsSequence<std::vector<int>>::value, "std::vector<int> should satisfy IsSequence");
+// DebugType<decltype(data(declval<std::array<int, 3>>()))> a {};
+// DebugType<const Element<std::array<int, 3>>*> b {};
+// DebugType<
+//     IsSame<decltype(data(declval<const std::array<int, 3>>())), const Element<std::array<int, 3>>*>>
+//     c {};
 
-// static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by
-// std::array"); static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by
-// std::array"); static_assert(IsSequenceImplData<std::vector<int>>::value, "IsSequenceImplData should be satisfied by
-// std::array");
+// static_assert(IsSequence<std::vector<int>>::value, "std::vector<int> should satisfy IsSequence");
+
+// static_assert(IsSequenceImplLength<std::vector<int>>::value, "IsSequenceImplLength should be satisfied by std::array");
+// static_assert(IsSequenceImplNth<std::vector<int>>::value, "IsSequenceImplNth should be satisfied by std::array");
+static_assert(
+    IsSequenceImplData<std::vector<int>>::value,
+    "IsSequenceImplData should be satisfied by std::array"
+);
+
+// DebugType<decltype(data(declval<std::vector<int>>()))> c {};
+// DebugType<const Element<std::vector<int>>*> d {};
 
 TEST_CASE("Array Rule of five", "Array") {
     SECTION("New Constructor") {
