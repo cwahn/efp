@@ -200,14 +200,21 @@ namespace detail {
     template<typename... Fs>
     struct Overloaded;
 
+#if __cplusplus >= 201402L
     template<>
     struct Overloaded<> {
-#if __cplusplus >= 201402L
         // Better error message without extra compilation cost is only available in >= C++14
         template<typename... Alts, EnableIf<True::value, int> = 0>
         auto operator()(BadParam, int _ = 0, Alts&&...) const {}
-#endif
     };
+#else
+    template<class F>
+    struct Overloaded<F>: F {
+        using F::operator();
+
+        Overloaded(const F& f) : F {f} {}
+    };
+#endif
 
     template<class F, class... Fs>
     struct Overloaded<F, Fs...>: F, Overloaded<Fs...> {
