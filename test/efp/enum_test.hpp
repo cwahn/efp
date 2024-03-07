@@ -364,8 +364,8 @@ TEST_CASE("enum_match") {
         Enum<Unit, int, double> a = unit;
         double b = 0.;
 
-        //?
         a.match([&](int x) { b += 1; }, [&]() {});
+        // Sould be failed to get compiled and show static assert message on top
         // a.match([&](int x) { b += 1; }, [&](double _) { b += 1; });
         a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
 
