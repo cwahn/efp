@@ -9,7 +9,7 @@ namespace detail {
 
     // Use bit operation and recursion
     constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
-        return (power >= n) ? power : power_2_ceiling(n, power << 1);
+        return (power >= n) ? power - 1 : power_2_ceiling(n, power << 1);
     }
 
     // clang-format off
@@ -32,7 +32,7 @@ namespace detail {
     struct _EnumSwitch {};
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<2, alt_num, Case, Args...> {
+    struct _EnumSwitch<2 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -44,7 +44,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<4, alt_num, Case, Args...> {
+    struct _EnumSwitch<4 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -56,7 +56,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<8, alt_num, Case, Args...> {
+    struct _EnumSwitch<8 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -68,7 +68,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<16, alt_num, Case, Args...> {
+    struct _EnumSwitch<16 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -80,7 +80,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<32, alt_num, Case, Args...> {
+    struct _EnumSwitch<32 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -92,7 +92,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<64, alt_num, Case, Args...> {
+    struct _EnumSwitch<64 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -104,7 +104,7 @@ namespace detail {
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<128, alt_num, Case, Args...> {
+    struct _EnumSwitch<128 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
@@ -115,18 +115,17 @@ namespace detail {
         }
     };
 
-    // ! temp
-    // template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    // struct _EnumSwitch<256, alt_num, Case, Args...> {
-    //     static auto call(uint8_t index, Args&&... args)
-    //         -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
-    //         switch (index) {
-    //             EFP_STAMP256(0, EFP_ENUM_CASE)
-    //             default:
-    //                 throw RuntimeError("Invalid alternative index");
-    //         }
-    //     }
-    // };
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<256 - 1, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP256(0, EFP_ENUM_CASE)
+                default:
+                    throw RuntimeError("Invalid alternative index");
+            }
+        }
+    };
 
 #undef EFP_ENUM_CASE
 
