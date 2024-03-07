@@ -12,7 +12,7 @@ namespace detail {
         return (power >= n) ? power : power_2_ceiling(n, power << 1);
     }
 
-    // clang-format off
+// clang-format off
     #define EFP_STAMP2(n, x) x(n) x(n + 1)
     #define EFP_STAMP4(n, x) EFP_STAMP2(n, x) EFP_STAMP2(n + 2, x)
     #define EFP_STAMP8(n, x) EFP_STAMP4(n, x) EFP_STAMP4(n + 4, x)
@@ -214,8 +214,13 @@ namespace detail {
 
     template<>
     struct Overloaded<> {
+#if __cplusplus >= 201402L
+        // Better error message without extra compilation cost is only available in >= C++14
         template<typename... Alts, EnableIf<True::value, int> = 0>
-        auto operator()(BadParam, int _ = 0, Alts&&...) const {}
+        auto operator()(BadParam, int _ = 0, Alts&&...) const {
+            return {};
+        }
+#endif
     };
 
     // template<typename F>
