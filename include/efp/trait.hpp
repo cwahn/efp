@@ -20,7 +20,7 @@ using Element = typename ElementImpl<CVRefRemoved<A>>::Type;
 
 // Sequence traits
 // dyn
-constexpr size_t dyn = -1;
+constexpr size_t dyn = std::numeric_limits<size_t>::max();
 using Dyn = Size<dyn>;
 
 // CtSize
