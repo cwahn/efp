@@ -149,21 +149,8 @@ namespace detail {
     template<typename F>
     using IsWildCard = IsSame<Arguments<F>, Tuple<>>;
 
-    // todo zero copy
-    // Wrapper for wild card to be callable with any arguments
-    // template<typename F>
-    // struct WildCardWrapper: public F {
-    //     // Explicitly define a constructor to accept a lambda or any callable
-    //     template<typename G>
-    //     WildCardWrapper(G&& g) : F {std::forward<G>(g)} {}
-
-    //     // Overload operator() to forward arguments to the callable's operator()
-    //     template<typename... Args>
-    //     inline auto operator()(Args&&...) const -> decltype(std::declval<F>()()) {
-    //         return F::operator()();
-    //     }
-    // };
-
+    // WildCardWrapper
+    // Zero-copy wrapper for wild card
     template<typename F>
     class WildCardWrapper {
     public:
@@ -209,6 +196,7 @@ namespace detail {
 
     // Overloaded
     // Overloaded class for pattern matching
+    // todo Make it zero-copy
     template<typename... Fs>
     struct Overloaded;
 
@@ -220,13 +208,6 @@ namespace detail {
         auto operator()(BadParam, int _ = 0, Alts&&...) const {}
 #endif
     };
-
-    // template<typename F>
-    // struct Overloaded<F>: F {
-    //     using F::operator();
-
-    //     Overloaded(const F& f) : F {f} {}
-    // };
 
     template<class F, class... Fs>
     struct Overloaded<F, Fs...>: F, Overloaded<Fs...> {
@@ -542,93 +523,6 @@ namespace detail {
                 }
             };
         };
-
-        // ! Explicit sanity check for match is deprecated.
-        // ! However, it maybe optionally enabled in the futere.
-        // Match branch sanity check
-
-        // // Wild card will be considered as a irrelevant branch
-        // template<typename F>
-        // using IsRelevantBranch = Any<IsInvocable<F, A>, IsInvocable<F, As>...>;
-
-        // // WildCardIffLast
-        // template<typename... Fs>
-        // struct WildCardIffLast {};
-
-        // template<typename F>
-        // struct WildCardIffLast<F>: IsWildCard<F> {};
-
-        // template<typename F, typename... Fs>
-        // struct WildCardIffLast<F, Fs...>: WildCardIffLast<Fs...> {};
-
-        // // AllButLastAreRelevant
-        // template<typename... Fs>
-        // struct AllButLastAreRelevant {};
-
-        // template<typename F>
-        // struct AllButLastAreRelevant<F>: True {};
-
-        // template<typename F, typename... Fs>
-        // struct AllButLastAreRelevant<F, Fs...>:
-        //     Conditional<IsRelevantBranch<F>::value, AllButLastAreRelevant<Fs...>, False> {};
-
-        // // todo Make it more stricter only excpeting explicitly invocable branches
-        // // RemoveFirstInvocable
-        // template<typename Alt, typename List>
-        // struct _RemoveFirstInvocable {};
-
-        // template<typename Alt>
-        // struct _RemoveFirstInvocable<Alt, TypeList<>> {
-        //     using Type = TypeList<>;
-        // };
-
-        // template<typename Alt, typename F, typename... Fs>
-        // struct _RemoveFirstInvocable<Alt, TypeList<F, Fs...>> {
-        //     using Type = Conditional<
-        //         IsInvocable<F, Alt>::value,
-        //         TypeList<Fs...>,
-        //         Prepend<F, typename _RemoveFirstInvocable<Alt, TypeList<Fs...>>::Type>>;
-        // };
-
-        // template<typename Alt, typename List>
-        // using RemoveFirstInvocable = typename _RemoveFirstInvocable<Alt, List>::Type;
-
-        // // Mutual Exhaustiveness
-        // // Check if the alternatives and the branches are mutually exhaustive
-        // template<typename AltList, typename BranchList>
-        // struct MutExhaust {};
-
-        // template<typename Alt, typename F>
-        // struct MutExhaust<TypeList<Alt>, TypeList<F>>: IsInvocable<F, Alt> {};
-
-        // template<typename Alt, typename... Alts, typename F, typename... Fs>
-        // struct MutExhaust<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
-        //     Conditional<
-        //         sizeof...(Alts) == sizeof...(Fs),
-        //         MutExhaust<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>,
-        //         False> {};
-
-        // // PatternCheck
-        // template<typename, typename... Fs>
-        // struct _PatternCheck {};
-
-        // // No need to check if all the alternatives are covered
-        // // Only need to check if all the branches are relevant
-        // template<typename... Fs>
-        // struct _PatternCheck<True, Fs...> {
-        //     using Type = AllButLastAreRelevant<Fs...>;
-        // };
-
-        // // If there is no wild card at the last branch, check if the alternatives and the branches are mutually exhaustive
-        // template<typename... Fs>
-        // struct _PatternCheck<False, Fs...> {
-        //     using Type = MutExhaust<TypeList<A, As...>, TypeList<Fs...>>;
-        // };
-
-        // template<typename... Fs>
-        // using PatternCheck =
-        //     typename _PatternCheck<Conditional<WildCardIffLast<Fs...>::value, True, False>, Fs...>::
-        //         Type;
 
         // Private member variables
         alignas(_maximum({alignof(A), alignof(As)...})

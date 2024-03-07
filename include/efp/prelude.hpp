@@ -267,10 +267,9 @@ using ConcatReturn = Conditional<
                     CtCapacity<Ass>::value * CtCapacity<Element<Ass>>::value>>>,
         Vector<Element<Element<Ass>>>>>;
 
-// concat
-
+// concat :: [[A]] -> [A]
 template<typename Ass>
-auto concat(const Ass ass) -> ConcatReturn<Ass> {
+auto concat(const Ass& ass) -> ConcatReturn<Ass> {
     ConcatReturn<Ass> res {};
 
     const auto ass_len = length(ass);
@@ -318,8 +317,7 @@ using IntercalateReturn = Conditional<
                 - CtCapacity<As>::value>,
         Vector<Element<Element<Ass>>>>>;
 
-// intercalate
-
+// intercalate :: [A] -> [[A]] -> [A]
 template<typename As, typename Ass>
 auto intercalate(const As& delimeter, const Ass& ass) -> IntercalateReturn<As, Ass> {
     IntercalateReturn<As, Ass> result {};
@@ -368,8 +366,7 @@ auto intercalate(const As& delimeter, const Ass& ass) -> IntercalateReturn<As, A
     return result;
 }
 
-// for_index
-
+// for_index :: (size_t -> A) -> size_t -> void
 template<typename F = void (*)(size_t)>
 void for_index(const F& f, const size_t n) {
     for (size_t i = 0; i < n; ++i) {
@@ -377,8 +374,7 @@ void for_index(const F& f, const size_t n) {
     }
 }
 
-// for_each_with_index
-
+// for_each_with_index :: (size_t -> A -> void) -> [A] ... -> void
 template<typename... Ass, typename F = void (*)(size_t, const Element<Ass>&...)>
 void for_each_with_index(const F& f, const Ass&... seqs) {
     const auto min_len = _min_length(seqs...);
@@ -398,7 +394,6 @@ void for_each_with_index_mut(const F& f, Ass&... seqs) {
 }
 
 // cartesian_for_each
-
 template<typename As, typename F = void (*)(const Element<As>&)>
 void cartesian_for_each(const F& f, const As& as) {
     for_each(f, as);

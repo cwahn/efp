@@ -352,8 +352,6 @@ using U32StringView = BasicStringView<char32_t>;
 using U8StringView = BasicStringView<char8_t>;
 #endif
 
-// Use intercalate to join strings
-
 // #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 // template<typename A>

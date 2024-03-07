@@ -16,9 +16,6 @@ class Vcb {
     static constexpr size_t ct_size = n;
     static constexpr size_t ct_capacity = n;
 
-    // static_assert(ct_size >= 0, "ct_size must greater or equal than 0.");
-    // static_assert(ct_capacity >= 0, "ct_capacity must greater or equal than 0.");
-
     Vcb() {
         for (size_t i = 0; i < ct_size * 2; ++i) {
             new (_buffer + i) A {};
@@ -173,9 +170,6 @@ class Vcq {
 
     static constexpr size_t ct_size = dyn;
     static constexpr size_t ct_capacity = n;
-
-    // static_assert(ct_size >= -1, "ct_size must greater or equal than -1.");
-    // static_assert(ct_capacity >= -1, "ct_capacity must greater or equal than -1.");
 
     Vcq() {
         // Buffers are uninitialized

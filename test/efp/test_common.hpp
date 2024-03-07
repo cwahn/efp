@@ -40,18 +40,18 @@ const std::vector<double> stl_vector_5 {1., 2., 3., 4., 5.};
 // Thread local side effectful
 
 class MockHW {
-  public:
+public:
     struct Resource {
         int id;
         int value;
     };
 
-  private:
+private:
     static thread_local int _next_id;
     static thread_local std::vector<Resource> _resources;
     static thread_local int _double_free_cnt;
 
-  public:
+public:
     MockHW() {}
 
     // Optional: Method to reset the manager for reuse or testing
@@ -108,26 +108,6 @@ class MockHW {
         return intercalate(String {", "}, strings);
     }
 
-    // static std::string resource_state_to_string() {
-    //     std::vector<std::string> strings;
-    //     std::transform(
-    //         _resources.begin(),
-    //         _resources.end(),
-    //         std::back_inserter(strings),
-    //         [](const Resource& resource) { return std::to_string(resource.id); }
-    //     );
-
-    //     std::string result;
-    //     for (size_t i = 0; i < strings.size(); ++i) {
-    //         result += strings[i];
-    //         if (i != strings.size() - 1) {
-    //             result += ", ";
-    //         }
-    //     }
-
-    //     return result;
-    // }
-
     static bool is_sound() {
         return _double_free_cnt == 0 && _resources.empty();
     }
@@ -141,7 +121,7 @@ thread_local int MockHW::_double_free_cnt = 0;
 class MockRaii {
     MockHW::Resource _resource;
 
-  public:
+public:
     MockRaii() : _resource(MockHW::acquire()) {}
 
     ~MockRaii() {

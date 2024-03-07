@@ -1,9 +1,6 @@
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
 
-// ct_capacity is compile time bound of length. It does not mean safety of access.
-// However, actual capacity does means the length of memory safe to access.
-
 #include "efp/cpp_core.hpp"
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
@@ -1417,6 +1414,7 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
+// ! Very problematic
 // #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 // template<typename A>

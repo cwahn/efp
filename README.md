@@ -98,6 +98,7 @@ int main() {
 ```cpp
 const String name_0 = "Lighthouse";
 const String name_1 = "Tinker Bell";
+
 println("{}", format("{} loves {}.", name_0, name_1));
 ``` 
 
@@ -118,6 +119,7 @@ CHECK(b == 42);
 ### File IO
 ```c++
 auto file = File::open("test", "w+").move();
+
 file.write("Hello, world!\nThis is a test file.\nEnd of test.");
 file.close();
 ```
@@ -139,6 +141,7 @@ All tests passed (1055 assertions in 107 test cases)
 ## Requirements
 
 - Requires C++ 11 or later.
+- Also supporte freestanding env. with some limitations.
 
 ## Acknowledgement
 - Formatting

@@ -370,12 +370,6 @@ TEST_CASE("enum_match") {
         a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
 
         CHECK(b == 0.);
-
-        // ! Compilation should fail
-        // a.match(
-        //     [&]()
-        //     { b += 1; },
-        //     [&]() {});
     }
 
     // todo Check priority of cosntructor argument then no match

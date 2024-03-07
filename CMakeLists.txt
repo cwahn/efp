@@ -17,9 +17,6 @@ project(
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-backtrace-limit=0")
-
-
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
 
@@ -61,11 +58,10 @@ endfunction()
 
 # ! temp
 # Set verbose makefile output
-set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
+# set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
 
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
-# target_compile_features(efp INTERFACE cxx_std_11)
 
 # Check if this CMakeLists.txt is the top-most CMake project
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
