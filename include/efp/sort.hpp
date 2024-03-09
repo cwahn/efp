@@ -74,10 +74,10 @@ void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
 template<typename A, typename F = bool (*)(const A&, const A&)>
 void heapsort_by(Vector<A>& arr, const F& comp) {
     size_t n = arr.size();
-    for (size_t i = n / 2 - 1; i != -1; i--) {
+    for (size_t i = n / 2 - 1; i-- > 0;) {
         max_heapify_by(arr, n, i, comp);
     }
-    for (size_t i = n - 1; i != -1; i--) {
+    for (size_t i = n - 1; i-- > 0;) {
         swap(arr[0], arr[i]);
         max_heapify_by(arr, i, 0, comp);
     }

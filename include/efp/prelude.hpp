@@ -160,7 +160,7 @@ template<typename As, typename B, typename F = B (*)(const Element<As>&, const B
 auto foldr(const F& f, const B& init, const As& as) -> B {
     B res = init;
 
-    for (size_t i = length(as) - 1; i != -1; --i) {
+    for (size_t i = length(as) - 1; i-- > 0;) {
         res = f(nth(i, as), res);
     }
 
