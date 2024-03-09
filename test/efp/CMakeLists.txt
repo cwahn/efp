@@ -26,6 +26,7 @@ function(create_test_for_standard cpp_standard)
         Catch2::Catch2WithMain
         efp)
     catch_discover_tests(${target_name})
+    # Enable compilation time output
     efp_enable_compilation_time(${target_name})
 
     target_compile_options(${target_name} PRIVATE
