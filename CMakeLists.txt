@@ -31,15 +31,6 @@ if(MSVC)
     endif()
 endif()
 
-# AddressSanitizer
-option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-
-if(ENABLE_ASAN)
-    # Add the -fsanitize=address flag to the compiler and linker
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
-endif()
-
 # Function to enable template compilation time measurement for a specific target
 function(efp_enable_compilation_time target_name)
     message(STATUS "Enabling template compilation time measurement for target: ${target_name}")
@@ -56,15 +47,26 @@ function(efp_enable_compilation_time target_name)
     endif()
 endfunction()
 
-# ! temp
-# Set verbose makefile output
-# set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
-
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
 # Check if this CMakeLists.txt is the top-most CMake project
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    if(MSVC)
+        add_compile_options(/W4 /WX)
+    else()
+        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    endif()
+
+    # AddressSanitizer
+    option(ENABLE_ASAN "Enable AddressSanitizer" ON)
+
+    if(ENABLE_ASAN)
+        # Add the -fsanitize=address flag to the compiler and linker
+        add_compile_options(-fsanitize=address)
+        add_link_options(-fsanitize=address)
+    endif()
+
     add_subdirectory("./example")
     add_subdirectory("./test")
 endif()
