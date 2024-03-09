@@ -1,8 +1,6 @@
 #ifndef META_TEST_HPP_
 #define META_TEST_HPP_
 
-#include "catch2/catch_test_macros.hpp"
-#include "efp.hpp"
 #include "test_common.hpp"
 
 using namespace efp;

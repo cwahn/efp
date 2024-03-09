@@ -111,15 +111,6 @@ auto operator>>=(const Maybe<A>& ma, const F& f)
         return nothing;
 }
 
-// #define try_(expr) \
-//     ({ auto&& _tmp_##__COUNTER__ = (expr); _tmp_##__COUNTER__ ? _tmp_##__COUNTER__.value() : return nothing })
-
-// #define try_(expr)          \
-//     auto&& _tmp_ = (expr);  \
-//     if (!_tmp_.has_value()) \
-//         return nothing;     \
-//     _tmp_.value()
-
 }  // namespace efp
 
 #endif

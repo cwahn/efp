@@ -357,7 +357,7 @@ public:
     }
 
     void resize(size_t length) {
-        if (length > ct_capacity || length < 0) {
+        if (length > ct_capacity) {
             throw RuntimeError("ArrVec::resize: length must be less than or equal to ct_capacity");
         }
 
@@ -388,7 +388,7 @@ public:
     }
 
     void insert(size_t index, const Element& value) {
-        if (index < 0 || index > _size || _size == ct_capacity) {
+        if (index > _size || _size == ct_capacity) {
             throw RuntimeError(
                 "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
             );
@@ -420,7 +420,7 @@ public:
     }
 
     void erase(size_t index) {
-        if (index < 0 || index >= _size) {
+        if (index >= _size) {
             throw RuntimeError("ArrVec::erase: index must be less than or equal to size");
         }
 
@@ -706,10 +706,6 @@ namespace detail {
         }
 
         void resize(size_t new_size) {
-            if (new_size < 0) {
-                throw RuntimeError("VectorBase::resize: length must be greater than or equal to 0");
-            }
-
             // Always allocate one extra space for BasicString null terminator
             if (new_size + 1 > _capacity) {
                 reserve(new_size + 1);
@@ -819,7 +815,7 @@ namespace detail {
         }
 
         void insert(size_t index, const Element& value) {
-            if (index < 0 || index > _size) {
+            if (index > _size) {
                 throw RuntimeError("VectorBase::insert: index must be less than or equal to size");
             }
 
@@ -837,7 +833,7 @@ namespace detail {
         }
 
         void erase(size_t index) {
-            if (index < 0 || index >= _size) {
+            if (index >= _size) {
                 throw RuntimeError("VectorBase::erase: index must be less than or equal to size");
             }
 

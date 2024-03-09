@@ -1,5 +1,5 @@
-#ifndef EFP_ENUM_HPP
-#define EFP_ENUM_HPP
+#ifndef EFP_ENUM_HPP_
+#define EFP_ENUM_HPP_
 
 #include "efp/meta.hpp"
 
@@ -563,4 +563,4 @@ using EnumAt = typename detail::_EnumAt<n, A>::Type;
 
 }  // namespace efp
 
-#endif  // EFP_ENUM_HPP
+#endif  // EFP_ENUM_HPP_
