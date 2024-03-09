@@ -50,31 +50,16 @@ endfunction()
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
-# Highest warning level and treat warnings as errors
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Use warning level 4, treat warnings as errors, and disable 'unused parameter' warnings
-    add_compile_options(/W4 /WX /wd4100)
-else()
-    message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} compiler, which might not have specific flags set in CMakeLists.txt.")
-endif()
-
-# AddressSanitizer
-option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-
-if(ENABLE_ASAN)
-    # Add the -fsanitize=address flag to the compiler and linker
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
-endif()
-
 # Check if this CMakeLists.txt is the top-most CMake project
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    if(MSVC)
-        add_compile_options(/W4 /WX)
+    # Set highest warning level and treat warnings as errors
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Use warning level 4, treat warnings as errors, and disable 'unused parameter' warnings
+        add_compile_options(/W4 /WX /wd4100)
     else()
-        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+        message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} compiler, which might not have specific flags set in CMakeLists.txt.")
     endif()
 
     # AddressSanitizer

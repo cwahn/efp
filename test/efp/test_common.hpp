@@ -62,7 +62,7 @@ public:
     }
 
     static Resource acquire() {
-        Resource resource = {_next_id++};
+        Resource resource = {_next_id++, 0};
         _resources.push_back(resource);
         return resource;
     }
