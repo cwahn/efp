@@ -46,37 +46,37 @@ template<typename A>
 using CtCapacity = typename CtCapacityImpl<CVRefRemoved<A>>::Type;
 
 template<typename As, size_t n, typename = Void<CtSize<As>>>
-constexpr auto length(const As& as) -> CtSize<As> {
+constexpr auto length(const As&) -> CtSize<As> {
     static_assert(AlwaysFalse<As>::value, "length is not implemented for the type");
     return {};
 }
 
 template<typename As>
-constexpr auto length(const As& as) -> size_t {
+constexpr auto length(const As&) -> size_t {
     static_assert(AlwaysFalse<As>::value, "length is not implemented for the type");
     return {};
 }
 
 template<typename As, typename = Void<Element<As>>>
-constexpr auto nth(size_t i, const As& as) -> const Element<As>& {
+constexpr auto nth(size_t, const As&) -> const Element<As>& {
     static_assert(AlwaysFalse<As>::value, "nth is not implemented for the type");
     return {};
 }
 
 template<typename As, typename = Void<Element<As>>>
-constexpr auto nth(size_t i, As& as) -> Element<As>& {
+constexpr auto nth(size_t, As&) -> Element<As>& {
     static_assert(AlwaysFalse<As>::value, "nth is not implemented for the type");
     return {};
 }
 
 template<typename As, typename = Void<Element<As>>>
-constexpr auto data(const As& as) -> const Element<As>* {
+constexpr auto data(const As&) -> const Element<As>* {
     static_assert(AlwaysFalse<As>::value, "data is not implemented for the type");
     return {};
 }
 
 template<typename As, typename = Void<Element<As>>>
-constexpr auto data(As& as) -> Element<As>* {
+constexpr auto data(As&) -> Element<As>* {
     static_assert(AlwaysFalse<As>::value, "data is not implemented for the type");
     return {};
 }

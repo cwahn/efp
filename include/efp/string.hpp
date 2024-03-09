@@ -86,20 +86,20 @@ public:
 
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
-        // Check if both are null pointers
-        if (Base::_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr) {
             return true;
+        }
 
-        // If one is null and the other is not, they can't be equal
-        if (Base::_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr) {
             return false;
+        }
 
-        // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
+        size_t c_str_len = Traits::length(c_str);
+        if (Base::_size != c_str_len) {
             return false;
+        }
 
-        // Check if the character at the position _size in c_str is the null character
-        return c_str[Base::_size] == '\0';
+        return Traits::compare(Base::_data, c_str, Base::_size) == 0;
     }
 
     Char at(size_t pos) const {
@@ -306,23 +306,20 @@ public:
 
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
-        // Check if both are null pointers
         if (Base::_data == nullptr && c_str == nullptr) {
             return true;
         }
 
-        // If one is null and the other is not, they can't be equal
         if (Base::_data == nullptr || c_str == nullptr) {
             return false;
         }
 
-        // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0) {
+        size_t c_str_len = Traits::length(c_str);
+        if (Base::_size != c_str_len) {
             return false;
         }
 
-        // Check if the character at the position _size in c_str is the null character
-        return c_str[Base::_size] == '\0';
+        return Traits::compare(Base::_data, c_str, Base::_size) == 0;
     }
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1

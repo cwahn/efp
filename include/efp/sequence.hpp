@@ -203,7 +203,7 @@ struct CtCapacityImpl<Array<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const Array<A, n>& as) -> Size<n> {
+constexpr auto length(const Array<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 
@@ -1023,7 +1023,7 @@ public:
     ArrayView() : _data(nullptr) {}
 
     // ! length will not be used
-    ArrayView(const Element* data, size_t length = Size<ct_size> {}) : _data(data) {
+    ArrayView(const Element* data, size_t = Size<ct_size> {}) : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && _data == nullptr) {
             throw RuntimeError("ArrayView::ArrayView: data must not be nullptr for a non-empty view"
@@ -1114,7 +1114,7 @@ struct CtCapacityImpl<ArrayView<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const ArrayView<A, n>& as) -> Size<n> {
+constexpr auto length(const ArrayView<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 
@@ -1461,7 +1461,7 @@ struct CtCapacityImpl<std::array<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const std::array<A, n>& as) -> Size<n> {
+constexpr auto length(const std::array<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 
