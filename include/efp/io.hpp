@@ -92,22 +92,22 @@ public:
         return lines;
     }
 
-    bool write(const char* data, int length = -1) {
+    bool write(const char* data, size_t length = dyn) {
         if (_file == nullptr)
             return false;
 
         if (std::strchr(_mode, 'b')) {
             // Write binary data
-            if (length == -1) {
+            if (length == dyn) {
                 length = std::strlen(data);
             }
 
-            int written = std::fwrite(data, sizeof(char), length, _file);
+            size_t written = std::fwrite(data, sizeof(char), length, _file);
 
             return written == length;
         } else {
             // Write text data
-            if (length == -1) {
+            if (length == dyn) {
                 length = std::strlen(data);
             }
 
@@ -126,7 +126,7 @@ public:
 
         if (std::strchr(_mode, 'b')) {
             // Write binary data
-            int written = std::fwrite(data.data(), sizeof(char), data.size(), _file);
+            size_t written = std::fwrite(data.data(), sizeof(char), data.size(), _file);
             return written == data.size();
         } else {
             return std::fputs(data.c_str(), _file) != EOF;

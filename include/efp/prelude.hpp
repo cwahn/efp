@@ -195,7 +195,7 @@ auto from_function(const N& length, const F& f) -> FromFunctionReturn<N, F> {
         res.resize(length);
     }
 
-    for (size_t i = 0; i < length; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(length); ++i) {
         nth(i, res) = f(i);
     }
 
@@ -813,7 +813,7 @@ template<typename N, typename As>
 auto drop(N n, const As& as) -> DropReturn<N, As, true> {
     const size_t as_len = length(as);
     const size_t bound_drop_size =
-        (n > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
+        (static_cast<size_t>(n) > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
 
     return DropReturn<N, As, true>(data(as) + bound_drop_size, as_len - bound_drop_size);
 }
@@ -822,7 +822,7 @@ template<typename N, typename As>
 auto drop(N n, As& as) -> DropReturn<N, As, false> {
     const size_t as_len = length(as);
     const size_t bound_drop_size =
-        (n > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
+        (static_cast<size_t>(n) > as_len) ? as_len : n;  // Ensuring n doesn't exceed the size of as
 
     return DropReturn<N, As, false>(data(as) + bound_drop_size, as_len - bound_drop_size);
 }
