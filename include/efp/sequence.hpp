@@ -1156,9 +1156,7 @@ public:
         }
     }
 
-    // Constructor from ArrayView
-    template<size_t ct_size_>
-    ArrVecView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
+    ArrVecView(const ArrVecView& other) : _data(other._data), _size(other._size) {}
 
     ArrVecView& operator=(const ArrVecView& other) {
         if (this != &other) {
@@ -1167,6 +1165,10 @@ public:
         }
         return *this;
     }
+
+    // Constructor from ArrayView
+    template<size_t ct_size_>
+    ArrVecView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
 
     const Element& operator[](size_t index) {
         return _data[index];
@@ -1285,15 +1287,8 @@ namespace detail {
             }
         }
 
-        // Constructor from ArrayView
-        template<size_t ct_size_>
-        VectorViewBase(const ArrayView<Element, ct_size_>& as)
-            : _data(as.data()), _size(length(as)) {}
-
-        // Constructor from ArrVecView
-        template<size_t ct_cap_>
-        VectorViewBase(const ArrVecView<Element, ct_cap_>& as)
-            : _data(as.data()), _size(length(as)) {}
+        VectorViewBase(const VectorViewBase& other)
+            : _data(other._data), _size(other._size), _capacity(other._capacity) {}
 
         VectorViewBase& operator=(const VectorViewBase& other) {
             if (this != &other) {
@@ -1303,6 +1298,16 @@ namespace detail {
             }
             return *this;
         }
+
+        // Constructor from ArrayView
+        template<size_t ct_size_>
+        VectorViewBase(const ArrayView<Element, ct_size_>& as)
+            : _data(as.data()), _size(length(as)) {}
+
+        // Constructor from ArrVecView
+        template<size_t ct_cap_>
+        VectorViewBase(const ArrVecView<Element, ct_cap_>& as)
+            : _data(as.data()), _size(length(as)) {}
 
         const Element& operator[](size_t index) {
             return _data[index];
