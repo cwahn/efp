@@ -10,7 +10,7 @@ include(FetchContent)
 
 project(
     efp
-    VERSION 0.1
+    VERSION 0.1.0
     DESCRIPTION "Eager functional programming library for C++ 11"
     LANGUAGES CXX)
 
@@ -20,14 +20,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED On)
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
 
-    if(MSVC_VERSION VERSION_LESS "1934")
-        message(WARNING "NVRO is not encouraged. Zc:N  RVO not supported under MSVC 17.4.")
-    endif()
-endif()
-
-if(MSVC)
     if(MSVC_VERSION VERSION_GREATER_EQUAL "1934")
         string(APPEND CMAKE_CXX_FLAGS " /Zc:nrvo")
+    elseif(MSVC_VERSION VERSION_LESS "1934")
+        message(WARNING "NVRO is not encouraged. Zc:N  RVO not supported under MSVC 17.4.")
     endif()
 endif()
 
