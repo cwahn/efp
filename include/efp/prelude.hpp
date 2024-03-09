@@ -147,8 +147,9 @@ auto filter(const F& f, const As& as) -> FilterReturn<As> {
 template<typename A, typename Bs, typename F = A (*)(const A&, const Element<Bs>&)>
 auto foldl(const F& f, const A& init, const Bs& bs) -> A {
     A res = init;
+    const auto res_length = length(bs);
 
-    for (size_t i = 0; i < length(bs); ++i) {
+    for (size_t i = 0; i < res_length; ++i) {
         res = f(res, nth(i, bs));
     }
 
