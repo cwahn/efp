@@ -50,7 +50,6 @@ int times_2(int x) {
 }
 
 TEST_CASE("maybe_applicative") {
-
     SECTION("pure") {
         CHECK(pure<Maybe<int>>(2).value() == 2);
     }
@@ -77,13 +76,12 @@ TEST_CASE("maybe_monad") {
     SECTION("bind") {
         Maybe<int> ma = 2;
 
-        const auto div_12_by = [](int x)
-            -> Maybe<double> {
+        const auto div_12_by = [](int x) -> Maybe<double> {
             if (x == 0) {
                 return nothing;
             }
 
-            return Maybe<double>{12. / x};
+            return Maybe<double> {12. / x};
         };
 
         CHECK(bind(ma, div_12_by).is_nothing() == false);
@@ -101,13 +99,12 @@ TEST_CASE("maybe_monad") {
     SECTION(">>=") {
         Maybe<int> ma = 2;
 
-        const auto div_12_by = [](int x)
-            -> Maybe<double> {
+        const auto div_12_by = [](int x) -> Maybe<double> {
             if (x == 0) {
                 return nothing;
             }
 
-            return Maybe<double>{12. / x};
+            return Maybe<double> {12. / x};
         };
 
         CHECK((ma >>= div_12_by).is_nothing() == false);
@@ -185,6 +182,30 @@ TEST_CASE("Maybe as bool") {
     // {
     //     CHECK(action_2(true, true).value() == 42);
     // }
+
+    SECTION("example") {
+        Enum<bool, int, double> x = 2;  // Example with int
+
+        int y = x.match(
+            [](int x) { return x * 2; },  // Specific branch for int
+            []() { return -1; }           // Wildcard branch
+        );
+        CHECK(y == 4);
+
+        // Maybe<A> is a specialization of Enum<Nothing, A>
+        Maybe<int> maybe_42 = 42;
+        Maybe<int> no_value = nothing;
+
+        // Using value() and isEmpty() for direct value access and checking
+        CHECK(maybe_42.value() == 42);
+        CHECK(no_value.is_nothing() == true);
+
+        int result = maybe_42.match(
+            [](int x) { return x; },  // Executes if there's a value
+            []() { return 0; }        // Executes if empty (wildcard)
+        );
+        CHECK(result == 42);
+    }
 }
 
 TEST_CASE("EnumAt on Maybe") {
