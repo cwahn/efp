@@ -80,12 +80,12 @@ TEST_CASE("compose") {
 }
 
 TEST_CASE("for_each") {
-    Array<int, 3> crtp_array {1, 2, 3};
+    Array<int, 3> _array {1, 2, 3};
 
     int res_1 = 0;
     auto add_to_res_1 = [&](int x) { res_1 += x; };
 
-    for_each(add_to_res_1, crtp_array);
+    for_each(add_to_res_1, _array);
     CHECK(res_1 == 6);
 }
 
@@ -115,17 +115,17 @@ TEST_CASE("filter") {
 }
 
 TEST_CASE("foldl") {
-    ArrVec<int, 5> crtp_arrayvec {1, 2, 3, 4};
+    ArrVec<int, 5> _arrayvec {1, 2, 3, 4};
     auto plus = [](int lhs, int rhs) { return lhs + rhs; };
 
-    CHECK(foldl(plus, 0, crtp_arrayvec) == 10);
+    CHECK(foldl(plus, 0, _arrayvec) == 10);
 }
 
 TEST_CASE("foldr") {
-    ArrVec<int, 5> crtp_arrayvec {1, 2, 3, 4};
+    ArrVec<int, 5> _arrayvec {1, 2, 3, 4};
     auto plus = [](int lhs, int rhs) { return lhs + rhs; };
 
-    CHECK(foldr(plus, 0, crtp_arrayvec) == 10);
+    CHECK(foldr(plus, 0, _arrayvec) == 10);
 }
 
 TEST_CASE("from_function") {

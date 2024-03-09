@@ -73,7 +73,7 @@ void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
 // Heapsort using a comparison function
 template<typename A, typename F = bool (*)(const A&, const A&)>
 void heapsort_by(Vector<A>& arr, const F& comp) {
-    = size_t n = arr.size();
+    size_t n = arr.size();
 
     // Build heap (rearrange array)
     if (n > 1) {  // Only proceed if there are at least two elements to sort
