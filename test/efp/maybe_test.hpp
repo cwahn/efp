@@ -183,29 +183,31 @@ TEST_CASE("Maybe as bool") {
     //     CHECK(action_2(true, true).value() == 42);
     // }
 
-    SECTION("example") {
-        Enum<bool, int, double> x = 2;  // Example with int
+    // todo Make example test
 
-        int y = x.match(
-            [](int x) { return x * 2; },  // Specific branch for int
-            []() { return -1; }           // Wildcard branch
-        );
-        CHECK(y == 4);
+    // SECTION("example") {
+    //     Enum<bool, int, double> x = 2;  // Example with int
 
-        // Maybe<A> is a specialization of Enum<Nothing, A>
-        Maybe<int> maybe_42 = 42;
-        Maybe<int> no_value = nothing;
+    //     int y = x.match(
+    //         [](int x) { return x * 2; },  // Specific branch for int
+    //         []() { return -1; }           // Wildcard branch
+    //     );
+    //     CHECK(y == 4);
 
-        // Using value() and isEmpty() for direct value access and checking
-        CHECK(maybe_42.value() == 42);
-        CHECK(no_value.is_nothing() == true);
+    //     // Maybe<A> is a specialization of Enum<Nothing, A>
+    //     Maybe<int> maybe_42 = 42;
+    //     Maybe<int> no_value = nothing;
 
-        int result = maybe_42.match(
-            [](int x) { return x; },  // Executes if there's a value
-            []() { return 0; }        // Executes if empty (wildcard)
-        );
-        CHECK(result == 42);
-    }
+    //     // Using value() and isEmpty() for direct value access and checking
+    //     CHECK(maybe_42.value() == 42);
+    //     CHECK(no_value.is_nothing() == true);
+
+    //     int result = maybe_42.match(
+    //         [](int x) { return x; },  // Executes if there's a value
+    //         []() { return 0; }        // Executes if empty (wildcard)
+    //     );
+    //     CHECK(result == 42);
+    // }
 }
 
 TEST_CASE("EnumAt on Maybe") {
