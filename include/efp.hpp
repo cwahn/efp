@@ -12,10 +12,12 @@
 #include "./efp/numeric.hpp"
 #include "./efp/scientific.hpp"
 #include "./efp/sort.hpp"
-#include "./efp/c_utility.hpp"
 #include "./efp/io.hpp"
 #include "./efp/string.hpp"
 #include "./efp/format.hpp"
 #include "./efp/concurrency.hpp"
+
+// ! Deprecated
+#include "./efp/c_utility.hpp"
 
 #endif

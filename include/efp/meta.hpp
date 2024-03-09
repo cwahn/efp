@@ -91,6 +91,75 @@ struct IsCtConst<A&&>: IsCtConst<A> {};
 template<typename T>
 struct AlwaysFalse: False {};
 
+// PointerRemoved
+template<typename A>
+using PointerRemoved = typename std::remove_pointer<A>::type;
+
+// ReferenceRemoved
+template<typename A>
+using ReferenceRemoved = typename std::remove_reference<A>::type;
+
+// ConstRemoved
+template<typename A>
+using ConstRemoved = typename std::remove_const<A>::type;
+
+// VoletileRemoved
+template<typename A>
+using VoletileRemoved = typename std::remove_volatile<A>::type;
+
+// CVRemoved
+template<typename A>
+using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
+
+// CVRefRemoved
+template<typename A>
+using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
+
+// Decay
+template<typename A>
+using Decay = typename std::decay<A>::type;
+
+// IsConst
+template<typename A>
+using IsConst = std::is_const<A>;
+
+// Void
+namespace detail {
+    template<typename... Ts>
+    struct VoidImpl {
+        using Type = void;
+    };
+}  // namespace detail
+
+template<typename... Ts>
+using Void = typename detail::VoidImpl<Ts...>::Type;
+
+// IsLvalueReference
+
+template<typename A>
+struct IsLvalueReference: False {};
+
+template<typename A>
+struct IsLvalueReference<A&>: True {};
+
+// forward
+template<typename A>
+constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
+    return static_cast<A&&>(a);
+}
+
+template<typename A>
+constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
+    static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
+    return static_cast<A&&>(a);
+}
+
+// move
+template<typename A>
+constexpr ReferenceRemoved<A>&& move(A&& a) {
+    return static_cast<ReferenceRemoved<A>&&>(a);
+}
+
 // EnableIf
 template<bool cond, typename A = void>
 using EnableIf = typename std::enable_if<cond, A>::type;
@@ -197,9 +266,9 @@ constexpr A op_mod(const A& lhs, const A& rhs) {
     return lhs % rhs;
 }
 
-// bound_v
+// clamp
 template<typename A, typename B, typename C>
-constexpr auto bound_v(const A& lower, const B& upper, const C& x)
+constexpr auto clamp(const A& lower, const B& upper, const C& x)
     -> decltype((x > upper) ? (upper) : ((x < lower) ? lower : x)) {
     return (x > upper) ? (upper) : ((x < lower) ? lower : x);
 }
@@ -286,6 +355,74 @@ using RvalueRefAdded = typename std::add_rvalue_reference<T>::type;
 template<typename T>
 constexpr RvalueRefAdded<T> declval() noexcept;
 
+// HasCallOperator
+template<typename A>
+class HasCallOperator {
+    typedef char one;
+    typedef long two;
+
+    template<typename B>
+    static one test(decltype(&B::operator()));
+
+    template<typename B>
+    static two test(...);
+
+public:
+    static const bool value = sizeof(test<A>(0)) == sizeof(one);
+};
+
+// IsInvocable
+#if __cplusplus >= 201703L
+
+template<typename F, typename... Args>
+using IsInvocable = std::is_invocable<F, Args...>;
+
+#else
+
+template<typename F, typename... Args>
+struct IsInvocable {
+private:
+    template<typename A>
+    static auto check(int) -> decltype(declval<A>()(declval<Args>()...), True());
+
+    template<typename>
+    static auto check(...) -> False;
+
+public:
+    static constexpr bool value = decltype(check<F>(0))::value;
+};
+
+#endif
+
+// IsInvocableR
+
+#if __cplusplus >= 201703L
+
+template<typename R, typename F, typename... Args>
+using IsInvocableR = std::is_invocable_r<R, F, Args...>;
+
+#else
+
+template<typename R, typename F, typename... Args>
+struct IsInvocableR {
+private:
+    // A helper to try invoking the function and check the return type
+    template<typename U>
+    static auto test(int)
+        -> decltype(std::is_convertible<decltype(std::declval<U>()(std::declval<Args>()...)), R>::
+                        type());
+
+    // Fallback if the above test fails
+    template<typename>
+    static False test(...);
+
+public:
+    // The value will be true if the function F can be called with Args... and the result is convertible to R
+    static constexpr bool value = decltype(test<F>(0))::value;
+};
+
+#endif
+
 // InvokeResult
 
 // Check the C++ standard version
@@ -307,44 +444,6 @@ template<typename F, typename... Args>
 using InvokeResult = typename detail::InvokeResultImpl<F, Args...>::Type;
 
 #endif
-
-// HasCallOperator
-template<typename A>
-class HasCallOperator {
-    typedef char one;
-    typedef long two;
-
-    template<typename B>
-    static one test(decltype(&B::operator()));
-
-    template<typename B>
-    static two test(...);
-
-public:
-    static const bool value = sizeof(test<A>(0)) == sizeof(one);
-};
-
-// IsInvocable
-// ? Is Custom implementation faster?
-// #if __cplusplus >= 201703L  // If C++17 or later, use std::is_invocable
-
-// template<typename F, typename... Args>
-// using IsInvocable = std::is_invocable<F, Args...>;
-
-// #else  // If earlier than C++17, use custom IsInvocable
-
-template<typename F, typename... Args>
-struct IsInvocable {
-private:
-    template<typename A>
-    static auto check(int) -> decltype(declval<A>()(declval<Args>()...), True());
-
-    template<typename>
-    static auto check(...) -> False;
-
-public:
-    static constexpr bool value = decltype(check<F>(0))::value;
-};
 
 // #endif
 
@@ -597,208 +696,49 @@ using TupleAt = typename detail::TupleAtImpl<n, Tpl>::Type;
 
 // Arguements
 // l-value and r-value reference will preserved at the result, but const will be removed.
+// ! This type-level function is partial. It will not work for callable with auto arguments
 
 namespace detail {
-    template<typename, bool>
-    struct ArgumentsImpl {};
+    // Fallback for unsupported types
+    struct Unsupported {};
 
-    template<typename F>
-    struct ArgumentsImpl<F, true>: ArgumentsImpl<decltype(&F::operator()), false> {
-        // using Type = typename
+    template<typename, typename = Void<>>
+    struct ArgumentsImpl {
+        using Type = Unsupported;
     };
 
+    template<typename F>
+    struct ArgumentsImpl<F, Void<decltype(&F::operator())>>:
+        ArgumentsImpl<decltype(&F::operator()), void> {};
+
     template<typename R, typename... Args>
-    struct ArgumentsImpl<R (*)(Args...), false> {
+    struct ArgumentsImpl<R (*)(Args...), void> {
         using Type = Tuple<Args...>;
     };
 
     template<typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...), false> {
+    struct ArgumentsImpl<R (A::*)(Args...), void> {
         using Type = Tuple<Args...>;
     };
 
     template<typename R, typename A, typename... Args>
-    struct ArgumentsImpl<R (A::*)(Args...) const, false> {
+    struct ArgumentsImpl<R (A::*)(Args...) const, void> {
         using Type = Tuple<Args...>;
     };
 }  // namespace detail
 
 template<typename F>
-using Arguments = typename detail::ArgumentsImpl<F, HasCallOperator<F>::value>::Type;
+using Arguments = typename detail::ArgumentsImpl<ReferenceRemoved<F>>::Type;
 
-// ReturnFromArgument
-
-namespace detail {
-    template<typename, typename>
-    struct ReturnFromArgumentImpl {};
-
-    template<typename F, typename... Args>
-    struct ReturnFromArgumentImpl<F, Tuple<Args...>> {
-        using Type = InvokeResult<F, Args...>;
-    };
-}  // namespace detail
-
-template<typename F>
-using ReturnFromArgument = typename detail::ReturnFromArgumentImpl<F, Arguments<F>>::Type;
-
-// FunctionReturn
-
-namespace detail {
-    template<typename F>
-    struct FunctionReturnImpl {};
-
-    // Specialization for function posize_ters
-    template<typename R, typename... Args>
-    struct FunctionReturnImpl<R (*)(Args...)> {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...)> {
-        using Type = R;
-    };
-
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...)> {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with const qualifier
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) const> {
-        using Type = R;
-    };
-
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) const> {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with volatile qualifier
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) volatile> {
-        using Type = R;
-    };
-
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) volatile> {
-        using Type = R;
-    };
-
-    // Specialization for member function posize_ters with const volatile qualifier
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args...) const volatile> {
-        using Type = R;
-    };
-
-    template<typename R, typename C, typename... Args>
-    struct FunctionReturnImpl<R (C::*)(Args..., ...) const volatile> {
-        using Type = R;
-    };
-}  // namespace detail
-
-template<typename F>
-using FunctionReturn = typename detail::FunctionReturnImpl<F>::Type;
-
-// Return
-
-namespace detail {
-    template<typename F, typename Enable = void>
-    struct ReturnImpl: FunctionReturnImpl<F> {};
-
-    template<typename F>
-    struct ReturnImpl<F, EnableIf<HasCallOperator<F>::value, void>>:
-        FunctionReturnImpl<decltype(&F::operator())> {};
-}  // namespace detail
-
-template<typename F>
-using Return = typename detail::ReturnImpl<F>::Type;
-
-namespace detail {
-    template<typename F, typename... As, int... indices>
-    Return<F> _apply(const F& f, const Tuple<As...>& tpl, IndexSequence<indices...>) {
-        return f(get<indices>(tpl)...);
-    }
-}  // namespace detail
-
-// apply
-template<
-    typename F,
-    typename... As,
-    typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
-Return<F> apply(const F& f, const Tuple<As...>& tpl) {
-    return detail::_apply(f, tpl, IndexSequenceFor<As...> {});
-}
-
-// PointerRemoved
-template<typename A>
-using PointerRemoved = typename std::remove_pointer<A>::type;
-
-// ReferenceRemoved
-template<typename A>
-using ReferenceRemoved = typename std::remove_reference<A>::type;
-
-// ConstRemoved
-template<typename A>
-using ConstRemoved = typename std::remove_const<A>::type;
-
-// VoletileRemoved
-template<typename A>
-using VoletileRemoved = typename std::remove_volatile<A>::type;
-
-// CVRemoved
-template<typename A>
-using CVRemoved = VoletileRemoved<ConstRemoved<A>>;
-
-// CVRefRemoved
-template<typename A>
-using CVRefRemoved = CVRemoved<ReferenceRemoved<A>>;
-
-// Decay
-template<typename A>
-using Decay = typename std::decay<A>::type;
-
-// IsConst
-template<typename A>
-using IsConst = std::is_const<A>;
-
-// Void
-namespace detail {
-    template<typename... Ts>
-    struct VoidImpl {
-        using Type = void;
-    };
-}  // namespace detail
-
-template<typename... Ts>
-using Void = typename detail::VoidImpl<Ts...>::Type;
-
-// IsLvalueReference
-
-template<typename A>
-struct IsLvalueReference: False {};
-
-template<typename A>
-struct IsLvalueReference<A&>: True {};
-
-// forward
-template<typename A>
-constexpr A&& forward(ReferenceRemoved<A>& a) noexcept {
-    return static_cast<A&&>(a);
-}
-
-template<typename A>
-constexpr A&& forward(ReferenceRemoved<A>&& a) noexcept {
-    static_assert(!IsLvalueReference<A>::value, "Cannot forward an rvalue as an lvalue.");
-    return static_cast<A&&>(a);
-}
-
-// move
-template<typename A>
-constexpr ReferenceRemoved<A>&& move(A&& a) {
-    return static_cast<ReferenceRemoved<A>&&>(a);
-}
+// ! deprecated, Implement invoke if needed
+// // apply
+// template<
+//     typename F,
+//     typename... As,
+//     typename = EnableIf<IsSame<Arguments<F>, Tuple<As...>>::value, void>>
+// Return<F> apply(const F& f, const Tuple<As...>& tpl) {
+//     return detail::_apply(f, tpl, IndexSequenceFor<As...> {});
+// }
 
 // swap
 template<typename A>

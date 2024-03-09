@@ -30,14 +30,16 @@ public:
     Vector(const Char* c_str) {
         Base::_size = Traits::length(c_str);
         Base::_capacity = Base::_size + 1;
-        Base::_data = Base::_allocator.allocate(Base::_capacity);
+        // Base::_data = Base::_allocator.allocate(Base::_capacity);
+        Base::_data = AllocatorTraits<Allocator>::allocate(Base::_allocator, Base::_capacity);
         _memcpy(Base::_data, c_str, Base::_size * sizeof(Char));
     }
 
     Vector(const Char* s, size_t count, const Allocator& alloc = Allocator()) {
         Base::_size = count;
         Base::_capacity = Base::_size + 1;
-        Base::_data = Base::_allocator.allocate(Base::_capacity);
+        // Base::_data = Base::_allocator.allocate(Base::_capacity);
+        Base::_data = AllocatorTraits<Allocator>::allocate(Base::_allocator, Base::_capacity);
         _memcpy(Base::_data, s, Base::_size * sizeof(Char));
     }
 
@@ -68,7 +70,8 @@ public:
         Base::capacity_ = Base::size_ + 1;
 
         // Allocate memory for the elements
-        Base::data_ = Base::allocator_.allocate(Base::capacity_);
+        // Base::data_ = Base::allocator_.allocate(Base::capacity_);
+        Base::data_ = AllocatorTraits<Allocator>::allocate(Base::allocator_, Base::capacity_);
 
         // Second pass: Copy-construct elements from the range
         size_t i = 0;
@@ -83,25 +86,25 @@ public:
 
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
-        // Check if both are null pointers
-        if (Base::_data == nullptr && c_str == nullptr)
+        if (Base::_data == nullptr && c_str == nullptr) {
             return true;
+        }
 
-        // If one is null and the other is not, they can't be equal
-        if (Base::_data == nullptr || c_str == nullptr)
+        if (Base::_data == nullptr || c_str == nullptr) {
             return false;
+        }
 
-        // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0)
+        size_t c_str_len = Traits::length(c_str);
+        if (Base::_size != c_str_len) {
             return false;
+        }
 
-        // Check if the character at the position _size in c_str is the null character
-        return c_str[Base::_size] == '\0';
+        return Traits::compare(Base::_data, c_str, Base::_size) == 0;
     }
 
     Char at(size_t pos) const {
         if (pos >= Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         return Base::_data[pos];
@@ -153,7 +156,7 @@ public:
 
     Vector& insert(size_t pos, const Char* c_str) {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         const size_t len = Traits::length(c_str);
@@ -174,7 +177,7 @@ public:
 
     Vector& insert(size_t pos, const Char* c_str, size_t n) {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         // Always reserve one extra space for the null character
@@ -199,7 +202,7 @@ public:
 
     Vector substr(size_t pos = 0, size_t len = npos) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (len > Base::_size - pos) {
@@ -213,7 +216,7 @@ public:
     // https://en.cppreference.com/w/cpp/string/basic_string/copy
     size_t copy(Char* dest, size_t count, size_t pos = 0) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (count > Base::_size - pos) {
@@ -232,7 +235,7 @@ public:
 
     int compare(size_t pos, size_t len, const Vector& other) const {
         if (pos > Base::_size) {
-            throw std::runtime_error("Index out of range");
+            throw RuntimeError("Index out of range");
         }
 
         if (len > Base::_size - pos) {
@@ -303,23 +306,20 @@ public:
 
     // Specialized equality comparison operator with const char *
     bool operator==(const Char* c_str) const {
-        // Check if both are null pointers
         if (Base::_data == nullptr && c_str == nullptr) {
             return true;
         }
 
-        // If one is null and the other is not, they can't be equal
         if (Base::_data == nullptr || c_str == nullptr) {
             return false;
         }
 
-        // Compare the contents up to the size of the SequenceView
-        if (Traits::compare(Base::_data, c_str, Base::_size) != 0) {
+        size_t c_str_len = Traits::length(c_str);
+        if (Base::_size != c_str_len) {
             return false;
         }
 
-        // Check if the character at the position _size in c_str is the null character
-        return c_str[Base::_size] == '\0';
+        return Traits::compare(Base::_data, c_str, Base::_size) == 0;
     }
 
 #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
@@ -348,8 +348,6 @@ using U32StringView = BasicStringView<char32_t>;
 #if __cplusplus >= 202002L
 using U8StringView = BasicStringView<char8_t>;
 #endif
-
-// Use intercalate to join strings
 
 // #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 

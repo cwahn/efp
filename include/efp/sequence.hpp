@@ -1,9 +1,6 @@
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
 
-// ct_capacity is compile time bound of length. It does not mean safety of access.
-// However, actual capacity does means the length of memory safe to access.
-
 #include "efp/cpp_core.hpp"
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
@@ -14,10 +11,19 @@
 
     #include <array>
     #include <vector>
+
+namespace efp {
+// Use std::allocator_traits if available
+template<typename A>
+using AllocatorTraits = std::allocator_traits<A>;
+
+}  // namespace efp
+
 #else
     // todo remove STL
     #include <string>
     #include "efp/allocator.hpp"
+
 #endif
 
 // todo Move and copy assigment operator sort out
@@ -90,20 +96,9 @@ public:
         }
     }
 
-    // ! Deprecated: variadic template constructor
-    // template<typename... Arg>
-    // Array(const Arg&... args) {
-    //     static_assert(
-    //         sizeof...(args) == ct_size,
-    //         "Array::Array: number of arguments must be equal to ct_size"
-    //     );
-    //     size_t index = 0;
-    //     _construct_elements(index, args...);
-    // }
-
     Array(InitializerList<Element> il) {
         if (il.size() != ct_size) {
-            throw std::runtime_error("Array::Array: number of arguments must be equal to ct_size");
+            throw RuntimeError("Array::Array: number of arguments must be equal to ct_size");
         }
 
         size_t index = 0;
@@ -139,15 +134,13 @@ public:
 
     void resize(size_t length) {
         if (length != ct_size) {
-            throw std::runtime_error("Array::resize: length must be equal to ct_size");
+            throw RuntimeError("Array::resize: length must be equal to ct_size");
         }
     }
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error(
-                "Array::reserve: capacity must be less than or equal to ct_size"
-            );
+            throw RuntimeError("Array::reserve: capacity must be less than or equal to ct_size");
         }
     }
 
@@ -210,7 +203,7 @@ struct CtCapacityImpl<Array<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const Array<A, n>& as) -> Size<n> {
+constexpr auto length(const Array<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 
@@ -223,9 +216,6 @@ template<typename A, size_t n>
 constexpr auto nth(size_t i, Array<A, n>& as) -> A& {
     return as[i];
 }
-
-// static_assert(IsSame<decltype(nth(0, Array<int, 2>{0, 1, 2})), int &>::value, "Assert nth");
-// DebugType<decltype(nth(0, Array<int, 2>{0, 1, 2}))> _;
 
 template<typename A, size_t n>
 constexpr auto data(const Array<A, n>& as) -> const A* {
@@ -323,23 +313,9 @@ public:
         }
     }
 
-    // template<typename... Arg>
-    // ArrVec(const Arg&... args) : _data {args...}, _size(sizeof...(args)) {}
-
-    // ! Deprecated: variadic template constructor
-    // template<typename... Arg>
-    // ArrVec(const Arg&... args) : _size(sizeof...(args)) {
-    //     static_assert(
-    //         sizeof...(args) <= ct_capacity,
-    //         "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
-    //     );
-    //     size_t index = 0;
-    //     _construct_elements(index, args...);
-    // }
-
     ArrVec(InitializerList<Element> il) : _size(il.size()) {
         if (il.size() > ct_capacity) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVec::ArrVec: number of arguments must be less than or equal to ct_capacity"
             );
         }
@@ -381,10 +357,8 @@ public:
     }
 
     void resize(size_t length) {
-        if (length > ct_capacity || length < 0) {
-            throw std::runtime_error(
-                "ArrVec::resize: length must be less than or equal to ct_capacity"
-            );
+        if (length > ct_capacity) {
+            throw RuntimeError("ArrVec::resize: length must be less than or equal to ct_capacity");
         }
 
         _size = length;
@@ -392,17 +366,14 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_capacity) {
-            throw std::runtime_error(
-                "ArrVec::reserve: capacity must be less than or equal to ct_capacity"
+            throw RuntimeError("ArrVec::reserve: capacity must be less than or equal to ct_capacity"
             );
         }
     }
 
     void push_back(const Element& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error(
-                "ArrVec::push_back: size must be less than or equal to ct_capacity"
-            );
+            throw RuntimeError("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
             new (_data + _size++) Element {value};
         }
@@ -410,17 +381,15 @@ public:
 
     void push_back(Element&& value) {
         if (_size >= ct_capacity) {
-            throw std::runtime_error(
-                "ArrVec::push_back: size must be less than or equal to ct_capacity"
-            );
+            throw RuntimeError("ArrVec::push_back: size must be less than or equal to ct_capacity");
         } else {
             new (_data + _size++) Element {efp::move(value)};
         }
     }
 
     void insert(size_t index, const Element& value) {
-        if (index < 0 || index > _size || _size == ct_capacity) {
-            throw std::runtime_error(
+        if (index > _size || _size == ct_capacity) {
+            throw RuntimeError(
                 "ArrVec::insert: index must be less than or equal to size and size must be less than or equal to ct_capacity"
             );
         }
@@ -437,7 +406,7 @@ public:
 
     void pop_back() {
         if (_size == 0) {
-            throw std::runtime_error("ArrVec::pop_back: size must be greater than 0");
+            throw RuntimeError("ArrVec::pop_back: size must be greater than 0");
         }
 
         (_data + _size-- - 1)->~Element();
@@ -451,8 +420,8 @@ public:
     }
 
     void erase(size_t index) {
-        if (index < 0 || index >= _size) {
-            throw std::runtime_error("ArrVec::erase: index must be less than or equal to size");
+        if (index >= _size) {
+            throw RuntimeError("ArrVec::erase: index must be less than or equal to size");
         }
 
         (_data + index)->~Element();
@@ -592,10 +561,12 @@ namespace detail {
             : _allocator(other._allocator), _size(other._size), _capacity(other._capacity) {
             if (other._data) {
                 // Member function call in not allowed in member initializer list
-                _data = _allocator.allocate(_capacity);
+                // _data = _allocator.allocate(_capacity);
+                _data = AllocatorTraits<Allocator>::allocate(_allocator, _capacity);
 
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.construct(_data + i, other._data[i]);
+                    // _allocator.construct(_data + i, other._data[i]);
+                    AllocatorTraits<Allocator>::construct(_allocator, _data + i, other._data[i]);
                 }
             }
         }
@@ -604,7 +575,8 @@ namespace detail {
         VectorBase& operator=(const VectorBase& other) noexcept {
             if (this != &other) {
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    // _allocator.destroy(_data + i);
+                    AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
                 }
 
                 if (_capacity < other._size + 1) {
@@ -612,7 +584,8 @@ namespace detail {
                 }
 
                 for (size_t i = 0; i < other._size; ++i) {
-                    _allocator.construct(_data + i, other._data[i]);
+                    // _allocator.construct(_data + i, other._data[i]);
+                    AllocatorTraits<Allocator>::construct(_allocator, _data + i, other._data[i]);
                 }
             }
 
@@ -630,9 +603,11 @@ namespace detail {
         VectorBase& operator=(VectorBase&& other) noexcept {
             if (this != &other) {
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    // _allocator.destroy(_data + i);
+                    AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
                 }
-                _allocator.deallocate(_data, _capacity);
+                // _allocator.deallocate(_data, _capacity);
+                AllocatorTraits<Allocator>::deallocate(_allocator, _data, _capacity);
 
                 _data = other._data;
                 _size = other._size;
@@ -648,41 +623,49 @@ namespace detail {
 
         VectorBase(InitializerList<Element> il)
             : _allocator(Allocator()), _size(il.size()), _capacity(il.size() + 1) {
-            _data = _allocator.allocate(_capacity);
+            // _data = _allocator.allocate(_capacity);
+            _data = AllocatorTraits<Allocator>::allocate(_allocator, _capacity);
 
             size_t index = 0;
             for (const auto& e : il) {
-                _allocator.construct(_data + index++, e);
+                // _allocator.construct(_data + index++, e);
+                AllocatorTraits<Allocator>::construct(_allocator, _data + index++, e);
             }
         }
 
         template<size_t ct_size_>
         VectorBase(const Array<Element, ct_size_>& as)
             : _allocator(Allocator()), _size(ct_size_), _capacity(ct_size_ + 1) {
-            _data = _allocator.allocate(_capacity);
+            // _data = _allocator.allocate(_capacity);
+            _data = AllocatorTraits<Allocator>::allocate(_allocator, _capacity);
 
             for (size_t i = 0; i < _size; ++i) {
-                _allocator.construct(_data + i, as[i]);
+                // _allocator.construct(_data + i, as[i]);
+                AllocatorTraits<Allocator>::construct(_allocator, _data + i, as[i]);
             }
         }
 
         template<size_t ct_cap_>
         VectorBase(const ArrVec<Element, ct_cap_>& as)
             : _allocator(Allocator()), _size(as.size()), _capacity(as.size() + 1) {
-            _data = _allocator.allocate(_capacity);
+            // _data = _allocator.allocate(_capacity);
+            _data = AllocatorTraits<Allocator>::allocate(_allocator, _capacity);
 
             for (size_t i = 0; i < _size; ++i) {
-                _allocator.construct(_data + i, as[i]);
+                // _allocator.construct(_data + i, as[i]);
+                AllocatorTraits<Allocator>::construct(_allocator, _data + i, as[i]);
             }
         }
 
         ~VectorBase() {
             if (_data) {
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    // _allocator.destroy(_data + i);
+                    AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
                 }
 
-                _allocator.deallocate(_data, _capacity);
+                // _allocator.deallocate(_data, _capacity);
+                AllocatorTraits<Allocator>::deallocate(_allocator, _data, _capacity);
                 _data = nullptr;
             }
         }
@@ -718,16 +701,11 @@ namespace detail {
         }
 
         size_t max_size() const {
-            return _allocator.max_size();
+            // return _allocator.max_size();
+            return AllocatorTraits<Allocator>::max_size(_allocator);
         }
 
         void resize(size_t new_size) {
-            if (new_size < 0) {
-                throw std::runtime_error(
-                    "VectorBase::resize: length must be greater than or equal to 0"
-                );
-            }
-
             // Always allocate one extra space for BasicString null terminator
             if (new_size + 1 > _capacity) {
                 reserve(new_size + 1);
@@ -738,17 +716,25 @@ namespace detail {
 
         void reserve(size_t new_capacity) {
             if (new_capacity > _capacity) {
-                Element* new_data = _allocator.allocate(new_capacity);
+                // Element* new_data = _allocator.allocate(new_capacity);
+                Element* new_data = AllocatorTraits<Allocator>::allocate(_allocator, new_capacity);
 
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.construct(new_data + i, efp::move(_data[i]));
+                    // _allocator.construct(new_data + i, efp::move(_data[i]));
+                    AllocatorTraits<Allocator>::construct(
+                        _allocator,
+                        new_data + i,
+                        efp::move(_data[i])
+                    );
                 }
 
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    // _allocator.destroy(_data + i);
+                    AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
                 }
 
-                _allocator.deallocate(_data, _capacity);
+                // _allocator.deallocate(_data, _capacity);
+                AllocatorTraits<Allocator>::deallocate(_allocator, _data, _capacity);
 
                 _data = new_data;
                 _capacity = new_capacity;
@@ -762,14 +748,21 @@ namespace detail {
 
                 // Move existing elements to the new storage
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.construct(new_data + i, efp::move(_data[i]));
+                    // _allocator.construct(new_data + i, efp::move(_data[i]));
+                    AllocatorTraits<Allocator>::construct(
+                        _allocator,
+                        new_data + i,
+                        efp::move(_data[i])
+                    );
                 }
 
                 // Destroy and deallocate old storage
                 for (size_t i = 0; i < _size; ++i) {
-                    _allocator.destroy(_data + i);
+                    // _allocator.destroy(_data + i);
+                    AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
                 }
-                _allocator.deallocate(_data, _capacity);
+                // _allocator.deallocate(_data, _capacity);
+                AllocatorTraits<Allocator>::deallocate(_allocator, _data, _capacity);
 
                 // Update data pointer and capacity
                 _data = new_data;
@@ -782,7 +775,8 @@ namespace detail {
                 reserve(_size == 0 ? 2 : 2 * _size + 1);
             }
 
-            _allocator.construct(_data + _size, value);
+            // _allocator.construct(_data + _size, value);
+            AllocatorTraits<Allocator>::construct(_allocator, _data + _size, value);
             ++_size;
         }
 
@@ -791,7 +785,8 @@ namespace detail {
                 reserve(_size == 0 ? 2 : 2 * _size + 1);
             }
 
-            _allocator.construct(_data + _size, efp::move(value));
+            // _allocator.construct(_data + _size, efp::move(value));
+            AllocatorTraits<Allocator>::construct(_allocator, _data + _size, efp::move(value));
             ++_size;
         }
 
@@ -801,23 +796,27 @@ namespace detail {
                 reserve(_size == 0 ? 2 : 2 * _size + 1);
             }
 
-            _allocator.construct(_data + _size, efp::forward<Args>(args)...);
+            // _allocator.construct(_data + _size, efp::forward<Args>(args)...);
+            AllocatorTraits<Allocator>::construct(
+                _allocator,
+                _data + _size,
+                efp::forward<Args>(args)...
+            );
             ++_size;
         }
 
         void pop_back() {
             if (_size == 0) {
-                throw std::runtime_error("VectorBase::pop_back: size must be greater than 0");
+                throw RuntimeError("VectorBase::pop_back: size must be greater than 0");
             }
 
-            _allocator.destroy(_data + _size-- - 1);
+            // _allocator.destroy(_data + _size-- - 1);
+            AllocatorTraits<Allocator>::destroy(_allocator, _data + _size-- - 1);
         }
 
         void insert(size_t index, const Element& value) {
-            if (index < 0 || index > _size) {
-                throw std::runtime_error(
-                    "VectorBase::insert: index must be less than or equal to size"
-                );
+            if (index > _size) {
+                throw RuntimeError("VectorBase::insert: index must be less than or equal to size");
             }
 
             if (_size + 1 >= _capacity) {
@@ -828,18 +827,18 @@ namespace detail {
                 _data[i] = efp::move(_data[i - 1]);
             }
 
-            _allocator.construct(_data + index, value);
+            // _allocator.construct(_data + index, value);
+            AllocatorTraits<Allocator>::construct(_allocator, _data + index, value);
             ++_size;
         }
 
         void erase(size_t index) {
-            if (index < 0 || index >= _size) {
-                throw std::runtime_error(
-                    "VectorBase::erase: index must be less than or equal to size"
-                );
+            if (index >= _size) {
+                throw RuntimeError("VectorBase::erase: index must be less than or equal to size");
             }
 
-            _allocator.destroy(_data + index);
+            // _allocator.destroy(_data + index);
+            AllocatorTraits<Allocator>::destroy(_allocator, _data + index);
 
             for (size_t i = index; i < _size - 1; ++i) {
                 _data[i] = efp::move(_data[i + 1]);
@@ -850,7 +849,8 @@ namespace detail {
 
         void clear() {
             for (size_t i = 0; i < _size; ++i) {
-                _allocator.destroy(_data + i);
+                // _allocator.destroy(_data + i);
+                AllocatorTraits<Allocator>::destroy(_allocator, _data + i);
             }
             _size = 0;
         }
@@ -886,12 +886,14 @@ namespace detail {
     protected:
         template<typename Last>
         void _construct_elements(size_t& index, const Last& last) {
-            _allocator.construct(_data + index++, last);
+            // _allocator.construct(_data + index++, last);
+            AllocatorTraits<Allocator>::construct(_allocator, _data + index++, last);
         }
 
         template<typename Head, typename... Tail>
         void _construct_elements(size_t& index, const Head& head, const Tail&... tail) {
-            _allocator.construct(_data + index++, head);
+            // _allocator.construct(_data + index++, head);
+            AllocatorTraits<Allocator>::construct(_allocator, _data + index++, head);
             _construct_elements(index, tail...);
         }
 
@@ -1017,11 +1019,10 @@ public:
     ArrayView() : _data(nullptr) {}
 
     // ! length will not be used
-    ArrayView(const Element* data, size_t length = Size<ct_size> {}) : _data(data) {
+    ArrayView(const Element* data, size_t = Size<ct_size> {}) : _data(data) {
         // Ensure that data is not nullptr for a non-empty view.
         if (ct_size > 0 && _data == nullptr) {
-            throw std::runtime_error(
-                "ArrayView::ArrayView: data must not be nullptr for a non-empty view"
+            throw RuntimeError("ArrayView::ArrayView: data must not be nullptr for a non-empty view"
             );
         }
     }
@@ -1048,7 +1049,7 @@ public:
 
     void resize(size_t length) {
         if (length > ct_size || length < 0) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrayView::resize: length must be less than or equal to ct_size and greater than or equal to 0"
             );
         }
@@ -1056,8 +1057,7 @@ public:
 
     void reserve(size_t capacity) {
         if (capacity > ct_size) {
-            throw std::runtime_error(
-                "ArrayView::reserve: capacity must be less than or equal to ct_size"
+            throw RuntimeError("ArrayView::reserve: capacity must be less than or equal to ct_size"
             );
         }
     }
@@ -1110,7 +1110,7 @@ struct CtCapacityImpl<ArrayView<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const ArrayView<A, n>& as) -> Size<n> {
+constexpr auto length(const ArrayView<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 
@@ -1146,15 +1146,13 @@ public:
     ArrVecView(const Element* data, size_t size) : _data(data), _size(size) {
         // Ensure that data is not nullptr for a non-empty view.
         if (size > 0 && _data == nullptr) {
-            throw std::runtime_error(
+            throw RuntimeError(
                 "ArrVecView::ArrVecView: data must not be nullptr for a non-empty view"
             );
         }
     }
 
-    // Constructor from ArrayView
-    template<size_t ct_size_>
-    ArrVecView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
+    ArrVecView(const ArrVecView& other) : _data(other._data), _size(other._size) {}
 
     ArrVecView& operator=(const ArrVecView& other) {
         if (this != &other) {
@@ -1163,6 +1161,10 @@ public:
         }
         return *this;
     }
+
+    // Constructor from ArrayView
+    template<size_t ct_size_>
+    ArrVecView(const ArrayView<Element, ct_size_>& as) : _data(as.data()), _size(length(as)) {}
 
     const Element& operator[](size_t index) {
         return _data[index];
@@ -1275,10 +1277,22 @@ namespace detail {
             : _data(data), _size(size), _capacity(size) {
             // Ensure that data is not nullptr for a non-empty view.
             if (size > 0 && _data == nullptr) {
-                throw std::runtime_error(
+                throw RuntimeError(
                     "VectorViewBase::VectorViewBase: data must not be nullptr for a non-empty view"
                 );
             }
+        }
+
+        VectorViewBase(const VectorViewBase& other)
+            : _data(other._data), _size(other._size), _capacity(other._capacity) {}
+
+        VectorViewBase& operator=(const VectorViewBase& other) {
+            if (this != &other) {
+                _data = other._data;
+                _size = other._size;
+                _capacity = other._capacity;
+            }
+            return *this;
         }
 
         // Constructor from ArrayView
@@ -1290,15 +1304,6 @@ namespace detail {
         template<size_t ct_cap_>
         VectorViewBase(const ArrVecView<Element, ct_cap_>& as)
             : _data(as.data()), _size(length(as)) {}
-
-        VectorViewBase& operator=(const VectorViewBase& other) {
-            if (this != &other) {
-                _data = other._data;
-                _size = other._size;
-                _capacity = other._capacity;
-            }
-            return *this;
-        }
 
         const Element& operator[](size_t index) {
             return _data[index];
@@ -1410,6 +1415,7 @@ constexpr auto data(VectorView<A>& as) -> const A* {
     return as.data();
 }
 
+// ! Very problematic
 // #if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
 
 // template<typename A>
@@ -1451,7 +1457,7 @@ struct CtCapacityImpl<std::array<A, n>> {
 };
 
 template<typename A, size_t n>
-constexpr auto length(const std::array<A, n>& as) -> Size<n> {
+constexpr auto length(const std::array<A, n>&) -> Size<n> {
     return Size<n> {};
 }
 

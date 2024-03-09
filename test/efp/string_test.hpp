@@ -24,11 +24,13 @@ TEST_CASE("BasicString<Char>", "[BasicString<Char>]") {
     SECTION("Constructor from C-Style String") {
         String str("Hello");
         CHECK(str.size() == 5);
-        CHECK(std::strcmp(str.data(), "Hello") == 0);
+        // CHECK(std::strcmp(str.data(), "Hello") == 0);
+        CHECK(std::strcmp(str.c_str(), "Hello") == 0);
 
         WString wstr(L"Hello");
         CHECK(wstr.size() == 5);
-        CHECK(std::wcscmp(wstr.data(), L"Hello") == 0);
+        // CHECK(std::wcscmp(wstr.data(), L"Hello") == 0);
+        CHECK(std::wcscmp(wstr.c_str(), L"Hello") == 0);
     }
 
     SECTION("Copy Constructor") {
@@ -45,12 +47,14 @@ TEST_CASE("BasicString<Char>", "[BasicString<Char>]") {
     SECTION("Move Constructor") {
         String original("Hello");
         String moved(efp::move(original));
-        CHECK(std::strcmp(moved.data(), "Hello") == 0);
+        // CHECK(std::strcmp(moved.data(), "Hello") == 0);
+        CHECK(std::strcmp(moved.c_str(), "Hello") == 0);
         CHECK(original.empty());
 
         WString woriginal(L"Hello");
         WString wmoved(efp::move(woriginal));
-        CHECK(std::wcscmp(wmoved.data(), L"Hello") == 0);
+        // CHECK(std::wcscmp(wmoved.data(), L"Hello") == 0);
+        CHECK(std::wcscmp(wmoved.c_str(), L"Hello") == 0);
         CHECK(woriginal.empty());
     }
 
@@ -72,13 +76,15 @@ TEST_CASE("BasicString<Char>", "[BasicString<Char>]") {
         String str1("Hello");
         String str2;
         str2 = efp::move(str1);
-        CHECK(std::strcmp(str2.data(), "Hello") == 0);
+        // CHECK(std::strcmp(str2.data(), "Hello") == 0);
+        CHECK(std::strcmp(str2.c_str(), "Hello") == 0);
         CHECK(str1.empty());
 
         WString wstr1(L"Hello");
         WString wstr2;
         wstr2 = efp::move(wstr1);
-        CHECK(std::wcscmp(wstr2.data(), L"Hello") == 0);
+        // CHECK(std::wcscmp(wstr2.data(), L"Hello") == 0);
+        CHECK(std::wcscmp(wstr2.c_str(), L"Hello") == 0);
         CHECK(wstr1.empty());
     }
 
@@ -145,7 +151,8 @@ TEST_CASE("BasicString<Char>", "[BasicString<Char>]") {
         str.push_back('H');
         str.push_back('i');
         CHECK(str.size() == 2);
-        CHECK(std::strcmp(str.data(), "Hi") == 0);
+        // CHECK(std::strcmp(str.data(), "Hi") == 0);
+        CHECK(std::strcmp(str.c_str(), "Hi") == 0);
     }
 
     SECTION("BasicString<Char>::pop_back") {

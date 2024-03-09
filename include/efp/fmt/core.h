@@ -17,11 +17,16 @@
 // #include <string>
 #include <type_traits>
 
+#include "efp/cpp_core.hpp"
 #include "efp/string.hpp"
 
 // todo local support
 // ! No local support
-#define EFP_FMT_STATIC_THOUSANDS_SEPARATOR
+
+// #define EFP_FMT_STATIC_THOUSANDS_SEPARATOR
+
+// In order to avoid  error: missing field 'thousands_sep' initializer [-Werror,-Wmissing-field-initializers]
+#define EFP_FMT_STATIC_THOUSANDS_SEPARATOR {}
 
 // The fmt library version in the form major * 10000 + minor * 100 + patch.
 #define EFP_FMT_VERSION 100101

@@ -16,41 +16,41 @@ double* fpt_function1(const int x0, float& x1) {
     return nullptr;
 }
 
-TEST_CASE("FunctionPosize_terType") {
+TEST_CASE("FunctionPointerType") {
     auto fpt_lambda0 = [](int x0, float x1) { return x1 + x0; };
     auto fpt_lambda1 = [](const int x0, float& x1) { return x0 + x1; };
 
     CHECK(IsSame<
               double (*)(int, float&&),
-              FunctionPosize_terType<decltype(&fpt_function0)>>::value == true);
+              FunctionPointerType<decltype(&fpt_function0)>>::value == true);
 
     CHECK(IsSame<
               double (*)(int, float),
-              FunctionPosize_terType<decltype(&fpt_function0)>>::value == false);
+              FunctionPointerType<decltype(&fpt_function0)>>::value == false);
 
     CHECK(IsSame<
               double* (*)(int, float&),
-              FunctionPosize_terType<decltype(&fpt_function1)>>::value == true);
+              FunctionPointerType<decltype(&fpt_function1)>>::value == true);
 
     CHECK(IsSame<
               double* (*)(int, float),
-              FunctionPosize_terType<decltype(&fpt_function1)>>::value == false);
+              FunctionPointerType<decltype(&fpt_function1)>>::value == false);
 
     CHECK(IsSame<
               float (*)(int, float),
-              FunctionPosize_terType<decltype(fpt_lambda0)>>::value == true);
+              FunctionPointerType<decltype(fpt_lambda0)>>::value == true);
 
     CHECK(IsSame<
               double (*)(int, float),
-              FunctionPosize_terType<decltype(fpt_lambda0)>>::value == false);
+              FunctionPointerType<decltype(fpt_lambda0)>>::value == false);
 
     CHECK(IsSame<
               float (*)(int, float&),
-              FunctionPosize_terType<decltype(fpt_lambda1)>>::value == true);
+              FunctionPointerType<decltype(fpt_lambda1)>>::value == true);
 
     CHECK(IsSame<
               float (*)(int, float),
-              FunctionPosize_terType<decltype(fpt_lambda1)>>::value == false);
+              FunctionPointerType<decltype(fpt_lambda1)>>::value == false);
 }
 
 static void (*inner_function1)() = nullptr;

@@ -247,8 +247,8 @@ private:
     };
 
     Spinlock _spinlock;
-    Vcq<A, capacity>* _write_buffer;
     Vcq<A, capacity>* _read_buffer;
+    Vcq<A, capacity>* _write_buffer;
 };
 
 // todo Implement Sequence traits for DoubleBuffer

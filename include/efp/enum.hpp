@@ -1,5 +1,5 @@
-#ifndef EFP_ENUM_HPP
-#define EFP_ENUM_HPP
+#ifndef EFP_ENUM_HPP_
+#define EFP_ENUM_HPP_
 
 #include "efp/meta.hpp"
 
@@ -9,7 +9,7 @@ namespace detail {
 
     // Use bit operation and recursion
     constexpr uint8_t power_2_ceiling(uint8_t n, uint8_t power = 2) {
-        return (power >= n) ? power : power_2_ceiling(n, power << 1);
+        return (power >= n) ? power - 1 : power_2_ceiling(n, power << 1);
     }
 
     // clang-format off
@@ -32,101 +32,100 @@ namespace detail {
     struct _EnumSwitch {};
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<2, alt_num, Case, Args...> {
+    struct _EnumSwitch<2 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP2(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<4, alt_num, Case, Args...> {
+    struct _EnumSwitch<4 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP4(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<8, alt_num, Case, Args...> {
+    struct _EnumSwitch<8 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP8(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<16, alt_num, Case, Args...> {
+    struct _EnumSwitch<16 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP16(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<32, alt_num, Case, Args...> {
+    struct _EnumSwitch<32 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP32(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<64, alt_num, Case, Args...> {
+    struct _EnumSwitch<64 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP64(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
     template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    struct _EnumSwitch<128, alt_num, Case, Args...> {
+    struct _EnumSwitch<128 - 1, alt_num, Case, Args...> {
         static auto call(uint8_t index, Args&&... args)
             -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
             switch (index) {
                 EFP_STAMP128(0, EFP_ENUM_CASE)
                 default:
-                    throw std::runtime_error("Invalid alternative index");
+                    throw RuntimeError("Invalid alternative index");
             }
         }
     };
 
-    // ! temp
-    // template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
-    // struct _EnumSwitch<256, alt_num, Case, Args...> {
-    //     static auto call(uint8_t index, Args&&... args)
-    //         -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
-    //         switch (index) {
-    //             EFP_STAMP256(0, EFP_ENUM_CASE)
-    //             default:
-    //                 throw std::runtime_error("Invalid alternative index");
-    //         }
-    //     }
-    // };
+    template<uint8_t alt_num, template<uint8_t> class Case, typename... Args>
+    struct _EnumSwitch<256 - 1, alt_num, Case, Args...> {
+        static auto call(uint8_t index, Args&&... args)
+            -> decltype(Case<0>::call(std::forward<Args>(args)...)) {
+            switch (index) {
+                EFP_STAMP256(0, EFP_ENUM_CASE)
+                default:
+                    throw RuntimeError("Invalid alternative index");
+            }
+        }
+    };
 
 #undef EFP_ENUM_CASE
 
@@ -144,24 +143,13 @@ namespace detail {
 
     // todo Maybe support more than 256 alternatives
 
+    // IsWildCard
+    // The function or lambda with auto arguments is not considered as a wild card
     template<typename F>
-    using IsWildCard = IsSame<Arguments<ReferenceRemoved<F>>, Tuple<>>;
+    using IsWildCard = IsSame<Arguments<F>, Tuple<>>;
 
-    // todo zero copy
-    // Wrapper for wild card to be callable with any arguments
-    // template<typename F>
-    // struct WildCardWrapper: public F {
-    //     // Explicitly define a constructor to accept a lambda or any callable
-    //     template<typename G>
-    //     WildCardWrapper(G&& g) : F {std::forward<G>(g)} {}
-
-    //     // Overload operator() to forward arguments to the callable's operator()
-    //     template<typename... Args>
-    //     inline auto operator()(Args&&...) const -> decltype(std::declval<F>()()) {
-    //         return F::operator()();
-    //     }
-    // };
-
+    // WildCardWrapper
+    // Zero-copy wrapper for wild card
     template<typename F>
     class WildCardWrapper {
     public:
@@ -169,8 +157,8 @@ namespace detail {
         explicit WildCardWrapper(const F& lambda) : _lambda(lambda) {}
 
         // Overload the function call operator to forward calls to the lambda's own call operator.
-        template<typename... Args>
-        inline auto operator()(Args&&...) const -> decltype(efp::declval<F>()()) {
+        template<typename A>
+        inline auto operator()(A&&) const -> decltype(efp::declval<F>()()) {
             return _lambda();
         }
 
@@ -195,17 +183,37 @@ namespace detail {
         return f;
     }
 
+    // BadParam
+    struct BadParam {
+        template<EnableIf<True::value, int> = 0, typename... Alts>
+        BadParam(Alts&&...) {
+            // clang-format off
+            static_assert(AlwaysFalse<Alts...>::value, "No matching pattern found for the alternative");
+            // clang-format on
+        }
+    };
+
     // Overloaded
     // Overloaded class for pattern matching
+    // todo Make it zero-copy
     template<typename... Fs>
     struct Overloaded;
 
-    template<typename F>
+#if __cplusplus >= 201402L
+    template<>
+    struct Overloaded<> {
+        // Better error message without extra compilation cost is only available in >= C++14
+        template<typename... Alts, EnableIf<True::value, int> = 0>
+        auto operator()(BadParam, int _ = 0, Alts&&...) const {}
+    };
+#else
+    template<class F>
     struct Overloaded<F>: F {
         using F::operator();
 
         Overloaded(const F& f) : F {f} {}
     };
+#endif
 
     template<class F, class... Fs>
     struct Overloaded<F, Fs...>: F, Overloaded<Fs...> {
@@ -380,7 +388,7 @@ namespace detail {
         template<typename Alt>
         const Alt& get() const {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<const Alt*>(&_storage);
@@ -389,7 +397,7 @@ namespace detail {
         template<typename Alt>
         Alt& get() {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<Alt*>(&_storage);
@@ -398,7 +406,7 @@ namespace detail {
         template<uint8_t i>
         const PackAt<i, A, As...>& get() const {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<const PackAt<i, A, As...>*>(&_storage);
@@ -407,7 +415,7 @@ namespace detail {
         template<uint8_t i>
         PackAt<i, A, As...>& get() {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return *reinterpret_cast<PackAt<i, A, As...>*>(&_storage);
@@ -416,7 +424,7 @@ namespace detail {
         template<typename Alt>
         const Alt&& move() const {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<Alt*>(&_storage));
@@ -425,7 +433,7 @@ namespace detail {
         template<typename Alt>
         Alt&& move() {
             if (_index != AltIndex<Alt>::value) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<Alt*>(&_storage));
@@ -434,7 +442,7 @@ namespace detail {
         template<uint8_t i>
         const PackAt<i, A, As...>&& move() const {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<PackAt<i, A, As...>*>(&_storage));
@@ -443,7 +451,7 @@ namespace detail {
         template<uint8_t i>
         PackAt<i, A, As...>&& move() {
             if (_index != i) {
-                throw std::runtime_error("Invalid alternative index");
+                throw RuntimeError("Invalid alternative index");
             }
 
             return efp::move(*reinterpret_cast<PackAt<i, A, As...>*>(&_storage));
@@ -455,10 +463,8 @@ namespace detail {
         // Pattern matching
         template<typename F, typename... Fs>
         auto match(const F& f, const Fs&... fs) const
-            -> decltype(efp::declval<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>>()(
-                efp::declval<A>()
-            )) const {
-            static_assert(PatternCheck<F, Fs...>::value, "Pattern is not exhaustive");
+            -> InvokeResult<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>, A> const {
+            // ? Maybe check for irrelevant branches only if specified to do so
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
@@ -524,91 +530,6 @@ namespace detail {
             };
         };
 
-        // Match branch sanity check
-
-        // Wild card will be considered as a irrelevant branch
-        template<typename F>
-        using IsRelevantBranch = Any<IsInvocable<F, A>, IsInvocable<F, As>...>;
-
-        // WildCardIffLast
-        template<typename... Fs>
-        struct WildCardIffLast {};
-
-        template<typename F>
-        struct WildCardIffLast<F>: IsWildCard<F> {};
-
-        template<typename F, typename... Fs>
-        struct WildCardIffLast<F, Fs...>: WildCardIffLast<Fs...> {};
-
-        // AllButLastAreRelevant
-        template<typename... Fs>
-        struct AllButLastAreRelevant {};
-
-        template<typename F>
-        struct AllButLastAreRelevant<F>: True {};
-
-        template<typename F, typename... Fs>
-        struct AllButLastAreRelevant<F, Fs...>:
-            Conditional<IsRelevantBranch<F>::value, AllButLastAreRelevant<Fs...>, False> {};
-
-        // todo Make it more stricter only excpeting explicitly invocable branches
-        // RemoveFirstInvocable
-        template<typename Alt, typename List>
-        struct _RemoveFirstInvocable {};
-
-        template<typename Alt>
-        struct _RemoveFirstInvocable<Alt, TypeList<>> {
-            using Type = TypeList<>;
-        };
-
-        template<typename Alt, typename F, typename... Fs>
-        struct _RemoveFirstInvocable<Alt, TypeList<F, Fs...>> {
-            using Type = Conditional<
-                IsInvocable<F, Alt>::value,
-                TypeList<Fs...>,
-                Prepend<F, typename _RemoveFirstInvocable<Alt, TypeList<Fs...>>::Type>>;
-        };
-
-        template<typename Alt, typename List>
-        using RemoveFirstInvocable = typename _RemoveFirstInvocable<Alt, List>::Type;
-
-        // Mutual Exhaustiveness
-        // Check if the alternatives and the branches are mutually exhaustive
-        template<typename AltList, typename BranchList>
-        struct MutExhaust {};
-
-        template<typename Alt, typename F>
-        struct MutExhaust<TypeList<Alt>, TypeList<F>>: IsInvocable<F, Alt> {};
-
-        template<typename Alt, typename... Alts, typename F, typename... Fs>
-        struct MutExhaust<TypeList<Alt, Alts...>, TypeList<F, Fs...>>:
-            Conditional<
-                sizeof...(Alts) == sizeof...(Fs),
-                MutExhaust<TypeList<Alts...>, RemoveFirstInvocable<Alt, TypeList<F, Fs...>>>,
-                False> {};
-
-        // PatternCheck
-        template<typename, typename... Fs>
-        struct _PatternCheck {};
-
-        // No need to check if all the alternatives are covered
-        // Only need to check if all the branches are relevant
-        template<typename... Fs>
-        struct _PatternCheck<True, Fs...> {
-            using Type = AllButLastAreRelevant<Fs...>;
-        };
-
-        // If there is no wild card at the last branch, check if the alternatives and the branches are mutually exhaustive
-        template<typename... Fs>
-        struct _PatternCheck<False, Fs...> {
-            using Type = MutExhaust<TypeList<A, As...>, TypeList<Fs...>>;
-        };
-
-        template<typename... Fs>
-        using PatternCheck =
-            typename _PatternCheck<Conditional<WildCardIffLast<Fs...>::value, True, False>, Fs...>::
-                Type;
-
         // Private member variables
         alignas(_maximum({alignof(A), alignof(As)...})
         ) uint8_t _storage[_maximum({sizeof(A), sizeof(As)...})];
@@ -642,4 +563,4 @@ using EnumAt = typename detail::_EnumAt<n, A>::Type;
 
 }  // namespace efp
 
-#endif  // EFP_ENUM_HPP
+#endif  // EFP_ENUM_HPP_

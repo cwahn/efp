@@ -10,37 +10,22 @@ include(FetchContent)
 
 project(
     efp
-    VERSION 0.1
+    VERSION 0.1.0
     DESCRIPTION "Eager functional programming library for C++ 11"
     LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-backtrace-limit=0")
-
+# Enable NRVO for MSVC if possible
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
 
-    if(MSVC_VERSION VERSION_LESS "1934")
-        message(WARNING "NVRO is not encouraged. Zc:N  RVO not supported under MSVC 17.4.")
-    endif()
-endif()
-
-if(MSVC)
     if(MSVC_VERSION VERSION_GREATER_EQUAL "1934")
         string(APPEND CMAKE_CXX_FLAGS " /Zc:nrvo")
+    elseif(MSVC_VERSION VERSION_LESS "1934")
+        message(WARNING "NVRO is not encouraged. Zc:N  RVO not supported under MSVC 17.4.")
     endif()
-endif()
-
-# AddressSanitizer
-option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-
-if(ENABLE_ASAN)
-    # Add the -fsanitize=address flag to the compiler and linker
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
 endif()
 
 # Function to enable template compilation time measurement for a specific target
@@ -59,16 +44,31 @@ function(efp_enable_compilation_time target_name)
     endif()
 endfunction()
 
-# ! temp
-# Set verbose makefile output
-set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output" FORCE)
-
+# efp
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
-target_compile_features(efp INTERFACE cxx_std_11)
 
 # Check if this CMakeLists.txt is the top-most CMake project
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Set highest warning level and treat warnings as errors
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        # Use warning level 4, treat warnings as errors, and disable 'unused parameter' warnings
+        add_compile_options(/W4 /WX /wd4100)
+    else()
+        message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} compiler, which might not have specific flags set in CMakeLists.txt.")
+    endif()
+
+    # AddressSanitizer
+    option(ENABLE_ASAN "Enable AddressSanitizer" ON)
+
+    if(ENABLE_ASAN)
+        # Add the -fsanitize=address flag to the compiler and linker
+        add_compile_options(-fsanitize=address)
+        add_link_options(-fsanitize=address)
+    endif()
+
     add_subdirectory("./example")
     add_subdirectory("./test")
 endif()

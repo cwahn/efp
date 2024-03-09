@@ -1,29 +1,19 @@
 #ifndef META_TEST_HPP_
 #define META_TEST_HPP_
 
-#include "catch2/catch_test_macros.hpp"
-#include "efp.hpp"
 #include "test_common.hpp"
 
 using namespace efp;
 
-// TEST_CASE("bound_v")
+// TEST_CASE("clamp")
 // {
-//     CHECK(bound_v(0, 2, CtConst<size_t, -1>{}) == 0);
-//     CHECK(bound_v(0, 2, CtConst<size_t, 1>{}) == 1);
-//     CHECK(bound_v(0, 2, CtConst<size_t, 3>{}) == 2);
-//     CHECK(bound_v(0, CtConst<size_t, 3>{}, -1) == 0);
+//     CHECK(clamp(0, 2, CtConst<size_t, -1>{}) == 0);
+//     CHECK(clamp(0, 2, CtConst<size_t, 1>{}) == 1);
+//     CHECK(clamp(0, 2, CtConst<size_t, 3>{}) == 2);
+//     CHECK(clamp(0, CtConst<size_t, 3>{}, -1) == 0);
 //     // ! issue
 //     // CHECK((-1 > CtConst<size_t, 3>{}) == true);
 //     // CHECK((-1 > CtConst<size_t, 3>{}) ? (CtConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
-// }
-
-// TEST_CASE("_all") {
-//     CHECK(_all() == true);
-//     CHECK(_all(true) == true);
-//     CHECK(_all(false) == false);
-//     CHECK(_all(true, false) == false);
-//     CHECK(_all(false, true) == false);
 // }
 
 TEST_CASE("_all") {
@@ -34,14 +24,6 @@ TEST_CASE("_all") {
     CHECK(_all({false, true}) == false);
 }
 
-// TEST_CASE("any_v") {
-//     CHECK(_any() == false);
-//     CHECK(_any(true) == true);
-//     CHECK(_any(false) == false);
-//     CHECK(_any(true, false) == true);
-//     CHECK(_any(false, true) == true);
-// }
-
 TEST_CASE("_any") {
     // CHECK(_any({}) == false);
     CHECK(_any({true}) == true);
@@ -50,14 +32,6 @@ TEST_CASE("_any") {
     CHECK(_any({false, true}) == true);
 }
 
-// TEST_CASE("_maximum") {
-//     CHECK(_maximum(0) == 0);
-//     CHECK(_maximum(0, 1) == 1);
-//     CHECK(_maximum(-1, 1) == 1);
-//     CHECK(_maximum(1., 2., 3) == 3.);
-//     CHECK(_maximum(-1., 2, 3.) == 3.);
-// }
-
 TEST_CASE("_maximum") {
     CHECK(_maximum({0}) == 0);
     CHECK(_maximum({0, 1}) == 1);
@@ -65,14 +39,6 @@ TEST_CASE("_maximum") {
     CHECK(_maximum({1., 2., 3.}) == 3.);
     CHECK(_maximum({-1., 2., 3.}) == 3.);
 }
-
-// TEST_CASE("_minimum") {
-//     CHECK(_minimum(0) == 0);
-//     CHECK(_minimum(1, 0) == 0);
-//     CHECK(_minimum(1u, -1) == 1);
-//     CHECK(_minimum(1, 2., 3) == 1);
-//     CHECK(_minimum(1, 2, -3.) == -3);
-// }
 
 TEST_CASE("_minimum") {
     CHECK(_minimum({0}) == 0);
@@ -183,31 +149,32 @@ double* return_t_function1(const int x0, float& x1) {
     return nullptr;
 }
 
-TEST_CASE("Return") {
-    auto return_t_lambda0 = [](int x0, float x1) { return x1 + x0; };
-    auto return_t_lambda1 = [](const int x0, float& x1) { return x0 + x1; };
-    auto return_t_lambda2 = [](const int x0, float& x1) {};
+// ! Deprecate. Use InvokeResult instead
+// TEST_CASE("Return") {
+//     auto return_t_lambda0 = [](int x0, float x1) { return x1 + x0; };
+//     auto return_t_lambda1 = [](const int x0, float& x1) { return x0 + x1; };
+//     auto return_t_lambda2 = [](const int x0, float& x1) {};
 
-    CHECK(IsSame<double, Return<decltype(&return_t_function0)>>::value == true);
+//     CHECK(IsSame<double, Return<decltype(&return_t_function0)>>::value == true);
 
-    CHECK(IsSame<double&, Return<decltype(&return_t_function0)>>::value == false);
+//     CHECK(IsSame<double&, Return<decltype(&return_t_function0)>>::value == false);
 
-    CHECK(IsSame<double*, Return<decltype(&return_t_function1)>>::value == true);
+//     CHECK(IsSame<double*, Return<decltype(&return_t_function1)>>::value == true);
 
-    CHECK(IsSame<double, Return<decltype(&return_t_function1)>>::value == false);
+//     CHECK(IsSame<double, Return<decltype(&return_t_function1)>>::value == false);
 
-    CHECK(IsSame<float, Return<decltype(return_t_lambda0)>>::value == true);
+//     CHECK(IsSame<float, Return<decltype(return_t_lambda0)>>::value == true);
 
-    CHECK(IsSame<int&, Return<decltype(return_t_lambda0)>>::value == false);
+//     CHECK(IsSame<int&, Return<decltype(return_t_lambda0)>>::value == false);
 
-    CHECK(IsSame<float, Return<decltype(return_t_lambda1)>>::value == true);
+//     CHECK(IsSame<float, Return<decltype(return_t_lambda1)>>::value == true);
 
-    CHECK(IsSame<float*, Return<decltype(return_t_lambda1)>>::value == false);
+//     CHECK(IsSame<float*, Return<decltype(return_t_lambda1)>>::value == false);
 
-    // Does catch void return
+//     // Does catch void return
 
-    CHECK(IsSame<void, Return<decltype(return_t_lambda2)>>::value == true);
-}
+//     CHECK(IsSame<void, Return<decltype(return_t_lambda2)>>::value == true);
+// }
 
 int is_invocable_add(int a, int b) {
     return a + b;
@@ -294,27 +261,28 @@ TEST_CASE("tuple") {
     CHECK(Tuple<> {} == tuple());
 }
 
-TEST_CASE("apply") {
-    SECTION("0") {
-        const auto tpl = tuple();
-        const auto f = []() { return unit; };
+// ! Deprecate. Use invoke instead
+// TEST_CASE("apply") {
+//     SECTION("0") {
+//         const auto tpl = tuple();
+//         const auto f = []() { return unit; };
 
-        CHECK(apply(f, tpl) == unit);
-    }
+//         CHECK(apply(f, tpl) == unit);
+//     }
 
-    SECTION("1") {
-        const auto tpl = tuple(true, 42);
-        const auto f = [](bool a, int b) { return unit; };
+//     SECTION("1") {
+//         const auto tpl = tuple(true, 42);
+//         const auto f = [](bool a, int b) { return unit; };
 
-        CHECK(apply(f, tpl) == unit);
-    }
+//         CHECK(apply(f, tpl) == unit);
+//     }
 
-    SECTION("2") {
-        const auto tpl = tuple(40, 2);
-        const auto add = [](int a, int b) { return a + b; };
+//     SECTION("2") {
+//         const auto tpl = tuple(40, 2);
+//         const auto add = [](int a, int b) { return a + b; };
 
-        CHECK(apply(add, tpl) == 42);
-    }
-}
+//         CHECK(apply(add, tpl) == 42);
+//     }
+// }
 
 #endif

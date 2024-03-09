@@ -94,30 +94,43 @@ int main() {
 }
 ```
 
-### String and formatting
+### Enum and Maybe with Pattern Matching
+```cpp
+const Enum<bool, int, double> x = 2;  // Example with int
+
+const int y = x.match(
+    [](int x) { return x * 2; },  // Specific branch for int
+    []() { return -1; }           // Wildcard branch
+);
+CHECK(y == 4);
+
+// Maybe<A> is a specialization of Enum<Nothing, A>
+const Maybe<int> maybe_42 = 42;
+const Maybe<int> no_value = nothing;
+
+// Using value() and isEmpty() for direct value access and checking
+CHECK(maybe_42.value() == 42);
+CHECK(no_value.is_nothing() == true);
+
+const int result = maybe_42.match(
+    [](int x) { return x; },  // Executes if there's a value
+    []() { return 0; }        // Executes if empty (wildcard)
+);
+CHECK(result == 42);
+```
+
+### String and Formatting
 ```cpp
 const String name_0 = "Lighthouse";
 const String name_1 = "Tinker Bell";
+
 println("{}", format("{} loves {}.", name_0, name_1));
 ``` 
-
-### Pattern Matching
-```cpp
-Enum<bool, int, double> a = 0;
-const int b = 42;
-
-const int c = a.match(
-    [&](bool x)
-    { return b * 0; },
-    [&]()                       
-    { return b * 1; }); // Empty branch indicates wildcard
-
-CHECK(b == 42);
-```
 
 ### File IO
 ```c++
 auto file = File::open("test", "w+").move();
+
 file.write("Hello, world!\nThis is a test file.\nEnd of test.");
 file.close();
 ```
@@ -125,16 +138,29 @@ file.close();
 ## Benchmarks
 WIP
 
-## Tests
-EFP is tested with Catch2 with GCC and Clang.
+## Testing
+
+EFP undergoes extensive testing with Catch2, leveraging pedantic warnings and Address Sanitizer to guarantee superior code quality and reliability.
+
+### Compatibility
+- **Compilers:** Clang 15, GCC 13
+- **C++ Standards:** C++11, C++14, C++17, C++20, C++23
+
+### Continuous Integration
+We are in the process of setting up CI to automate testing and ensure consistent quality.
+
+### Test Suite Results
+Our comprehensive tests affirm EFP's robustness:
+
 ```
 ===============================================================================
-All tests passed (1036 assertions in 106 test cases)
+All tests passed (1055 assertions in 107 test cases)
 ```
 
 ## Requirements
 
 - Requires C++ 11 or later.
+- Also supporte freestanding env. with some limitations.
 
 ## Acknowledgement
 - Formatting

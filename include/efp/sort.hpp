@@ -74,12 +74,18 @@ void max_heapify_by(Vector<A>& arr, size_t n, size_t i, const F& comp) {
 template<typename A, typename F = bool (*)(const A&, const A&)>
 void heapsort_by(Vector<A>& arr, const F& comp) {
     size_t n = arr.size();
-    for (size_t i = n / 2 - 1; i != -1; i--) {
-        max_heapify_by(arr, n, i, comp);
+
+    // Build heap (rearrange array)
+    if (n > 1) {  // Only proceed if there are at least two elements to sort
+        for (size_t i = n / 2; i-- > 0;) {
+            max_heapify_by(arr, n, i, comp);
+        }
     }
-    for (size_t i = n - 1; i != -1; i--) {
-        swap(arr[0], arr[i]);
-        max_heapify_by(arr, i, 0, comp);
+
+    // One by one extract an element from heap
+    for (size_t i = n; i-- > 1;) {  // Start from n and decrement; stop at 1 to avoid underflow
+        swap(arr[0], arr[i]);       // Move current root to end
+        max_heapify_by(arr, i, 0, comp);  // call max heapify on the reduced heap
     }
 }
 

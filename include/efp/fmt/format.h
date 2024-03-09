@@ -39,7 +39,7 @@
 #include <initializer_list>  // std::initializer_list
 #include <limits>            // efp::NumericLimits
 #include <memory>            // std::uninitialized_copy
-#include <stdexcept>         // std::runtime_error
+#include <stdexcept>         // std::error
 #include <system_error>      // std::system_error
 
 #ifdef __cpp_lib_bit_cast

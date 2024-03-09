@@ -308,7 +308,7 @@ TEST_CASE("enum_match") {
         Enum<bool, int, double> a = 0;
         int b = 42;
 
-        int c = a.match(
+        a.match(
             [&](bool x) { return b * 0; },
             [&](int x) { return b * 1; },
             [&](double x) { return b * 2; }
@@ -321,7 +321,7 @@ TEST_CASE("enum_match") {
         Enum<bool, int, double, float, long> a = 0;
         int b = 42;
 
-        int c = a.match(
+        a.match(
             [&](bool x) { return b * 0; },
             [&](int x) { return b * 1; },
             [&](double x) { return b * 2; },
@@ -349,7 +349,7 @@ TEST_CASE("enum_match") {
 
         int b = 42;
 
-        int c = a.match(
+        a.match(
             [&](InitState x) { return b * 0; },
             [&](AState x) { return b * 1; },
             [&](BState x) { return b * 2; },
@@ -364,17 +364,15 @@ TEST_CASE("enum_match") {
         Enum<Unit, int, double> a = unit;
         double b = 0.;
 
-        //?
         a.match([&](int x) { b += 1; }, [&]() {});
+        // Sould be failed to get compiled and show static assert message on top
+        // a.match([&](int x) { b += 1; }, [&](double _) { b += 1; });
+        a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
 
         CHECK(b == 0.);
-
-        // ! Compilation should fail
-        // a.match(
-        //     [&]()
-        //     { b += 1; },
-        //     [&]() {});
     }
+
+    // todo Check priority of cosntructor argument then no match
 
     SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
@@ -387,7 +385,7 @@ TEST_CASE("enum_match") {
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
-        int c = a.match([&](bool x) { return b * 0; }, [&](std::string x) { return 42; });
+        a.match([&](bool x) { return b * 0; }, [&](std::string x) { return 42; });
 
         CHECK(b == 42);
     }
@@ -397,7 +395,7 @@ TEST_CASE("enum_match") {
         Enum<bool, std::string> a = std::string("Hello");
         int b = 42;
 
-        int c = a.match([&](bool x) { return b * 0; }, [&](const std::string& x) { return 42; });
+        a.match([&](bool x) { return b * 0; }, [&](const std::string& x) { return 42; });
 
         CHECK(b == 42);
     }

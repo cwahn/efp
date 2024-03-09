@@ -3,7 +3,6 @@
 
 #include "efp.hpp"
 
-
 using namespace efp;
 
 TEST_CASE("Vcb Rule of 5", "Vcb") {
