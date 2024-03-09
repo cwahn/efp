@@ -13,7 +13,8 @@ TEST_CASE("Sorting algorithms sort correctly", "[sort]") {
     Vector<int> expectedAscending = {1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9};
     Vector<int> expected_descending = {9, 6, 5, 5, 5, 4, 3, 3, 2, 1, 1};
 
-    bool (*less_than)(const int&, const int&) = efp::op_lt<int>;
+    // todo Add tests for less_than
+    // bool (*less_than)(const int&, const int&) = efp::op_lt<int>;
 
     auto greater_than = [](int a, int b) { return a > b; };
 

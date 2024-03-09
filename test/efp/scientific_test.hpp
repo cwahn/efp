@@ -387,7 +387,7 @@ TEST_CASE("detrend") {
 
     auto f1 = [&](double x) { return a * x + b; };
 
-    auto f2 = [n](double x) { return sin(2 * M_PI * x / n); };
+    auto f2 = [](double x) { return sin(2 * M_PI * x / n); };
 
     SECTION("Array") {
         const auto xs = from_function(n, id<int>);
