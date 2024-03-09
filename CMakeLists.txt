@@ -17,6 +17,7 @@ project(
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
+# Enable NRVO for MSVC if possible
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     message(WARNING "Copy-elision (RVO, NRVO) is not guraanteed.\n")
 
@@ -43,6 +44,7 @@ function(efp_enable_compilation_time target_name)
     endif()
 endfunction()
 
+# efp
 add_library(efp INTERFACE)
 target_include_directories(efp INTERFACE "./include")
 
