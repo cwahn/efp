@@ -184,72 +184,73 @@ TEST_CASE("enum_type") {
 }
 
 // ! Deprecated
-TEST_CASE("Enum Exteneded Constructor") {
-    SECTION("Explicit constructor") {
-        struct A {
-            A(bool arg) : value(arg) {}
+// TEST_CASE("Enum Exteneded Constructor") {
+//     SECTION("Explicit constructor") {
+//         struct A {
+//             A(bool arg) : value(arg) {}
 
-            bool value;
-        };
+//             bool value;
+//         };
 
-        struct B {};
+//         struct B {};
 
-        using SomeEnum = Enum<A, B>;
+//         using SomeEnum = Enum<A, B>;
 
-        CHECK(IsConstructible<bool, bool>::value);
-        CHECK(IsConstructible<A, bool>::value);
+//         CHECK(IsConstructible<bool, bool>::value);
+//         CHECK(IsConstructible<A, bool>::value);
 
-        CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+//         CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-        int idx_0 = (int)SomeEnum(true).index();
-        int idx_1 = (int)SomeEnum {A {true}}.index();
+//         int idx_0 = (int)SomeEnum(true).index();
+//         int idx_1 = (int)SomeEnum {A {true}}.index();
 
-        CHECK(idx_0 == idx_1);
+//         CHECK(idx_0 == idx_1);
 
-        // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-    }
+//         // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+//     }
 
-    // todo Make it works for aggregate construction as well
-    // SECTION("Non-explicit constructor") {
-    //     struct A {
-    //         bool value;
-    //     };
-    //     struct B {};
+// todo Make it works for aggregate construction as well
+// SECTION("Non-explicit constructor") {
+//     struct A {
+//         bool value;
+//     };
+//     struct B {};
 
-    //     using SomeEnum = Enum<A, B>;
+//     using SomeEnum = Enum<A, B>;
 
-    //     CHECK(IsConstructible<bool, bool>::value);
-    //     CHECK(IsConstructible<A, bool>::value);
+//     CHECK(IsConstructible<bool, bool>::value);
+//     CHECK(IsConstructible<A, bool>::value);
 
-    //     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
+//     CHECK(SomeEnum::IsUniquelyConstructible<bool>::value);
 
-    //     int idx_0 = (int)SomeEnum(true).index();
-    //     int idx_1 = (int)SomeEnum{A{true}}.index();
+//     int idx_0 = (int)SomeEnum(true).index();
+//     int idx_1 = (int)SomeEnum{A{true}}.index();
 
-    //     CHECK(idx_0 == idx_1);
+//     CHECK(idx_0 == idx_1);
 
-    //     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
-    // }
+//     // CHECK((int)SomeEnum{true}.index() == (int)SomeEnum{A{true}}.index());
+// }
 
-    SECTION("Nested Enum") {
-        struct A {};
+// ! Deprecated. Nested Enum does not support any shortcutss
+// SECTION("Nested Enum") {
+//     struct A {};
 
-        struct B {};
+//     struct B {};
 
-        using Enum0 = Enum<A, B>;
+//     using Enum0 = Enum<A, B>;
 
-        struct C {};
+//     struct C {};
 
-        using NestedEnum = Enum<C, Enum0>;
+//     using NestedEnum = Enum<C, Enum0>;
 
-        CHECK(NestedEnum {A {}}.index() == NestedEnum {Enum0 {A {}}}.index());
-    }
+//     CHECK(NestedEnum {A {}}.index() == NestedEnum {Enum0 {A {}}}.index());
+// }
 
-    // SECTION("Self referencing Enum") {
-    //     List<int> empty_list = Nil{};
-    //     List<int> one_list = Cons<int>{42, Nil{}};
-    // }
-}
+// SECTION("Self referencing Enum") {
+//     List<int> empty_list = Nil{};
+//     List<int> one_list = Cons<int>{42, Nil{}};
+// }
+// }
 
 // SECTION("Self referencing Enum") {
 //     List<int> empty_list = Nil{};
