@@ -1,7 +1,6 @@
 #ifndef IO_HPP_
 #define IO_HPP_
 
-#include "efp/cpp_core.hpp"
 #include "efp/prelude.hpp"
 #include "efp/string.hpp"
 #include "efp/format.hpp"

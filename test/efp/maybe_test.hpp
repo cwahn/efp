@@ -215,4 +215,5 @@ TEST_CASE("EnumAt on Maybe") {
     CHECK(IsSame<EnumAt<1, Maybe<int>>, int>::value);
 }
 
+
 #endif

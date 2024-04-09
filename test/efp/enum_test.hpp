@@ -366,9 +366,9 @@ TEST_CASE("enum_match") {
         double b = 0.;
 
         a.match([&](int x) { b += 1; }, [&]() {});
-        // Sould be failed to get compiled and show static assert message on top
+        // ! Sould be failed to get compiled and show static assert message on top
         // a.match([&](int x) { b += 1; }, [&](double _) { b += 1; });
-        a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
+        // a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
 
         CHECK(b == 0.);
     }
@@ -378,7 +378,9 @@ TEST_CASE("enum_match") {
     SECTION("wild_card1") {
         Enum<Unit, int, double> a = unit;
 
-        CHECK(a.match([]() { return 42; }) == 42);
+        const auto res = a.match([]() { return 42; });
+
+        CHECK(res == 42);
     }
 
     SECTION("non-trivial0") {

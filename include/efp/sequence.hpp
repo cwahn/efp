@@ -1,7 +1,6 @@
 #ifndef SEQUENCE_HPP_
 #define SEQUENCE_HPP_
 
-#include "efp/cpp_core.hpp"
 #include "efp/meta.hpp"
 #include "efp/trait.hpp"
 
