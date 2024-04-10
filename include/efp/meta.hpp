@@ -820,24 +820,24 @@ constexpr A _product(const A (&as)[n]) {
 }
 
 // All
-// ! Deprecated because of performance issue. Use foldl instead
+// ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-struct All: Bool<_all({A::value, As::value...})> {};
+using All = Bool<_all({A::value, As::value...})>;
 
 // Any
-// ! Deprecated because of performance issue. Use foldl instead
+// ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-struct Any: Bool<_any({A::value, As::value...})> {};
+using Any = Bool<_any({A::value, As::value...})>;
 
 // Minimum
-// ! Deprecated because of performance issue. Use foldl instead
+// ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-struct Minimum: CtConst<typename A::value_type, _minimum({A::value, As::value...})> {};
+using Mininum = CtConst<typename A::value_type, _minimum({A::value, As::value...})>;
 
 // Maximum
-// ! Deprecated because of performance issue. Use foldl instead
+// ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-struct Maximum: CtConst<typename A::value_type, _maximum({A::value, As::value...})> {};
+using Maximum = CtConst<typename A::value_type, _maximum({A::value, As::value...})>;
 
 // Common
 template<typename... As>

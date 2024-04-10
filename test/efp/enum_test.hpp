@@ -369,6 +369,7 @@ TEST_CASE("enum_match") {
         // ! Sould be failed to get compiled and show static assert message on top
         // a.match([&](int x) { b += 1; }, [&](double _) { b += 1; });
         // a.match([&](int x) { b += 1; }, [&](False _) {}, [&]() {});
+        // a.match([&]() {}, [&](int x) { b += 1; });
 
         CHECK(b == 0.);
     }

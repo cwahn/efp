@@ -239,8 +239,6 @@ namespace detail {
     public:
         constexpr static uint8_t alt_num = sizeof...(As) + 1;
 
-        // constexpr static uint8_t switch_size = power_2_ceiling(alt_num);
-
         // Default constructor initializes the first alternative with default constructor
         EnumBase() : _index {0} {
             new (reinterpret_cast<A*>(&_storage)) A {};
@@ -410,7 +408,7 @@ namespace detail {
 
     private:
         template<typename Alt>
-        struct AltIndex: Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...> {};
+        using AltIndex = Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...>;
 
         // Assume that the index is altready bounded
         template<uint8_t i>
