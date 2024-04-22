@@ -1,9 +1,9 @@
 #ifndef PRELUDE_HPP_
 #define PRELUDE_HPP_
 
+#include "efp/meta.hpp"
 #include "efp/enum.hpp"
 #include "efp/maybe.hpp"
-#include "efp/meta.hpp"
 #include "efp/sequence.hpp"
 #include "efp/trait.hpp"
 

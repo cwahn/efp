@@ -6,11 +6,21 @@
 #include "efp/trait.hpp"
 
 namespace efp {
+
 struct Nothing {};
 
 constexpr Nothing nothing;
 
 // Specialization of Enum for Maybe
+
+template<typename A>
+using Maybe = Enum<Nothing, A>;
+
+template<typename A>
+struct IsMaybe: False {};
+
+template<typename A>
+struct IsMaybe<Maybe<A>>: True {};
 
 template<typename A>
 class Enum<Nothing, A>: public detail::EnumBase<Nothing, A> {
@@ -44,22 +54,44 @@ public:
     }
 
     template<typename F>
-    auto fmap(const F& f) -> Enum<Nothing, InvokeResult<F, A>> {
+    static Enum<Nothing, A> pure(const A& a) {
+        return a;
+    }
+
+    template<typename F>
+    auto fmap(const F& f) -> Enum<Nothing, InvokeResult<F, A>> const {
+        if (has_value())
+            return f(value());
+        else
+            return nothing;
+    }
+
+    template<typename F>
+    auto ap(const Enum<Nothing, F>& mf) -> Enum<Nothing, InvokeResult<F, A>> const {
+        if (has_value() && mf.has_value())
+            return mf.value()(value());
+        else
+            return nothing;
+    }
+
+    template<typename F>
+    auto bind(const F& f)
+        -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> const {
+        if (has_value())
+            return f(value());
+        else
+            return nothing;
+    }
+
+    template<typename F>
+    auto operator>>=(const F& f)
+        -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> const {
         if (has_value())
             return f(value());
         else
             return nothing;
     }
 };
-
-template<typename A>
-using Maybe = Enum<Nothing, A>;
-
-template<typename A>
-struct IsMaybe: False {};
-
-template<typename A>
-struct IsMaybe<Maybe<A>>: True {};
 
 // Element specializetion for Maybe
 template<typename A>
@@ -95,15 +127,6 @@ auto ap(const Maybe<F>& mf, const Maybe<A>& ma) -> Maybe<InvokeResult<F, A>> {
 
 template<typename A, typename F>
 auto bind(const Maybe<A>& ma, const F& f)
-    -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> {
-    if (ma)
-        return f(ma.value());
-    else
-        return nothing;
-}
-
-template<typename A, typename F>
-auto operator>>=(const Maybe<A>& ma, const F& f)
     -> EnableIf<IsMaybe<InvokeResult<F, A>>::value, InvokeResult<F, A>> {
     if (ma)
         return f(ma.value());

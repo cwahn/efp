@@ -239,8 +239,6 @@ namespace detail {
     public:
         constexpr static uint8_t alt_num = sizeof...(As) + 1;
 
-        // constexpr static uint8_t switch_size = power_2_ceiling(alt_num);
-
         // Default constructor initializes the first alternative with default constructor
         EnumBase() : _index {0} {
             new (reinterpret_cast<A*>(&_storage)) A {};
@@ -296,73 +294,6 @@ namespace detail {
         template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
         EnumBase(Alt&& alt) : _index(AltIndex<Alt>::value) {
             new (reinterpret_cast<Alt*>(_storage)) Alt(efp::move(alt));
-        }
-
-        // ! Deprecated
-        // Count how many types in the pack are constructible with Args...
-        template<typename... Types>
-        struct ConstructibleCount {};
-
-        template<typename T>
-        struct ConstructibleCount<T> {
-            template<typename... Args>
-            using Type = Size<IsConstructible<T, Args...>::value ? 1 : 0>;
-        };
-
-        template<typename First, typename... Rest>
-        struct ConstructibleCount<First, Rest...> {
-            template<typename... Args>
-            using Type = Size<
-                IsConstructible<First, Args...>::value
-                    ? 1
-                    : 0 + ConstructibleCount<Rest...>::template Type<Args...>::value>;
-        };
-
-        template<typename... Args>
-        using IsUniquelyConstructible =
-            Bool<ConstructibleCount<A, As...>::template Type<Args...>::value == 1>;
-
-        // Base case: no types are constructible
-        template<typename...>
-        struct FirstConstructible {
-            template<typename... Args>
-            using Type = void;  // Fallback type if no constructible type is found
-        };
-
-        // Specialization for at least one type in the pack
-        template<typename First, typename... Rest>
-        struct FirstConstructible<First, Rest...> {
-            template<typename... Args>
-            using Type = typename std::conditional<
-                IsConstructible<First, Args...>::value,
-                First,
-                typename FirstConstructible<Rest...>::template Type<Args...>>::type;
-        };
-
-        template<typename... Args>
-        using DetermineAlt = EnableIf<
-            IsUniquelyConstructible<Args...>::value,
-            typename FirstConstructible<A, As...>::template Type<Args...>>;
-
-        // ! End of deprecated
-
-        // ! Deprecated
-        // Extended constructor
-        // Templated constructor for forwarding arguments to the variants'
-        // constructors
-        template<
-            typename Head,
-            typename... Tail,
-            typename = EnableIf<
-                !(sizeof...(Tail) == 0 && Any<IsSame<As, Head>...>::value)
-                && IsUniquelyConstructible<Head, Tail...>::value>>
-        EnumBase(Head&& head, Tail&&... args)
-            : _index(AltIndex<DetermineAlt<Head, Tail...>>::value) {
-            // Determine the appropriate variant type based on the argument
-            using Alt = DetermineAlt<Head, Tail...>;  // Implement this based on your logic
-
-            // Construct the variant in place
-            new (reinterpret_cast<Alt*>(_storage)) Alt(forward<Head>(head), forward<Tail>(args)...);
         }
 
         bool operator==(const EnumBase& other) const {
@@ -464,7 +395,7 @@ namespace detail {
         template<typename F, typename... Fs>
         auto match(const F& f, const Fs&... fs) const
             -> InvokeResult<Overloaded<MatchBranch<F>, MatchBranch<Fs>...>, A> const {
-            // ? Maybe check for irrelevant branches only if specified to do so
+            static_assert(PatternCheck<F, Fs...>::value, "Invalid pattern matching branches");
 
             using Pattern = Overloaded<MatchBranch<F>, MatchBranch<Fs>...>;
 
@@ -477,7 +408,7 @@ namespace detail {
 
     private:
         template<typename Alt>
-        struct AltIndex: Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...> {};
+        using AltIndex = Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...>;
 
         // Assume that the index is altready bounded
         template<uint8_t i>
@@ -529,6 +460,20 @@ namespace detail {
                 }
             };
         };
+
+        // Match brach validation
+        template<typename F>
+        using IsRelevantBranch =
+            Bool<_any({IsInvocable<F, A>::value, IsInvocable<F, As>::value...})>;
+
+        template<typename F, typename... Fs>
+        struct PatternCheck:
+            Bool<
+                IsRelevantBranch<F>::value && (!IsWildCard<F>::value)
+                && PatternCheck<Fs...>::value> {};
+
+        template<typename F>
+        struct PatternCheck<F>: Bool<IsRelevantBranch<F>::value || IsWildCard<F>::value> {};
 
         // Private member variables
         alignas(_maximum({alignof(A), alignof(As)...})
