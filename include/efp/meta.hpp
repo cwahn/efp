@@ -340,17 +340,37 @@ using PackAt = typename detail::PackAtImpl<n, Args...>::Type;
 
 namespace detail {
     // FindImpl
-    template<size_t n, template<class> class P, typename... Args>
+    template<template<class> class P, typename... Args>
     struct FindImpl {};
 
-    template<size_t n, template<class> class P, typename Head, typename... Tail>
-    struct FindImpl<n, P, Head, Tail...>:
-        Conditional<P<Head>::value, CtConst<size_t, n>, FindImpl<n + 1, P, Tail...>> {};
+    template<template<class> class P>
+    struct FindImpl<P> {
+        static_assert(AlwaysFalse<P<void>>::value, "No type in the list satisfies the predicate");
+    };
+
+    template<template<class> class P, typename Head, typename... Tail>
+    struct FindImpl<P, Head, Tail...>: Conditional<P<Head>::value, Head, FindImpl<P, Tail...>> {};
 }  // namespace detail
 
 // Find the first type in the list that satisfies the predicate P
 template<template<class> class P, typename... Args>
-struct Find: detail::FindImpl<0, P, Args...> {};
+using Find = detail::FindImpl<P, Args...>;
+
+// FindIndex
+
+namespace detail {
+    // FindImpl
+    template<size_t n, template<class> class P, typename... Args>
+    struct FindIndexImpl {};
+
+    template<size_t n, template<class> class P, typename Head, typename... Tail>
+    struct FindIndexImpl<n, P, Head, Tail...>:
+        Conditional<P<Head>::value, CtConst<size_t, n>, FindIndexImpl<n + 1, P, Tail...>> {};
+}  // namespace detail
+
+// FindIndex the first type in the list that satisfies the predicate P
+template<template<class> class P, typename... Args>
+struct FindIndex: detail::FindIndexImpl<0, P, Args...> {};
 
 // LvalueRefAdded
 template<class T>

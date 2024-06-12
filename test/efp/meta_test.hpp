@@ -73,10 +73,10 @@ struct IsInt<int> {
     static constexpr bool value = true;
 };
 
-TEST_CASE("Find") {
-    CHECK(Find<IsInt, int, int, float>::value == 0);
-    CHECK(Find<IsInt, bool, int, float>::value == 1);
-    CHECK(Find<IsInt, bool, float, int>::value == 2);
+TEST_CASE("FindIndex") {
+    CHECK(FindIndex<IsInt, int, int, float>::value == 0);
+    CHECK(FindIndex<IsInt, bool, int, float>::value == 1);
+    CHECK(FindIndex<IsInt, bool, float, int>::value == 2);
 }
 
 TEST_CASE("HasCallOperator") {

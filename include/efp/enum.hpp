@@ -293,16 +293,14 @@ namespace detail {
             EnumSwitch<alt_num, DestroyCase, EnumBase*>::call(_index, this);
         }
 
-        // template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
         template<
-            typename Alt,
+            typename _A,
             typename = EnableIf<_any(
-                {IsAltCopyConstructible<A>::template With<Alt>::value,
-                 IsAltCopyConstructible<As>::template With<Alt>::value...}
+                {IsAltCopyConstructible<A>::template With<_A>::value,
+                 IsAltCopyConstructible<As>::template With<_A>::value...}
             )>>
-        // EnumBase(const Alt& alt) : _index(AltIndex<Alt>::value) {
-        EnumBase(const Alt& alt) : _index(CCAltIndex<Alt>::value) {
-            new (reinterpret_cast<Alt*>(_storage)) Alt(alt);
+        EnumBase(const _A& alt) : _index(CCAltIndex<_A>::value) {
+            new (reinterpret_cast<_A*>(_storage)) _A(alt);
         }
 
         template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
@@ -422,11 +420,15 @@ namespace detail {
 
     private:
         template<typename Alt>
-        using AltIndex = Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...>;
+        using AltIndex = FindIndex<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...>;
 
         // ! Temp
         template<typename _A>
-        using CCAltIndex = Find<IsAltCopyConstructible<_A>::template With, A, As...>;
+        using CCAltIndex = FindIndex<IsAltCopyConstructible<_A>::template With, A, As...>;
+
+        // ! Temp
+        template<typename _A>
+        using CCAlt = PackAt<CCAltIndex<_A>::value, A, As...>;
 
         // Assume that the index is altready bounded
         template<uint8_t i>
