@@ -232,6 +232,13 @@ namespace detail {
         };
     };
 
+    // ! Temp IsCopyConstructibleWith
+    template<typename Alt>
+    struct IsAltCopyConstructible {
+        template<typename A>
+        using With = IsConstructible<Alt, const A&>;
+    };
+
     // EnumBase
     // Enum is not permitted to hold a reference, but permitted to hold cv-qualified types
     template<typename A, typename... As>
@@ -286,8 +293,15 @@ namespace detail {
             EnumSwitch<alt_num, DestroyCase, EnumBase*>::call(_index, this);
         }
 
-        template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
-        EnumBase(const Alt& alt) : _index(AltIndex<Alt>::value) {
+        // template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
+        template<
+            typename Alt,
+            typename = EnableIf<_any(
+                {IsAltCopyConstructible<A>::template With<Alt>::value,
+                 IsAltCopyConstructible<As>::template With<Alt>::value...}
+            )>>
+        // EnumBase(const Alt& alt) : _index(AltIndex<Alt>::value) {
+        EnumBase(const Alt& alt) : _index(CCAltIndex<Alt>::value) {
             new (reinterpret_cast<Alt*>(_storage)) Alt(alt);
         }
 
@@ -409,6 +423,10 @@ namespace detail {
     private:
         template<typename Alt>
         using AltIndex = Find<IsSameUnary<ReferenceRemoved<Alt>>::template Binded, A, As...>;
+
+        // ! Temp
+        template<typename _A>
+        using CCAltIndex = Find<IsAltCopyConstructible<_A>::template With, A, As...>;
 
         // Assume that the index is altready bounded
         template<uint8_t i>

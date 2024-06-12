@@ -95,6 +95,7 @@ TEST_CASE("map") {
     SECTION("Array") {
         CHECK(map(times_2, array_3) == Array<int, 3> {2, 4, 6});
     }
+
     SECTION("C array") {
         // ArrayView<double, 3> view{stl_array_3};
         // CHECK(map(times_2, StlArrayAdapter<double, 3>{stl_array_3}) == Array<int, 3>{2, 4, 6});
@@ -1132,18 +1133,22 @@ TEST_CASE("find") {
     auto is_nine = [](double x) { return x == 9. ? true : false; };
 
     SECTION("Array") {
-        CHECK(find(is_two, array_3) == true);
-        CHECK(find(is_nine, array_3) == false);
+        CHECK(find(is_two, array_3).value() == 2.);
+        CHECK(find(is_nine, array_3).is_nothing() == true);
     }
 
     SECTION("Vector") {
-        CHECK(find(is_two, vector_3) == true);
-        CHECK(find(is_nine, vector_3) == false);
+        // CHECK(find(is_two, vector_3) == true);
+        // CHECK(find(is_nine, vector_3) == false);
+        CHECK(find(is_two, vector_3).value() == 2.);
+        CHECK(find(is_nine, vector_3).is_nothing() == true);
     }
 
     SECTION("ArrayView") {
-        CHECK(find(is_two, array_view_3) == true);
-        CHECK(find(is_nine, array_view_3) == false);
+        // CHECK(find(is_two, array_view_3) == true);
+        // CHECK(find(is_nine, array_view_3) == false);
+        CHECK(find(is_two, array_view_3).value() == 2.);
+        CHECK(find(is_nine, array_view_3).is_nothing() == true);
     }
 }
 

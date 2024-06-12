@@ -964,17 +964,31 @@ auto elem_indices(const Element<As>& a, const As& as) -> ElemIndicesReturn<As> {
 
 // find
 
-template<typename As, typename F = void (*)(const Element<As>&)>
-bool find(const F& f, const As& as) {
+// template<typename As, typename F = void (*)(const Element<As>&)>
+// bool find(const F& f, const As& as) {
+//     const auto as_len = length(as);
+
+//     for (size_t i = 0; i < as_len; ++i) {
+//         if (f(nth(i, as))) {
+//             return true;
+//         }
+//     }
+
+//     return false;
+// }
+
+template<typename As, typename F = bool (*)(const Element<As>&)>
+auto find(const F& f, const As& as) -> Maybe<Element<As>> {
     const auto as_len = length(as);
 
     for (size_t i = 0; i < as_len; ++i) {
-        if (f(nth(i, as))) {
-            return true;
+        const auto& a = nth(i, as);
+        if (f(a)) {
+            return a;
         }
     }
 
-    return false;
+    return nothing;
 }
 
 // find_index

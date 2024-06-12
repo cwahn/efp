@@ -757,6 +757,10 @@ void swap(A& a, A& b) {
     b = efp::move(temp);
 }
 
+// // IsConstructible
+// template<typename A, typename... Args>
+// using IsConstructible = std::is_constructible<A, Args...>;
+
 // IsDefaultConstructible
 
 template<typename A, typename = void>
@@ -849,7 +853,7 @@ struct DebugType;  // Intentionally undefined
 
 // IsConstructible
 template<typename A, typename... Args>
-using IsConstructible = Bool<std::is_constructible<A, Args...>::value>;
+using IsConstructible = std::is_constructible<A, Args...>;
 
 // AlignedStorage
 
