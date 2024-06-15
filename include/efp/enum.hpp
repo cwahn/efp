@@ -211,7 +211,7 @@ namespace detail {
     struct Overloaded<F>: F {
         using F::operator();
 
-        Overloaded(const F& f) : F {f} {}
+        explicit Overloaded(const F& f) : F {f} {}
     };
 #endif
 
@@ -220,7 +220,7 @@ namespace detail {
         using F::operator();
         using Overloaded<Fs...>::operator();
 
-        Overloaded(const F& f, const Fs&... fs) : F {f}, Overloaded<Fs...> {fs...} {}
+        explicit Overloaded(const F& f, const Fs&... fs) : F {f}, Overloaded<Fs...> {fs...} {}
     };
 
     // IsSameUnary
@@ -248,7 +248,8 @@ namespace detail {
 
         // Default constructor initializes the first alternative with default constructor
         EnumBase() : _index {0} {
-            new (reinterpret_cast<A*>(&_storage)) A {};
+            // new (reinterpret_cast<A*>(&_storage)) A {};
+            new (_storage) A {};
         }
 
         EnumBase(const EnumBase& other) : _index {other._index} {
@@ -294,18 +295,16 @@ namespace detail {
         }
 
         template<
-            typename _A,
-            typename = EnableIf<_any(
-                {IsAltCopyConstructible<A>::template With<_A>::value,
-                 IsAltCopyConstructible<As>::template With<_A>::value...}
-            )>>
-        EnumBase(const _A& alt) : _index(CCAltIndex<_A>::value) {
-            new (reinterpret_cast<_A*>(_storage)) _A(alt);
+            typename Alt,
+            typename = EnableIf<
+                Any<IsSame<Alt, ConstRemoved<A>>, IsSame<Alt, ConstRemoved<As>>...>::value>>
+        EnumBase(const Alt& alt) : _index(CCAltIndex<Alt>::value) {
+            new (reinterpret_cast<Alt*>(_storage)) Alt(alt);
         }
 
         template<typename Alt, typename = EnableIf<Any<IsSame<Alt, A>, IsSame<Alt, As>...>::value>>
         EnumBase(Alt&& alt) : _index(AltIndex<Alt>::value) {
-            new (reinterpret_cast<Alt*>(_storage)) Alt(efp::move(alt));
+            new (reinterpret_cast<Alt*>(&_storage)) Alt {efp::forward<Alt>(alt)};
         }
 
         bool operator==(const EnumBase& other) const {
@@ -436,7 +435,9 @@ namespace detail {
             using Alt = PackAt<i, A, As...>;
 
             static inline void call(EnumBase* self, const EnumBase& other) {
-                new (self->_storage) Alt {*reinterpret_cast<const Alt*>(&other._storage)};
+                // new (self->_storage) Alt {*reinterpret_cast<const Alt*>(&other._storage)};
+                new (reinterpret_cast<Alt*>(&self->_storage))
+                    Alt {*reinterpret_cast<const Alt*>(&other._storage)};
             }
         };
 
