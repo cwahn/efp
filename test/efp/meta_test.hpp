@@ -16,20 +16,20 @@ using namespace efp;
 //     // CHECK((-1 > CtConst<size_t, 3>{}) ? (CtConst<int, 3>{}) : ((-1 < 0) ? 0 : -1) == 0);
 // }
 
-TEST_CASE("_all") {
-    // CHECK(_all({}) == true);
-    CHECK(_all({true}) == true);
-    CHECK(_all({false}) == false);
-    CHECK(_all({true, false}) == false);
-    CHECK(_all({false, true}) == false);
+TEST_CASE("_and") {
+    // CHECK(_and({}) == true);
+    CHECK(_and({true}) == true);
+    CHECK(_and({false}) == false);
+    CHECK(_and({true, false}) == false);
+    CHECK(_and({false, true}) == false);
 }
 
-TEST_CASE("_any") {
-    // CHECK(_any({}) == false);
-    CHECK(_any({true}) == true);
-    CHECK(_any({false}) == false);
-    CHECK(_any({true, false}) == true);
-    CHECK(_any({false, true}) == true);
+TEST_CASE("_or") {
+    // CHECK(_or({}) == false);
+    CHECK(_or({true}) == true);
+    CHECK(_or({false}) == false);
+    CHECK(_or({true, false}) == true);
+    CHECK(_or({false, true}) == true);
 }
 
 TEST_CASE("_maximum") {

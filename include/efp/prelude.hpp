@@ -13,6 +13,74 @@ namespace efp {
 
 // todo concat, concat_map
 
+// Fold and Traversals
+
+// foldl :: (A -> B -> A) -> A -> [B] -> A
+template<typename A, typename Bs, typename F = A (*)(const A&, const Element<Bs>&)>
+auto foldl(const F& f, const A& init, const Bs& bs) -> A {
+    A res = init;
+    const auto res_length = length(bs);
+
+    for (size_t i = 0; i < res_length; ++i) {
+        res = f(res, nth(i, bs));
+    }
+
+    return res;
+}
+
+// foldr :: (A -> B -> B) -> B -> [A] -> B
+template<typename As, typename B, typename F = B (*)(const Element<As>&, const B&)>
+auto foldr(const F& f, const B& init, const As& as) -> B {
+    B res = init;
+
+    for (size_t i = length(as); i > 0; i--) {
+        res = f(nth(i - 1, as), res);
+    }
+
+    return res;
+}
+
+// elem_index
+
+template<typename As>
+Maybe<size_t> elem_index(const Element<As>& a, const As& as) {
+    const auto as_len = length(as);
+
+    for (size_t i = 0; i < as_len; ++i) {
+        if (nth(i, as) == a) {
+            return i;
+        }
+    }
+
+    return nothing;
+}
+
+// ElemIndicesReturn
+
+template<typename As>
+using ElemIndicesReturn =
+    Conditional<IsStaticCapacity<As>::value, ArrVec<size_t, CtCapacity<As>::value>, Vector<size_t>>;
+
+// elem_indices
+
+template<typename As>
+auto elem_indices(const Element<As>& a, const As& as) -> ElemIndicesReturn<As> {
+    ElemIndicesReturn<As> res {};
+    const auto as_len = length(as);
+
+    for (size_t i = 0; i < as_len; ++i) {
+        if (a == nth(i, as)) {
+            res.push_back(i);
+        }
+    }
+
+    return res;
+}
+
+// todo maximum, minimum, sum, product
+
+// Miscellanius functions
+
 // id :: A -> A
 template<typename A>
 constexpr A id(const A& a) {
@@ -89,10 +157,10 @@ void for_each_mut(const F& f, Ass&... ass) {
 
 template<typename R, typename... Ass>
 using NAryReturn = Conditional<
-    _all({IsStaticSize<Ass>::value...}),
+    _and({IsStaticSize<Ass>::value...}),
     Array<R, _minimum({CtSize<Ass>::value...})>,
     Conditional<
-        _all({IsStaticCapacity<Ass>::value...}),
+        _and({IsStaticCapacity<Ass>::value...}),
         ArrVec<R, _minimum({CtCapacity<Ass>::value...})>,
         Vector<R>>>;
 
@@ -114,134 +182,6 @@ auto map(const F& f, const Ass&... ass) -> MapReturn<F, Ass...> {
     for (size_t i = 0; i < res_len; ++i) {
         nth(i, res) = f(nth(i, ass)...);
     }
-
-    return res;
-}
-
-// FilterReturn
-
-template<typename As>
-using FilterReturn = Conditional<
-    CtCapacity<As>::value != dyn,
-    ArrVec<Element<As>, CtCapacity<As>::value>,
-    Vector<Element<As>>>;
-
-// filter :: (A -> Bool) -> [A] -> [A]
-template<typename As, typename F = bool (*)(const Element<As>&)>
-auto filter(const F& f, const As& as) -> FilterReturn<As> {
-    FilterReturn<As> res {};
-    const auto res_len = length(as);
-
-    for (size_t i = 0; i < res_len; ++i) {
-        const auto& a = nth(i, as);
-
-        if (f(a)) {
-            res.push_back(a);
-        }
-    }
-
-    return res;
-}
-
-// foldl :: (A -> B -> A) -> A -> [B] -> A
-template<typename A, typename Bs, typename F = A (*)(const A&, const Element<Bs>&)>
-auto foldl(const F& f, const A& init, const Bs& bs) -> A {
-    A res = init;
-    const auto res_length = length(bs);
-
-    for (size_t i = 0; i < res_length; ++i) {
-        res = f(res, nth(i, bs));
-    }
-
-    return res;
-}
-
-// foldr :: (A -> B -> B) -> B -> [A] -> B
-template<typename As, typename B, typename F = B (*)(const Element<As>&, const B&)>
-auto foldr(const F& f, const B& init, const As& as) -> B {
-    B res = init;
-
-    for (size_t i = length(as); i > 0; i--) {
-        res = f(nth(i - 1, as), res);
-    }
-
-    return res;
-}
-
-// FromFunctionReturnImpl
-
-namespace detail {
-    template<typename N, typename F>
-    struct FromFunctionReturnImpl {
-        using Type = Vector<InvokeResult<F, N>>;
-    };
-
-    template<size_t n, typename F>
-    struct FromFunctionReturnImpl<Size<n>, F> {
-        using Type = Array<InvokeResult<F, size_t>, n>;
-    };
-}  // namespace detail
-
-// FromFunctionReturn
-
-template<typename N, typename F>
-using FromFunctionReturn = typename detail::FromFunctionReturnImpl<N, F>::Type;
-
-// from_function :: (Size -> A) -> Size -> [A]
-template<typename N, typename F>
-auto from_function(const N& length, const F& f) -> FromFunctionReturn<N, F> {
-    FromFunctionReturn<N, F> res {};
-
-    if (!IsStaticSize<FromFunctionReturn<N, F>>::value) {
-        res.resize(length);
-    }
-
-    for (size_t i = 0; i < static_cast<size_t>(length); ++i) {
-        nth(i, res) = f(i);
-    }
-
-    return res;
-}
-
-// execute_pack
-
-template<typename... Args>
-void execute_pack(Args... args) {}
-
-template<typename... Ass>
-using AppendReturn = Conditional<
-    _all({IsStaticSize<Ass>::value...}),
-    Array<Common<Element<Ass>...>, _sum({CtSize<Ass>::value...})>,
-    Conditional<
-        _all({IsStaticCapacity<Ass>::value...}),
-        ArrVec<Common<Element<Ass>...>, _sum({CtCapacity<Ass>::value...})>,
-        Vector<Common<Element<Ass>...>>>>;
-
-namespace detail {
-    template<typename As, typename Bs>
-    Unit append_impl(size_t& idx, As& as, const Bs& bs) {
-        const auto seq_length = length(bs);
-
-        for (size_t i = 0; i < seq_length; ++i) {
-            nth(idx, as) = nth(i, bs);
-            idx++;
-        }
-
-        return unit;
-    }
-}  // namespace detail
-
-// append :: [A] -> [A] ... -> [A]
-template<typename As, typename... Ass>
-auto append(const As& as, const Ass&... ass) -> AppendReturn<As, Ass...> {
-    AppendReturn<As, Ass...> res {};
-
-    if (CtSize<AppendReturn<As, Ass...>>::value == dyn) {
-        res.resize(_sum({static_cast<size_t>(length(as)), static_cast<size_t>(length(ass))...}));
-    }
-
-    size_t idx = 0;
-    execute_pack(detail::append_impl(idx, res, as), detail::append_impl(idx, res, ass)...);
 
     return res;
 }
@@ -298,16 +238,249 @@ auto concat(const Ass& ass) -> ConcatReturn<Ass> {
     return res;
 }
 
+// FilterReturn
+
+template<typename As>
+using FilterReturn = Conditional<
+    CtCapacity<As>::value != dyn,
+    ArrVec<Element<As>, CtCapacity<As>::value>,
+    Vector<Element<As>>>;
+
+// filter :: (A -> Bool) -> [A] -> [A]
+template<typename As, typename F = bool (*)(const Element<As>&)>
+auto filter(const F& f, const As& as) -> FilterReturn<As> {
+    FilterReturn<As> res {};
+    const auto res_len = length(as);
+
+    for (size_t i = 0; i < res_len; ++i) {
+        const auto& a = nth(i, as);
+
+        if (f(a)) {
+            res.push_back(a);
+        }
+    }
+
+    return res;
+}
+
+// head
+
+// ! Partial function. Make sure non-empty
+
+template<typename As>
+auto head(const As& as) -> const Element<As>& {
+    if (as.empty()) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return nth(0, as);
+}
+
+// last
+
+// ! Partial function. Make sure non
+
+template<typename As>
+auto last(const As& as) -> const Element<As>& {
+    if (length(as) == 0) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return nth(length(as) - 1, as);
+}
+
+// TailReturn
+
+template<typename As, bool is_const>
+using TailReturn = EnableIf<
+    CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
+    Conditional<
+        IsStaticSize<As>::value,
+        Conditional<
+            is_const,
+            ArrayView<const Element<As>, CtSize<As>::value - 1>,
+            ArrayView<Element<As>, CtSize<As>::value - 1>>,
+        Conditional<
+            IsStaticCapacity<As>::value,
+            Conditional<
+                is_const,
+                ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
+                ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
+            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>>;
+
+// tail
+// ! Partial function. Application on empty list is abortion.
+
+template<typename A>
+auto tail(const A& as) -> TailReturn<A, true> {
+    if (length(as) == 0) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return {data(as) + 1, length(as) - 1};
+}
+
+template<typename A>
+auto tail(A& as) -> TailReturn<A, false> {
+    if (length(as) == 0) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return {data(as) + 1, length(as) - 1};
+}
+
+// InitReturn
+
+template<typename As, bool is_const>
+using InitReturn = EnableIf<
+    CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
+    Conditional<
+        IsStaticSize<As>::value,
+        Conditional<
+            is_const,
+            ArrayView<const Element<As>, CtSize<As>::value - 1>,
+            ArrayView<Element<As>, CtSize<As>::value - 1>>,
+        Conditional<
+            IsStaticCapacity<As>::value,
+            Conditional<
+                is_const,
+                ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
+                ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
+            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>>;
+
+// init
+
+// ! Zero length input will envoke abort.÷
+
+template<typename As>
+auto init(const As& as) -> InitReturn<As, true> {
+    if (length(as) == 0) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return {data(as), length(as) - 1};
+}
+
+template<typename As>
+auto init(As& as) -> InitReturn<As, false> {
+    if (length(as) == 0) {
+        throw RuntimeError("Sequence should not be empty");
+    }
+
+    return {data(as), length(as) - 1};
+}
+
+// cf nth is part of sequence trait
+
+// is_null
+
+template<typename As>
+bool is_null(const As& as) {
+    return length(as) == 0;
+}
+
+// cf length is part of sequence trait
+
+// todo reverse
+
+// Special folds 
+
+// and :: [Bool] -> Bool
+
+// or :: [Bool] -> Bool
+
+// any :: (A -> Bool) -> [A] -> Bool
+
+// all :: (A -> Bool) -> [A] -> Bool
+
+// FromFunctionReturnImpl
+
+namespace detail {
+    template<typename N, typename F>
+    struct FromFunctionReturnImpl {
+        using Type = Vector<InvokeResult<F, N>>;
+    };
+
+    template<size_t n, typename F>
+    struct FromFunctionReturnImpl<Size<n>, F> {
+        using Type = Array<InvokeResult<F, size_t>, n>;
+    };
+}  // namespace detail
+
+// FromFunctionReturn
+
+template<typename N, typename F>
+using FromFunctionReturn = typename detail::FromFunctionReturnImpl<N, F>::Type;
+
+// from_function :: (Size -> A) -> Size -> [A]
+template<typename N, typename F>
+auto from_function(const N& length, const F& f) -> FromFunctionReturn<N, F> {
+    FromFunctionReturn<N, F> res {};
+
+    if (!IsStaticSize<FromFunctionReturn<N, F>>::value) {
+        res.resize(length);
+    }
+
+    for (size_t i = 0; i < static_cast<size_t>(length); ++i) {
+        nth(i, res) = f(i);
+    }
+
+    return res;
+}
+
+// execute_pack
+
+template<typename... Args>
+void execute_pack(Args... args) {}
+
+template<typename... Ass>
+using AppendReturn = Conditional<
+    _and({IsStaticSize<Ass>::value...}),
+    Array<Common<Element<Ass>...>, _sum({CtSize<Ass>::value...})>,
+    Conditional<
+        _and({IsStaticCapacity<Ass>::value...}),
+        ArrVec<Common<Element<Ass>...>, _sum({CtCapacity<Ass>::value...})>,
+        Vector<Common<Element<Ass>...>>>>;
+
+namespace detail {
+    template<typename As, typename Bs>
+    Unit append_impl(size_t& idx, As& as, const Bs& bs) {
+        const auto seq_length = length(bs);
+
+        for (size_t i = 0; i < seq_length; ++i) {
+            nth(idx, as) = nth(i, bs);
+            idx++;
+        }
+
+        return unit;
+    }
+}  // namespace detail
+
+// append :: [A] -> [A] ... -> [A]
+template<typename As, typename... Ass>
+auto append(const As& as, const Ass&... ass) -> AppendReturn<As, Ass...> {
+    AppendReturn<As, Ass...> res {};
+
+    if (CtSize<AppendReturn<As, Ass...>>::value == dyn) {
+        res.resize(_sum({static_cast<size_t>(length(as)), static_cast<size_t>(length(ass))...}));
+    }
+
+    size_t idx = 0;
+    execute_pack(detail::append_impl(idx, res, as), detail::append_impl(idx, res, ass)...);
+
+    return res;
+}
+
 // IntercalateReturn
 
 template<typename As, typename Ass>
 using IntercalateReturn = Conditional<
-    _all({IsStaticSize<As>::value, IsStaticSize<Ass>::value, IsStaticSize<Element<Ass>>::value}),
+    _and({IsStaticSize<As>::value, IsStaticSize<Ass>::value, IsStaticSize<Element<Ass>>::value}),
     Array<
         Element<Element<Ass>>,
         CtSize<Ass>::value*(CtSize<Element<Ass>>::value + CtSize<As>::value) - CtSize<As>::value>,
     Conditional<
-        _all(
+        _and(
             {IsStaticCapacity<As>::value,
              IsStaticCapacity<Ass>::value,
              IsStaticCapacity<Element<Ass>>::value}
@@ -436,10 +609,10 @@ void cartesian_for_each_mut(const F& f, As& as, Ass&... ass) {
 
 template<typename F, typename... Ass>
 using MapWithIndexReturn = Conditional<
-    _all({IsStaticSize<Ass>::value...}),
+    _and({IsStaticSize<Ass>::value...}),
     Array<InvokeResult<F, size_t, Element<Ass>...>, _minimum({CtSize<Ass>::value...})>,
     Conditional<
-        _all({IsStaticCapacity<Ass>::value...}),
+        _and({IsStaticCapacity<Ass>::value...}),
         ArrVec<InvokeResult<F, size_t, Element<Ass>...>, _minimum({CtCapacity<Ass>::value...})>,
         Vector<InvokeResult<F, size_t, Element<Ass>...>>>>;
 
@@ -465,10 +638,10 @@ auto map_with_index(const F& f, const Ass&... ass) -> MapWithIndexReturn<F, Ass.
 
 template<typename F, typename... Ass>
 using CartesianMapReturn = Conditional<
-    _all({IsStaticSize<Ass>::value...}),
+    _and({IsStaticSize<Ass>::value...}),
     Array<InvokeResult<F, Element<Ass>...>, _product({CtSize<Ass>::value...})>,
     Conditional<
-        _all({IsStaticCapacity<Ass>::value...}),
+        _and({IsStaticCapacity<Ass>::value...}),
         ArrVec<InvokeResult<F, Element<Ass>...>, _product({CtCapacity<Ass>::value...})>,
         Vector<InvokeResult<F, Element<Ass>...>>>>;
 
@@ -505,120 +678,6 @@ void cartesian_for_index(const F& f, size_t n, const Ints&... is) {
         const auto inner = [&](const Ints&... is) { f(i, is...); };
         cartesian_for_index(inner, is...);
     }
-}
-
-// head
-
-// ! Partial function. Make sure non empty
-
-template<typename As>
-auto head(const As& as) -> const Element<As>& {
-    if (as.empty()) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return nth(0, as);
-}
-
-// TailReturn
-
-template<typename As, bool is_const>
-using TailReturn = EnableIf<
-    CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
-    Conditional<
-        IsStaticSize<As>::value,
-        Conditional<
-            is_const,
-            ArrayView<const Element<As>, CtSize<As>::value - 1>,
-            ArrayView<Element<As>, CtSize<As>::value - 1>>,
-        Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<
-                is_const,
-                ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
-                ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
-            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>>;
-
-// tail
-// ! Partial function. Application on empty list is abortion.
-
-template<typename A>
-auto tail(const A& as) -> TailReturn<A, true> {
-    if (length(as) == 0) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return {data(as) + 1, length(as) - 1};
-}
-
-template<typename A>
-auto tail(A& as) -> TailReturn<A, false> {
-    if (length(as) == 0) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return {data(as) + 1, length(as) - 1};
-}
-
-// InitReturn
-
-template<typename As, bool is_const>
-using InitReturn = EnableIf<
-    CtSize<As>::value != 0 && CtCapacity<As>::value != 0,
-    Conditional<
-        IsStaticSize<As>::value,
-        Conditional<
-            is_const,
-            ArrayView<const Element<As>, CtSize<As>::value - 1>,
-            ArrayView<Element<As>, CtSize<As>::value - 1>>,
-        Conditional<
-            IsStaticCapacity<As>::value,
-            Conditional<
-                is_const,
-                ArrVecView<const Element<As>, CtCapacity<As>::value - 1>,
-                ArrVecView<Element<As>, CtCapacity<As>::value - 1>>,
-            Conditional<is_const, VectorView<const Element<As>>, VectorView<Element<As>>>>>>;
-
-// init
-
-// ! Zero length input will envoke abort.÷
-
-template<typename As>
-auto init(const As& as) -> InitReturn<As, true> {
-    if (length(as) == 0) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return {data(as), length(as) - 1};
-}
-
-template<typename As>
-auto init(As& as) -> InitReturn<As, false> {
-    if (length(as) == 0) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return {data(as), length(as) - 1};
-}
-
-// last
-
-// ! Partial function. Make sure non
-
-template<typename As>
-auto last(const As& as) -> const Element<As>& {
-    if (length(as) == 0) {
-        throw RuntimeError("Sequence should not be empty");
-    }
-
-    return nth(length(as) - 1, as);
-}
-
-// is_null
-
-template<typename As>
-bool is_null(const As& as) {
-    return length(as) == 0;
 }
 
 // TakeUnsafeReturnImpl
@@ -923,43 +982,6 @@ bool elem(const Element<As>& a, const As& as) {
     }
 
     return false;
-}
-
-// elem_index
-
-template<typename As>
-Maybe<size_t> elem_index(const Element<As>& a, const As& as) {
-    const auto as_len = length(as);
-
-    for (size_t i = 0; i < as_len; ++i) {
-        if (nth(i, as) == a) {
-            return i;
-        }
-    }
-
-    return nothing;
-}
-
-// ElemIndicesReturn
-
-template<typename As>
-using ElemIndicesReturn =
-    Conditional<IsStaticCapacity<As>::value, ArrVec<size_t, CtCapacity<As>::value>, Vector<size_t>>;
-
-// elem_indices
-
-template<typename As>
-auto elem_indices(const Element<As>& a, const As& as) -> ElemIndicesReturn<As> {
-    ElemIndicesReturn<As> res {};
-    const auto as_len = length(as);
-
-    for (size_t i = 0; i < as_len; ++i) {
-        if (a == nth(i, as)) {
-            res.push_back(i);
-        }
-    }
-
-    return res;
 }
 
 // find

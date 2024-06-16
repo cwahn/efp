@@ -807,15 +807,15 @@ constexpr A _foldl(const F& f, A a, const B (&bs)[n]) {
     return detail::foldl(f, a, bs, bs + n);
 }
 
-// _all :: [Bool] -> Bool
+// _and :: [Bool] -> Bool
 template<size_t n>
-constexpr bool _all(const bool (&bs)[n]) {
+constexpr bool _and(const bool (&bs)[n]) {
     return _foldl(op_and, true, bs);
 }
 
-// _any :: [Bool] -> Bool
+// _or :: [Bool] -> Bool
 template<size_t n>
-constexpr bool _any(const bool (&bs)[n]) {
+constexpr bool _or(const bool (&bs)[n]) {
     return _foldl(op_or, false, bs);
 }
 
@@ -846,12 +846,12 @@ constexpr A _product(const A (&as)[n]) {
 // All
 // ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-using All = Bool<_all({A::value, As::value...})>;
+using All = Bool<_and({A::value, As::value...})>;
 
 // Any
 // ! Not suitable for library implementation because of compile-time performance issue
 template<typename A, typename... As>
-using Any = Bool<_any({A::value, As::value...})>;
+using Any = Bool<_or({A::value, As::value...})>;
 
 // Minimum
 // ! Not suitable for library implementation because of compile-time performance issue

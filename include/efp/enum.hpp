@@ -485,7 +485,7 @@ namespace detail {
         // Match brach validation
         template<typename F>
         using IsRelevantBranch =
-            Bool<_any({IsInvocable<F, A>::value, IsInvocable<F, As>::value...})>;
+            Bool<_or({IsInvocable<F, A>::value, IsInvocable<F, As>::value...})>;
 
         template<typename F, typename... Fs>
         struct PatternCheck:
